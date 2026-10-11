@@ -7,7 +7,12 @@
  *
  * Chinese titles (and Japanese titles written in kanji only) also match their pinyin without tones: the full spelling
  * ("mixingjiao", "mi xing jiao") is an answer, and the initials ("mxj") lead the suggestions but never count as one.
+ *
+ * Romaji matches the kana reading and kana titles: the query is read as kana and both sides are folded (romaji.ts),
+ * so "mayoiuta", "hekiten banso" and "orion o nazoru" name their songs.
  */
+
+import { foldKana, romajiToKana } from "./romaji";
 
 /** title: the title in the page language; other: another language's title or the kana reading; pinyin: a Han title's. */
 export type MatchKind = "title" | "other" | "pinyin";
@@ -43,6 +48,8 @@ export interface IndexedKey {
   text: string;
   /** Whether a typed answer may be this key; pinyin initials only lead the suggestions. */
   answer: boolean;
+  /** A kana key folded for romaji queries. */
+  fold?: string | undefined;
 }
 
 export interface IndexedSong {
@@ -66,6 +73,23 @@ export interface SongSuggestion {
 
 const KIND_ORDER: Record<MatchKind, number> = { title: 0, other: 1, pinyin: 2 };
 const STRIPPED = /[\p{P}\p{S}\p{Z}\p{Cc}\p{Cf}\s]/gu;
+/** A normalized key written in hiragana (and the long vowel mark) only: a reading or a kana title. */
+const KANA_KEY = /^[\u3041-\u3096\u30fc]+$/;
+
+const romajiFold = (key: string): string | undefined => (KANA_KEY.test(key) ? foldKana(key) : undefined);
+const matchRank = (key: string, query: string): number => (key === query ? 0 : key.startsWith(query) ? 1 : key.includes(query) ? 2 : -1);
+
+/**
+ * A romaji query folded like the kana keys: exact is the whole input (null while it ends in a lone consonant), prefix
+ * what a suggestion may continue. Null when the input is not romaji.
+ */
+function romajiQuery(input: string): { exact: string | null; prefix: string } | null {
+  const read = romajiToKana(input);
+  if (!read) return null;
+  const exact = read.kana ? foldKana(read.kana) : null;
+  const prefix = foldKana(read.prefix);
+  return exact || prefix ? { exact: exact || null, prefix } : null;
+}
 
 export function normalizeAnswer(input: string): string {
   const folded = (input ?? "").normalize("NFKC").toLowerCase();
@@ -93,7 +117,7 @@ export function buildSongIndex(entries: readonly SongSearchEntry[]): SongIndex {
       const key = normalizeAnswer(source);
       if (!key || seen.has(key)) return;
       seen.add(key);
-      keys.push({ key, kind, text, answer });
+      keys.push({ key, kind, text, answer, fold: romajiFold(key) });
     };
     add(entry.title, "title");
     add(entry.groupTitle, "other");
@@ -112,16 +136,23 @@ export function buildSongIndex(entries: readonly SongSearchEntry[]): SongIndex {
 /**
  * Songs matching a query: exact matches, then prefix matches, then substring matches; within a rank the page
  * language's title beats the other titles and the reading, and the closer (shorter) key wins. Songs sharing a title
- * appear once.
+ * appear once. A romaji query also searches the kana keys, just behind a direct match of the same rank; until it is
+ * complete it ranks as a prefix at best.
  */
 export function searchSongs(index: SongIndex, query: string, limit = 8): SongSuggestion[] {
   const q = normalizeAnswer(query);
   if (!q) return [];
+  const romaji = romajiQuery(query);
   const hits: Array<{ song: IndexedSong; key: IndexedKey; rank: number }> = [];
   for (const song of index.songs) {
     let best: { key: IndexedKey; rank: number } | null = null;
     for (const key of song.keys) {
-      const rank = key.key === q ? 0 : key.key.startsWith(q) ? 1 : key.key.includes(q) ? 2 : -1;
+      let rank = matchRank(key.key, q);
+      if (romaji && key.fold) {
+        const partial = romaji.prefix ? matchRank(key.fold, romaji.prefix) : -1;
+        const romajiRank = key.fold === romaji.exact ? 0.5 : partial < 0 ? -1 : Math.max(partial, 1) + 0.5;
+        if (romajiRank >= 0 && (rank < 0 || romajiRank < rank)) rank = romajiRank;
+      }
       if (rank < 0) continue;
       if (!best || compareHit(rank, key, best.rank, best.key) < 0) best = { key, rank };
     }
@@ -154,9 +185,22 @@ export function acceptedAnswerKeys(entry: SongSearchEntry): Set<string> {
   return keys;
 }
 
+/** The accepted kana answers folded for romaji: the reading and any title written in kana. */
+function acceptedRomajiKeys(entry: SongSearchEntry): Set<string> {
+  const keys = new Set<string>();
+  for (const text of [entry.title, entry.groupTitle, ...entry.answers]) {
+    const fold = text ? romajiFold(normalizeAnswer(text)) : undefined;
+    if (fold) keys.add(fold);
+  }
+  return keys;
+}
+
 export function matchesTypedAnswer(entry: SongSearchEntry, input: string): boolean {
   const key = normalizeAnswer(input);
-  return key.length > 0 && acceptedAnswerKeys(entry).has(key);
+  if (!key) return false;
+  if (acceptedAnswerKeys(entry).has(key)) return true;
+  const romaji = romajiQuery(input)?.exact;
+  return Boolean(romaji) && acceptedRomajiKeys(entry).has(romaji!);
 }
 
 /** A picked song is right when it is the answer or shares its title (re-releases). */
@@ -177,9 +221,10 @@ export type TypedSong = { kind: "song"; id: number } | { kind: "none" } | { kind
 export function resolveTypedAnswer(index: SongIndex, input: string): TypedSong {
   const key = normalizeAnswer(input);
   if (!key) return { kind: "none" };
+  const romaji = romajiQuery(input)?.exact ?? null;
   const groups = new Map<string, { id: number; primary: boolean }>();
   for (const song of index.songs) {
-    if (!song.keys.some((indexed) => indexed.answer && indexed.key === key)) continue;
+    if (!song.keys.some((indexed) => indexed.answer && (indexed.key === key || (romaji !== null && indexed.fold === romaji)))) continue;
     const primary = song.titleKey === key || normalizeAnswer(song.entry.title) === key;
     const group = groups.get(song.titleKey);
     if (!group) groups.set(song.titleKey, { id: song.entry.id, primary });

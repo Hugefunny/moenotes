@@ -2070,7 +2070,7 @@ export const zhTW = {
       modes: { choice: "選擇題", suggest: "聯想輸入", type: "純手打" },
       modeHints: {
         choice: "從幾個選項中選出正確的歌曲。",
-        suggest: "輸入歌名、讀音或拼音首字母，在聯想清單中選中即送出。",
+        suggest: "輸入歌名、讀音或漢語拼音首字母，在聯想清單中選中即送出。",
         type: "沒有聯想提示，要完整打出歌名或讀音。",
       },
       options: "選項數量",
@@ -2139,7 +2139,7 @@ export const zhTW = {
       noSuggestions: "沒有找到相符的歌曲。",
       typeLabel: "輸入歌名",
       typePlaceholder: "歌名或讀音",
-      typeHint: "日文、英文、中文、韓文歌名，還有假名讀音和拼音，都算對。",
+      typeHint: "日文、英文、中文、韓文歌名，還有假名讀音、羅馬拼音和漢語拼音，都算對。",
       typeSongHint: "沒有聯想提示，打出歌名或讀音後按 Enter 送出。輸入的歌名對不上任何歌曲時，不扣機會。",
       typeNoSong: "找不到「{text}」這首歌，不扣機會，換個寫法試試吧。",
       typeAmbiguous: "好幾首歌都能叫「{text}」，請輸入完整的歌名。",

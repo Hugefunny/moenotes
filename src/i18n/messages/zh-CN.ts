@@ -2140,7 +2140,7 @@ export const zhCN = {
       noSuggestions: "没有找到匹配的歌曲。",
       typeLabel: "输入歌名",
       typePlaceholder: "歌名或读音",
-      typeHint: "日文、英文、中文、韩文歌名，还有假名读音和拼音，都算对。",
+      typeHint: "日文、英文、中文、韩文歌名，还有假名读音、罗马音和拼音，都算对。",
       typeSongHint: "没有联想提示，打出歌名或读音后按回车提交。输入的歌名对不上任何歌曲时，不扣机会。",
       typeNoSong: "没有找到「{text}」这首歌，不扣机会，换个写法试试吧。",
       typeAmbiguous: "好几首歌都能叫「{text}」，请输入完整的歌名。",

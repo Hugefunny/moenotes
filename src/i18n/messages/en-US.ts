@@ -2096,7 +2096,7 @@ export const enUS = {
       noSuggestions: "No matching songs.",
       typeLabel: "Song title",
       typePlaceholder: "Title or reading",
-      typeHint: "The title in Japanese, English, Chinese or Korean, its kana reading or its pinyin all count.",
+      typeHint: "The title in Japanese, English, Chinese or Korean, its reading in kana or romaji, or its pinyin all count.",
       typeSongHint: "No suggestions: type the title or its reading and press Enter. A title that matches no song costs you nothing.",
       typeNoSong: "No song goes by “{text}”. That costs you nothing, so try another spelling.",
       typeAmbiguous: "More than one song goes by “{text}”. Type the full title.",

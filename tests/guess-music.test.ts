@@ -3,6 +3,7 @@ import { isSameSong, matchesTypedAnswer, normalizeAnswer, resolveTypedAnswer, se
 import { createGameState, gameReducer, remainingMs, type Guess } from "../src/lib/guess-music/game";
 import { buildSongLibrary, buildSongPool, isMedley } from "../src/lib/guess-music/pool";
 import { createRandom } from "../src/lib/guess-music/random";
+import { foldKana, romajiToKana } from "../src/lib/guess-music/romaji";
 import { buildRounds, formatClock, requiredPoolSize, resolveClipStart } from "../src/lib/guess-music/rounds";
 import { comboMultiplier, difficultyMultiplier, nextCombo, scoreRound, timeAfterWrongGuess } from "../src/lib/guess-music/scoring";
 import {
@@ -74,6 +75,41 @@ test("full pinyin is an answer; initials only lead the suggestions, after the ti
   // A pinyin suggestion shows the title it reads.
   expect(searchSongs(library.index, "mixing")[0]).toEqual({ id: 1, kind: "pinyin", text: "迷星叫" });
   expect(searchSongs(library.index, "mxj").map((hit) => hit.id)).toEqual([3, 1]);
+});
+
+test("romaji reads like an input method: every spelling system, っ, ん and syllable breaks", () => {
+  for (const [typed, kana] of [
+    ["mayoiuta", "まよいうた"], ["si shi", "しし"], ["tu tsu", "つつ"], ["ti chi", "ちち"], ["hu fu", "ふふ"], ["zi ji", "じじ"],
+    ["kitte", "きって"], ["matcha", "まっちゃ"], ["konna", "こんな"], ["shin'ya", "しんや"], ["shimbun", "しんぶん"],
+    ["orion o", "おりおんお"], ["Hekiten Bansō", "へきてんばんそ"], ["ave mujica", "あゔぇむじか"],
+  ] as const) expect(romajiToKana(typed)?.kana).toBe(kana);
+  // A trailing consonant has no kana yet, and a final n may still become な.
+  expect(romajiToKana("hekitenb")).toEqual({ kana: null, prefix: "へきてん" });
+  expect(romajiToKana("kan")).toEqual({ kana: "かん", prefix: "か" });
+  for (const typed of ["mixingjiao", "迷星叫", "seishun complex"]) expect(romajiToKana(typed)).toBeNull();
+  expect(foldKana("かーねーしょん")).toBe("かねしょん");
+  expect(foldKana("へきてんばんそう")).toBe(foldKana("へきてんばんそ"));
+  expect(foldKana("おりおんをなぞる")).toBe(foldKana("おりおんおなぞる"));
+  expect(foldKana("ねぇ")).toBe("ね");
+});
+
+test("romaji names a song by its reading, forgiving long vowels and を", () => {
+  const library = buildSongLibrary([
+    song(1, { title: "迷星叫", titleJa: "迷星叫", answers: ["迷星叫", "まよいうた"] }),
+    song(2, { title: "碧天伴走", titleJa: "碧天伴走", answers: ["碧天伴走", "へきてんばんそう"] }),
+    song(3, { title: "オリオンをなぞる", titleJa: "オリオンをなぞる", answers: ["オリオンをなぞる", "おりおんをなぞる"] }),
+    song(4, { title: "カーネーションの咲く日に", titleJa: "カーネーションの咲く日に", answers: ["カーネーションの咲く日に", "かーねーしょんのさくひに"] }),
+  ], NOW);
+  const entry = (id: number) => library.entryById.get(id)!;
+  // No English title here: the reading alone answers.
+  expect(matchesTypedAnswer(entry(1), "mayoiuta")).toBe(true);
+  expect(matchesTypedAnswer(entry(1), "mayoiu")).toBe(false);
+  for (const typed of ["hekiten bansou", "Hekiten Banso", "hekitenbansō"]) expect(matchesTypedAnswer(entry(2), typed)).toBe(true);
+  for (const typed of ["orion wo nazoru", "orion o nazoru"]) expect(matchesTypedAnswer(entry(3), typed)).toBe(true);
+  for (const typed of ["kaneshon no saku hi ni", "ka-ne-shon no sakuhini", "kaaneeshon no sakuhini"]) expect(matchesTypedAnswer(entry(4), typed)).toBe(true);
+  expect(resolveTypedAnswer(library.index, "hekiten banso")).toEqual({ kind: "song", id: 2 });
+  expect(searchSongs(library.index, "hekitenb")[0]).toEqual({ id: 2, kind: "other", text: "へきてんばんそう" });
+  expect(searchSongs(library.index, "mayo")[0]).toEqual({ id: 1, kind: "other", text: "まよいうた" });
 });
 
 test("re-releases sharing a Japanese title are the same answer and appear once in suggestions", () => {

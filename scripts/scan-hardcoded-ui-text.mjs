@@ -15,6 +15,8 @@ const ignoredPathPrefixes = [
 
 const ignoredFiles = new Set([
   "src/env.d.ts",
+  // The romaji-to-kana tables of the guess-the-song answers: script conversion data, not UI copy.
+  "src/lib/guess-music/romaji.ts",
 ]);
 
 const allowedLiteralPatterns = [
