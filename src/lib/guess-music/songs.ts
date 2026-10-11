@@ -1,3 +1,5 @@
+import type { PinyinReading } from "./answer";
+
 /** A song of the guess-the-song game, as the build hands it to the page (build-guess-music.ts). */
 export interface GuessSong {
   id: number;
@@ -7,6 +9,8 @@ export interface GuessSong {
   titleJa: string;
   /** Every language's title and the kana reading: what a typed answer may be. */
   answers: string[];
+  /** Pinyin of the Chinese titles and of a Japanese title written in kanji only. */
+  pinyin: PinyinReading[];
   composer: string;
   lyricist: string;
   arranger: string;

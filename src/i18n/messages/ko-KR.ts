@@ -2016,7 +2016,7 @@ export const koKR = {
       modes: { choice: "객관식", suggest: "검색 선택", type: "직접 입력" },
       modeHints: {
         choice: "여러 보기 중에서 정답 곡을 골라요.",
-        suggest: "곡명이나 읽는 법을 입력하고 후보 목록에서 고르면 바로 제출돼요.",
+        suggest: "곡명, 읽는 법, 병음 첫 글자를 입력하고 후보 목록에서 고르면 바로 제출돼요.",
         type: "후보 목록 없이 곡명이나 읽는 법을 정확히 입력해야 해요.",
       },
       options: "보기 수",
@@ -2085,7 +2085,7 @@ export const koKR = {
       noSuggestions: "일치하는 곡이 없어요.",
       typeLabel: "곡명 입력",
       typePlaceholder: "곡명이나 읽는 법",
-      typeHint: "일본어·영어·중국어·한국어 곡명이나 가나 읽기 모두 정답으로 인정돼요.",
+      typeHint: "일본어·영어·중국어·한국어 곡명, 가나 읽기, 병음 모두 정답으로 인정돼요.",
       typeSongHint: "후보 목록 없이 곡명이나 읽는 법을 입력하고 Enter로 제출해요. 어떤 곡과도 맞지 않는 입력은 기회를 쓰지 않아요.",
       typeNoSong: "“{text}” 곡을 찾지 못했어요. 기회는 줄지 않으니 다른 표기로 입력해 보세요.",
       typeAmbiguous: "“{text}”에 해당하는 곡이 여러 개예요. 정식 곡명을 입력해 주세요.",

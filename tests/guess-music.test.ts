@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { isSameSong, matchesTypedAnswer, normalizeAnswer, searchSongs } from "../src/lib/guess-music/answer";
+import { isSameSong, matchesTypedAnswer, normalizeAnswer, resolveTypedAnswer, searchSongs } from "../src/lib/guess-music/answer";
 import { createGameState, gameReducer, remainingMs, type Guess } from "../src/lib/guess-music/game";
 import { buildSongLibrary, buildSongPool, isMedley } from "../src/lib/guess-music/pool";
 import { createRandom } from "../src/lib/guess-music/random";
@@ -17,13 +17,14 @@ import {
   settingsToParams,
 } from "../src/lib/guess-music/settings";
 import type { GuessSong } from "../src/lib/guess-music/songs";
+import { pinyinReading } from "../src/lib/masterdata/build-guess-music";
 
 const NOW = Date.parse("2026-10-09T00:00:00+08:00");
 const RELEASED = "2026/01/01 0:00:00";
 
 function song(id: number, patch: Partial<GuessSong> = {}): GuessSong {
   return {
-    id, title: `Song ${id}`, titleJa: `ソング${id}`, answers: [`Song ${id}`, `ソング${id}`, `そんぐ${id}`],
+    id, title: `Song ${id}`, titleJa: `ソング${id}`, answers: [`Song ${id}`, `ソング${id}`, `そんぐ${id}`], pinyin: [],
     composer: "A", lyricist: "B", arranger: "C", bandId: 1, bandName: "Band", jacketUrl: `j${id}.webp`,
     audioUrl: `https://assets.example/${id}.m4a`, startAt: RELEASED, ...patch,
   };
@@ -47,6 +48,32 @@ test("typed answers accept every language's title and the reading; suggestions r
   expect(searchSongs(library.index, "まよい").map((hit) => hit.id)).toEqual([1]);
   expect(searchSongs(library.index, "迷星叫")[0]).toEqual({ id: 1, kind: "title", text: "迷星叫" });
   expect(searchSongs(library.index, "heki")[0]).toEqual({ id: 2, kind: "other", text: "Hekiten Bansou" });
+});
+
+test("pinyin readings come from Han titles only, with ü spelled both v and u", () => {
+  expect(pinyinReading("迷星叫")).toEqual({ title: "迷星叫", full: ["mixingjiao"], initials: "mxj" });
+  expect(pinyinReading("詩超絆")?.full).toEqual(["shichaoban"]);
+  expect(pinyinReading("绿")).toEqual({ title: "绿", full: ["lv", "lu"], initials: "l" });
+  expect(normalizeAnswer(pinyinReading("春日影(MyGO!!!!! ver.)")!.full[0]!)).toBe("chunriyingmygover");
+  for (const title of ["Ave Mujica", "春の歌", "미싱"]) expect(pinyinReading(title)).toBeNull();
+});
+
+test("full pinyin is an answer; initials only lead the suggestions, after the titles", () => {
+  const library = buildSongLibrary([
+    song(1, { title: "Mayoiuta", titleJa: "迷星叫", answers: ["迷星叫", "Mayoiuta", "まよいうた"], pinyin: [pinyinReading("迷星叫")!] }),
+    song(2, { title: "Green", titleJa: "緑", answers: ["绿", "Green"], pinyin: [pinyinReading("绿")!] }),
+    song(3, { title: "mxj", titleJa: "mxj", answers: ["mxj"] }),
+  ], NOW);
+  const entry = library.entryById.get(1)!;
+  for (const typed of ["mixingjiao", "mi xing jiao", "MiXingJiao"]) expect(matchesTypedAnswer(entry, typed)).toBe(true);
+  expect(matchesTypedAnswer(entry, "mxj")).toBe(false);
+  for (const typed of ["lv", "lu"]) expect(matchesTypedAnswer(library.entryById.get(2)!, typed)).toBe(true);
+  expect(resolveTypedAnswer(library.index, "mixingjiao")).toEqual({ kind: "song", id: 1 });
+  // Initials never name a song: "mxj" is the third song's title, not the first one's answer.
+  expect(resolveTypedAnswer(library.index, "mxj")).toEqual({ kind: "song", id: 3 });
+  // A pinyin suggestion shows the title it reads.
+  expect(searchSongs(library.index, "mixing")[0]).toEqual({ id: 1, kind: "pinyin", text: "迷星叫" });
+  expect(searchSongs(library.index, "mxj").map((hit) => hit.id)).toEqual([3, 1]);
 });
 
 test("re-releases sharing a Japanese title are the same answer and appear once in suggestions", () => {

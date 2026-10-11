@@ -4,10 +4,23 @@
  * Every comparison runs on normalized keys: NFKC (full-width letters and digits, half-width kana), lower case,
  * katakana folded to hiragana, and whitespace, punctuation and symbols removed. Full-width "Mayoiuta", "mayoiuta" and
  * "MAYOIUTA" all become "mayoiuta", and a reading typed in katakana matches the same reading in hiragana.
+ *
+ * Chinese titles (and Japanese titles written in kanji only) also match their pinyin without tones: the full spelling
+ * ("mixingjiao", "mi xing jiao") is an answer, and the initials ("mxj") lead the suggestions but never count as one.
  */
 
-/** title: the title in the page language; other: another language's title or the kana reading. */
-export type MatchKind = "title" | "other";
+/** title: the title in the page language; other: another language's title or the kana reading; pinyin: a Han title's. */
+export type MatchKind = "title" | "other" | "pinyin";
+
+/** A Han title read in pinyin, made at build time (build-guess-music.ts). */
+export interface PinyinReading {
+  /** The title it reads. */
+  title: string;
+  /** The full pinyin without tones, once per spelling of ü (v and u): each is an answer. */
+  full: readonly string[];
+  /** The first letter of each syllable: suggestions only. */
+  initials: string;
+}
 
 export interface SongSearchEntry {
   id: number;
@@ -19,13 +32,17 @@ export interface SongSearchEntry {
   groupTitle: string;
   /** Every accepted answer: each language's title and the kana reading. */
   answers: readonly string[];
+  /** Pinyin of the Han titles. */
+  pinyin?: readonly PinyinReading[] | undefined;
 }
 
 export interface IndexedKey {
   key: string;
   kind: MatchKind;
-  /** The original text the key came from, for display. */
+  /** The original text the key came from, for display: the title itself for its pinyin. */
   text: string;
+  /** Whether a typed answer may be this key; pinyin initials only lead the suggestions. */
+  answer: boolean;
 }
 
 export interface IndexedSong {
@@ -47,7 +64,7 @@ export interface SongSuggestion {
   text: string;
 }
 
-const KIND_ORDER: Record<MatchKind, number> = { title: 0, other: 1 };
+const KIND_ORDER: Record<MatchKind, number> = { title: 0, other: 1, pinyin: 2 };
 const STRIPPED = /[\p{P}\p{S}\p{Z}\p{Cc}\p{Cf}\s]/gu;
 
 export function normalizeAnswer(input: string): string {
@@ -71,16 +88,20 @@ export function buildSongIndex(entries: readonly SongSearchEntry[]): SongIndex {
   for (const entry of entries) {
     const keys: IndexedKey[] = [];
     const seen = new Set<string>();
-    const add = (text: string | undefined, kind: MatchKind) => {
-      if (!text) return;
-      const key = normalizeAnswer(text);
+    const add = (source: string | undefined, kind: MatchKind, answer = true, text = source) => {
+      if (!source || !text) return;
+      const key = normalizeAnswer(source);
       if (!key || seen.has(key)) return;
       seen.add(key);
-      keys.push({ key, kind, text });
+      keys.push({ key, kind, text, answer });
     };
     add(entry.title, "title");
     add(entry.groupTitle, "other");
     for (const answer of entry.answers) add(answer, "other");
+    for (const reading of entry.pinyin ?? []) {
+      for (const full of reading.full) add(full, "pinyin", true, reading.title);
+      add(reading.initials, "pinyin", false, reading.title);
+    }
     const song: IndexedSong = { entry, titleKey: normalizeAnswer(entry.groupTitle) || `#${entry.id}`, keys };
     songs.push(song);
     byId.set(entry.id, song);
@@ -122,10 +143,11 @@ function compareHit(rankA: number, keyA: IndexedKey, rankB: number, keyB: Indexe
   return rankA - rankB || KIND_ORDER[keyA.kind] - KIND_ORDER[keyB.kind] || keyA.key.length - keyB.key.length;
 }
 
-/** Normalized answers the pure-typing mode accepts for a song. */
+/** Normalized answers the pure-typing mode accepts for a song: its titles, the reading and the full pinyin. */
 export function acceptedAnswerKeys(entry: SongSearchEntry): Set<string> {
   const keys = new Set<string>();
-  for (const text of [entry.title, entry.groupTitle, ...entry.answers]) {
+  const pinyin = (entry.pinyin ?? []).flatMap((reading) => reading.full);
+  for (const text of [entry.title, entry.groupTitle, ...entry.answers, ...pinyin]) {
     const key = text ? normalizeAnswer(text) : "";
     if (key) keys.add(key);
   }
@@ -157,7 +179,7 @@ export function resolveTypedAnswer(index: SongIndex, input: string): TypedSong {
   if (!key) return { kind: "none" };
   const groups = new Map<string, { id: number; primary: boolean }>();
   for (const song of index.songs) {
-    if (!song.keys.some((indexed) => indexed.key === key)) continue;
+    if (!song.keys.some((indexed) => indexed.answer && indexed.key === key)) continue;
     const primary = song.titleKey === key || normalizeAnswer(song.entry.title) === key;
     const group = groups.get(song.titleKey);
     if (!group) groups.set(song.titleKey, { id: song.entry.id, primary });

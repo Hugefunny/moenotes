@@ -40,6 +40,7 @@ export function buildSongLibrary(songs: readonly GuessSong[], now: number = Date
     subtitle: song.titleJa && song.titleJa !== song.title ? song.titleJa : undefined,
     groupTitle: song.titleJa || song.title,
     answers: song.answers,
+    pinyin: song.pinyin,
   }));
   return {
     pool,

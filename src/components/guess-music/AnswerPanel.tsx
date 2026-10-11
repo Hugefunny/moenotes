@@ -194,8 +194,8 @@ function SuggestBox({ locale, library, wrongGuesses, enabled, onGuess }: AnswerP
         {suggestions.map((suggestion, index) => {
           const entry = library.entryById.get(suggestion.id);
           const guessed = wrongIds.has(suggestion.id);
-          // The second line shows what matched when it was another language's title or the reading.
-          const secondary = suggestion.kind === "other" && suggestion.text !== entry?.title ? suggestion.text : entry?.subtitle;
+          // The second line shows what matched when it was another language's title, the reading or a title's pinyin.
+          const secondary = suggestion.kind !== "title" && suggestion.text !== entry?.title ? suggestion.text : entry?.subtitle;
           return (
             <li
               key={suggestion.id}

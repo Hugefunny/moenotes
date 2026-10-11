@@ -2027,7 +2027,7 @@ export const enUS = {
       modes: { choice: "Choice", suggest: "Search", type: "Type" },
       modeHints: {
         choice: "Pick the right song from a list of options.",
-        suggest: "Type a title or its reading, then pick a suggestion to answer.",
+        suggest: "Type a title, its reading or its pinyin initials, then pick a suggestion to answer.",
         type: "No suggestions: type the full title or its reading.",
       },
       options: "Options",
@@ -2096,7 +2096,7 @@ export const enUS = {
       noSuggestions: "No matching songs.",
       typeLabel: "Song title",
       typePlaceholder: "Title or reading",
-      typeHint: "The title in Japanese, English, Chinese or Korean, or its kana reading, all count.",
+      typeHint: "The title in Japanese, English, Chinese or Korean, its kana reading or its pinyin all count.",
       typeSongHint: "No suggestions: type the title or its reading and press Enter. A title that matches no song costs you nothing.",
       typeNoSong: "No song goes by “{text}”. That costs you nothing, so try another spelling.",
       typeAmbiguous: "More than one song goes by “{text}”. Type the full title.",
