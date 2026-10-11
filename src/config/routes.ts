@@ -296,12 +296,12 @@ export const routeRegistry = [
     seo: {
       titleKey: "seo.musics.title",
       descriptionKey: "seo.musics.description",
-      keywords: ["BanG Dream! Our Notes music", "Our Notes songs", "Our Notes chart preview", "Our Notes song meta", "Our Notes chart data", "Our Notes music ranking", "StarMoe", "star.moe"],
+      keywords: ["BanG Dream! Our Notes music", "Our Notes songs", "Our Notes chart preview", "Our Notes song meta", "Our Notes chart data", "Our Notes music ranking", "Our Notes guess the song", "StarMoe", "star.moe"],
       sitemap: { priority: 0.8, changefreq: "daily" },
     },
     nav: { order: 15, icon: "music" },
     searchable: true,
-    keywords: ["music", "songs", "charts", "meta", "ranking"],
+    keywords: ["music", "songs", "charts", "meta", "ranking", "guess the song"],
     children: [
       {
         id: "music",
@@ -398,6 +398,22 @@ export const routeRegistry = [
         nav: { order: 40, icon: "sparkles" },
         searchable: true,
         keywords: ["ranking", "high score", "leaderboard", "top players"],
+      },
+      {
+        // The guess-the-song game: free play in the browser, the daily challenge on starmoe-api.
+        id: "guess-music",
+        path: "/music/guess",
+        labelKey: "nav.items.guessMusic",
+        component: "guess-music",
+        seo: {
+          titleKey: "seo.guessMusic.title",
+          descriptionKey: "seo.guessMusic.description",
+          keywords: ["Our Notes guess the song", "BanG Dream song quiz", "music quiz", "guess the song game", "Our Notes music game"],
+          sitemap: { priority: 0.5, changefreq: "weekly" },
+        },
+        nav: { order: 50, icon: "music" },
+        searchable: true,
+        keywords: ["guess", "quiz", "song", "music", "game"],
       },
     ],
   },
@@ -868,21 +884,6 @@ export const routeRegistry = [
         nav: { order: 20, icon: "book" },
         searchable: true,
         keywords: ["story", "live2d", "adv", "player", "voice"],
-      },
-      {
-        id: "guess-music",
-        path: "/tools/guess-music",
-        labelKey: "nav.items.guessMusic",
-        component: "guess-music",
-        seo: {
-          titleKey: "seo.guessMusic.title",
-          descriptionKey: "seo.guessMusic.description",
-          keywords: ["Our Notes guess the song", "BanG Dream song quiz", "music quiz", "guess the song game", "Our Notes music game"],
-          sitemap: { priority: 0.5, changefreq: "weekly" },
-        },
-        nav: { order: 25, icon: "music" },
-        searchable: true,
-        keywords: ["guess", "quiz", "song", "music", "game"],
       },
       {
         id: "asset-viewer",
