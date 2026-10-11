@@ -870,6 +870,21 @@ export const routeRegistry = [
         keywords: ["story", "live2d", "adv", "player", "voice"],
       },
       {
+        id: "guess-music",
+        path: "/tools/guess-music",
+        labelKey: "nav.items.guessMusic",
+        component: "guess-music",
+        seo: {
+          titleKey: "seo.guessMusic.title",
+          descriptionKey: "seo.guessMusic.description",
+          keywords: ["Our Notes guess the song", "BanG Dream song quiz", "music quiz", "guess the song game", "Our Notes music game"],
+          sitemap: { priority: 0.5, changefreq: "weekly" },
+        },
+        nav: { order: 25, icon: "music" },
+        searchable: true,
+        keywords: ["guess", "quiz", "song", "music", "game"],
+      },
+      {
         id: "asset-viewer",
         path: "/tools/asset-viewer",
         labelKey: "nav.items.assetViewer",

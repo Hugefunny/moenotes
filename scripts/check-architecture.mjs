@@ -35,6 +35,8 @@ const allowedFetchFiles = new Set([
   "src/lib/collectibles/image-client.ts",
   "src/lib/recognition/client.ts",
   "src/lib/deck/runtime-source.ts",
+  "src/lib/guess-music/daily-client.ts",
+  "src/lib/guess-music/practice-client.ts",
 ]);
 
 const allowedDomainFiles = new Set([
