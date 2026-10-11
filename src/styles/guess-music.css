@@ -1,5 +1,5 @@
 /* Guess the song (src/components/guess-music). Panels, controls and states use the site tokens only. */
-.gm-root{display:grid;gap:16px;width:100%;max-width:880px;min-width:0}
+.gm-root{display:grid;gap:16px;width:100%;max-width:880px;min-width:0;margin-inline:auto}
 .gm-panel{min-width:0;padding:20px;border:1px solid var(--mn-border);border-radius:16px;background:var(--mn-paper);box-shadow:var(--mn-shadow)}
 .gm-panel-soft{background:var(--mn-surface)}
 .gm-panel-title{margin:0;font-family:var(--mn-font-display);font-size:18px;font-weight:700;color:var(--mn-text)}
