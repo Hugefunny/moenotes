@@ -23,7 +23,8 @@ export const zhTW = {
     "arenaSong": "Arena 歌曲",
     "chooseArena": "選擇 Arena 歌曲",
     "noArena": "目前伺服器資料中沒有 Arena 歌曲",
-    conditions: {"play": "演奏條件", "accuracy": "Great / Just 比例，無 Miss", "pattern": "明確指定含 Miss 的完整演奏", "missEvery": "每 N 個判定音符出現一次 Miss（0 為無 Miss）", "noMiss": "明確指定完整演奏：無 Miss。", "missPattern": "每第 {n} 個判定音符記為 Miss。", "patternNote": "先套用下方 Great、Just 比例，再將指定音符改為 Miss。這是固定演奏條件，不代表真人失誤的機率分布。", "timeLimit": "最長計算時間", "timeLimitNote": "到時間後給出目前找到的最佳隊伍，並標明尚未證明最優。", "timeLimits": {"30": "30 秒", "60": "1 分鐘", "120": "2 分鐘", "300": "5 分鐘", "none": "不限"}, "eventItemsNote": "引擎逐個演出結果計算活動徽章，每次只取與最終評級確切對應的一檔獎勵。", "secondaryPriority": "CP 相同時的副收益順序", "priorities": {"none": "僅 CP", "eventPointsFirst": "CP → PT → 徽章", "eventItemsFirst": "CP → 徽章 → PT"}, "priorityNote": "先最大化平均 CP，CP 相同時再依所選副收益順序排序。", "priorityTeams": "只回傳最高 CP 層內至多 {n} 支隊伍，可能少於此數。逾時結果仍未證明最優。", "priorityExpectedOnly": "CP 副收益排序僅適用於平均表現，請選擇平均表現繼續。", "priorityUnsupported": "目前引擎不支援這些條件下的 CP 優先副收益排序。"},
+    conditions: {"play": "演奏條件", "accuracy": "Great / Just 比例，無 Miss", "pattern": "明確指定含 Miss 的完整演奏", "missEvery": "每 N 個判定音符出現一次 Miss（0 為無 Miss）", "noMiss": "明確指定完整演奏：無 Miss。", "missPattern": "每第 {n} 個判定音符記為 Miss。", "patternNote": "先套用下方 Great、Just 比例，再將指定音符改為 Miss。這是固定演奏條件，不代表真人失誤的機率分布。", "timeLimit": "最長計算時間", "timeLimitNote": "到時間後給出目前找到的最佳隊伍，並標明尚未證明最優。", "timeLimits": {"30": "30 秒", "60": "1 分鐘", "120": "2 分鐘", "300": "5 分鐘", "none": "不限"}, "eventItemsNote": "引擎逐個演出結果計算活動徽章，每次只取與最終評級確切對應的一檔獎勵。"},
+    rewardMix: {"label": "獎勵方案", "others": "同一局的其他獎勵", "roles": {"off": "不計", "convert": "折算計入", "tieBreak": "同分再比"}, "roleLabel": "{reward}怎麼算", "unsupported": "目前引擎暫不支援把其他獎勵計入排序。", "rewards": {"eventPoints": "PT", "challengePoints": "CP", "eventItems": "徽章"}, "units": {"eventPoints": "PT", "challengePoints": "CP", "eventItems": "徽章"}, "names": {"eventPoints": "活動點數", "challengePoints": "挑戰點數", "eventItems": "活動徽章"}, "base": "主目標", "sources": {"auto": "依挑戰 Live 自動算", "manual": "自己填"}, "sourceLabel": "1 CP 的價值怎麼定", "autoNote": "開始計算時先求出這場挑戰 Live 的最佳隊伍，它平均每消耗 1 CP 拿到多少 {base}，1 CP 就依多少 {base} 計算。", "rateSong": "用來折算的挑戰曲", "noChallengeSongs": "本期活動沒有挑戰曲，請改為自己填。", "rateDifficulty": "挑戰 Live 難度", "rateCost": "每次消耗", "rate": "1 {reward} =", "rateInput": "1 {reward} 折合多少 {base}", "ratePlaceholder": "換算率", "tieFirstNote": "排序依據完全相同時，先比較 {reward}。", "tieNextNote": "{before} 也相同時，再比較 {reward}。", "tieFirst": "改為先比這項", "spent": "挑戰 Live 消耗 CP，不會獲得 CP。", "formula": "排序依據", "autoRate": "自動", "then": "同分再比", "rateMissing": "請為折算計入的獎勵填寫大於 0 的換算率。", "expectedOnly": "把其他獎勵計入排序僅適用於平均表現，請選擇平均表現繼續。", "unavailable": "目前引擎不支援在這些條件下把其他獎勵計入排序。", "luckNote": "技能帶 LUCK 抽籤的場次暫時無法計入其他獎勵。", "total": "每局期望合計（折合 {unit}）", "totalDeterministic": "每局合計（折合 {unit}）", "breakdown": "合計的構成", "counted": "× {rate} = {value} {unit}", "share": "{n}%", "ties": "同分再比", "basisLabel": "CP 的折算依據", "basis": "1 CP = {rate} {unit}", "basisSource": "挑戰 Live「{song}」{difficulty}，每次消耗 {cost} CP，最佳隊伍每局期望折合 {value} {unit}。", "basisUnproven": "這支挑戰隊尚未證明最佳，1 CP 的實際價值可能更高。", "basisTeam": "查看這支挑戰隊", "rating": "正在求挑戰 Live 的最佳隊伍", "ratingNote": "先算出 1 CP 折合多少，再搜尋本場的隊伍。"},
 
     cloud: {
       "accountChanged": "登入帳號發生了變更。儲存本機卡池前，請確認下方顯示的帳號。",
@@ -538,9 +539,7 @@ export const zhTW = {
       "challengeSkip": "挑戰 Skip",
 
       "challenge": "挑戰曲衝榜",
-      "challengePoints": "刷挑戰點數 CP",
-      "eventPoints": "刷活動 PT",
-      "eventItems": "刷活動徽章",
+      "eventRewards": "活動獎勵",
       "battle": "撃奏ライブ拿高分",
       "free": "自由ライブ拿高分",
       "power": "綜合力最高"
@@ -555,6 +554,7 @@ export const zhTW = {
       "challengePoints": "每局新增的挑戰點數。活動 PT 加成不提高 CP。",
       "eventPoints": "每局能拿多少活動 PT。",
       "eventItems": "逐個結算結果依確切評級計算每局活動徽章。",
+      "eventRewards": "PT、CP、徽章自由組合：選一個主目標，其餘可折算計入或同分再比。",
       "battle": "這首歌能打多少分。",
       "free": "不開激走的單人演出能打多少分。",
       "power": "隊伍綜合力最高是多少。"
@@ -584,8 +584,6 @@ export const zhTW = {
     "othersAverage": "房間裡其他人的平均分",
     "othersAverageSame": "留空表示與你同分",
     "solver": {
-      "eventRewards": "每局期望收益",
-      "exactReward": "精確值：{numerator}/{denominator}",
       "eventItemsUnsupported": "目前引擎不支援依確切結算評級計算活動徽章。",
       "eventItemRewardsUnsupported": "目前場景的活動獎勵資料不受支援：每個評級必須恰好有一條獎勵，且機率標記為 10000。",
       "maximumLabel": {"score": "理論最高分數", "challengePoints": "每局最高新增 CP", "eventPoints": "每局最高 PT", "eventItems": "每局最高徽章"},
@@ -646,7 +644,8 @@ export const zhTW = {
         "protocol": "組卡引擎通訊出錯。"
       },
       "gap": {
-        "secondaryPriority": "CP 副收益排序僅適用於平均表現，請選擇平均表現繼續。",
+        "rewardMix": "請為折算計入的獎勵填寫大於 0 的換算率，並選擇平均表現。",
+        "rateSong": "請選擇用來折算 CP 的挑戰曲。",
       "arenaSong": "請從目前伺服器資料中選擇 Arena 歌曲。",
       "play": "請填寫有效的 Miss 間隔：0 或正整數。",
 
