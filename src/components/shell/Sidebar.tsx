@@ -262,6 +262,9 @@ function NavGroup({ group, locale, pathname, activePath, collapsed, onToggle, on
   const target = normalizePathname(group.path);
   const isHeaderActive = current === target;
   const hasChildren = children.length > 0;
+  // Paths nest (`/music` holds `/music/playlists` and song details), so only the longest matching item is current.
+  const activeItemId = children.filter((item) => isCurrentRoute(activePath || pathname, item.path))
+    .sort((a, b) => b.path.length - a.path.length)[0]?.id;
   return (
     <div className="space-y-1.5">
       <div
@@ -301,7 +304,7 @@ function NavGroup({ group, locale, pathname, activePath, collapsed, onToggle, on
       {hasChildren && !collapsed && (
         <div className="relative ml-[1.15rem] space-y-0.5 border-l border-dashed border-[color-mix(in_oklab,var(--mn-border)_22%,transparent)] pl-3">
           {children.map((item) => {
-            const active = isCurrentRoute(activePath || pathname, item.path);
+            const active = item.id === activeItemId;
             return (
               <Fragment key={item.id}>
                 <a
