@@ -133,6 +133,20 @@
   .md3-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 8px rgb(var(--md-sys-color-primary-rgb) / 0.12); }
   .md3-range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 8px rgb(var(--md-sys-color-primary-rgb) / 0.12); }
 
+  /* ── Primary tabs (M3) for role="tablist" groups that are not MUI Tabs: label-large, 3dp indicator ── */
+  .md3-tabs { display: flex; max-width: 100%; overflow-x: auto; border-bottom: 1px solid var(--md-sys-color-surface-container-highest); scrollbar-width: none; }
+  .md3-tabs::-webkit-scrollbar { display: none; }
+  .md3-tab {
+    position: relative; display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 16px;
+    border: 0; background: transparent; color: var(--md-sys-color-on-surface-variant);
+    font: inherit; font-size: var(--md-sys-typescale-title-small-size); line-height: var(--md-sys-typescale-title-small-line-height); font-weight: 500; letter-spacing: var(--md-sys-typescale-title-small-tracking);
+    white-space: nowrap; cursor: pointer;
+  }
+  .md3-tab[aria-selected="true"], .md3-tab[aria-pressed="true"], .md3-tab[aria-current="page"] { color: var(--md-sys-color-primary); }
+  .md3-tab[aria-selected="true"]::after, .md3-tab[aria-pressed="true"]::after, .md3-tab[aria-current="page"]::after {
+    content: ""; position: absolute; left: 16px; right: 16px; bottom: 0; height: 3px; border-radius: 3px 3px 0 0; background: var(--md-sys-color-primary);
+  }
+
   /* ── Legacy surface classes, resolved to M3 until their pages are rewritten ── */
   .mn-paper, .mn-glass, .mn-system-section {
     position: relative;

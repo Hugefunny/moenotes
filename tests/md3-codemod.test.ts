@@ -20,6 +20,21 @@ describe("material 3 token codemod", () => {
     expect(migrateSource(`const c = "var(--mn-mint)";`, "markup")).toBe(`const c = "var(--md-sys-color-success)";`);
   });
 
+  test("turns legacy segmented groups into M3 segmented buttons or tabs", () => {
+    const group = [
+      `<div className="mn-segmented mb-5 flex w-fit gap-1 rounded-full p-1" role="group">`,
+      "  <button aria-pressed={on} className={`rounded-full px-3 ${on ? \"bg-secondary-container text-primary\" : \"text-on-surface-variant\"}`}>x</button>",
+      `</div>`,
+    ].join("\n");
+    expect(migrateSource(group, "markup")).toBe([
+      `<div className="md3-segmented mb-5 w-fit" role="group">`,
+      `  <button aria-pressed={on} className="md3-segment md3-state">x</button>`,
+      `</div>`,
+    ].join("\n"));
+    const tabs = `<div className="mn-segmented flex gap-1" role="tablist">\n  <button role="tab" className={\`px-3 \${on ? "bg-secondary-container" : "text-on-surface-variant"}\`}>x</button>\n</div>`;
+    expect(migrateSource(tabs, "markup")).toBe(`<div className="md3-tabs" role="tablist">\n  <button role="tab" className="md3-tab md3-state">x</button>\n</div>`);
+  });
+
   test("moves typography onto the M3 type scale", () => {
     expect(migrateSource(`<h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-on-surface-variant">`, "markup"))
       .toBe(`<h3 className="mb-2 text-label-medium text-on-surface-variant">`);

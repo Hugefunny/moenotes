@@ -248,20 +248,20 @@ function CardDetailView({ locale, data, materials }: { locale: AppLocale; data: 
   };
 
   if (loading) {
-    return <SiriusLoader locale={locale} label={t(locale, "cards.loading")} className="mn-paper min-h-72" />;
+    return <SiriusLoader locale={locale} label={t(locale, "cards.loading")} className="md3-surface min-h-72" />;
   }
 
   if (error || !card) {
     return (
-      <div className="mn-paper p-8 text-center sm:p-12" role={error ? "alert" : undefined}>
-        <h2 className="font-[var(--mn-font-display)] text-2xl text-[var(--mn-text)]">
+      <div className="md3-surface p-8 text-center sm:p-12" role={error ? "alert" : undefined}>
+        <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">
           {t(locale, error ? "cards.loadErrorTitle" : "cards.detailNotFound")}
         </h2>
-        <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-7 text-[var(--mn-text-muted)]">
+        <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">
           {t(locale, error ? "cards.loadErrorDescription" : "cards.detailNotFoundDescription")}
         </p>
         {error && (
-          <button type="button" onClick={() => setReloadKey((value) => value + 1)} className="mn-focus mn-stamp-press mt-6 rounded-full border border-[var(--mn-border)] bg-[var(--mn-accent-deep)] px-6 py-3 text-sm font-bold text-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp)]">
+          <button type="button" onClick={() => setReloadKey((value) => value + 1)} className="md3-state mt-6 rounded-full border border-outline-variant bg-primary px-6 py-3 text-label-large text-on-primary shadow-elevation-1">
             {t(locale, "cards.retry")}
           </button>
         )}
@@ -296,7 +296,7 @@ function CardDetailView({ locale, data, materials }: { locale: AppLocale; data: 
         type="button"
         onClick={handleDownload}
         disabled={downloadState === "downloading"}
-        className="grid h-8 w-8 place-items-center rounded-full border-2 border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-text-muted)] shadow-[var(--mn-shadow-stamp-sm)] transition hover:text-[var(--mn-text)] disabled:opacity-50"
+        className="grid h-8 w-8 place-items-center rounded-full border-2 border-outline-variant bg-surface-container-low text-on-surface-variant transition hover:text-on-surface disabled:opacity-50"
       >
         {downloadState === "idle" && (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -304,13 +304,13 @@ function CardDetailView({ locale, data, materials }: { locale: AppLocale; data: 
           </svg>
         )}
         {downloadState === "downloading" && <SiriusIcon />}
-        {downloadState === "success" && <svg className="h-4 w-4 text-[var(--mn-mint)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+        {downloadState === "success" && <svg className="h-4 w-4 text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
       </button>
       <button
         type="button"
         onClick={copySelectedAsset}
         disabled={copyState === "copying"}
-        className="grid h-8 w-8 place-items-center rounded-full border-2 border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-text-muted)] shadow-[var(--mn-shadow-stamp-sm)] transition hover:text-[var(--mn-text)] disabled:opacity-50"
+        className="grid h-8 w-8 place-items-center rounded-full border-2 border-outline-variant bg-surface-container-low text-on-surface-variant transition hover:text-on-surface disabled:opacity-50"
       >
         {copyState === "idle" && (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -318,8 +318,8 @@ function CardDetailView({ locale, data, materials }: { locale: AppLocale; data: 
           </svg>
         )}
         {copyState === "copying" && <SiriusIcon />}
-        {copyState === "success" && <svg className="h-4 w-4 text-[var(--mn-mint)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
-        {copyState === "error" && <svg className="h-4 w-4 text-[var(--mn-rose)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>}
+        {copyState === "success" && <svg className="h-4 w-4 text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+        {copyState === "error" && <svg className="h-4 w-4 text-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>}
       </button>
     </>
   ) : null;
@@ -332,7 +332,7 @@ function CardDetailView({ locale, data, materials }: { locale: AppLocale; data: 
         {/* Left Column: Fixed / Sticky Asset Pane */}
         <aside className="lg:sticky lg:top-24 w-full flex flex-col pt-8">
           <div
-            className="relative aspect-[3/4] w-full rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-paper)] p-5 shadow-[var(--mn-shadow-stamp-lg)]"
+            className="relative aspect-[3/4] w-full rounded-shape-lg border border-outline-variant bg-surface-container-low p-5 shadow-elevation-1"
           >
             {/* Asset preview panel */}
 
@@ -346,11 +346,7 @@ function CardDetailView({ locale, data, materials }: { locale: AppLocale; data: 
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveTabId(tab.id)}
-                    className={`px-3 pt-1.5 pb-3 text-[10px] font-semibold tracking-wider uppercase border border-b-0 border-[var(--mn-border)] rounded-t-xl transition-all origin-bottom -mb-[6px] ${
-                      isActive
-                        ? "bg-[var(--mn-accent)] text-[var(--mn-bg)] shadow-md z-20 -translate-y-[2px]"
-                        : "bg-[var(--mn-surface)] text-[var(--mn-text)] hover:bg-[var(--mn-accent-soft)] hover:-translate-y-[1px]"
-                    }`}
+                    className={`px-3 pt-1.5 pb-3 text-label-medium border border-b-0 border-outline-variant rounded-t-xl transition-all origin-bottom -mb-[6px] ${ isActive ? "bg-primary text-on-primary shadow-md z-20 -translate-y-[2px]" : "bg-surface-container text-on-surface hover:bg-secondary-container hover:-translate-y-[1px]" }`}
                   >
                     {tab.label}
                   </button>
@@ -366,11 +362,11 @@ function CardDetailView({ locale, data, materials }: { locale: AppLocale; data: 
                   <button
                     type="button"
                     onClick={() => activeAsset && setSelectedAsset(activeAsset)}
-                    className="group relative block w-full h-full overflow-hidden rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-cream-deep)] shadow-inner transition hover:scale-[1.01]"
+                    className="group relative block w-full h-full overflow-hidden rounded-shape-lg border border-outline-variant bg-surface-container-highest shadow-inner transition hover:scale-[1.01]"
                     aria-label={t(locale, "cards.assets.previewFull")}
                   >
                     {activeAsset && (
-                      <div className={`h-full w-full ${activeAsset.transparent ? "mn-stripes-cream bg-[var(--mn-cream-deep)]" : ""}`}>
+                      <div className={`h-full w-full ${activeAsset.transparent ? "md3-transparency-grid bg-surface-container-highest" : ""}`}>
                         <img
                           className={activeAsset.compact ? "max-h-full max-w-full object-contain mx-auto my-auto absolute inset-0 p-4" : "h-full w-full object-cover"}
                           src={activeAsset.url}
@@ -389,8 +385,8 @@ function CardDetailView({ locale, data, materials }: { locale: AppLocale; data: 
                   {/* Quote and card metadata */}
                   <div className="flex-1 overflow-y-auto space-y-4 pr-1">
                     {card.gachaVoice && (
-                      <div className="relative rounded-2xl border border-solid border-[var(--mn-border)] bg-[var(--mn-accent-soft)] p-4 text-xs font-semibold leading-relaxed text-[var(--mn-ink-soft)] shadow-inner">
-                        <div className="absolute top-2 right-2 bg-[var(--mn-surface)] border border-[var(--mn-border)] px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider text-[var(--mn-accent-deep)] rounded">
+                      <div className="relative rounded-shape-lg border border-solid border-outline-variant bg-secondary-container p-4 text-label-medium text-on-surface-variant shadow-inner">
+                        <div className="absolute top-2 right-2 bg-surface-container border border-outline-variant px-1.5 py-0.5 text-label-medium text-primary rounded">
                           QUOTE
                         </div>
                         <div className="mt-2 flex items-start gap-2">
@@ -402,32 +398,32 @@ function CardDetailView({ locale, data, materials }: { locale: AppLocale; data: 
                       </div>
                     )}
 
-                    <div className="rounded-2xl border border-solid border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 space-y-3 shadow-inner">
-                      <h4 className="font-[var(--mn-font-display)] text-sm tracking-tight text-[var(--mn-text)] border-b border-[var(--mn-border)]/60 pb-1.5">Notebook Log</h4>
-                      <div className="space-y-2 text-[11px] font-bold text-[var(--mn-text-muted)]">
-                        <div className="flex justify-between border-b border-[var(--mn-border)]/20 pb-1">
+                    <div className="rounded-shape-lg border border-solid border-outline-variant bg-surface-container p-4 space-y-3 shadow-inner">
+                      <h4 className="font-[var(--md-ref-typeface-brand)] text-body-medium text-on-surface border-b border-outline-variant/60 pb-1.5">Notebook Log</h4>
+                      <div className="space-y-2 text-label-small text-on-surface-variant">
+                        <div className="flex justify-between border-b border-outline-variant/20 pb-1">
                           <span>Rarity</span>
-                          <span className="text-[var(--mn-text)]">{rarity}</span>
+                          <span className="text-on-surface">{rarity}</span>
                         </div>
-                        <div className="flex justify-between border-b border-[var(--mn-border)]/20 pb-1">
+                        <div className="flex justify-between border-b border-outline-variant/20 pb-1">
                           <span>Attribute</span>
-                          <span className="text-[var(--mn-text)]">{attribute}</span>
+                          <span className="text-on-surface">{attribute}</span>
                         </div>
-                        <div className="flex justify-between border-b border-[var(--mn-border)]/20 pb-1">
+                        <div className="flex justify-between border-b border-outline-variant/20 pb-1">
                           <span>Band</span>
-                          <span className="text-[var(--mn-text)]">{card.bandName}</span>
+                          <span className="text-on-surface">{card.bandName}</span>
                         </div>
-                        <div className="flex justify-between border-b border-[var(--mn-border)]/20 pb-1">
+                        <div className="flex justify-between border-b border-outline-variant/20 pb-1">
                           <span>Release</span>
-                          <span className="text-[var(--mn-text)]">{formatMasterDay(card.startAt, locale, timeZone)}</span>
+                          <span className="text-on-surface">{formatMasterDay(card.startAt, locale, timeZone)}</span>
                         </div>
-                        <div className="flex justify-between border-b border-[var(--mn-border)]/20 pb-1">
+                        <div className="flex justify-between border-b border-outline-variant/20 pb-1">
                           <span>Card ID</span>
-                          <span className="text-[var(--mn-text)]">#{card.id}</span>
+                          <span className="text-on-surface">#{card.id}</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Asset ID</span>
-                          <span className="text-[var(--mn-text)]">#{card.assetId}</span>
+                          <span className="text-on-surface">#{card.assetId}</span>
                         </div>
                       </div>
                     </div>
@@ -446,11 +442,7 @@ function CardDetailView({ locale, data, materials }: { locale: AppLocale; data: 
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveTabId(tab.id)}
-                    className={`px-3 pt-3 pb-1.5 text-[10px] font-semibold tracking-wider uppercase border border-t-0 border-[var(--mn-border)] rounded-b-xl transition-all origin-top -mt-[6px] ${
-                      isActive
-                        ? "bg-[var(--mn-accent)] text-[var(--mn-bg)] shadow-md z-20 translate-y-[2px]"
-                        : "bg-[var(--mn-surface)] text-[var(--mn-text)] hover:bg-[var(--mn-accent-soft)] hover:translate-y-[1px]"
-                    }`}
+                    className={`px-3 pt-3 pb-1.5 text-label-medium border border-t-0 border-outline-variant rounded-b-xl transition-all origin-top -mt-[6px] ${ isActive ? "bg-primary text-on-primary shadow-md z-20 translate-y-[2px]" : "bg-surface-container text-on-surface hover:bg-secondary-container hover:translate-y-[1px]" }`}
                   >
                     {tab.label}
                   </button>
@@ -463,9 +455,9 @@ function CardDetailView({ locale, data, materials }: { locale: AppLocale; data: 
         {/* Right Column: Other Content */}
         <section className="flex-1 min-w-0 space-y-6">
           {/* Card Info Card */}
-          <div className="mn-paper overflow-hidden">
+          <div className="md3-surface overflow-hidden">
             {/* Title Section (Header Banner) */}
-            <div className="border-b border-[var(--mn-border)] bg-gradient-to-r from-[color-mix(in_oklab,var(--mn-accent)_6%,transparent)] to-transparent p-6 sm:p-8">
+            <div className="border-b border-outline-variant p-6 sm:p-8">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -483,18 +475,18 @@ function CardDetailView({ locale, data, materials }: { locale: AppLocale; data: 
                       aria-hidden="true"
                       onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
                     />
-                    <span className="font-[var(--mn-font-note)] text-sm text-[var(--mn-accent-deep)]">{card.bandName}</span>
+                    <span className="font-[var(--md-ref-typeface-mono)] text-body-medium text-primary">{card.bandName}</span>
                   </div>
-                  <h2 className="mt-1 font-[var(--mn-font-display)] text-3xl leading-tight text-[var(--mn-text)] sm:text-4xl">{card.title}</h2>
-                  <p className="mt-3 text-base font-medium text-[var(--mn-text-muted)]">{card.characterName}</p>
+                  <h2 className="mt-1 font-[var(--md-ref-typeface-brand)] text-headline-medium text-on-surface sm:text-headline-large">{card.title}</h2>
+                  <p className="mt-3 text-body-large text-on-surface-variant">{card.characterName}</p>
                 </div>
                 <img className="h-12 w-auto" src={assetUrl(getRarityIconUrl(card.rarity))} alt={rarity} />
               </div>
             </div>
 
             {/* Body Section (Detail Rows List) */}
-            <div className="p-6 sm:p-8 bg-[var(--mn-paper)]">
-              <div className="divide-y divide-dashed divide-[var(--mn-border)]/60">
+            <div className="p-6 sm:p-8 bg-surface-container-low">
+              <div className="divide-y divide-dashed divide-outline-variant/60">
                 <DetailRow label={t(locale, "cards.detailRarity")} value={rarity} />
                 <DetailRow label={t(locale, "cards.detailAttribute")} value={<span className="inline-flex items-center gap-2"><img className="h-5 w-5" src={assetUrl(getCardTypeIconUrl(card.cardType))} alt="" aria-hidden="true" />{attribute}</span>} />
                 <DetailRow
@@ -520,17 +512,17 @@ function CardDetailView({ locale, data, materials }: { locale: AppLocale; data: 
           </div>
 
           {/* Parameters Card */}
-          <div className="mn-paper overflow-hidden">
+          <div className="md3-surface overflow-hidden">
             {/* Title Section */}
-            <div className="border-b border-[var(--mn-border)] bg-gradient-to-r from-[color-mix(in_oklab,var(--mn-accent)_6%,transparent)] to-transparent px-6 py-4 sm:px-8">
-              <h3 className="font-[var(--mn-font-display)] text-xl text-[var(--mn-text)] sm:text-2xl">
+            <div className="border-b border-outline-variant px-6 py-4 sm:px-8">
+              <h3 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-small">
                 {t(locale, "cards.parametersTitle")}
               </h3>
             </div>
             {/* Body Section */}
             <div className="p-6 sm:p-8 space-y-5">
               {growth.levelCurve.length > 0 && (
-                <div className="space-y-4 border-b border-solid border-[var(--mn-border)]/60 pb-5">
+                <div className="space-y-4 border-b border-solid border-outline-variant/60 pb-5">
                   <LevelControl locale={locale} level={build.level} limit={levelLimit} onChange={(level) => setBuild((current) => ({ ...current, level }))} />
                   {growth.awakeSteps.length > 1 && (
                     <StepControl
@@ -552,28 +544,28 @@ function CardDetailView({ locale, data, materials }: { locale: AppLocale; data: 
               )}
 
               {/* Highlighted Total Parameter Row */}
-              <div className="flex items-center justify-between border-b border-solid border-[var(--mn-border)]/60 pb-4">
-                <span className="text-sm font-semibold text-[var(--mn-text-muted)]">
+              <div className="flex items-center justify-between border-b border-solid border-outline-variant/60 pb-4">
+                <span className="text-label-large text-on-surface-variant">
                   {t(locale, isMaxBuild ? "cards.detailPower" : "cards.growth.power")}
                 </span>
-                <span className="font-mono text-xl font-bold text-[var(--mn-accent-deep)]">
+                <span className="font-mono text-headline-small text-primary">
                   {parameters.totalPower.toLocaleString(locale)}
                 </span>
               </div>
 
               <div className="space-y-4">
-                <ParameterBar label={t(locale, "cards.parameters.performance")} value={parameters.performancePower} max={parameterScale} color="var(--mn-accent)" locale={locale} />
-                <ParameterBar label={t(locale, "cards.parameters.technique")} value={parameters.technicPower} max={parameterScale} color="var(--mn-cyan)" locale={locale} />
-                <ParameterBar label={t(locale, "cards.parameters.visual")} value={parameters.visualPower} max={parameterScale} color="var(--mn-mint)" locale={locale} />
+                <ParameterBar label={t(locale, "cards.parameters.performance")} value={parameters.performancePower} max={parameterScale} color="var(--md-sys-color-primary)" locale={locale} />
+                <ParameterBar label={t(locale, "cards.parameters.technique")} value={parameters.technicPower} max={parameterScale} color="var(--md-sys-color-category2)" locale={locale} />
+                <ParameterBar label={t(locale, "cards.parameters.visual")} value={parameters.visualPower} max={parameterScale} color="var(--md-sys-color-success)" locale={locale} />
               </div>
             </div>
           </div>
 
           {/* Skills Card */}
-          <div className="mn-paper overflow-hidden">
+          <div className="md3-surface overflow-hidden">
             {/* Title Section */}
-            <div className="border-b border-[var(--mn-border)] bg-gradient-to-r from-[color-mix(in_oklab,var(--mn-accent)_6%,transparent)] to-transparent px-6 py-4 sm:px-8">
-              <h3 className="font-[var(--mn-font-display)] text-xl text-[var(--mn-text)] sm:text-2xl">
+            <div className="border-b border-outline-variant px-6 py-4 sm:px-8">
+              <h3 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-small">
                 {t(locale, "cards.skillsTitle")}
               </h3>
             </div>
@@ -595,7 +587,7 @@ function CardDetailView({ locale, data, materials }: { locale: AppLocale; data: 
           {materials && materials.groups.length > 0 && <CardMaterialsPanel locale={locale} groups={materials.groups} />}
 
           <div className="flex justify-start">
-            <a href={localizePath(getRoutePathById("cards"), locale)} className="mn-focus mn-stamp-press inline-flex rounded-full border border-[var(--mn-border)] bg-[var(--mn-paper)] px-6 py-3 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]">
+            <a href={localizePath(getRoutePathById("cards"), locale)} className="md3-state inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
               {t(locale, "cards.backToList")}
             </a>
           </div>
@@ -611,7 +603,7 @@ function CardDetailView({ locale, data, materials }: { locale: AppLocale; data: 
         headerActions={previewActions}
       >
         {selectedAsset && (
-          <div className={`w-full overflow-hidden rounded-2xl border border-[var(--mn-border)] ${selectedAsset.transparent ? "mn-stripes-cream bg-[var(--mn-cream-deep)]" : "bg-[var(--mn-surface)]"}`}>
+          <div className={`w-full overflow-hidden rounded-shape-lg border border-outline-variant ${selectedAsset.transparent ? "md3-transparency-grid bg-surface-container-highest" : "bg-surface-container"}`}>
             <img
               className="mx-auto max-h-[65vh] w-full object-contain"
               src={selectedAsset.url}
@@ -626,9 +618,9 @@ function CardDetailView({ locale, data, materials }: { locale: AppLocale; data: 
 
 function DetailRow({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="flex items-center justify-between py-3.5 text-sm">
-      <span className="font-semibold text-[var(--mn-text-muted)]">{label}</span>
-      <span className="font-semibold text-[var(--mn-text)]">{value}</span>
+    <div className="flex items-center justify-between py-3.5 text-body-medium">
+      <span className="font-semibold text-on-surface-variant">{label}</span>
+      <span className="font-semibold text-on-surface">{value}</span>
     </div>
   );
 }
@@ -636,11 +628,11 @@ function DetailRow({ label, value }: { label: string; value: ReactNode }) {
 function ParameterBar({ label, value, max, color, locale }: { label: string; value: number; max: number; color: string; locale: AppLocale }) {
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between text-sm font-semibold">
-        <span className="text-[var(--mn-text-muted)]">{label}</span>
-        <span className="font-mono text-[var(--mn-text)]">{value.toLocaleString(locale)}</span>
+      <div className="flex items-center justify-between text-label-large">
+        <span className="text-on-surface-variant">{label}</span>
+        <span className="font-mono text-on-surface">{value.toLocaleString(locale)}</span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full border border-[var(--mn-border)] bg-[var(--mn-cream-deep)]">
+      <div className="h-2 overflow-hidden rounded-full border border-outline-variant bg-surface-container-highest">
         <div className="h-full rounded-full" style={{ width: `${Math.max(4, (value / max) * 100)}%`, backgroundColor: color }} />
       </div>
     </div>
@@ -663,18 +655,18 @@ function SkillCard({
   const current = pickSkillLevel(skill, level);
   const assetUrl = useAssetUrl();
   return (
-    <article className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface-strong)] p-5 shadow-[var(--mn-shadow-stamp)]">
+    <article className="rounded-shape-lg border border-outline-variant bg-surface-container-high p-5 shadow-elevation-1">
       <div className="flex items-start gap-4">
-        {skill.iconUrl ? <img className="h-14 w-14 shrink-0 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-paper)] object-contain p-1" src={assetUrl(skill.iconUrl)} alt="" aria-hidden="true" /> : null}
-        <div className="min-w-0"><p className="text-xs font-semibold uppercase tracking-wider text-[var(--mn-accent-deep)]">{t(locale, `cards.skillKinds.${skill.kind}`)}</p><h3 className="mt-1 text-base font-semibold leading-6 text-[var(--mn-text)]">{skill.name}</h3><p className="mt-1 text-xs text-[var(--mn-text-muted)]">{t(locale, "cards.skillMeta", { level: current.level, id: skill.id })}</p></div>
+        {skill.iconUrl ? <img className="h-14 w-14 shrink-0 rounded-shape-lg border border-outline-variant bg-surface-container-low object-contain p-1" src={assetUrl(skill.iconUrl)} alt="" aria-hidden="true" /> : null}
+        <div className="min-w-0"><p className="text-label-medium text-primary">{t(locale, `cards.skillKinds.${skill.kind}`)}</p><h3 className="mt-1 text-title-medium leading-6 text-on-surface">{skill.name}</h3><p className="mt-1 text-body-small text-on-surface-variant">{t(locale, "cards.skillMeta", { level: current.level, id: skill.id })}</p></div>
       </div>
       {skill.levels.length > 1 ? (
         <div className="mt-4">
           <StepControl label={t(locale, "cards.growth.skillLevel")} value={current.level} options={skill.levels.map((entry) => entry.level)} onChange={onLevelChange} />
         </div>
       ) : null}
-      {hint ? <p className="mt-3 text-xs font-medium text-[var(--mn-text-muted)]">{hint}</p> : null}
-      <p className="mt-4 whitespace-pre-line rounded-2xl border border-solid border-[var(--mn-border)] bg-[var(--mn-paper)] p-4 text-sm font-medium leading-7 text-[var(--mn-text)]">
+      {hint ? <p className="mt-3 text-body-small text-on-surface-variant">{hint}</p> : null}
+      <p className="mt-4 whitespace-pre-line rounded-shape-lg border border-solid border-outline-variant bg-surface-container-low p-4 text-body-medium leading-7 text-on-surface">
         {current.description || fallbackSkillDescription(current, locale)}
       </p>
     </article>

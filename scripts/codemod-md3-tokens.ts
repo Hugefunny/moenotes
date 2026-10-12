@@ -99,6 +99,24 @@ export function migrateSource(source: string, kind: "markup" | "css"): string {
     out = out.replace(/(^|[\s"'`])(?:mn-card|mn-sticker)(?=[\s"'`])/g, "$1md3-card-outlined");
     out = out.replace(/(^|[\s"'`])mn-stripes-cream(?=[\s"'`])/g, "$1md3-transparency-grid");
     out = out.replace(/(^|[\s"'`])mn-texture-orbit(?=[\s"'`])/g, "$1md3-placeholder");
+    // Sirius gradient section headers become flat (M3 headers sit on the surface, divided by an outline).
+    out = out.replace(/\s?bg-gradient-to-[a-z]+ from-(?:primary|secondary-container|category\d)\/\d+ to-transparent/g, "");
+    // Hover lifts and press scales: M3 shows interaction with state layers, not motion.
+    out = out.replace(/\s(?:[a-z-]+:)*hover:-translate-y-(?:0\.5|1|2)(?=[\s"'`])/g, "");
+    out = out.replace(/\s(?:[a-z-]+:)*active:scale-(?:9[0-9])(?=[\s"'`])/g, "");
+    // Legacy segmented groups: wrapper → .md3-segmented, its toggle buttons (a ternary between a selected and an
+    // idle class list) → .md3-segment (the aria-pressed/selected attribute carries the state).
+    out = out.replace(/className="mn-segmented[^"]*"(?=[^>]*role="tablist")/g, 'className="md3-tabs"');
+    out = out.replace(/className="mn-segmented[^"]*"/g, (match) => {
+      const keep = match.match(/\b(?:mb|mt|ml|mr|mx|my)-[0-9.]+\b|\bw-fit\b|\bshrink-0\b/g) ?? [];
+      return `className="md3-segmented ${keep.join(" ")}"`.replace(/\s+"$/, '"');
+    });
+    out = out.replace(/className=\{`[a-z0-9:.\-[\]/ ]*\$\{[^}?]+\?\s*"[^"]*bg-secondary-container[^"]*"\s*:\s*"[^"]*"\}[^`]*`\}/g, (match, offset: number, whole: string) => {
+      // Only inside a segmented group: the nearest wrapper opened before this button.
+      const before = whole.slice(Math.max(0, offset - 700), offset);
+      if (before.lastIndexOf("md3-tabs") > Math.max(before.lastIndexOf("</div>"), before.lastIndexOf("md3-segmented"))) return 'className="md3-tab md3-state"';
+      return before.lastIndexOf("md3-segmented") > before.lastIndexOf("</div>") ? 'className="md3-segment md3-state"' : match;
+    });
     out = out.replace(/\bborder-\[1\.5px\]/g, "border");
     // Radii onto the M3 shape scale.
     out = out.replace(/\brounded-3xl\b/g, "rounded-shape-lg").replace(/\brounded-2xl\b/g, "rounded-shape-lg").replace(/\brounded-xl\b/g, "rounded-shape-md").replace(/\brounded-lg\b/g, "rounded-shape-sm").replace(/\brounded-md\b/g, "rounded-shape-sm");
@@ -129,6 +147,8 @@ const EXTENSIONS: Record<string, "markup" | "css"> = { ".tsx": "markup", ".ts": 
  * - font-black / font-bold / font-semibold go: the scale's weight applies. Responsive prefixes are kept.
  */
 const SIZE_MAP: Record<string, [regular: string, strong: string]> = {
+  "text-[8px]": ["text-label-small", "text-label-small"],
+  "text-[9px]": ["text-label-small", "text-label-small"],
   "text-[10px]": ["text-label-small", "text-label-small"],
   "text-[11px]": ["text-label-small", "text-label-small"],
   "text-xs": ["text-body-small", "text-label-medium"],
@@ -184,7 +204,7 @@ export function migrateTypography(source: string): string {
     })
     // Class strings inside expressions (ternaries, constants): only those that look like utility lists.
     .replace(/(["'])((?:[a-z0-9:[\]\/._%-]+\s+)*[a-z0-9:[\]\/._%-]+)\1/g, (match, quote: string, value: string) =>
-      /\btext-(xs|sm|base|lg|[2-5]?xl|\[1[01]px\])\b/.test(value) ? `${quote}${migrateClassList(value)}${quote}` : match);
+      /\btext-(?:xs|sm|base|lg|[2-5]?xl|\[(?:8|9|10|11)px\])(?=[\s"']|$)/.test(value) ? `${quote}${migrateClassList(value)}${quote}` : match);
 }
 
 function walk(path: string, files: string[]): void {

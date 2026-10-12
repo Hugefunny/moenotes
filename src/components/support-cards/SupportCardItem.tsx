@@ -29,7 +29,7 @@ export default function SupportCardItem({ card, locale, onClick, badge, selectio
       href={localizePath(`${getRoutePathById("support-cards")}/${card.id}`, locale)}
       onClick={onClick}
       selection={selection}
-      className="mn-list-card group flex w-full flex-col min-w-0 overflow-hidden border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] text-left shadow-[var(--mn-shadow-stamp)] transition hover:-translate-y-1 hover:shadow-[var(--mn-shadow-stamp-lg)]"
+      className="mn-list-card group flex w-full flex-col min-w-0 overflow-hidden border border-outline-variant bg-surface-container-low text-left shadow-elevation-1 transition hover:shadow-elevation-1"
       cardId={card.id}
       label={t(locale, "supportCards.openDetail", { title: card.title, character: card.name })}
     >
@@ -48,19 +48,19 @@ export default function SupportCardItem({ card, locale, onClick, badge, selectio
       <div className="flex flex-col flex-1 min-w-0 p-3 sm:p-4">
         <div className="flex min-w-0 items-start gap-2">
           <span
-            className="mt-1 h-3 w-3 shrink-0 rounded-full border border-[var(--mn-border)]"
-            style={{ backgroundColor: card.characters[0]?.color || "var(--mn-accent)" }}
+            className="mt-1 h-3 w-3 shrink-0 rounded-full border border-outline-variant"
+            style={{ backgroundColor: card.characters[0]?.color || "var(--md-sys-color-primary)" }}
             aria-hidden="true"
           />
           <div className="min-w-0">
-            <h3 className="line-clamp-2 text-sm font-black leading-5 text-[var(--mn-text)]">{card.title}</h3>
-            <p className="mt-1 truncate text-xs font-medium text-[var(--mn-text-muted)]">{card.name}</p>
+            <h3 className="line-clamp-2 text-label-large leading-5 text-on-surface">{card.title}</h3>
+            <p className="mt-1 truncate text-body-small text-on-surface-variant">{card.name}</p>
           </div>
         </div>
-        <div className="mt-auto pt-2 flex items-center justify-between gap-2 border-t border-dashed border-[var(--mn-text-muted)]/40">
+        <div className="mt-auto pt-2 flex items-center justify-between gap-2 border-t border-dashed border-on-surface-variant/40">
           {rarityIcon
             ? <img className="h-5 w-auto max-w-14 object-contain" src={rarityIcon} alt={rarityLabel} />
-            : <span className="text-xs font-black text-[var(--mn-accent-deep)]">{rarityLabel}</span>}
+            : <span className="text-label-medium text-primary">{rarityLabel}</span>}
           <BandLogo bandId={card.bandId} bandName={card.bandName} locale={locale} />
         </div>
       </div>
@@ -75,7 +75,7 @@ export function SupportCardTile({ card, locale, onClick, badge, selection }: Pro
       href={localizePath(`${getRoutePathById("support-cards")}/${card.id}`, locale)}
       onClick={onClick}
       selection={selection}
-      className="mn-focus group flex min-w-0 flex-col items-center gap-1.5 rounded-2xl p-1.5 text-center transition hover:-translate-y-0.5 hover:bg-[var(--mn-paper)] hover:shadow-[var(--mn-shadow-stamp)]"
+      className="group flex min-w-0 flex-col items-center gap-1.5 rounded-shape-lg p-1.5 text-center transition hover:bg-surface-container-low hover:shadow-elevation-1"
       cardId={card.id}
       label={t(locale, "supportCards.openDetail", { title: card.title, character: card.name })}
     >
@@ -84,8 +84,8 @@ export function SupportCardTile({ card, locale, onClick, badge, selection }: Pro
         {badge && <ListCardBadge label={badge} position="right-0 top-0" />}
       </span>
       <span className="w-full min-w-0">
-        <span className="block truncate text-xs font-black text-[var(--mn-text)]">{card.name}</span>
-        <span className="block truncate text-[10px] font-medium text-[var(--mn-text-muted)]">{card.title}</span>
+        <span className="block truncate text-label-medium text-on-surface">{card.name}</span>
+        <span className="block truncate text-label-small text-on-surface-variant">{card.title}</span>
       </span>
     </CardItemSurface>
   );

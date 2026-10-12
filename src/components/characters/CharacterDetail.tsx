@@ -217,20 +217,20 @@ function CharacterDetailView({ locale, data, progression, extras }: { locale: Ap
   };
 
   if (loading) {
-    return <SiriusLoader locale={locale} label={t(locale, "characters.loading")} className="mn-paper min-h-72" />;
+    return <SiriusLoader locale={locale} label={t(locale, "characters.loading")} className="md3-surface min-h-72" />;
   }
 
   if (error || !character) {
     return (
-      <div className="mn-paper p-8 text-center sm:p-12" role={error ? "alert" : undefined}>
-        <h2 className="font-[var(--mn-font-display)] text-2xl text-[var(--mn-text)]">
+      <div className="md3-surface p-8 text-center sm:p-12" role={error ? "alert" : undefined}>
+        <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">
           {t(locale, error ? "characters.loadErrorTitle" : "characters.detailNotFound")}
         </h2>
-        <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-7 text-[var(--mn-text-muted)]">
+        <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">
           {t(locale, error ? "characters.loadErrorDescription" : "characters.detailNotFoundDescription")}
         </p>
         {error && (
-          <button type="button" onClick={() => setReloadKey((value) => value + 1)} className="mn-focus mn-stamp-press mt-6 rounded-full border border-[var(--mn-border)] bg-[var(--mn-accent-deep)] px-6 py-3 text-sm font-bold text-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp)]">
+          <button type="button" onClick={() => setReloadKey((value) => value + 1)} className="md3-state mt-6 rounded-full border border-outline-variant bg-primary px-6 py-3 text-label-large text-on-primary shadow-elevation-1">
             {t(locale, "cards.retry")}
           </button>
         )}
@@ -244,7 +244,7 @@ function CharacterDetailView({ locale, data, progression, extras }: { locale: Ap
         type="button"
         onClick={handleDownload}
         disabled={downloadState === "downloading"}
-        className="grid h-8 w-8 place-items-center rounded-full border-2 border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-text-muted)] shadow-[var(--mn-shadow-stamp-sm)] transition hover:text-[var(--mn-text)] disabled:opacity-50"
+        className="grid h-8 w-8 place-items-center rounded-full border-2 border-outline-variant bg-surface-container-low text-on-surface-variant transition hover:text-on-surface disabled:opacity-50"
       >
         {downloadState === "idle" && (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -252,13 +252,13 @@ function CharacterDetailView({ locale, data, progression, extras }: { locale: Ap
           </svg>
         )}
         {downloadState === "downloading" && <SiriusIcon />}
-        {downloadState === "success" && <svg className="h-4 w-4 text-[var(--mn-mint)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+        {downloadState === "success" && <svg className="h-4 w-4 text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
       </button>
       <button
         type="button"
         onClick={copySelectedAsset}
         disabled={copyState === "copying"}
-        className="grid h-8 w-8 place-items-center rounded-full border-2 border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-text-muted)] shadow-[var(--mn-shadow-stamp-sm)] transition hover:text-[var(--mn-text)] disabled:opacity-50"
+        className="grid h-8 w-8 place-items-center rounded-full border-2 border-outline-variant bg-surface-container-low text-on-surface-variant transition hover:text-on-surface disabled:opacity-50"
       >
         {copyState === "idle" && (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -266,8 +266,8 @@ function CharacterDetailView({ locale, data, progression, extras }: { locale: Ap
           </svg>
         )}
         {copyState === "copying" && <SiriusIcon />}
-        {copyState === "success" && <svg className="h-4 w-4 text-[var(--mn-mint)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
-        {copyState === "error" && <svg className="h-4 w-4 text-[var(--mn-rose)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>}
+        {copyState === "success" && <svg className="h-4 w-4 text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+        {copyState === "error" && <svg className="h-4 w-4 text-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>}
       </button>
     </>
   ) : null;
@@ -280,7 +280,7 @@ function CharacterDetailView({ locale, data, progression, extras }: { locale: Ap
         {/* Left Column: Fixed / Sticky Asset Pane */}
         <aside className="lg:sticky lg:top-24 w-full flex flex-col pt-8">
           <div
-            className="relative aspect-[3/4] w-full rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-paper)] p-5 shadow-[var(--mn-shadow-stamp-lg)]"
+            className="relative aspect-[3/4] w-full rounded-shape-lg border border-outline-variant bg-surface-container-low p-5 shadow-elevation-1"
           >
             {/* Asset preview panel */}
 
@@ -294,11 +294,7 @@ function CharacterDetailView({ locale, data, progression, extras }: { locale: Ap
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveTabId(tab.id)}
-                    className={`px-3 pt-1.5 pb-3 text-[10px] font-semibold tracking-wider uppercase border border-b-0 border-[var(--mn-border)] rounded-t-xl transition-all origin-bottom -mb-[6px] ${
-                      isActive
-                        ? "bg-[var(--mn-accent)] text-[var(--mn-bg)] shadow-md z-20 -translate-y-[2px]"
-                        : "bg-[var(--mn-surface)] text-[var(--mn-text)] hover:bg-[var(--mn-accent-soft)] hover:-translate-y-[1px]"
-                    }`}
+                    className={`px-3 pt-1.5 pb-3 text-label-medium border border-b-0 border-outline-variant rounded-t-xl transition-all origin-bottom -mb-[6px] ${ isActive ? "bg-primary text-on-primary shadow-md z-20 -translate-y-[2px]" : "bg-surface-container text-on-surface hover:bg-secondary-container hover:-translate-y-[1px]" }`}
                   >
                     {tab.label}
                   </button>
@@ -314,11 +310,11 @@ function CharacterDetailView({ locale, data, progression, extras }: { locale: Ap
                   <button
                     type="button"
                     onClick={() => activeAsset && setSelectedAsset(activeAsset)}
-                    className="group relative block w-full h-full overflow-hidden rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-cream-deep)] shadow-inner transition hover:scale-[1.01]"
+                    className="group relative block w-full h-full overflow-hidden rounded-shape-lg border border-outline-variant bg-surface-container-highest shadow-inner transition hover:scale-[1.01]"
                     aria-label={activeAsset?.label}
                   >
                     {activeAsset && (
-                      <div className={`h-full w-full flex items-center justify-center ${activeAsset.transparent ? "mn-stripes-cream bg-[var(--mn-cream-deep)]" : ""}`}>
+                      <div className={`h-full w-full flex items-center justify-center ${activeAsset.transparent ? "md3-transparency-grid bg-surface-container-highest" : ""}`}>
                         <img
                           className={activeAsset.compact ? "max-h-full max-w-full object-contain p-4" : "h-full w-full object-cover"}
                           src={activeAsset.url}
@@ -337,47 +333,47 @@ function CharacterDetailView({ locale, data, progression, extras }: { locale: Ap
                   {/* Handwritten Bio Scrapbook Info */}
                   <div className="flex-1 overflow-y-auto space-y-4 pr-1">
                     {character.catchCopy && (
-                      <div className="relative rounded-2xl border border-solid border-[var(--mn-border)] bg-[var(--mn-accent-soft)] p-4 text-xs font-semibold leading-relaxed text-[var(--mn-ink-soft)] shadow-inner">
-                        <div className="absolute top-2 right-2 bg-[var(--mn-surface)] border border-[var(--mn-border)] px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider text-[var(--mn-accent-deep)] rounded">
+                      <div className="relative rounded-shape-lg border border-solid border-outline-variant bg-secondary-container p-4 text-label-medium text-on-surface-variant shadow-inner">
+                        <div className="absolute top-2 right-2 bg-surface-container border border-outline-variant px-1.5 py-0.5 text-label-medium text-primary rounded">
                           CATCHCOPY
                         </div>
-                        <p className="mt-2 italic font-[var(--mn-font-hand)] text-sm">"{character.catchCopy}"</p>
+                        <p className="mt-2 italic font-[var(--md-ref-typeface-plain)] text-body-medium">"{character.catchCopy}"</p>
                       </div>
                     )}
 
-                    <div className="rounded-2xl border border-solid border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 space-y-3 shadow-inner">
-                      <h4 className="font-[var(--mn-font-display)] text-sm tracking-tight text-[var(--mn-text)] border-b border-[var(--mn-border)]/60 pb-1.5">Profile Log</h4>
-                      <div className="space-y-2 text-[11px] font-bold text-[var(--mn-text-muted)]">
-                        <div className="flex justify-between border-b border-[var(--mn-border)]/20 pb-1">
+                    <div className="rounded-shape-lg border border-solid border-outline-variant bg-surface-container p-4 space-y-3 shadow-inner">
+                      <h4 className="font-[var(--md-ref-typeface-brand)] text-body-medium text-on-surface border-b border-outline-variant/60 pb-1.5">Profile Log</h4>
+                      <div className="space-y-2 text-label-small text-on-surface-variant">
+                        <div className="flex justify-between border-b border-outline-variant/20 pb-1">
                           <span>Band</span>
-                          <span className="text-[var(--mn-text)]">{character.bandName}</span>
+                          <span className="text-on-surface">{character.bandName}</span>
                         </div>
-                        <div className="flex justify-between border-b border-[var(--mn-border)]/20 pb-1">
+                        <div className="flex justify-between border-b border-outline-variant/20 pb-1">
                           <span>Color</span>
-                          <span className="inline-flex items-center gap-1.5 text-[var(--mn-text)]">
-                            <span className="h-2 w-2 rounded-full border border-[var(--mn-border)]" style={{ backgroundColor: character.mainColor }} />
-                            <span className="font-mono text-[10px] uppercase">{character.mainColor}</span>
+                          <span className="inline-flex items-center gap-1.5 text-on-surface">
+                            <span className="h-2 w-2 rounded-full border border-outline-variant" style={{ backgroundColor: character.mainColor }} />
+                            <span className="font-mono text-label-medium">{character.mainColor}</span>
                           </span>
                         </div>
-                        <div className="flex justify-between border-b border-[var(--mn-border)]/20 pb-1">
+                        <div className="flex justify-between border-b border-outline-variant/20 pb-1">
                           <span>Role</span>
-                          <span className="text-[var(--mn-text)]">{character.bandPart}</span>
+                          <span className="text-on-surface">{character.bandPart}</span>
                         </div>
-                        <div className="flex justify-between border-b border-[var(--mn-border)]/20 pb-1">
+                        <div className="flex justify-between border-b border-outline-variant/20 pb-1">
                           <span>Birthday</span>
-                          <span className="text-[var(--mn-text)]">{character.birthday}</span>
+                          <span className="text-on-surface">{character.birthday}</span>
                         </div>
-                        <div className="flex justify-between border-b border-[var(--mn-border)]/20 pb-1">
+                        <div className="flex justify-between border-b border-outline-variant/20 pb-1">
                           <span>Height</span>
-                          <span className="text-[var(--mn-text)]">{character.height}</span>
+                          <span className="text-on-surface">{character.height}</span>
                         </div>
-                        <div className="flex justify-between border-b border-[var(--mn-border)]/20 pb-1">
+                        <div className="flex justify-between border-b border-outline-variant/20 pb-1">
                           <span>Blood Type</span>
-                          <span className="text-[var(--mn-text)]">{character.bloodType || "—"}</span>
+                          <span className="text-on-surface">{character.bloodType || "—"}</span>
                         </div>
                         <div className="flex justify-between">
                           <span>ID</span>
-                          <span className="text-[var(--mn-text)]">#{character.id}</span>
+                          <span className="text-on-surface">#{character.id}</span>
                         </div>
                       </div>
                     </div>
@@ -396,11 +392,7 @@ function CharacterDetailView({ locale, data, progression, extras }: { locale: Ap
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveTabId(tab.id)}
-                    className={`px-3 pt-3 pb-1.5 text-[10px] font-semibold tracking-wider uppercase border border-t-0 border-[var(--mn-border)] rounded-b-xl transition-all origin-top -mt-[6px] ${
-                      isActive
-                        ? "bg-[var(--mn-accent)] text-[var(--mn-bg)] shadow-md z-20 translate-y-[2px]"
-                        : "bg-[var(--mn-surface)] text-[var(--mn-text)] hover:bg-[var(--mn-accent-soft)] hover:translate-y-[1px]"
-                    }`}
+                    className={`px-3 pt-3 pb-1.5 text-label-medium border border-t-0 border-outline-variant rounded-b-xl transition-all origin-top -mt-[6px] ${ isActive ? "bg-primary text-on-primary shadow-md z-20 translate-y-[2px]" : "bg-surface-container text-on-surface hover:bg-secondary-container hover:translate-y-[1px]" }`}
                   >
                     {tab.label}
                   </button>
@@ -423,9 +415,9 @@ function CharacterDetailView({ locale, data, progression, extras }: { locale: Ap
           {section === "related" && <RelatedPanels locale={locale} cards={data.cards} extras={extras} />}
           {section === "profile" && <>
           {/* Character Bio Info Card */}
-          <div className="mn-paper overflow-hidden">
+          <div className="md3-surface overflow-hidden">
             {/* Title Section (Header Banner) */}
-            <div className="border-b border-[var(--mn-border)] bg-gradient-to-r from-[color-mix(in_oklab,var(--mn-accent)_6%,transparent)] to-transparent p-6 sm:p-8">
+            <div className="border-b border-outline-variant p-6 sm:p-8">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -443,27 +435,27 @@ function CharacterDetailView({ locale, data, progression, extras }: { locale: Ap
                       aria-hidden="true"
                       onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
                     />
-                    <span className="font-[var(--mn-font-note)] text-sm text-[var(--mn-accent-deep)]">{character.bandName}</span>
+                    <span className="font-[var(--md-ref-typeface-mono)] text-body-medium text-primary">{character.bandName}</span>
                   </div>
-                  <h2 className="mt-1 font-[var(--mn-font-display)] text-3xl leading-tight text-[var(--mn-text)] sm:text-4xl">{character.name}</h2>
-                  <p className="mt-2 text-sm font-bold text-[var(--mn-text-muted)] tracking-wide uppercase">{character.enName}</p>
+                  <h2 className="mt-1 font-[var(--md-ref-typeface-brand)] text-headline-medium text-on-surface sm:text-headline-large">{character.name}</h2>
+                  <p className="mt-2 text-label-large text-on-surface-variant">{character.enName}</p>
                 </div>
-                <span className="px-4 py-1.5 text-xs font-black uppercase tracking-wider rounded-full border-2 border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]">
+                <span className="px-4 py-1.5 text-label-medium rounded-full border-2 border-outline-variant bg-surface-container-low text-on-surface shadow-elevation-1">
                   {character.bandPart}
                 </span>
               </div>
             </div>
 
             {/* Body Section (Detail Rows List) */}
-            <div className="p-6 sm:p-8 bg-[var(--mn-paper)]">
-              <div className="divide-y divide-dashed divide-[var(--mn-border)]/60">
+            <div className="p-6 sm:p-8 bg-surface-container-low">
+              <div className="divide-y divide-dashed divide-outline-variant/60">
                 <DetailRow label={t(locale, "characters.detailBand")} value={character.bandName} />
                 <DetailRow
                   label={t(locale, "characters.detailColor")}
                   value={
                     <span className="inline-flex items-center gap-2">
-                      <span className="h-3 w-3 rounded-full border border-[var(--mn-border)]" style={{ backgroundColor: character.mainColor }} />
-                      <span className="font-mono text-xs uppercase">{character.mainColor}</span>
+                      <span className="h-3 w-3 rounded-full border border-outline-variant" style={{ backgroundColor: character.mainColor }} />
+                      <span className="font-mono text-label-medium">{character.mainColor}</span>
                     </span>
                   }
                 />
@@ -486,14 +478,14 @@ function CharacterDetailView({ locale, data, progression, extras }: { locale: Ap
 
           {/* Description Card */}
           {character.description && (
-            <div className="mn-paper overflow-hidden">
-              <div className="border-b border-[var(--mn-border)] bg-gradient-to-r from-[color-mix(in_oklab,var(--mn-accent)_6%,transparent)] to-transparent px-6 py-4 sm:px-8">
-                <h3 className="font-[var(--mn-font-display)] text-xl text-[var(--mn-text)] sm:text-2xl">
+            <div className="md3-surface overflow-hidden">
+              <div className="border-b border-outline-variant px-6 py-4 sm:px-8">
+                <h3 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-small">
                   {t(locale, "characters.profileTitle")}
                 </h3>
               </div>
-              <div className="p-6 sm:p-8 bg-[var(--mn-paper)]">
-                <p className="whitespace-pre-line text-sm font-medium leading-7 text-[var(--mn-text)]">
+              <div className="p-6 sm:p-8 bg-surface-container-low">
+                <p className="whitespace-pre-line text-body-medium leading-7 text-on-surface">
                   {character.description}
                 </p>
               </div>
@@ -501,11 +493,11 @@ function CharacterDetailView({ locale, data, progression, extras }: { locale: Ap
           )}
 
           {/* The full card lists live in the related section; the profile keeps the counts. */}
-          <div className="mn-paper flex flex-wrap items-center justify-between gap-3 px-6 py-4 sm:px-8">
-            <p className="text-sm font-bold text-[var(--mn-text)]">
+          <div className="md3-surface flex flex-wrap items-center justify-between gap-3 px-6 py-4 sm:px-8">
+            <p className="text-label-large text-on-surface">
               {t(locale, "characters.related.summary", { cards: data.cards.length, supportCards: extras.supportCards.length, stories: extras.stories.length + extras.friendshipStories.length })}
             </p>
-            <button type="button" onClick={() => setSection("related")} className="mn-focus mn-stamp-press rounded-full border border-[var(--mn-border)] bg-[var(--mn-paper)] px-4 py-1.5 text-xs font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp-sm)] hover:text-[var(--mn-accent-deep)]">
+            <button type="button" onClick={() => setSection("related")} className="md3-state rounded-full border border-outline-variant bg-surface-container-low px-4 py-1.5 text-label-medium text-on-surface hover:text-primary">
               {t(locale, "characters.related.open")}
             </button>
           </div>
@@ -514,7 +506,7 @@ function CharacterDetailView({ locale, data, progression, extras }: { locale: Ap
           </>}
 
           <div className="flex justify-start">
-            <a href={localizePath(getRoutePathById("characters"), locale)} className="mn-focus mn-stamp-press inline-flex rounded-full border border-[var(--mn-border)] bg-[var(--mn-paper)] px-6 py-3 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]">
+            <a href={localizePath(getRoutePathById("characters"), locale)} className="md3-state inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
               {t(locale, "characters.backToList")}
             </a>
           </div>
@@ -530,7 +522,7 @@ function CharacterDetailView({ locale, data, progression, extras }: { locale: Ap
         headerActions={previewActions}
       >
         {selectedAsset && (
-          <div className={`w-full overflow-hidden rounded-2xl border border-[var(--mn-border)] ${selectedAsset.transparent ? "mn-stripes-cream bg-[var(--mn-cream-deep)]" : "bg-[var(--mn-surface)]"}`}>
+          <div className={`w-full overflow-hidden rounded-shape-lg border border-outline-variant ${selectedAsset.transparent ? "md3-transparency-grid bg-surface-container-highest" : "bg-surface-container"}`}>
             <img
               className="mx-auto max-h-[65vh] w-full object-contain"
               src={selectedAsset.url}
@@ -545,9 +537,9 @@ function CharacterDetailView({ locale, data, progression, extras }: { locale: Ap
 
 function DetailRow({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="flex items-center justify-between py-3.5 text-sm">
-      <span className="font-semibold text-[var(--mn-text-muted)]">{label}</span>
-      <span className="font-semibold text-[var(--mn-text)]">{value}</span>
+    <div className="flex items-center justify-between py-3.5 text-body-medium">
+      <span className="font-semibold text-on-surface-variant">{label}</span>
+      <span className="font-semibold text-on-surface">{value}</span>
     </div>
   );
 }

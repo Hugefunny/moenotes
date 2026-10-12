@@ -107,10 +107,10 @@ export default function CardsExplorer({ locale, initialCards, servers, skillName
 
 function EmptyState({ locale, onReset }: { locale: AppLocale; onReset: () => void }) {
   return (
-    <div className="mn-paper p-8 text-center sm:p-12">
-      <h3 className="font-[var(--mn-font-display)] text-2xl text-[var(--mn-text)]">{t(locale, "cards.emptyTitle")}</h3>
-      <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-7 text-[var(--mn-text-muted)]">{t(locale, "cards.emptyDescription")}</p>
-      <button type="button" onClick={onReset} className="mn-focus mn-stamp-press mt-6 rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-6 py-3 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]">
+    <div className="md3-surface p-8 text-center sm:p-12">
+      <h3 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "cards.emptyTitle")}</h3>
+      <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "cards.emptyDescription")}</p>
+      <button type="button" onClick={onReset} className="md3-state mt-6 rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
         {t(locale, "cards.reset")}
       </button>
     </div>

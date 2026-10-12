@@ -33,18 +33,18 @@ export default function CardMaterialsPanel({ locale, groups }: Props) {
   })), [current, assetUrl]);
 
   return (
-    <div className="mn-paper overflow-hidden">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--mn-border)] bg-gradient-to-r from-[color-mix(in_oklab,var(--mn-accent)_6%,transparent)] to-transparent px-6 py-4 sm:px-8">
-        <h3 className="font-[var(--mn-font-display)] text-xl text-[var(--mn-text)] sm:text-2xl">{t(locale, "cards.materials.title")}</h3>
+    <div className="md3-surface overflow-hidden">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-6 py-4 sm:px-8">
+        <h3 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-small">{t(locale, "cards.materials.title")}</h3>
         {groups.length > 1 && (
-          <div className="mn-segmented flex max-w-full flex-wrap gap-1 rounded-full border border-[var(--mn-glass-border)] bg-[var(--mn-surface-strong)] p-1" role="group" aria-label={t(locale, "cards.materials.title")}>
+          <div className="md3-segmented" role="group" aria-label={t(locale, "cards.materials.title")}>
             {groups.map((group) => (
               <button
                 key={group.kind}
                 type="button"
                 aria-pressed={group === current}
                 onClick={() => setActive(group.kind)}
-                className={`mn-focus rounded-full px-3 py-1 text-xs font-bold transition ${group === current ? "bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]" : "text-[var(--mn-text-muted)] hover:bg-[var(--mn-cream-deep)]"}`}
+                className="md3-segment md3-state"
               >
                 {t(locale, LABEL_KEY[group.kind])}
               </button>
@@ -54,15 +54,15 @@ export default function CardMaterialsPanel({ locale, groups }: Props) {
       </div>
       <div className="space-y-3 p-6 sm:p-8">
         {!current ? (
-          <p className="text-sm font-medium text-[var(--mn-text-muted)]">{t(locale, "cards.materials.empty")}</p>
+          <p className="text-body-medium text-on-surface-variant">{t(locale, "cards.materials.empty")}</p>
         ) : (
           <>
             {current.alternative && (
-              <p className="text-xs font-medium text-[var(--mn-text-muted)]">
+              <p className="text-body-small text-on-surface-variant">
                 {t(locale, "cards.materials.alternative")}{" "}
                 {current.alternative.link
-                  ? <a className="mn-focus font-bold text-[var(--mn-accent-deep)] underline decoration-dotted underline-offset-4" href={localizePath(entityLinkPath(current.alternative.link), locale)}>{current.alternative.name}</a>
-                  : <span className="font-bold text-[var(--mn-text)]">{current.alternative.name}</span>}
+                  ? <a className="font-bold text-primary underline decoration-dotted underline-offset-4" href={localizePath(entityLinkPath(current.alternative.link), locale)}>{current.alternative.name}</a>
+                  : <span className="font-bold text-on-surface">{current.alternative.name}</span>}
               </p>
             )}
             <UpgradeCostTable

@@ -30,7 +30,7 @@ export function useCharacterSection(): [CharacterSection, (section: CharacterSec
 
 export function CharacterSectionTabs({ locale, value, onChange }: { locale: AppLocale; value: CharacterSection; onChange: (section: CharacterSection) => void }) {
   return (
-    <div className="mn-segmented flex w-fit max-w-full flex-wrap gap-1 rounded-full border border-[var(--mn-glass-border)] bg-[var(--mn-surface-strong)] p-1" role="tablist" aria-label={t(locale, "characters.sections.label")}>
+    <div className="md3-tabs" role="tablist" aria-label={t(locale, "characters.sections.label")}>
       {CHARACTER_SECTIONS.map((section) => (
         <button
           key={section}
@@ -38,7 +38,7 @@ export function CharacterSectionTabs({ locale, value, onChange }: { locale: AppL
           role="tab"
           aria-selected={section === value}
           onClick={() => onChange(section)}
-          className={`mn-focus rounded-full px-3 py-1.5 text-xs font-bold transition ${section === value ? "bg-[var(--mn-accent-soft)] text-[var(--mn-text)]" : "text-[var(--mn-text-muted)] hover:bg-[var(--mn-cream-deep)] hover:text-[var(--mn-text)]"}`}
+          className="md3-tab md3-state"
         >
           {t(locale, `characters.sections.${section}`)}
         </button>
@@ -47,12 +47,12 @@ export function CharacterSectionTabs({ locale, value, onChange }: { locale: AppL
   );
 }
 
-const panelHeader = "border-b border-[var(--mn-border)] bg-gradient-to-r from-[color-mix(in_oklab,var(--mn-accent)_6%,transparent)] to-transparent px-6 py-4 sm:px-8";
-const panelTitle = "font-[var(--mn-font-display)] text-xl text-[var(--mn-text)] sm:text-2xl";
+const panelHeader = "border-b border-outline-variant px-6 py-4 sm:px-8";
+const panelTitle = "font-[var(--md-ref-typeface-brand)] text-xl text-on-surface sm:text-2xl";
 
 export function Panel({ title, actions, children }: { title: string; actions?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div className="mn-paper overflow-hidden">
+    <div className="md3-surface overflow-hidden">
       <div className={`${panelHeader} flex flex-wrap items-center justify-between gap-3`}><h3 className={panelTitle}>{title}</h3>{actions}</div>
       <div className="p-6 sm:p-8">{children}</div>
     </div>
@@ -60,7 +60,7 @@ export function Panel({ title, actions, children }: { title: string; actions?: R
 }
 
 export function Empty({ text }: { text: string }) {
-  return <p className="py-2 text-center text-sm font-medium text-[var(--mn-text-muted)]">{text}</p>;
+  return <p className="py-2 text-center text-body-medium text-on-surface-variant">{text}</p>;
 }
 
 /** Rank rewards with a rank switch: the rewards handed out on reaching the chosen rank. */
@@ -105,14 +105,14 @@ export function CostumesPanel({ locale, costumes }: { locale: AppLocale; costume
             const body = (
               <>
                 <img className="mx-auto h-24 w-24 object-contain" src={assetUrl(getCostumeIconUrl(costume.iconPath, locale))} alt="" loading="lazy" />
-                <span className="mt-2 block text-center text-xs font-bold text-[var(--mn-text)]">{costume.name}</span>
+                <span className="mt-2 block text-center text-label-medium text-on-surface">{costume.name}</span>
               </>
             );
             return (
               <li key={costume.groupId}>
                 {modelId
-                  ? <a href={getLive2DViewerHref(locale, modelId)} title={t(locale, "characters.costumes.openViewer")} className="mn-focus block rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-cream-deep)]/40 p-3 transition hover:-translate-y-0.5 hover:border-[var(--mn-accent)]">{body}</a>
-                  : <div className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-cream-deep)]/40 p-3">{body}</div>}
+                  ? <a href={getLive2DViewerHref(locale, modelId)} title={t(locale, "characters.costumes.openViewer")} className="block rounded-shape-lg border border-outline-variant bg-surface-container-highest/40 p-3 transition hover:border-primary">{body}</a>
+                  : <div className="rounded-shape-lg border border-outline-variant bg-surface-container-highest/40 p-3">{body}</div>}
               </li>
             );
           })}

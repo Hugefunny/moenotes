@@ -42,7 +42,7 @@ export default function SupportCardArtwork({
   const handleImageError = () => setAttempt((current) => current + 1);
 
   return (
-    <div className={`relative aspect-[16/9] overflow-hidden bg-[var(--mn-cream-deep)] ${className}`.trim()}>
+    <div className={`relative aspect-[16/9] overflow-hidden bg-surface-container-highest ${className}`.trim()}>
       {!failed ? (
         <img
           className="h-full w-full object-cover"
@@ -54,7 +54,7 @@ export default function SupportCardArtwork({
           onError={handleImageError}
         />
       ) : (
-        <div className="grid h-full place-items-center p-4 text-center text-sm font-medium text-[var(--mn-text-muted)]">
+        <div className="grid h-full place-items-center p-4 text-center text-body-medium text-on-surface-variant">
           {fallbackLabel}
         </div>
       )}

@@ -50,12 +50,12 @@ export default function CharacterVoicesSection({ locale, characterId, characterN
   const payload = state.status === "ready" ? state.payload : null;
   const groups = useMemo(() => (payload ? groupVoiceLines(characterVoiceLines(payload, server, characterId)) : []), [payload, server, characterId]);
 
-  if (state.status === "loading") return <SiriusLoader locale={locale} label={t(locale, "characters.voices.loading")} className="mn-paper min-h-48" />;
+  if (state.status === "loading") return <SiriusLoader locale={locale} label={t(locale, "characters.voices.loading")} className="md3-surface min-h-48" />;
   if (state.status === "error" || !payload) {
     return (
-      <div className="mn-paper p-8 text-center" role="alert">
-        <p className="text-sm font-medium text-[var(--mn-text-muted)]">{t(locale, "characters.voices.loadError")}</p>
-        <button type="button" onClick={() => setAttempt((value) => value + 1)} className="mn-focus mn-stamp-press mt-4 rounded-full border border-[var(--mn-border)] bg-[var(--mn-paper)] px-5 py-2 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp-sm)]">
+      <div className="md3-surface p-8 text-center" role="alert">
+        <p className="text-body-medium text-on-surface-variant">{t(locale, "characters.voices.loadError")}</p>
+        <button type="button" onClick={() => setAttempt((value) => value + 1)} className="md3-state mt-4 rounded-full border border-outline-variant bg-surface-container-low px-5 py-2 text-label-large text-on-surface">
           {t(locale, "cards.retry")}
         </button>
       </div>
@@ -109,7 +109,7 @@ function VoiceGroupPanel({ locale, group, payload, characterId, characterNames, 
     <button
       type="button"
       onClick={() => setQueue(queue)}
-      className="mn-focus mn-stamp-press inline-flex items-center gap-1.5 rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-3.5 py-1.5 text-xs font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp-sm)] transition hover:border-[var(--mn-accent)] hover:text-[var(--mn-accent-deep)]"
+      className="md3-state inline-flex items-center gap-1.5 rounded-full border border-outline-variant bg-surface-container-low px-3.5 py-1.5 text-label-medium text-on-surface transition hover:border-primary hover:text-primary"
     >
       <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" /></svg>
       {t(locale, "characters.voices.playAll", { count: queue.length })}
@@ -122,11 +122,11 @@ function VoiceGroupPanel({ locale, group, payload, characterId, characterNames, 
         {group.sections.map((section) => (
           <section key={section.kind ?? "all"}>
             {section.kind && group.source === "talk" && (
-              <h4 className="mb-1 text-xs font-black uppercase tracking-wider text-[var(--mn-text-muted)]">
+              <h4 className="mb-1 text-label-medium text-on-surface-variant">
                 {t(locale, `characters.voices.talk.${section.kind}`)} <span className="tabular-nums">({section.lines.length})</span>
               </h4>
             )}
-            <ul className="divide-y divide-dashed divide-[var(--mn-border)]/60">
+            <ul className="divide-y divide-dashed divide-outline-variant/60">
               {section.lines.map((line) => (
                 <VoiceLineRow key={`${line.source}:${line.id}:${line.characterId}`} locale={locale} line={line} payload={payload} characterId={characterId} nameOf={nameOf} cards={cards} trackOf={trackOf} />
               ))}
@@ -138,7 +138,7 @@ function VoiceGroupPanel({ locale, group, payload, characterId, characterNames, 
   );
 }
 
-const linkClass = "mn-focus font-bold text-[var(--mn-accent-deep)] underline decoration-dotted underline-offset-4 hover:text-[var(--mn-accent)]";
+const linkClass = " font-bold text-primary underline decoration-dotted underline-offset-4 hover:text-primary";
 
 interface LineProps {
   locale: AppLocale;
@@ -188,8 +188,8 @@ function VoiceLineRow({ locale, line, payload, characterId, nameOf, cards, track
     <div className="flex items-start gap-3">
       {own ? <AudioPlayButton locale={locale} size="sm" track={own} /> : <span className="h-8 w-8 shrink-0" />}
       <div className="min-w-0">
-        {partner ? <p className="text-[11px] font-bold text-[var(--mn-text-muted)]">{nameOf(line.characterId)}</p> : null}
-        <p className="whitespace-pre-line text-sm font-medium text-[var(--mn-text)]">{text || "—"}</p>
+        {partner ? <p className="text-label-small text-on-surface-variant">{nameOf(line.characterId)}</p> : null}
+        <p className="whitespace-pre-line text-body-medium text-on-surface">{text || "—"}</p>
       </div>
     </div>
   );
@@ -197,8 +197,8 @@ function VoiceLineRow({ locale, line, payload, characterId, nameOf, cards, track
     <div className="flex items-start gap-3">
       {partnerTrack ? <AudioPlayButton locale={locale} size="sm" track={partnerTrack} /> : <span className="h-8 w-8 shrink-0" />}
       <div className="min-w-0">
-        <p className="text-[11px] font-bold text-[var(--mn-text-muted)]">{nameOf(partner)}</p>
-        <p className="whitespace-pre-line text-sm font-medium text-[var(--mn-text-muted)]">{voiceText(payload, line.partnerText, locale) || "—"}</p>
+        <p className="text-label-small text-on-surface-variant">{nameOf(partner)}</p>
+        <p className="whitespace-pre-line text-body-medium text-on-surface-variant">{voiceText(payload, line.partnerText, locale) || "—"}</p>
       </div>
     </div>
   ) : null;
@@ -206,7 +206,7 @@ function VoiceLineRow({ locale, line, payload, characterId, nameOf, cards, track
   return (
     <li className="space-y-2 py-3">
       {(label || partner || meta.length > 0) && (
-        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-bold uppercase tracking-wider text-[var(--mn-accent-deep)]">
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-label-medium text-primary">
           {label && <span>{label}</span>}
           {partner ? (
             <a className={`${linkClass} normal-case tracking-normal`} href={localizePath(entityLinkPath({ routeId: "characters", detailId: partner }), locale)}>
@@ -214,7 +214,7 @@ function VoiceLineRow({ locale, line, payload, characterId, nameOf, cards, track
             </a>
           ) : null}
           {meta.map((entry, index) => (
-            <span key={index} className="rounded-full border border-[var(--mn-border)]/60 px-2 py-0.5 normal-case tracking-normal text-[var(--mn-text-muted)]">{entry}</span>
+            <span key={index} className="rounded-full border border-outline-variant/60 px-2 py-0.5 normal-case tracking-normal text-on-surface-variant">{entry}</span>
           ))}
         </p>
       )}
