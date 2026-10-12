@@ -6,6 +6,9 @@ import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
 import { playerShellPath } from "./src/config/players.ts";
 
+/** Packages the server environments bundle instead of importing from node_modules at render time. */
+const SERVER_BUNDLED = ["@material/material-color-utilities", "@mui/material", "@mui/system", "@mui/utils", "@mui/styled-engine", "@mui/private-theming"];
+
 /**
  * `astro dev` serves player pages (/u/{server}/{profileId}) from the locale's /u shell, as the deploy server does
  * (server/static.ts): a static build has no page per player.
@@ -67,6 +70,15 @@ export default defineConfig({
     // glue is ESM and locates the .wasm via import.meta.url, which Vite emits as a hashed asset.
     worker: {
       format: "es",
+    },
+    // material-color-utilities publishes extensionless relative imports (`./dynamic_scheme`) that Node's ESM loader
+    // cannot resolve when a server environment imports it; bundling it lets Vite resolve them. MUI is bundled too so
+    // the server renders its components through the same module graph as the islands. Astro 7 prerenders static
+    // pages in its own `prerender` environment, which does not inherit the top-level `ssr` options.
+    ssr: { noExternal: SERVER_BUNDLED },
+    environments: {
+      ssr: { resolve: { noExternal: SERVER_BUNDLED } },
+      prerender: { resolve: { noExternal: SERVER_BUNDLED } },
     },
     resolve: {
       alias: {

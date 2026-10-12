@@ -1,0 +1,89 @@
+/* Material 3 primitives for markup that is not a MUI component: static Astro pages and dense artwork grids
+   (hundreds of cards, where one MUI Card per item would cost far more than a class). Interactive controls in React
+   islands are MUI (src/lib/md3/mui-theme.ts); both read the same `--md-sys-*` tokens. */
+@layer components {
+  /* ── Surfaces / cards (M3 card: medium shape) ── */
+  .md3-card-filled { border-radius: var(--md-sys-shape-corner-medium); background: var(--md-sys-color-surface-container-highest); color: var(--md-sys-color-on-surface); }
+  .md3-card-elevated { border-radius: var(--md-sys-shape-corner-medium); background: var(--md-sys-color-surface-container-low); color: var(--md-sys-color-on-surface); box-shadow: var(--md-sys-elevation-level1); }
+  .md3-card-outlined { border-radius: var(--md-sys-shape-corner-medium); border: 1px solid var(--md-sys-color-outline-variant); background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); }
+  /* A section panel on the page: tonal, no outline (M3 surface-container-low). */
+  .md3-surface { position: relative; border-radius: var(--md-sys-shape-corner-large); background: var(--md-sys-color-surface-container-low); color: var(--md-sys-color-on-surface); }
+
+  /* ── State layer: hover / focus / pressed overlay in the content color (M3 interaction states) ── */
+  .md3-state { position: relative; isolation: isolate; }
+  .md3-state::before {
+    content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: currentColor; opacity: 0;
+    pointer-events: none; transition: opacity var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+  }
+  @media (hover: hover) { .md3-state:hover::before { opacity: var(--md-sys-state-hover-opacity); } }
+  .md3-state:focus-visible::before, .md3-state:active::before { opacity: var(--md-sys-state-pressed-opacity); }
+  .md3-state:disabled::before, .md3-state[aria-disabled="true"]::before { opacity: 0; }
+
+  /* ── List card: an item of a browse grid (cards, songs, events…). Filled M3 card; elevation on hover. ── */
+  .md3-list-card,
+  .mn-list-card {
+    position: relative;
+    border-radius: var(--md-sys-shape-corner-medium);
+    background-color: var(--md-sys-color-surface-container-low);
+    color: var(--md-sys-color-on-surface);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    transition: box-shadow var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard), background-color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard), border-color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+  }
+  @media (hover: hover) {
+    :is(a, button, [role="button"]):is(.md3-list-card, .mn-list-card):hover,
+    :is(.md3-list-card, .mn-list-card):has(> a:hover) {
+      background-color: var(--md-sys-color-surface-container);
+      box-shadow: var(--md-sys-elevation-level1);
+    }
+  }
+  :is(.md3-list-card, .mn-list-card):focus-visible { outline: 3px solid var(--md-sys-color-secondary); outline-offset: 2px; }
+  .mn-list-card-row { border-radius: var(--md-sys-shape-corner-medium); }
+  .mn-list-group { border-radius: var(--md-sys-shape-corner-large); }
+  .mn-list-caption { border-radius: var(--md-sys-shape-corner-small); }
+
+  /* ── Headings (M3 type scale; no decoration) ── */
+  .md3-page-heading { margin: 0 0 24px; padding: 8px 0 0; }
+  .md3-page-heading h1 { min-width: 0; margin: 0; font-family: var(--md-ref-typeface-brand); font-size: var(--md-sys-typescale-headline-large-size); line-height: var(--md-sys-typescale-headline-large-line-height); font-weight: 400; color: var(--md-sys-color-on-surface); overflow-wrap: anywhere; }
+  .md3-page-heading p { max-width: 76ch; margin: 8px 0 0; color: var(--md-sys-color-on-surface-variant); font-size: var(--md-sys-typescale-body-large-size); line-height: var(--md-sys-typescale-body-large-line-height); letter-spacing: var(--md-sys-typescale-body-large-tracking); }
+  @media (max-width: 600px) {
+    .md3-page-heading h1 { font-size: var(--md-sys-typescale-headline-medium-size); line-height: var(--md-sys-typescale-headline-medium-line-height); }
+    .md3-page-heading p { font-size: var(--md-sys-typescale-body-medium-size); line-height: var(--md-sys-typescale-body-medium-line-height); }
+  }
+  .md3-section-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 16px; min-width: 0; }
+  .md3-section-heading h2 { flex: 1 1 auto; min-width: 0; margin: 0; font-family: var(--md-ref-typeface-brand); font-size: var(--md-sys-typescale-title-large-size); line-height: var(--md-sys-typescale-title-large-line-height); font-weight: 400; color: var(--md-sys-color-on-surface); overflow-wrap: anywhere; }
+
+  /* ── Placeholder art (missing banners/thumbnails): a tonal tile instead of the old orbit texture ── */
+  .md3-placeholder, .mn-texture-orbit {
+    background-color: var(--md-sys-color-surface-container-high);
+    background-image: radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--md-sys-color-primary) 10%, transparent), transparent 60%);
+    color: var(--md-sys-color-on-surface-variant);
+  }
+  /* Checkerboard behind transparent artwork. */
+  .md3-transparency-grid, .mn-stripes-cream {
+    background-color: var(--md-sys-color-surface-container);
+    background-image: conic-gradient(var(--md-sys-color-surface-container-high) 25%, transparent 0 50%, var(--md-sys-color-surface-container-high) 0 75%, transparent 0);
+    background-size: 16px 16px;
+  }
+
+  /* ── Legacy surface classes, resolved to M3 until their pages are rewritten ── */
+  .mn-paper, .mn-glass, .mn-system-section {
+    position: relative;
+    border-radius: var(--md-sys-shape-corner-large);
+    background: var(--md-sys-color-surface-container-low);
+    color: var(--md-sys-color-on-surface);
+  }
+  .mn-card, .mn-sticker {
+    border-radius: var(--md-sys-shape-corner-medium);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    background: var(--md-sys-color-surface-container-low);
+  }
+  .mn-stamp {
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: var(--md-sys-shape-corner-full);
+    background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary);
+  }
+  .mn-focus { outline: 3px solid transparent; outline-offset: 2px; }
+  .mn-focus:focus-visible { outline-color: var(--md-sys-color-secondary); }
+  /* The old "stamp" press gave a lift and a glow; M3 shows interaction with a state layer instead. */
+  .mn-stamp-press, .mn-stamp-press-lg { transition: background-color var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard), color var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard); }
+}

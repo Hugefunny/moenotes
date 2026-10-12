@@ -1,0 +1,53 @@
+/* MUI's palette CSS variables follow the Material 3 roles, so a band seed (runtime --md-sys-color-* on <html>)
+   restyles MUI internals that read the palette directly (focus rings, ripples, pickers) without rebuilding the
+   theme. `html[data-theme]` outranks the theme stylesheet's `:root, [data-theme="light"]` rules. */
+html[data-theme] {
+  --mui-palette-primary-main: var(--md-sys-color-primary);
+  --mui-palette-primary-mainChannel: var(--md-sys-color-primary-rgb);
+  --mui-palette-primary-contrastText: var(--md-sys-color-on-primary);
+  --mui-palette-primary-contrastTextChannel: var(--md-sys-color-on-primary-rgb);
+  --mui-palette-primary-light: var(--md-sys-color-primary-fixed-dim);
+  --mui-palette-primary-dark: var(--md-sys-color-on-primary-container);
+  --mui-palette-secondary-main: var(--md-sys-color-secondary);
+  --mui-palette-secondary-mainChannel: var(--md-sys-color-secondary-rgb);
+  --mui-palette-secondary-contrastText: var(--md-sys-color-on-secondary);
+  --mui-palette-tertiary-main: var(--md-sys-color-tertiary);
+  --mui-palette-tertiary-mainChannel: var(--md-sys-color-tertiary-rgb);
+  --mui-palette-tertiary-contrastText: var(--md-sys-color-on-tertiary);
+  --mui-palette-error-main: var(--md-sys-color-error);
+  --mui-palette-error-mainChannel: var(--md-sys-color-error-rgb);
+  --mui-palette-error-contrastText: var(--md-sys-color-on-error);
+  --mui-palette-success-main: var(--md-sys-color-success);
+  --mui-palette-success-mainChannel: var(--md-sys-color-success-rgb);
+  --mui-palette-success-contrastText: var(--md-sys-color-on-success);
+  --mui-palette-warning-main: var(--md-sys-color-warning);
+  --mui-palette-warning-mainChannel: var(--md-sys-color-warning-rgb);
+  --mui-palette-warning-contrastText: var(--md-sys-color-on-warning);
+  --mui-palette-info-main: var(--md-sys-color-primary);
+  --mui-palette-info-mainChannel: var(--md-sys-color-primary-rgb);
+  --mui-palette-info-contrastText: var(--md-sys-color-on-primary);
+  --mui-palette-text-primary: var(--md-sys-color-on-surface);
+  --mui-palette-text-primaryChannel: var(--md-sys-color-on-surface-rgb);
+  --mui-palette-text-secondary: var(--md-sys-color-on-surface-variant);
+  --mui-palette-text-secondaryChannel: var(--md-sys-color-on-surface-variant-rgb);
+  --mui-palette-background-default: var(--md-sys-color-surface);
+  --mui-palette-background-defaultChannel: var(--md-sys-color-surface-rgb);
+  --mui-palette-background-paper: var(--md-sys-color-surface-container-low);
+  --mui-palette-background-paperChannel: var(--md-sys-color-surface-container-low-rgb);
+  --mui-palette-divider: var(--md-sys-color-outline-variant);
+  --mui-palette-dividerChannel: var(--md-sys-color-outline-variant-rgb);
+  --mui-palette-action-active: var(--md-sys-color-on-surface-variant);
+  --mui-palette-action-activeChannel: var(--md-sys-color-on-surface-variant-rgb);
+  --mui-palette-action-selectedChannel: var(--md-sys-color-on-surface-rgb);
+  --mui-palette-Slider-primaryTrack: var(--md-sys-color-secondary-container);
+  --mui-palette-LinearProgress-primaryBg: var(--md-sys-color-secondary-container);
+  --mui-palette-SnackbarContent-bg: var(--md-sys-color-inverse-surface);
+  --mui-palette-SnackbarContent-color: var(--md-sys-color-inverse-on-surface);
+  --mui-palette-Tooltip-bg: var(--md-sys-color-inverse-surface);
+  --mui-palette-TableCell-border: var(--md-sys-color-outline-variant);
+}
+
+/* Reduced motion: no ripple (the hover/focus state layers still show interaction). */
+@media (prefers-reduced-motion: reduce) {
+  .MuiTouchRipple-root { display: none; }
+}

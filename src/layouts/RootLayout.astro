@@ -1,5 +1,6 @@
 ---
 import "@/styles/global.css";
+import Md3ThemeVars from "@/components/md3/Md3ThemeVars.astro";
 import BrowserNotice from "@/components/shell/BrowserNotice.astro";
 import PageUpdateNotice from "@/components/shell/PageUpdateNotice.astro";
 import { HTML_LANG, DEFAULT_LOCALE, OG_LOCALE, type AppLocale } from "@/config/locales";
@@ -40,6 +41,9 @@ const googleAnalyticsBootstrapScript = isGoogleAnalyticsEnabled
 <html lang={HTML_LANG[locale]} data-locale={locale}>
   <head>
     <meta charset="utf-8" />
+    <!-- Cascade layer order, before any stylesheet: MUI (Emotion) styles sit between Tailwind's base and utilities. -->
+    <style is:inline>@layer theme, base, mui, components, utilities;</style>
+    <Md3ThemeVars />
     <meta name="color-scheme" content="light dark" />
     <!-- Resolve the theme before any external stylesheet can block this script. -->
     <script is:inline set:html={themeScript}></script>

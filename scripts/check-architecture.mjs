@@ -117,6 +117,22 @@ function checkFile(file) {
   if (!allowedInternalRouteFiles.has(repoPath)) {
     checkInternalRouteLiterals(repoPath, source);
   }
+
+  checkMuiImports(repoPath, source);
+}
+
+/**
+ * Material 3 components come from MUI through path imports (`@mui/material/Button`), which keep every island's
+ * bundle to the components it renders; the barrel (`@mui/material`) and `@mui/icons-material` are not used (the
+ * site keeps its own line icons).
+ */
+function checkMuiImports(repoPath, source) {
+  if (/from\s+["']@mui\/material["']/.test(source)) {
+    errors.push(`${repoPath}: import MUI components by path (@mui/material/Button), not from the @mui/material barrel.`);
+  }
+  if (/from\s+["']@mui\/icons-material/.test(source)) {
+    errors.push(`${repoPath}: @mui/icons-material is not used; draw icons as line SVGs (see RouteGlyph).`);
+  }
 }
 
 function checkInternalRouteLiterals(repoPath, source) {
