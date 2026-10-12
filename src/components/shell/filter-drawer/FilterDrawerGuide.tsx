@@ -48,14 +48,15 @@ export default function FilterDrawerGuide({ locale }: { locale: AppLocale }) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [visible, dismiss]);
 
-  const left = isDocked ? `calc(${FILTER_DOCK_LEFT} + ${isDocked && isOpen ? FILTER_SHEET_WIDTH : "0rem"} + 1rem)` : "1rem";
+  // Bottom of the content column, above the filter FAB (or beside the docked sheet), clear of the page heading.
+  const left = isDocked ? `calc(${FILTER_DOCK_LEFT} + ${isOpen ? FILTER_SHEET_WIDTH : "0rem"} + 1.5rem)` : "1rem";
 
   return (
-    <Grow in={visible} unmountOnExit style={{ transformOrigin: "0 0" }}>
+    <Grow in={visible} unmountOnExit style={{ transformOrigin: "0 100%" }}>
       <aside
         aria-label={t(locale, "filter.drawerHintTitle")}
         style={{ left }}
-        className="fixed bottom-24 z-30 w-[min(20rem,calc(100vw-2rem))] rounded-shape-md bg-surface-container p-4 shadow-elevation-2 lg:bottom-auto lg:top-[calc(var(--md-app-bar-height,64px)+5.5rem)]"
+        className="fixed bottom-24 z-30 w-[min(20rem,calc(100vw-2rem))] rounded-shape-md bg-surface-container p-4 shadow-elevation-2"
       >
         <h3 className="text-title-small text-on-surface-variant">{t(locale, "filter.drawerHintTitle")}</h3>
         <p className="mt-1 text-body-medium text-on-surface-variant">{t(locale, "filter.drawerHintBody")}</p>

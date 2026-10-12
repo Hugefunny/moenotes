@@ -7,6 +7,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import BrandLogo from "@/components/shared/BrandLogo";
 import { Icon } from "@/components/shared/icons";
 import { withMd3 } from "@/components/md3/Md3Provider";
@@ -38,11 +39,13 @@ function TopAppBar({ locale, homeHref, crumbs }: Props) {
     setShortcut(/Mac|iPhone|iPad|iPod/.test(navigator.userAgent) ? "⌘K" : "Ctrl K");
   }, []);
 
+  const desktop = useMediaQuery("(min-width: 768px)");
   const toggleNav = () => {
-    if (window.matchMedia("(min-width: 768px)").matches) toggleDesktop();
+    if (desktop) toggleDesktop();
     else toggleMobile();
   };
-  const navOpen = mobileOpen || desktopOpen;
+  // The drawer this viewport uses: docked from md, modal below (its own state, closed until opened).
+  const navOpen = desktop ? desktopOpen : mobileOpen;
 
   return (
     <AppBar

@@ -28,6 +28,8 @@ describe("material 3 shell", () => {
     expect(html).toContain('aria-label="パンくずリスト"');
     expect(html).toContain("Moenotes を検索");
     expect(html).not.toContain("Select subpage");
+    // Server render (no viewport): the modal drawer's state, closed — never "Close sidebar" on first paint.
+    expect(html).toContain('aria-label="サイドバーを開く"');
   });
 
   test("the navigation drawer marks the current page with the active indicator", () => {

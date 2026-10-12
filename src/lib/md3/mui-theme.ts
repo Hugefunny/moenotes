@@ -232,12 +232,14 @@ function components(density: Md3Density): ThemeOptions["components"] {
           "&:active": { boxShadow: elevation(3) },
           "& svg": { width: 24, height: 24 },
         },
+        // MUI's default size is "large", which is the M3 standard FAB (56dp); "small" is the M3 small FAB (40dp).
         sizeSmall: { width: 40, height: 40, minHeight: 40, borderRadius: shape.md },
         sizeMedium: { width: 56, height: 56 },
-        extended: { width: "auto", height: 56, minWidth: 80, paddingInline: 16, gap: 12, borderRadius: shape.lg },
+        // Extended FABs size to their label: `&&` outranks the circular size rules emitted alongside.
+        extended: { "&&": { width: "auto", height: 56, minWidth: 80, paddingInline: 16, gap: 12, borderRadius: shape.lg } },
       },
       variants: [
-        { props: { size: "large" }, style: { width: 96, height: 96, borderRadius: shape.xl, "& svg": { width: 36, height: 36 } } },
+        { props: { size: "large" }, style: { width: 56, height: 56 } },
         { props: { color: "primary" }, style: { ...tonalColor("primary"), "&:hover": tonalColor("primary") } },
         { props: { color: "secondary" }, style: { ...tonalColor("secondary"), "&:hover": tonalColor("secondary") } },
         { props: { color: "tertiary" }, style: { ...tonalColor("tertiary"), "&:hover": tonalColor("tertiary") } },
