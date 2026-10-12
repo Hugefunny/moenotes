@@ -128,16 +128,16 @@ export default function ShopExplorer({ locale, servers, initialShops }: Props) {
       sticky: true,
       render: (shop) => (
         <span className="flex min-w-[14rem] items-center gap-3">
-          <ShopThumbnail src={shop.thumbnailUrl} alt="" fallback={shop.name} className="w-20 shrink-0 rounded-lg" />
+          <ShopThumbnail src={shop.thumbnailUrl} alt="" fallback={shop.name} className="w-20 shrink-0 rounded-shape-sm" />
           <span className="min-w-0">
-            <span className="line-clamp-2 font-bold text-[var(--mn-text)]">{shop.name}</span>
+            <span className="line-clamp-2 font-bold text-on-surface">{shop.name}</span>
             <ServerAvailabilityBadge locale={locale} entity={shop} servers={servers} className="mt-1" />
           </span>
         </span>
       ),
     },
     { key: "price", header: t(locale, "shop.columns.price"), render: (shop) => <ShopPrice locale={locale} payment={shop.payment} compact /> },
-    { key: "limit", header: t(locale, "shop.columns.limit"), render: (shop) => <span className="whitespace-nowrap text-xs font-semibold">{shopLimitLabel(locale, shop)}</span> },
+    { key: "limit", header: t(locale, "shop.columns.limit"), render: (shop) => <span className="whitespace-nowrap text-label-medium">{shopLimitLabel(locale, shop)}</span> },
     {
       key: "status",
       header: t(locale, "shop.columns.status"),
@@ -148,7 +148,7 @@ export default function ShopExplorer({ locale, servers, initialShops }: Props) {
         </span>
       ),
     },
-    { key: "id", header: "ID", numeric: true, render: (shop) => <span className="text-xs text-[var(--mn-text-muted)]">#{shop.id}</span> },
+    { key: "id", header: "ID", numeric: true, render: (shop) => <span className="text-body-small text-on-surface-variant">#{shop.id}</span> },
   ];
 
   return (
@@ -158,11 +158,11 @@ export default function ShopExplorer({ locale, servers, initialShops }: Props) {
       </div>
       <section className="min-w-0" aria-live="polite">
         {shops.length === 0 ? (
-          <p className="mn-paper p-8 text-center text-sm font-medium text-[var(--mn-text-muted)]">{t(locale, "shop.noneOnServer")}</p>
+          <p className="md3-surface p-8 text-center text-body-medium text-on-surface-variant">{t(locale, "shop.noneOnServer")}</p>
         ) : filtered.length === 0 ? (
-          <div className="mn-paper p-8 text-center sm:p-12">
-            <h2 className="font-[var(--mn-font-display)] text-2xl text-[var(--mn-text)]">{t(locale, "shop.emptyTitle")}</h2>
-            <button type="button" onClick={resetFilters} className="mn-focus mn-stamp-press mt-6 rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-6 py-3 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]">
+          <div className="md3-surface p-8 text-center sm:p-12">
+            <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "shop.emptyTitle")}</h2>
+            <button type="button" onClick={resetFilters} className="md3-state mt-6 rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
               {t(locale, "filter.reset")}
             </button>
           </div>
@@ -186,30 +186,30 @@ function ShopCard({ shop, locale, now, servers }: { shop: ServerFaceted<ShopSumm
   return (
     <a
       href={localizePath(shopPath(shop.id), locale)}
-      className="mn-list-card group flex h-full min-w-0 flex-col overflow-hidden border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp)] transition hover:-translate-y-1 hover:shadow-[var(--mn-shadow-stamp-lg)]"
+      className="mn-list-card group flex h-full min-w-0 flex-col overflow-hidden border border-outline-variant bg-surface-container-low shadow-elevation-1 transition hover:shadow-elevation-1"
       data-list-item-id={shop.id}
       aria-label={t(locale, "shop.openDetail", { name: shop.name })}
     >
-      <div className="relative border-b border-[var(--mn-glass-border)]">
+      <div className="relative border-b border-outline-variant">
         <ShopThumbnail src={shop.thumbnailUrl} alt="" fallback={shop.name} />
         <div className="absolute left-2 top-2 flex max-w-[calc(100%-1rem)] flex-wrap gap-1.5">
           <ScheduleBadge locale={locale} startAt={shop.startAt} endAt={shop.endAt} now={now} />
           {shop.recommended && (
-            <span className="rounded-full border border-[var(--mn-accent-deep)]/30 bg-[var(--mn-accent-deep)] px-2 py-1 text-[11px] font-bold leading-none text-[var(--mn-paper)]">{t(locale, "shop.recommended")}</span>
+            <span className="rounded-full border border-primary/30 bg-primary px-2 py-1 text-label-small text-on-primary">{t(locale, "shop.recommended")}</span>
           )}
         </div>
       </div>
       <div className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
-        <h3 className="line-clamp-2 text-sm font-black leading-5 text-[var(--mn-text)] transition-colors group-hover:text-[var(--mn-accent-deep)]">{shop.name}</h3>
+        <h3 className="line-clamp-2 text-label-large leading-5 text-on-surface transition-colors group-hover:text-primary">{shop.name}</h3>
         <ShopPrice locale={locale} payment={shop.payment} compact />
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-[var(--mn-text-muted)]">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-body-small text-on-surface-variant">
           <span>{shopLimitLabel(locale, shop)}</span>
           {shop.vipRank > 0 && <span>{t(locale, "shop.vipRankShort", { rank: shop.vipRank })}</span>}
           <ScheduleCountdown locale={locale} startAt={shop.startAt} endAt={shop.endAt} now={now} />
           <ServerAvailabilityBadge locale={locale} entity={shop} servers={servers} />
         </div>
         {shop.highlights.length > 0 && (
-          <div className="mt-auto flex flex-wrap gap-2.5 border-t border-dashed border-[var(--mn-text-muted)]/40 pt-3">
+          <div className="mt-auto flex flex-wrap gap-2.5 border-t border-dashed border-on-surface-variant/40 pt-3">
             {shop.highlights.map((reward, index) => <RewardChip key={`${reward.kind}:${reward.id}:${index}`} reward={reward} locale={locale} variant="icon" linked={false} />)}
           </div>
         )}

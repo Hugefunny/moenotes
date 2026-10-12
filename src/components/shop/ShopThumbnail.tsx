@@ -19,9 +19,9 @@ export default function ShopThumbnail({ src: neutralSrc, alt, fallback, classNam
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
   const failed = !src || failedSrc === src;
   return (
-    <div className={`relative aspect-[3/2] overflow-hidden bg-[var(--mn-cream-deep)] ${className}`.trim()}>
+    <div className={`relative aspect-[3/2] overflow-hidden bg-surface-container-highest ${className}`.trim()}>
       {failed ? (
-        <div className="mn-texture-orbit grid h-full place-items-center p-3 text-center text-xs font-bold text-[var(--mn-text-muted)]">
+        <div className="md3-placeholder grid h-full place-items-center p-3 text-center text-label-medium text-on-surface-variant">
           <span className="line-clamp-3">{fallback}</span>
         </div>
       ) : (

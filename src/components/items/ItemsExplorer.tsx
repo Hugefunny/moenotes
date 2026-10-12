@@ -111,12 +111,12 @@ export default function ItemsExplorer({ locale, servers, initialItems }: Props) 
               <button
                 ref={ref as React.Ref<HTMLButtonElement>}
                 type="button"
-                className="mn-stamp-press flex w-full items-center justify-between rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-surface)] px-5 py-2.5 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)] cursor-pointer"
+                className="md3-state flex w-full items-center justify-between rounded-full border border-outline-variant bg-surface-container px-5 py-2.5 text-label-large text-on-surface shadow-elevation-1 cursor-pointer"
                 onClick={onClick}
                 {...aria}
               >
                 {selectedGroups.length === 0 ? t(locale, "items.allGroups") : t(locale, `items.groups.${selectedGroups[0]}`)}
-                <svg className="h-4 w-4 shrink-0 text-[var(--mn-text-muted)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <svg className="h-4 w-4 shrink-0 text-on-surface-variant" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="m6 9 6 6 6-6" />
                 </svg>
               </button>
@@ -126,7 +126,7 @@ export default function ItemsExplorer({ locale, servers, initialItems }: Props) 
               <div className="flex flex-col gap-0.5">
                 <button
                   type="button"
-                  className={`text-left block w-full rounded-full px-4 py-2 text-sm font-bold transition hover:bg-[var(--mn-cream-deep)] cursor-pointer ${selectedGroups.length === 0 ? "bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]" : "text-[var(--mn-text-muted)] hover:text-[var(--mn-text)]"}`}
+                  className={`text-left block w-full rounded-full px-4 py-2 text-label-large transition hover:bg-surface-container-highest cursor-pointer ${selectedGroups.length === 0 ? "bg-secondary-container text-primary" : "text-on-surface-variant hover:text-on-surface"}`}
                   onClick={() => {
                     setSelectedGroups([]);
                     closePopover();
@@ -138,7 +138,7 @@ export default function ItemsExplorer({ locale, servers, initialItems }: Props) 
                   <button
                     key={value}
                     type="button"
-                    className={`text-left block w-full rounded-full px-4 py-2 text-sm font-bold transition hover:bg-[var(--mn-cream-deep)] cursor-pointer ${selectedGroups.includes(value) ? "bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]" : "text-[var(--mn-text-muted)] hover:text-[var(--mn-text)]"}`}
+                    className={`text-left block w-full rounded-full px-4 py-2 text-label-large transition hover:bg-surface-container-highest cursor-pointer ${selectedGroups.includes(value) ? "bg-secondary-container text-primary" : "text-on-surface-variant hover:text-on-surface"}`}
                     onClick={() => {
                       setSelectedGroups([value]);
                       closePopover();
@@ -193,12 +193,12 @@ function ItemCardItem({ item, locale, onOpen }: { item: ItemViewModel; locale: A
 
   return (
     <a
-      className="mn-list-card group flex flex-col min-w-0 overflow-hidden border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp)] transition hover:-translate-y-1 hover:shadow-[var(--mn-shadow-stamp-lg)]"
+      className="mn-list-card group flex flex-col min-w-0 overflow-hidden border border-outline-variant bg-surface-container-low shadow-elevation-1 transition hover:shadow-elevation-1"
       href={localizePath(entityLinkPath({ routeId: "items", detailId: item.id }), locale)}
       onClick={onOpen}
       data-list-item-id={item.id}
     >
-      <div className="relative aspect-square overflow-hidden bg-[var(--mn-cream-deep)] flex items-center justify-center p-4">
+      <div className="relative aspect-square overflow-hidden bg-surface-container-highest flex items-center justify-center p-4">
         {!failed ? (
           <img
             className="h-full w-full object-contain max-h-20 max-w-20 transition group-hover:scale-105"
@@ -208,23 +208,23 @@ function ItemCardItem({ item, locale, onOpen }: { item: ItemViewModel; locale: A
             onError={handleImageError}
           />
         ) : (
-          <div className="grid h-full place-items-center text-center text-xs font-semibold text-[var(--mn-text-muted)]">
+          <div className="grid h-full place-items-center text-center text-label-medium text-on-surface-variant">
             {item.name}
           </div>
         )}
       </div>
       <div className="flex flex-col flex-1 min-w-0 p-3 sm:p-4">
         <div className="min-w-0">
-          <h3 className="line-clamp-2 text-sm font-black leading-5 text-[var(--mn-text)]" title={item.name}>
+          <h3 className="line-clamp-2 text-label-large leading-5 text-on-surface" title={item.name}>
             {item.name}
           </h3>
-          <p className="mt-1.5 line-clamp-3 text-xs font-medium text-[var(--mn-text-muted)] leading-relaxed min-h-[3rem]" title={item.desc}>
+          <p className="mt-1.5 line-clamp-3 text-body-small text-on-surface-variant min-h-[3rem]" title={item.desc}>
             {item.desc}
           </p>
         </div>
-        <div className="mt-auto pt-2 flex items-center justify-between gap-2 border-t border-dashed border-[var(--mn-text-muted)]/30 text-[11px] font-semibold text-[var(--mn-text-muted)]/80">
+        <div className="mt-auto pt-2 flex items-center justify-between gap-2 border-t border-dashed border-on-surface-variant/30 text-label-small text-on-surface-variant/80">
           <span>ID #{item.id}</span>
-          <span className="bg-[var(--mn-cream-deep)] px-2.5 py-0.5 rounded-full border border-[var(--mn-border)] text-[10px]">
+          <span className="bg-surface-container-highest px-2.5 py-0.5 rounded-full border border-outline-variant text-label-small">
             {t(locale, `items.groups.${item.group}`)}
           </span>
         </div>
@@ -235,13 +235,13 @@ function ItemCardItem({ item, locale, onOpen }: { item: ItemViewModel; locale: A
 
 function EmptyState({ locale, onReset }: { locale: AppLocale; onReset: () => void }) {
   return (
-    <div className="mn-paper p-8 text-center sm:p-12">
-      <h3 className="font-[var(--mn-font-display)] text-2xl text-[var(--mn-text)]">{t(locale, "items.emptyTitle")}</h3>
-      <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-7 text-[var(--mn-text-muted)]">{t(locale, "items.emptyDescription")}</p>
+    <div className="md3-surface p-8 text-center sm:p-12">
+      <h3 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "items.emptyTitle")}</h3>
+      <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "items.emptyDescription")}</p>
       <button
         type="button"
         onClick={onReset}
-        className="mn-focus mn-stamp-press mt-6 rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-6 py-3 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]"
+        className="md3-state mt-6 rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1"
       >
         {t(locale, "items.reset")}
       </button>

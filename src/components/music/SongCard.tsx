@@ -27,14 +27,14 @@ export default function SongCard({ song, locale, onClick, badge, playable = fals
   const title = titleOf(song);
   const track = playable ? songTrack(song, title, assetUrl) : null;
   return (
-    <div className="mn-list-card group relative rounded-2xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] overflow-hidden shadow-[var(--mn-shadow-stamp)] transition-all hover:scale-[1.01] hover:shadow-[var(--mn-shadow-stamp-lg)] hover:-translate-y-0.5">
+    <div className="mn-list-card group relative rounded-shape-lg border border-outline-variant bg-surface-container-low overflow-hidden shadow-elevation-1 transition-all hover:scale-[1.01] hover:shadow-elevation-1">
       <a
         href={localizePath(`${getRoutePathById("music")}/${song.id}`, locale)}
         onClick={onClick}
-        className="mn-focus block rounded-2xl"
+        className="block rounded-shape-lg"
       >
         {/* Top Cover Block */}
-        <div className="relative aspect-square w-full shrink-0 border-b-[1.5px] border-[var(--mn-border)] bg-[var(--mn-cream-deep)] overflow-hidden">
+        <div className="relative aspect-square w-full shrink-0 border-b-[1.5px] border-outline-variant bg-surface-container-highest overflow-hidden">
           <img
             className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
             src={assetUrl(song.jacketUrl)}
@@ -62,10 +62,10 @@ export default function SongCard({ song, locale, onClick, badge, playable = fals
         {/* Bottom Info Area */}
         <div className="p-3 flex-1 flex flex-col justify-between gap-3">
           <div className="space-y-0.5">
-            <h3 className="font-[var(--mn-font-display)] text-[15px] font-bold leading-snug text-[var(--mn-text)] truncate group-hover:text-[var(--mn-accent-deep)] transition-colors">
+            <h3 className="font-[var(--md-ref-typeface-brand)] text-title-medium text-on-surface truncate">
               {title}
             </h3>
-            <p className="text-[10px] font-medium text-[var(--mn-text-muted)] truncate">
+            <p className="text-label-small text-on-surface-variant truncate">
               {t(locale, "music.composer")}: {song.composer}
             </p>
           </div>
@@ -79,10 +79,10 @@ export default function SongCard({ song, locale, onClick, badge, playable = fals
               return (
                 <div
                   key={diffKey}
-                  className={`flex-1 text-center py-0.5 rounded text-[8px] font-black border uppercase tracking-tighter ${DIFFICULTY_CHIP_CLASSES[diffKey]}`}
+                  className={`flex-1 text-center py-0.5 rounded text-label-medium border ${DIFFICULTY_CHIP_CLASSES[diffKey]}`}
                 >
                   <span className="block opacity-60 text-[6px] leading-none mb-0.5">{DIFFICULTY_SHORT_LABELS[diffKey]}</span>
-                  <span className="font-mono text-[10px]">{diff.displayLevel}</span>
+                  <span className="font-mono text-label-small">{diff.displayLevel}</span>
                 </div>
               );
             })}

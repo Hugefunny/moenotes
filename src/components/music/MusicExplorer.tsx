@@ -103,7 +103,7 @@ export default function MusicExplorer({ locale, servers, initialSongs, categorie
         type="button"
         onClick={() => setQueue(queue)}
         disabled={queue.length === 0}
-        className="mn-focus mn-stamp-press inline-flex items-center gap-1.5 rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-3.5 py-1.5 text-xs font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp-sm)] transition hover:border-[var(--mn-accent)] hover:text-[var(--mn-accent-deep)] disabled:opacity-50"
+        className="md3-state inline-flex items-center gap-1.5 rounded-full border border-outline-variant bg-surface-container-low px-3.5 py-1.5 text-label-medium text-on-surface transition hover:border-primary hover:text-primary disabled:opacity-50"
       >
         <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" /></svg>
         {t(locale, "music.playAll", { count: queue.length })}
@@ -162,15 +162,15 @@ function MusicList({ locale, music, titleOf, assetUrl, onOpen, servers }: {
         const figures = chartMetricsOf(music.metrics, song, music.focus);
         const badge = serverOnlyLabel(locale, song, servers);
         return (
-          <li key={song.id} className="mn-list-card mn-list-card-row flex items-center gap-3 border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] p-2 pr-3 shadow-[var(--mn-shadow-stamp-sm)]">
-            <a href={songHref(song, locale)} onClick={onOpen} className="mn-focus group flex min-w-0 flex-1 items-center gap-3 rounded-lg">
-              <img className="h-14 w-14 shrink-0 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-cream-deep)] object-cover" src={assetUrl(song.jacketUrl)} alt="" loading="lazy" />
+          <li key={song.id} className="mn-list-card mn-list-card-row flex items-center gap-3 border border-outline-variant bg-surface-container-low p-2 pr-3">
+            <a href={songHref(song, locale)} onClick={onOpen} className="group flex min-w-0 flex-1 items-center gap-3 rounded-shape-sm">
+              <img className="h-14 w-14 shrink-0 rounded-shape-md border border-outline-variant bg-surface-container-highest object-cover" src={assetUrl(song.jacketUrl)} alt="" loading="lazy" />
               <span className="min-w-0 flex-1">
-                <span className="block truncate font-[var(--mn-font-display)] text-[15px] font-bold text-[var(--mn-text)] group-hover:text-[var(--mn-accent-deep)]" title={title}>{title}</span>
-                <span className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[11px] font-semibold text-[var(--mn-text-muted)]">
+                <span className="block truncate font-[var(--md-ref-typeface-brand)] text-title-medium text-on-surface" title={title}>{title}</span>
+                <span className="mt-0.5 flex min-w-0 items-center gap-1.5 text-label-small text-on-surface-variant">
                   {song.bandId > 0 && <img className="h-4 w-auto shrink-0 object-contain" src={assetUrl(getBandSmallIconUrl(song.bandId))} alt="" aria-hidden="true" />}
                   <span className="truncate">{song.bandName}</span>
-                  {badge && <span className="shrink-0 rounded-full bg-[var(--mn-accent-soft)] px-1.5 text-[10px] text-[var(--mn-accent-deep)]">{badge}</span>}
+                  {badge && <span className="shrink-0 rounded-full bg-secondary-container px-1.5 text-label-small text-primary">{badge}</span>}
                 </span>
               </span>
               <span className="hidden shrink-0 gap-1 sm:flex">
@@ -179,12 +179,12 @@ function MusicList({ locale, music, titleOf, assetUrl, onOpen, servers }: {
                   return (
                     <span key={difficulty} className={`w-9 rounded border py-0.5 text-center ${DIFFICULTY_CHIP_CLASSES[difficulty]} ${chart ? "" : "opacity-30"}`}>
                       <span className="block text-[7px] font-black leading-none opacity-60">{DIFFICULTY_SHORT_LABELS[difficulty]}</span>
-                      <span className="font-mono text-[11px] font-black">{chart?.displayLevel ?? "—"}</span>
+                      <span className="font-mono text-label-small">{chart?.displayLevel ?? "—"}</span>
                     </span>
                   );
                 })}
               </span>
-              <span className="hidden w-24 shrink-0 text-right font-mono text-[11px] font-semibold leading-5 text-[var(--mn-text-muted)] md:block">
+              <span className="hidden w-24 shrink-0 text-right font-mono text-label-small leading-5 text-on-surface-variant md:block">
                 <span className="block">{formatDuration(figures?.durationMs)}</span>
                 <span className="block">{t(locale, "music.bpmValue", { bpm: formatBpm(figures) })}</span>
               </span>
@@ -199,14 +199,14 @@ function MusicList({ locale, music, titleOf, assetUrl, onOpen, servers }: {
 
 function EmptyState({ locale, onReset }: { locale: AppLocale; onReset: () => void }) {
   return (
-    <div className="mn-paper p-8 text-center sm:p-12">
-      <h2 className="font-[var(--mn-font-display)] text-2xl text-[var(--mn-text)]">
+    <div className="md3-surface p-8 text-center sm:p-12">
+      <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">
         {t(locale, "music.emptyTitle")}
       </h2>
-      <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-7 text-[var(--mn-text-muted)]">
+      <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">
         {t(locale, "music.emptyDescription")}
       </p>
-      <button type="button" onClick={onReset} className="mn-focus mn-stamp-press mt-6 rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-6 py-3 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]">
+      <button type="button" onClick={onReset} className="md3-state mt-6 rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
         {t(locale, "music.reset")}
       </button>
     </div>

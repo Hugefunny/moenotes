@@ -112,20 +112,20 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
   };
 
   if (loading) {
-    return <SiriusLoader locale={locale} label={t(locale, "music.loading")} className="mn-paper min-h-72" />;
+    return <SiriusLoader locale={locale} label={t(locale, "music.loading")} className="md3-surface min-h-72" />;
   }
 
   if (error || !song) {
     return (
-      <div className="mn-paper p-8 text-center sm:p-12" role={error ? "alert" : undefined}>
-        <h2 className="font-[var(--mn-font-display)] text-2xl text-[var(--mn-text)]">
+      <div className="md3-surface p-8 text-center sm:p-12" role={error ? "alert" : undefined}>
+        <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">
           {t(locale, error ? "music.loadErrorTitle" : "music.detailNotFound")}
         </h2>
-        <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-7 text-[var(--mn-text-muted)]">
+        <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">
           {t(locale, error ? "music.loadErrorDescription" : "music.detailNotFoundDescription")}
         </p>
         {error && (
-          <button type="button" onClick={() => setReloadKey((value) => value + 1)} className="mn-focus mn-stamp-press mt-6 rounded-full border border-[var(--mn-border)] bg-[var(--mn-accent-deep)] px-6 py-3 text-sm font-bold text-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp)]">
+          <button type="button" onClick={() => setReloadKey((value) => value + 1)} className="md3-state mt-6 rounded-full border border-outline-variant bg-primary px-6 py-3 text-label-large text-on-primary shadow-elevation-1">
             {t(locale, "cards.retry")}
           </button>
         )}
@@ -142,7 +142,7 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
         type="button"
         onClick={downloadJacket}
         disabled={downloadState === "downloading"}
-        className="grid h-8 w-8 place-items-center rounded-full border-2 border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-text-muted)] shadow-[var(--mn-shadow-stamp-sm)] transition hover:text-[var(--mn-text)] disabled:opacity-50"
+        className="grid h-8 w-8 place-items-center rounded-full border-2 border-outline-variant bg-surface-container-low text-on-surface-variant transition hover:text-on-surface disabled:opacity-50"
       >
         {downloadState === "idle" && (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -150,13 +150,13 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
           </svg>
         )}
         {downloadState === "downloading" && <SiriusIcon />}
-        {downloadState === "success" && <svg className="h-4 w-4 text-[var(--mn-mint)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+        {downloadState === "success" && <svg className="h-4 w-4 text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
       </button>
       <button
         type="button"
         onClick={copyJacketLink}
         disabled={copyState === "copying"}
-        className="grid h-8 w-8 place-items-center rounded-full border-2 border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-text-muted)] shadow-[var(--mn-shadow-stamp-sm)] transition hover:text-[var(--mn-text)] disabled:opacity-50"
+        className="grid h-8 w-8 place-items-center rounded-full border-2 border-outline-variant bg-surface-container-low text-on-surface-variant transition hover:text-on-surface disabled:opacity-50"
       >
         {copyState === "idle" && (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -164,8 +164,8 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
           </svg>
         )}
         {copyState === "copying" && <SiriusIcon />}
-        {copyState === "success" && <svg className="h-4 w-4 text-[var(--mn-mint)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
-        {copyState === "error" && <svg className="h-4 w-4 text-[var(--mn-rose)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>}
+        {copyState === "success" && <svg className="h-4 w-4 text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+        {copyState === "error" && <svg className="h-4 w-4 text-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>}
       </button>
     </>
   );
@@ -176,7 +176,7 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
         {/* Left Column: Fixed / Sticky Asset Pane */}
         <aside className="lg:sticky lg:top-24 w-full flex flex-col pt-8">
           <div
-            className="relative aspect-square w-full rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-paper)] p-5 shadow-[var(--mn-shadow-stamp-lg)]"
+            className="relative aspect-square w-full rounded-shape-lg border border-outline-variant bg-surface-container-low p-5 shadow-elevation-1"
           >
             {/* Spine Crease */}
 
@@ -185,22 +185,14 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
               <button
                 type="button"
                 onClick={() => setActiveTabId("jacket")}
-                className={`px-4 pt-1.5 pb-3 text-[10px] font-semibold tracking-wider uppercase border border-b-0 border-[var(--mn-border)] rounded-t-xl transition-all origin-bottom -mb-[6px] rotate-[-1deg] ${
-                  activeTabId === "jacket"
-                    ? "bg-[var(--mn-accent)] text-[var(--mn-bg)] shadow-md z-20 -translate-y-[2px]"
-                    : "bg-[var(--mn-surface)] text-[var(--mn-text)] hover:bg-[var(--mn-accent-soft)] hover:-translate-y-[1px]"
-                }`}
+                className={`px-4 pt-1.5 pb-3 text-label-medium border border-b-0 border-outline-variant rounded-t-xl transition-all origin-bottom -mb-[6px] rotate-[-1deg] ${ activeTabId === "jacket" ? "bg-primary text-on-primary shadow-md z-20 -translate-y-[2px]" : "bg-surface-container text-on-surface hover:bg-secondary-container hover:-translate-y-[1px]" }`}
               >
                 {t(locale, "music.assets.jacket")}
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTabId("info")}
-                className={`px-4 pt-1.5 pb-3 text-[10px] font-semibold tracking-wider uppercase border border-b-0 border-[var(--mn-border)] rounded-t-xl transition-all origin-bottom -mb-[6px] rotate-[1.5deg] ${
-                  activeTabId === "info"
-                    ? "bg-[var(--mn-accent)] text-[var(--mn-bg)] shadow-md z-20 -translate-y-[2px]"
-                    : "bg-[var(--mn-surface)] text-[var(--mn-text)] hover:bg-[var(--mn-accent-soft)] hover:-translate-y-[1px]"
-                }`}
+                className={`px-4 pt-1.5 pb-3 text-label-medium border border-b-0 border-outline-variant rounded-t-xl transition-all origin-bottom -mb-[6px] rotate-[1.5deg] ${ activeTabId === "info" ? "bg-primary text-on-primary shadow-md z-20 -translate-y-[2px]" : "bg-surface-container text-on-surface hover:bg-secondary-container hover:-translate-y-[1px]" }`}
               >
                 {t(locale, "music.songInfoTitle")}
               </button>
@@ -213,7 +205,7 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
                   <button
                     type="button"
                     onClick={() => setJacketModalOpen(true)}
-                    className="group relative block w-full h-full overflow-hidden rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-cream-deep)] shadow-inner transition hover:scale-[1.01]"
+                    className="group relative block w-full h-full overflow-hidden rounded-shape-lg border border-outline-variant bg-surface-container-highest shadow-inner transition hover:scale-[1.01]"
                     aria-label={t(locale, "music.assets.previewFull")}
                   >
                     <img
@@ -229,36 +221,36 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
               ) : (
                 <div className="h-full w-full flex flex-col justify-between">
                   <div className="flex-1 overflow-y-auto space-y-4 pr-1">
-                    <div className="rounded-2xl border border-solid border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 space-y-3 shadow-inner">
-                      <h4 className="font-[var(--mn-font-display)] text-sm tracking-tight text-[var(--mn-text)] border-b border-[var(--mn-border)]/60 pb-1.5">Song Notebook</h4>
-                      <div className="space-y-2 text-[11px] font-bold text-[var(--mn-text-muted)]">
-                        <div className="flex justify-between border-b border-[var(--mn-border)]/20 pb-1">
+                    <div className="rounded-shape-lg border border-solid border-outline-variant bg-surface-container p-4 space-y-3 shadow-inner">
+                      <h4 className="font-[var(--md-ref-typeface-brand)] text-body-medium text-on-surface border-b border-outline-variant/60 pb-1.5">Song Notebook</h4>
+                      <div className="space-y-2 text-label-small text-on-surface-variant">
+                        <div className="flex justify-between border-b border-outline-variant/20 pb-1">
                           <span>Band</span>
-                          <span className="text-[var(--mn-text)]">{song.bandName}</span>
+                          <span className="text-on-surface">{song.bandName}</span>
                         </div>
                         <div className="flex justify-between border-b border(--mn-border)/20 pb-1">
                           <span>Attribute</span>
-                          <span className="text-[var(--mn-text)]">{attributeName}</span>
+                          <span className="text-on-surface">{attributeName}</span>
                         </div>
-                        <div className="flex justify-between border-b border-[var(--mn-border)]/20 pb-1">
+                        <div className="flex justify-between border-b border-outline-variant/20 pb-1">
                           <span>Composer</span>
-                          <span className="text-[var(--mn-text)]">{song.composer}</span>
+                          <span className="text-on-surface">{song.composer}</span>
                         </div>
-                        <div className="flex justify-between border-b border-[var(--mn-border)]/20 pb-1">
+                        <div className="flex justify-between border-b border-outline-variant/20 pb-1">
                           <span>Lyricist</span>
-                          <span className="text-[var(--mn-text)]">{song.lyricist}</span>
+                          <span className="text-on-surface">{song.lyricist}</span>
                         </div>
-                        <div className="flex justify-between border-b border-[var(--mn-border)]/20 pb-1">
+                        <div className="flex justify-between border-b border-outline-variant/20 pb-1">
                           <span>Release</span>
-                          <span className="text-[var(--mn-text)]">{formatMasterDay(song.startAt, locale, timeZone)}</span>
+                          <span className="text-on-surface">{formatMasterDay(song.startAt, locale, timeZone)}</span>
                         </div>
-                        <div className="flex justify-between border-b border-[var(--mn-border)]/20 pb-1">
+                        <div className="flex justify-between border-b border-outline-variant/20 pb-1">
                           <span>Song ID</span>
-                          <span className="text-[var(--mn-text)]">#{song.id}</span>
+                          <span className="text-on-surface">#{song.id}</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Jacket Asset</span>
-                          <span className="text-[var(--mn-text)]">{song.jacketAssetName}</span>
+                          <span className="text-on-surface">{song.jacketAssetName}</span>
                         </div>
                       </div>
                     </div>
@@ -276,9 +268,9 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
         {/* Right Column: Details & Difficulties */}
         <section className="flex-1 min-w-0 space-y-6">
           {/* Main Info */}
-          <div className="mn-paper overflow-hidden">
+          <div className="md3-surface overflow-hidden">
             {/* Header Banner */}
-            <div className="border-b border-[var(--mn-border)] bg-gradient-to-r from-[color-mix(in_oklab,var(--mn-accent)_6%,transparent)] to-transparent p-6 sm:p-8">
+            <div className="border-b border-outline-variant p-6 sm:p-8">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -296,18 +288,18 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
                       aria-hidden="true"
                       onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
                     />
-                    <span className="font-[var(--mn-font-note)] text-sm text-[var(--mn-accent-deep)]">{song.bandName}</span>
+                    <span className="font-[var(--md-ref-typeface-mono)] text-body-medium text-primary">{song.bandName}</span>
                   </div>
-                  <h2 className="mt-1 font-[var(--mn-font-display)] text-3xl leading-tight text-[var(--mn-text)] sm:text-4xl">{title}</h2>
-                  {title !== song.title && <p className="mt-1 text-sm font-semibold text-[var(--mn-text-muted)]">{song.title}</p>}
+                  <h2 className="mt-1 font-[var(--md-ref-typeface-brand)] text-headline-medium text-on-surface sm:text-headline-large">{title}</h2>
+                  {title !== song.title && <p className="mt-1 text-label-large text-on-surface-variant">{song.title}</p>}
                 </div>
                 <img className="h-8 w-8 shrink-0" src={assetUrl(getCardTypeIconUrl(song.musicType as CardType))} alt="" aria-hidden="true" />
               </div>
             </div>
 
             {/* Details Table */}
-            <div className="p-6 sm:p-8 bg-[var(--mn-paper)]">
-              <div className="divide-y divide-dashed divide-[var(--mn-border)]/60">
+            <div className="p-6 sm:p-8 bg-surface-container-low">
+              <div className="divide-y divide-dashed divide-outline-variant/60">
                 <DetailRow label={t(locale, "music.composer")} value={song.composer} />
                 <DetailRow label={t(locale, "music.lyricist")} value={song.lyricist} />
                 <DetailRow label={t(locale, "music.arranger")} value={song.arranger} />
@@ -324,7 +316,7 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
                         <a
                           key={voc.id}
                           href={localizePath(`/characters/${voc.id}`, locale)}
-                          className="mn-focus mn-stamp-press inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-[var(--mn-border)] bg-[var(--mn-cream-deep)] hover:bg-[var(--mn-accent)] hover:text-white transition-all text-xs font-bold text-[var(--mn-text)] shadow-sm"
+                          className="md3-state inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-outline-variant bg-surface-container-highest hover:bg-primary hover:text-white transition-all text-label-medium text-on-surface shadow-sm"
                         >
                           <img className="h-4.5 w-4.5 rounded-full object-cover bg-white" src={assetUrl(getCharacterFaceIconUrl(voc.id))} alt="" />
                           <span>{voc.name}</span>
@@ -341,9 +333,9 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
           </div>
 
           {/* Difficulties Card */}
-          <div className="mn-paper overflow-hidden">
-            <div className="border-b border-[var(--mn-border)] bg-gradient-to-r from-[color-mix(in_oklab,var(--mn-accent)_6%,transparent)] to-transparent px-6 py-4 sm:px-8">
-              <h3 className="font-[var(--mn-font-display)] text-xl text-[var(--mn-text)] sm:text-2xl">
+          <div className="md3-surface overflow-hidden">
+            <div className="border-b border-outline-variant px-6 py-4 sm:px-8">
+              <h3 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-small">
                 {t(locale, "music.difficultiesTitle")}
               </h3>
             </div>
@@ -351,18 +343,18 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
               {song.difficulties.map((diff) => {
                 const config = difficultyStyles[diff.difficulty];
                 const level = t(locale, `music.difficultyLevels.${diff.difficulty}`);
-                const previewButton = "mn-focus mn-stamp-press inline-flex items-center gap-1 rounded-full border border-[var(--mn-border)] bg-[var(--mn-paper)] px-2.5 py-1 text-[10px] font-bold text-[var(--mn-text)] transition hover:border-[var(--mn-accent)] hover:text-[var(--mn-accent-deep)]";
+                const previewButton = " md3-state inline-flex items-center gap-1 rounded-full border border-outline-variant bg-surface-container-low px-2.5 py-1 text-[10px] font-bold text-on-surface transition hover:border-primary hover:text-primary";
 
                 return (
-                  <div key={diff.difficulty} className={`p-3 border rounded-2xl flex flex-col items-center justify-between text-center gap-2 ${config.cardBg}`}>
+                  <div key={diff.difficulty} className={`p-3 border rounded-shape-lg flex flex-col items-center justify-between text-center gap-2 ${config.cardBg}`}>
                     <div className="flex items-center gap-1">
                       <span className={`h-2 w-2 rounded-full shrink-0 ${config.dot}`} />
-                      <span className={`font-black text-xs uppercase tracking-wider ${config.labelColor}`}>{config.shortLabel}</span>
+                      <span className={`text-label-medium ${config.labelColor}`}>{config.shortLabel}</span>
                     </div>
-                    <div className="font-mono text-2xl font-black text-[var(--mn-accent-deep)] leading-none my-0.5">
+                    <div className="font-mono text-headline-small text-primary my-0.5">
                       {diff.displayLevel}
                     </div>
-                    <div className="text-[10px] font-semibold text-[var(--mn-text-muted)] leading-none">
+                    <div className="text-label-small text-on-surface-variant">
                       {t(locale, "music.notesCount", { count: diff.notesCount })}
                     </div>
                     <div className="mt-1 flex flex-wrap justify-center gap-1.5">
@@ -400,7 +392,7 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
 
           {/* Back Action */}
           <div className="flex justify-start">
-            <a href={localizePath(getRoutePathById("music"), locale)} className="mn-focus mn-stamp-press inline-flex rounded-full border border-[var(--mn-border)] bg-[var(--mn-paper)] px-6 py-3 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]">
+            <a href={localizePath(getRoutePathById("music"), locale)} className="md3-state inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
               {t(locale, "music.backToList")}
             </a>
           </div>
@@ -420,7 +412,7 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
         size="md"
         headerActions={previewActions}
       >
-        <div className="w-full overflow-hidden rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)]">
+        <div className="w-full overflow-hidden rounded-shape-lg border border-outline-variant bg-surface-container">
           <img
             className="mx-auto max-h-[65vh] w-full object-contain"
             src={song.jacketUrl}
@@ -434,9 +426,9 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
 
 function DetailRow({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="flex items-center justify-between py-3.5 text-sm">
-      <span className="font-semibold text-[var(--mn-text-muted)]">{label}</span>
-      <span className="font-semibold text-[var(--mn-text)] text-right">{value}</span>
+    <div className="flex items-center justify-between py-3.5 text-body-medium">
+      <span className="font-semibold text-on-surface-variant">{label}</span>
+      <span className="font-semibold text-on-surface text-right">{value}</span>
     </div>
   );
 }
@@ -451,17 +443,17 @@ function LiveSystemSections({ locale, detail }: { locale: AppLocale; detail: Mus
   if (!hasScoreRanks && !hasCombo && !hasScore && live.categories.length === 0 && live.anotherVocals.length === 0) return null;
 
   return (
-    <div className="mn-paper overflow-hidden">
-      <div className="border-b border-[var(--mn-border)] bg-gradient-to-r from-[color-mix(in_oklab,var(--mn-accent)_6%,transparent)] to-transparent px-6 py-4 sm:px-8">
-        <h3 className="font-[var(--mn-font-display)] text-xl text-[var(--mn-text)] sm:text-2xl">{t(locale, "music.live.title")}</h3>
+    <div className="md3-surface overflow-hidden">
+      <div className="border-b border-outline-variant px-6 py-4 sm:px-8">
+        <h3 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-small">{t(locale, "music.live.title")}</h3>
       </div>
       <div className="p-6 sm:p-8 space-y-6">
         {live.categories.length > 0 && (
           <section>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">{t(locale, "music.live.categories")}</h4>
+            <h4 className="text-label-medium text-on-surface-variant">{t(locale, "music.live.categories")}</h4>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {live.categories.map((category) => (
-                <span key={category.id} className="inline-flex items-center rounded-full border border-[var(--mn-border)] bg-[var(--mn-cream-deep)] px-2.5 py-1 text-xs font-bold text-[var(--mn-text)]">
+                <span key={category.id} className="inline-flex items-center rounded-full border border-outline-variant bg-surface-container-highest px-2.5 py-1 text-label-medium text-on-surface">
                   {category.name}
                 </span>
               ))}
@@ -471,13 +463,13 @@ function LiveSystemSections({ locale, detail }: { locale: AppLocale; detail: Mus
 
         {live.anotherVocals.length > 0 && (
           <section>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">{t(locale, "music.live.anotherVocals")}</h4>
+            <h4 className="text-label-medium text-on-surface-variant">{t(locale, "music.live.anotherVocals")}</h4>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {live.anotherVocals.map((vocal) => (
                 <a
                   key={vocal.characterId}
                   href={localizePath(`/characters/${vocal.characterId}`, locale)}
-                  className="mn-focus mn-stamp-press inline-flex items-center gap-1.5 rounded-full border border-[var(--mn-border)] bg-[var(--mn-cream-deep)] px-2 py-0.5 text-xs font-bold text-[var(--mn-text)] shadow-sm transition-all hover:bg-[var(--mn-accent)] hover:text-white"
+                  className="md3-state inline-flex items-center gap-1.5 rounded-full border border-outline-variant bg-surface-container-highest px-2 py-0.5 text-label-medium text-on-surface shadow-sm transition-all hover:bg-primary hover:text-white"
                 >
                   {vocal.name}
                 </a>
@@ -488,22 +480,22 @@ function LiveSystemSections({ locale, detail }: { locale: AppLocale; detail: Mus
 
         {hasScoreRanks && (
           <section>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">{t(locale, "music.live.scoreRanks")}</h4>
-            <div className="mt-2 overflow-x-auto rounded-xl border border-[var(--mn-border)]">
-              <table className="min-w-full divide-y divide-[var(--mn-border)] text-sm">
-                <thead className="bg-[var(--mn-surface)] text-left text-[11px] font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">
+            <h4 className="text-label-medium text-on-surface-variant">{t(locale, "music.live.scoreRanks")}</h4>
+            <div className="mt-2 overflow-x-auto rounded-shape-md border border-outline-variant">
+              <table className="min-w-full divide-y divide-outline-variant text-body-medium">
+                <thead className="bg-surface-container text-left text-label-medium text-on-surface-variant">
                   <tr>
                     <th className="px-3 py-2">{t(locale, "music.live.rank")}</th>
                     <th className="px-3 py-2 text-right">{t(locale, "music.live.requiredScore")}</th>
                     <th className="px-3 py-2 text-right">{t(locale, "music.live.battleScore")}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-dashed divide-[var(--mn-border)]/50 bg-[var(--mn-paper)]">
+                <tbody className="divide-y divide-dashed divide-outline-variant/50 bg-surface-container-low">
                   {live.scoreRanks.filter((row) => row.requiredScore > 0).map((row) => (
                     <tr key={row.liveScoreRank}>
-                      <td className="px-3 py-2 font-black text-[var(--mn-accent-deep)]">{row.rank}</td>
-                      <td className="px-3 py-2 text-right font-mono font-semibold text-[var(--mn-text)]">{row.requiredScore.toLocaleString(locale)}</td>
-                      <td className="px-3 py-2 text-right font-mono text-[var(--mn-text-muted)]">{row.battleLiveRequiredScore > 0 ? row.battleLiveRequiredScore.toLocaleString(locale) : "—"}</td>
+                      <td className="px-3 py-2 font-black text-primary">{row.rank}</td>
+                      <td className="px-3 py-2 text-right font-mono font-semibold text-on-surface">{row.requiredScore.toLocaleString(locale)}</td>
+                      <td className="px-3 py-2 text-right font-mono text-on-surface-variant">{row.battleLiveRequiredScore > 0 ? row.battleLiveRequiredScore.toLocaleString(locale) : "—"}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -516,12 +508,12 @@ function LiveSystemSections({ locale, detail }: { locale: AppLocale; detail: Mus
           <section className="grid gap-6 lg:grid-cols-2">
             {hasScore && (
               <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">{t(locale, "music.live.scoreRewards")}</h4>
+                <h4 className="text-label-medium text-on-surface-variant">{t(locale, "music.live.scoreRewards")}</h4>
                 <ul className="mt-2 space-y-2">
                   {scoreRewards.map((entry) => (
-                    <li key={entry.liveScoreRank} className="flex items-center justify-between gap-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-paper)] px-3 py-2">
-                      <span className="font-black text-[var(--mn-accent-deep)]">{entry.rank}</span>
-                      <span className="min-w-0 flex-1 truncate text-right text-sm font-semibold text-[var(--mn-text)]">{rewardName(entry.reward, locale)}<span className="ml-1.5 font-mono text-xs text-[var(--mn-text-muted)]">×{entry.reward.count.toLocaleString(locale)}</span></span>
+                    <li key={entry.liveScoreRank} className="flex items-center justify-between gap-3 rounded-shape-md border border-outline-variant bg-surface-container-low px-3 py-2">
+                      <span className="font-black text-primary">{entry.rank}</span>
+                      <span className="min-w-0 flex-1 truncate text-right text-label-large text-on-surface">{rewardName(entry.reward, locale)}<span className="ml-1.5 font-mono text-body-small text-on-surface-variant">×{entry.reward.count.toLocaleString(locale)}</span></span>
                     </li>
                   ))}
                 </ul>
@@ -529,12 +521,12 @@ function LiveSystemSections({ locale, detail }: { locale: AppLocale; detail: Mus
             )}
             {hasCombo && (
               <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">{t(locale, "music.live.comboRewards")}</h4>
+                <h4 className="text-label-medium text-on-surface-variant">{t(locale, "music.live.comboRewards")}</h4>
                 <ul className="mt-2 space-y-2">
                   {comboRewards.map((entry) => (
-                    <li key={entry.difficulty} className="flex items-center justify-between gap-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-paper)] px-3 py-2">
-                      <span className="text-[11px] font-black uppercase tracking-wider text-[var(--mn-accent-deep)]">{t(locale, `music.difficultyLevels.${entry.difficulty}`)}</span>
-                      <span className="min-w-0 flex-1 truncate text-right text-sm font-semibold text-[var(--mn-text)]">{rewardName(entry.reward, locale)}<span className="ml-1.5 font-mono text-xs text-[var(--mn-text-muted)]">×{entry.reward.count.toLocaleString(locale)}</span></span>
+                    <li key={entry.difficulty} className="flex items-center justify-between gap-3 rounded-shape-md border border-outline-variant bg-surface-container-low px-3 py-2">
+                      <span className="text-label-medium text-primary">{t(locale, `music.difficultyLevels.${entry.difficulty}`)}</span>
+                      <span className="min-w-0 flex-1 truncate text-right text-label-large text-on-surface">{rewardName(entry.reward, locale)}<span className="ml-1.5 font-mono text-body-small text-on-surface-variant">×{entry.reward.count.toLocaleString(locale)}</span></span>
                     </li>
                   ))}
                 </ul>
@@ -580,9 +572,9 @@ function SongAudioPanel({ locale, song, title }: { locale: AppLocale; song: Musi
 
   if (tracks.length === 0) {
     return (
-      <div className="mn-paper p-4 text-sm">
-        <p className="font-bold text-[var(--mn-text)]">{t(locale, "music.audio.unavailableTitle")}</p>
-        <p className="mt-1.5 text-xs leading-6 text-[var(--mn-text-muted)]">{t(locale, "music.audio.unavailableDescription")}</p>
+      <div className="md3-surface p-4 text-body-medium">
+        <p className="font-bold text-on-surface">{t(locale, "music.audio.unavailableTitle")}</p>
+        <p className="mt-1.5 text-body-small leading-6 text-on-surface-variant">{t(locale, "music.audio.unavailableDescription")}</p>
       </div>
     );
   }
@@ -599,14 +591,14 @@ function SongAudioPanel({ locale, song, title }: { locale: AppLocale; song: Musi
   return (
     <div className="space-y-3">
       {tracks.length > 1 && (
-        <div className="mn-segmented flex w-fit gap-1 rounded-full border border-[var(--mn-glass-border)] bg-[var(--mn-surface-strong)] p-1" role="group" aria-label={t(locale, "music.audio.title")}>
+        <div className="md3-segmented w-fit" role="group" aria-label={t(locale, "music.audio.title")}>
           {tracks.map((item, index) => (
             <button
               key={item.kind}
               type="button"
               onClick={() => setActive(index)}
               aria-pressed={index === active}
-              className={`mn-focus rounded-full px-3 py-1 text-xs font-bold transition ${index === active ? "bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]" : "text-[var(--mn-text-muted)] hover:bg-[var(--mn-cream-deep)]"}`}
+              className="md3-segment md3-state"
             >
               {t(locale, `music.audio.${item.kind}`)}
             </button>
@@ -621,7 +613,7 @@ function SongAudioPanel({ locale, song, title }: { locale: AppLocale; song: Musi
             type="button"
             onClick={() => download(item)}
             disabled={downloading !== null}
-            className="mn-focus mn-stamp-press inline-flex items-center gap-2 rounded-full border border-[var(--mn-border)] bg-[var(--mn-paper)] px-4 py-2 text-xs font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)] disabled:opacity-60"
+            className="md3-state inline-flex items-center gap-2 rounded-full border border-outline-variant bg-surface-container-low px-4 py-2 text-label-medium text-on-surface shadow-elevation-1 disabled:opacity-60"
           >
             {downloading === item.kind
               ? <SiriusIcon />
@@ -691,7 +683,7 @@ function AudioPlayer({ locale, src, title, label }: { locale: AppLocale; src: st
   };
 
   return (
-    <div className="mn-paper overflow-hidden border border-[var(--mn-border)] bg-[var(--mn-paper)] p-4 shadow-[var(--mn-shadow-stamp)] flex flex-col gap-3">
+    <div className="md3-surface overflow-hidden border border-outline-variant bg-surface-container-low p-4 shadow-elevation-1 flex flex-col gap-3">
       <audio
         ref={audioRef}
         src={src}
@@ -704,10 +696,10 @@ function AudioPlayer({ locale, src, title, label }: { locale: AppLocale; src: st
 
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <span className="text-[10px] font-black uppercase tracking-wider text-[var(--mn-accent-deep)] block opacity-75">
+          <span className="text-label-medium text-primary block opacity-75">
             {label}
           </span>
-          <span className="text-xs font-bold text-[var(--mn-text)] truncate block mt-0.5" title={title}>
+          <span className="text-label-medium text-on-surface truncate block mt-0.5" title={title}>
             {title}
           </span>
         </div>
@@ -715,7 +707,7 @@ function AudioPlayer({ locale, src, title, label }: { locale: AppLocale; src: st
         <button
           type="button"
           onClick={togglePlay}
-          className="mn-focus mn-stamp-press flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--mn-border)] bg-[var(--mn-accent)] text-[var(--mn-bg)] shadow-sm hover:scale-105 transition-all"
+          className="md3-state flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-outline-variant bg-primary text-on-primary shadow-sm hover:scale-105 transition-all"
           aria-label={t(locale, isPlaying ? "music.audio.pause" : "music.audio.play")}
         >
           {isPlaying ? (
@@ -731,7 +723,7 @@ function AudioPlayer({ locale, src, title, label }: { locale: AppLocale; src: st
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="font-mono text-[10px] text-[var(--mn-text-muted)] shrink-0 w-8">
+        <span className="font-mono text-label-small text-on-surface-variant shrink-0 w-8">
           {formatTime(currentTime)}
         </span>
         <input
@@ -741,16 +733,16 @@ function AudioPlayer({ locale, src, title, label }: { locale: AppLocale; src: st
           max={duration || 100}
           value={currentTime}
           onChange={handleSeek}
-          className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer bg-[var(--mn-cream-deep)] accent-[var(--mn-accent)] focus:outline-none"
+          className="flex-1 h-1.5 rounded-shape-sm appearance-none cursor-pointer bg-surface-container-highest accent-primary focus:outline-none"
           style={{
-            background: `linear-gradient(to right, var(--mn-accent) 0%, var(--mn-accent) ${
+            background: `linear-gradient(to right, var(--md-sys-color-primary) 0%, var(--md-sys-color-primary) ${
               duration ? (currentTime / duration) * 100 : 0
-            }%, var(--mn-cream-deep) ${
+            }%, var(--md-sys-color-surface-container-highest) ${
               duration ? (currentTime / duration) * 100 : 0
-            }%, var(--mn-cream-deep) 100%)`,
+            }%, var(--md-sys-color-surface-container-highest) 100%)`,
           }}
         />
-        <span className="font-mono text-[10px] text-[var(--mn-text-muted)] shrink-0 w-8 text-right">
+        <span className="font-mono text-label-small text-on-surface-variant shrink-0 w-8 text-right">
           {formatTime(duration)}
         </span>
       </div>

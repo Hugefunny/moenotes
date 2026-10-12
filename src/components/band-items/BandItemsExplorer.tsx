@@ -167,7 +167,7 @@ function BandItemCard({ item, locale, onOpen }: { item: BandItemViewModel; local
 
   return (
     <div
-      className="mn-list-card group flex flex-col min-w-0 overflow-hidden border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp)] transition hover:-translate-y-1 hover:shadow-[var(--mn-shadow-stamp-lg)]"
+      className="mn-list-card group flex flex-col min-w-0 overflow-hidden border border-outline-variant bg-surface-container-low shadow-elevation-1 transition hover:shadow-elevation-1"
       data-list-item-id={item.id}
     >
       <div className="flex flex-col flex-1 min-w-0 p-3 sm:p-4">
@@ -175,7 +175,7 @@ function BandItemCard({ item, locale, onOpen }: { item: BandItemViewModel; local
           type="button"
           onClick={onOpen}
           aria-haspopup="dialog"
-          className="mn-focus mb-2 flex items-center gap-3 rounded-lg -m-1 p-1 text-left"
+          className="mb-2 flex items-center gap-3 rounded-shape-sm -m-1 p-1 text-left"
         >
           {artUrl && !artFailed ? (
             <img
@@ -189,26 +189,26 @@ function BandItemCard({ item, locale, onOpen }: { item: BandItemViewModel; local
             />
           ) : null}
           <div className="min-w-0">
-            <h3 className="line-clamp-2 text-sm font-black leading-5 text-[var(--mn-text)]" title={item.name}>
+            <h3 className="line-clamp-2 text-label-large leading-5 text-on-surface" title={item.name}>
               {item.name}
             </h3>
-            <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--mn-text-muted)]/80" title={item.bandName}>
+            <p className="mt-1 text-label-medium text-on-surface-variant/80" title={item.bandName}>
               {item.bandName}
             </p>
-            <span className="mt-1 inline-block text-[11px] font-bold text-[var(--mn-accent-deep)]">
+            <span className="mt-1 inline-block text-label-small text-primary">
               {t(locale, "bandItems.openDetail")}
             </span>
           </div>
         </button>
         {effectText ? (
-          <p className="mt-1.5 text-xs font-medium text-[var(--mn-text-muted)] leading-relaxed min-h-[3rem]" title={effectText}>
+          <p className="mt-1.5 text-body-small text-on-surface-variant min-h-[3rem]" title={effectText}>
             {effectText}
           </p>
         ) : null}
 
         {maxLevel > 1 && effect ? (
           <div className="mt-3">
-            <div className="flex items-center justify-between gap-2 text-[11px] font-semibold text-[var(--mn-text-muted)]/80">
+            <div className="flex items-center justify-between gap-2 text-label-small text-on-surface-variant/80">
               <span>{t(locale, "bandItems.level", { level })}</span>
               <span>{t(locale, "bandItems.effectValue", { value: formatBandItemEffectPercent(effect.value, locale) })}</span>
             </div>
@@ -218,15 +218,15 @@ function BandItemCard({ item, locale, onOpen }: { item: BandItemViewModel; local
               max={maxLevel}
               value={level}
               onChange={(event) => setLevel(Number(event.target.value))}
-              className="mt-2 w-full accent-[var(--mn-accent)]"
+              className="mt-2 w-full accent-primary"
               aria-label={t(locale, "bandItems.level", { level })}
             />
           </div>
         ) : null}
 
-        <div className="mt-auto pt-2 flex items-center justify-between gap-2 border-t border-dashed border-[var(--mn-text-muted)]/30 text-[11px] font-semibold text-[var(--mn-text-muted)]/80">
+        <div className="mt-auto pt-2 flex items-center justify-between gap-2 border-t border-dashed border-on-surface-variant/30 text-label-small text-on-surface-variant/80">
           <span>ID #{item.id}</span>
-          <span className="bg-[var(--mn-cream-deep)] px-2.5 py-0.5 rounded-full border border-[var(--mn-border)] text-[10px]">
+          <span className="bg-surface-container-highest px-2.5 py-0.5 rounded-full border border-outline-variant text-label-small">
             {t(locale, "bandItems.maxLevel", { level: maxLevel })}
           </span>
         </div>
@@ -237,13 +237,13 @@ function BandItemCard({ item, locale, onOpen }: { item: BandItemViewModel; local
 
 function EmptyState({ locale, onReset }: { locale: AppLocale; onReset: () => void }) {
   return (
-    <div className="mn-paper p-8 text-center sm:p-12">
-      <h3 className="font-[var(--mn-font-display)] text-2xl text-[var(--mn-text)]">{t(locale, "bandItems.emptyTitle")}</h3>
-      <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-7 text-[var(--mn-text-muted)]">{t(locale, "bandItems.emptyDescription")}</p>
+    <div className="md3-surface p-8 text-center sm:p-12">
+      <h3 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "bandItems.emptyTitle")}</h3>
+      <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "bandItems.emptyDescription")}</p>
       <button
         type="button"
         onClick={onReset}
-        className="mn-focus mn-stamp-press mt-6 rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-6 py-3 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]"
+        className="md3-state mt-6 rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1"
       >
         {t(locale, "bandItems.reset")}
       </button>

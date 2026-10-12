@@ -53,7 +53,7 @@ export default function SongMetaTable({ locale, servers, initialSongs }: Props) 
       sortValue: (row) => titleOf(row.song),
       render: (row) => (
         <span className="flex min-w-[11rem] max-w-[16rem] items-center gap-2.5">
-          <img className="h-9 w-9 shrink-0 rounded-lg border border-[var(--mn-border)] object-cover" src={assetUrl(row.song.jacketUrl)} alt="" loading="lazy" />
+          <img className="h-9 w-9 shrink-0 rounded-shape-sm border border-outline-variant object-cover" src={assetUrl(row.song.jacketUrl)} alt="" loading="lazy" />
           <span className="truncate font-bold" title={titleOf(row.song)}>{titleOf(row.song)}</span>
         </span>
       ),
@@ -71,7 +71,7 @@ export default function SongMetaTable({ locale, servers, initialSongs }: Props) 
       key: "difficulty",
       header: t(locale, "music.filters.difficulty"),
       sortValue: (row) => MUSIC_DIFFICULTIES.indexOf(row.chart.difficulty),
-      render: (row) => <span className={`inline-block rounded border px-1.5 text-[10px] font-black ${DIFFICULTY_CHIP_CLASSES[row.chart.difficulty]}`}>{DIFFICULTY_SHORT_LABELS[row.chart.difficulty]}</span>,
+      render: (row) => <span className={`inline-block rounded border px-1.5 text-label-small ${DIFFICULTY_CHIP_CLASSES[row.chart.difficulty]}`}>{DIFFICULTY_SHORT_LABELS[row.chart.difficulty]}</span>,
     },
     { key: "level", header: t(locale, "music.chart.level"), numeric: true, sortValue: levelOf, render: levelOf },
     {
@@ -81,7 +81,7 @@ export default function SongMetaTable({ locale, servers, initialSongs }: Props) 
       render: (row) => row.song.bandName ? (
         <span className="flex items-center gap-1.5 whitespace-nowrap">
           {row.song.bandId > 0 && <img className="h-5 w-auto shrink-0 object-contain" src={assetUrl(getBandSmallIconUrl(row.song.bandId))} alt="" aria-hidden="true" />}
-          <span className="max-w-[8rem] truncate text-xs">{row.song.bandName}</span>
+          <span className="max-w-[8rem] truncate text-body-small">{row.song.bandName}</span>
         </span>
       ) : dash,
     },
@@ -106,7 +106,7 @@ export default function SongMetaTable({ locale, servers, initialSongs }: Props) 
         header: t(locale, "music.gekisou.title"),
         render: (row: SongMetaRow) => {
           const missions = row.missions.filter(isGekisouMission);
-          return missions.length ? <span className="whitespace-nowrap text-xs">{missions.map((mission) => t(locale, `music.gekisou.missions.${GEKISOU_MISSION_KEYS[mission]}`)).join(" / ")}</span> : dash;
+          return missions.length ? <span className="whitespace-nowrap text-body-small">{missions.map((mission) => t(locale, `music.gekisou.missions.${GEKISOU_MISSION_KEYS[mission]}`)).join(" / ")}</span> : dash;
         },
       },
       { key: "justRate", header: t(locale, "music.meta.justRate"), numeric: true, sortValue: (row: SongMetaRow) => row.metrics?.justRate, render: (row: SongMetaRow) => formatPercent(row.metrics?.justRate, locale) },
@@ -115,13 +115,13 @@ export default function SongMetaTable({ locale, servers, initialSongs }: Props) 
     ] satisfies DataTableColumn<SongMetaRow>[] : []),
   ];
 
-  const segmented = "mn-segmented flex w-fit gap-1 rounded-full border border-[var(--mn-glass-border)] bg-[var(--mn-surface-strong)] p-1";
-  const segment = (active: boolean) => `mn-focus rounded-full px-3 py-1.5 text-xs font-bold transition ${active ? "bg-[var(--mn-accent-soft)] text-[var(--mn-text)]" : "text-[var(--mn-text-muted)] hover:bg-[var(--mn-cream-deep)]"}`;
+  const segmented = "md3-segmented w-fit";
+  const segment = (_active: boolean) => "md3-segment md3-state";
 
   return (
     <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer}>
       <div className="space-y-4">
-        <div className="mn-paper space-y-4 p-4 sm:p-5">
+        <div className="md3-surface space-y-4 p-4 sm:p-5">
           <div className="flex flex-wrap items-center gap-3">
             <div className={segmented} role="group" aria-label={t(locale, "music.meta.mode")}>
               {MODES.map((entry) => (
@@ -130,7 +130,7 @@ export default function SongMetaTable({ locale, servers, initialSongs }: Props) 
                 </button>
               ))}
             </div>
-            <span className="text-xs font-semibold text-[var(--mn-text-muted)]">{t(locale, "music.meta.count", { count: rows.length })}</span>
+            <span className="text-label-medium text-on-surface-variant">{t(locale, "music.meta.count", { count: rows.length })}</span>
           </div>
           <FilterSection title={t(locale, "music.filters.difficulty")}>
             <div className="flex flex-wrap gap-2">
@@ -159,7 +159,7 @@ export default function SongMetaTable({ locale, servers, initialSongs }: Props) 
               getAttributeLabel={(value) => t(locale, `cards.attributes.${value}`)}
             />
           </div>
-          <p className="text-[11px] leading-5 text-[var(--mn-text-muted)]">
+          <p className="text-label-small leading-5 text-on-surface-variant">
             {status === "loading" ? t(locale, "music.meta.loading") : status === "error" ? t(locale, "music.chart.unavailable") : t(locale, `music.meta.hints.${mode}`)}
           </p>
         </div>
@@ -176,9 +176,9 @@ export default function SongMetaTable({ locale, servers, initialSongs }: Props) 
           maxHeight="78vh"
           dense
           empty={(
-            <div className="mn-paper p-8 text-center">
-              <p className="font-[var(--mn-font-display)] text-xl text-[var(--mn-text)]">{t(locale, "music.emptyTitle")}</p>
-              <p className="mt-2 text-sm text-[var(--mn-text-muted)]">{t(locale, "music.emptyDescription")}</p>
+            <div className="md3-surface p-8 text-center">
+              <p className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "music.emptyTitle")}</p>
+              <p className="mt-2 text-body-medium text-on-surface-variant">{t(locale, "music.emptyDescription")}</p>
             </div>
           )}
         />

@@ -26,9 +26,9 @@ interface Props {
   servers: GameServer[];
 }
 
-const panelHeader = "flex flex-wrap items-center justify-between gap-3 border-b border-[var(--mn-border)] bg-gradient-to-r from-[color-mix(in_oklab,var(--mn-accent)_6%,transparent)] to-transparent px-6 py-4 sm:px-8";
-const panelTitle = "font-[var(--mn-font-display)] text-xl text-[var(--mn-text)] sm:text-2xl";
-const backLink = "mn-focus mn-stamp-press inline-flex rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-6 py-3 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]";
+const panelHeader = "flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-6 py-4 sm:px-8";
+const panelTitle = "font-[var(--md-ref-typeface-brand)] text-xl text-on-surface sm:text-2xl";
+const backLink = " md3-state inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-sm font-bold text-on-surface shadow-elevation-1";
 
 /** The shop as the page's server has it (docs/servers.md). */
 export default function ExchangeDetail({ locale, exchange: faceted, servers }: Props) {
@@ -71,23 +71,23 @@ function ExchangeDetailView({ locale, exchange, schedules }: { locale: AppLocale
       <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(22rem,2fr)_3fr] lg:items-start">
         <aside className="flex w-full flex-col gap-6 lg:sticky lg:top-24">
           {/* The shop banners are 420×180: kept at most at their own width rather than blown up across the column. */}
-          <div className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-paper)] p-4 shadow-[var(--mn-shadow-stamp-lg)]">
-            <BannerImage eager className="mx-auto max-w-[420px] rounded-xl border border-[var(--mn-glass-border)]" src={exchange.bannerUrl} alt={exchange.name} fallback={exchange.name} />
+          <div className="rounded-shape-lg border border-outline-variant bg-surface-container-low p-4 shadow-elevation-1">
+            <BannerImage eager className="mx-auto max-w-[420px] rounded-shape-md border border-outline-variant" src={exchange.bannerUrl} alt={exchange.name} fallback={exchange.name} />
           </div>
-          <div className="mn-paper overflow-hidden">
-            <div className="border-b border-[var(--mn-border)] bg-gradient-to-r from-[color-mix(in_oklab,var(--mn-accent)_6%,transparent)] to-transparent p-6">
+          <div className="md3-surface overflow-hidden">
+            <div className="border-b border-outline-variant p-6">
               <ScheduleBadge locale={locale} startAt={exchange.startAt} endAt={exchange.endAt} now={now} />
-              <h2 className="mt-3 font-[var(--mn-font-display)] text-2xl leading-tight text-[var(--mn-text)] sm:text-3xl">{exchange.name}</h2>
+              <h2 className="mt-3 font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-medium">{exchange.name}</h2>
             </div>
-            <div className="divide-y divide-dashed divide-[var(--mn-border)]/60 px-6 py-2">
+            <div className="divide-y divide-dashed divide-outline-variant/60 px-6 py-2">
               {facts.map(([label, value]) => (
-                <div key={label} className="flex items-center justify-between gap-4 py-3.5 text-sm">
-                  <span className="shrink-0 font-semibold text-[var(--mn-text-muted)]">{label}</span>
-                  <span className="min-w-0 text-right font-semibold text-[var(--mn-text)]">{value}</span>
+                <div key={label} className="flex items-center justify-between gap-4 py-3.5 text-body-medium">
+                  <span className="shrink-0 font-semibold text-on-surface-variant">{label}</span>
+                  <span className="min-w-0 text-right font-semibold text-on-surface">{value}</span>
                 </div>
               ))}
             </div>
-            <TimesNote locale={locale} value={exchange.startAt || exchange.endAt} timeZone={timeZone} className="px-6 pb-5 text-xs text-[var(--mn-text-muted)]" />
+            <TimesNote locale={locale} value={exchange.startAt || exchange.endAt} timeZone={timeZone} className="px-6 pb-5 text-body-small text-on-surface-variant" />
             <div className="px-6 pb-5 empty:hidden">{schedules}</div>
           </div>
         </aside>
@@ -111,18 +111,18 @@ function ProductPanel({ locale, exchange, timeZone }: { locale: AppLocale; excha
   const products = exchange.products.filter((product) => filter === "all" || (filter === "limited") === (product.limitCount > 0));
   const filters: ProductFilter[] = ["all", "limited", "unlimited"];
   return (
-    <div className="mn-paper overflow-hidden">
+    <div className="md3-surface overflow-hidden">
       <div className={panelHeader}>
         <h3 className={panelTitle}>{t(locale, "exchange.detail.products")}</h3>
         {hasBoth && (
-          <div className="flex max-w-full flex-wrap gap-1 rounded-full border border-[var(--mn-glass-border)] bg-[var(--mn-surface-strong)] p-1" role="group" aria-label={t(locale, "exchange.detail.productFilter")}>
+          <div className="flex max-w-full flex-wrap gap-1 rounded-full border border-outline-variant bg-surface-container-high p-1" role="group" aria-label={t(locale, "exchange.detail.productFilter")}>
             {filters.map((option) => (
               <button
                 key={option}
                 type="button"
                 onClick={() => setFilter(option)}
                 aria-pressed={filter === option}
-                className={`mn-focus rounded-full px-3 py-1 text-xs font-bold transition ${filter === option ? "bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]" : "text-[var(--mn-text-muted)] hover:bg-[var(--mn-cream-deep)]"}`}
+                className={`rounded-full px-3 py-1 text-label-medium transition ${filter === option ? "bg-secondary-container text-primary" : "text-on-surface-variant hover:bg-surface-container-highest"}`}
               >
                 {t(locale, `exchange.detail.filters.${option}`)}
               </button>
@@ -130,7 +130,7 @@ function ProductPanel({ locale, exchange, timeZone }: { locale: AppLocale; excha
           </div>
         )}
       </div>
-      <ol className="divide-y divide-dashed divide-[var(--mn-border)]/60 px-4 sm:px-6">
+      <ol className="divide-y divide-dashed divide-outline-variant/60 px-4 sm:px-6">
         {products.map((product) => (
           <ProductRow key={product.id} locale={locale} product={product} currency={exchange.currency} timeZone={timeZone} />
         ))}
@@ -150,20 +150,20 @@ function ProductRow({ locale, product, currency, timeZone }: { locale: AppLocale
       <div className="flex min-w-0 flex-wrap items-center gap-2">
         <RewardChip reward={product.reward} locale={locale} />
         {product.isRecommended && (
-          <span className="rounded-full border border-[var(--mn-accent-deep)]/30 bg-[var(--mn-accent-deep)] px-2 py-0.5 text-[10px] font-bold leading-none text-[var(--mn-paper)]">
+          <span className="rounded-full border border-primary/30 bg-primary px-2 py-0.5 text-label-small text-on-primary">
             {t(locale, "exchange.product.recommended")}
           </span>
         )}
       </div>
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:flex-col sm:items-end sm:gap-1">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-body-small sm:flex-col sm:items-end sm:gap-1">
         <Price locale={locale} currency={currency} amount={product.price} />
-        <span className="font-medium text-[var(--mn-text-muted)]">{limit}</span>
+        <span className="font-medium text-on-surface-variant">{limit}</span>
         {product.priceSteps.length > 0 && (
-          <span className="font-medium tabular-nums text-[var(--mn-text-muted)]">
+          <span className="font-medium tabular-nums text-on-surface-variant">
             {product.priceSteps.map((step) => t(locale, "exchange.detail.priceStep", { from: step.from, price: step.price.toLocaleString(locale) })).join(" · ")}
           </span>
         )}
-        {(start || end) && <span className="tabular-nums text-[11px] text-[var(--mn-text-muted)]">{[start, end].filter(Boolean).join(" – ")}</span>}
+        {(start || end) && <span className="tabular-nums text-label-small text-on-surface-variant">{[start, end].filter(Boolean).join(" – ")}</span>}
       </div>
     </li>
   );
@@ -184,13 +184,13 @@ function CurrencyLabel({ locale, currency }: { locale: AppLocale; currency: Exch
     </>
   );
   return currency.link
-    ? <a href={localizePath(entityLinkPath(currency.link), locale)} className="mn-focus inline-flex items-center gap-1.5 hover:text-[var(--mn-accent-deep)]">{content}</a>
+    ? <a href={localizePath(entityLinkPath(currency.link), locale)} className="inline-flex items-center gap-1.5 hover:text-primary">{content}</a>
     : <span className="inline-flex items-center gap-1.5">{content}</span>;
 }
 
 function Price({ locale, currency, amount }: { locale: AppLocale; currency: ExchangeCurrency; amount: number }) {
   return (
-    <span className="inline-flex items-center gap-1 font-mono text-sm font-black tabular-nums text-[var(--mn-accent-deep)]" title={currency.name || undefined}>
+    <span className="inline-flex items-center gap-1 font-mono text-label-large tabular-nums text-primary" title={currency.name || undefined}>
       <CurrencyIcon currency={currency} />
       {amount.toLocaleString(locale)}
     </span>
@@ -199,14 +199,14 @@ function Price({ locale, currency, amount }: { locale: AppLocale; currency: Exch
 
 function RelationLink({ locale, relation }: { locale: AppLocale; relation: NonNullable<ExchangeDetailViewModel["relation"]> }) {
   const path = relation.kind === "event" ? eventPath(relation.id) : buildDynamicPath(getRoutePathById("gacha-detail"), { id: String(relation.id) });
-  return <a href={localizePath(path, locale)} className="mn-focus underline decoration-dotted underline-offset-4 hover:text-[var(--mn-accent-deep)]">{relation.name}</a>;
+  return <a href={localizePath(path, locale)} className="underline decoration-dotted underline-offset-4 hover:text-primary">{relation.name}</a>;
 }
 
 function NotFound({ locale }: { locale: AppLocale }) {
   return (
-    <div className="mn-paper p-8 text-center sm:p-12">
-      <h2 className="font-[var(--mn-font-display)] text-2xl text-[var(--mn-text)]">{t(locale, "exchange.detail.notFoundTitle")}</h2>
-      <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-7 text-[var(--mn-text-muted)]">{t(locale, "exchange.detail.notFoundDescription")}</p>
+    <div className="md3-surface p-8 text-center sm:p-12">
+      <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "exchange.detail.notFoundTitle")}</h2>
+      <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "exchange.detail.notFoundDescription")}</p>
       <a href={localizePath(getRoutePathById("exchange"), locale)} className={`${backLink} mt-6`}>{t(locale, "exchange.detail.backToList")}</a>
     </div>
   );

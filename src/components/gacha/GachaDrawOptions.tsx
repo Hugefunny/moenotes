@@ -22,10 +22,10 @@ export function drawOptionName(locale: AppLocale, option: GachaDrawOption): stri
 export function DrawPrice({ locale, option, amount }: { locale: AppLocale; option: GachaDrawOption; amount: number }) {
   if (amount === 0) {
     const key = option.itemType === 15 ? "gacha.options.ad" : option.itemType === 23 ? "gacha.options.pass" : option.itemType === 24 ? "gacha.options.bonus" : "gacha.options.free";
-    return <span className="font-bold text-[var(--mn-mint-deep)]">{t(locale, key)}</span>;
+    return <span className="font-bold text-on-success-container">{t(locale, key)}</span>;
   }
   return (
-    <span className="inline-flex items-center gap-1 font-mono font-black tabular-nums text-[var(--mn-accent-deep)]" title={option.currency?.name || undefined}>
+    <span className="inline-flex items-center gap-1 font-mono font-black tabular-nums text-primary" title={option.currency?.name || undefined}>
       <DrawCurrencyIcon locale={locale} option={option} />
       {amount.toLocaleString(locale)}
     </span>
@@ -35,11 +35,11 @@ export function DrawPrice({ locale, option, amount }: { locale: AppLocale; optio
 /** Every draw option of a gacha: its price (and first-purchase price), guarantee, limit and points. */
 export default function GachaDrawOptions({ locale, options, title }: { locale: AppLocale; options: GachaDrawOption[]; title: string }) {
   return (
-    <div className="mn-paper overflow-hidden">
-      <div className="border-b border-[var(--mn-border)] bg-gradient-to-r from-[color-mix(in_oklab,var(--mn-accent)_6%,transparent)] to-transparent px-6 py-4 sm:px-8">
-        <h3 className="font-[var(--mn-font-display)] text-xl text-[var(--mn-text)] sm:text-2xl">{title}</h3>
+    <div className="md3-surface overflow-hidden">
+      <div className="border-b border-outline-variant px-6 py-4 sm:px-8">
+        <h3 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-small">{title}</h3>
       </div>
-      <ol className="divide-y divide-dashed divide-[var(--mn-border)]/60 px-4 sm:px-6">
+      <ol className="divide-y divide-dashed divide-outline-variant/60 px-4 sm:px-6">
         {options.map((option) => {
           const notes = [
             option.ensuredCount > 0 ? t(locale, "gacha.options.guarantee", { count: option.ensuredCount, rarity: t(locale, `cards.rarities.${option.ensuredRarity}`) }) : "",
@@ -50,13 +50,13 @@ export default function GachaDrawOptions({ locale, options, title }: { locale: A
           return (
             <li key={option.slot} className="grid gap-2 py-3.5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6">
               <div className="min-w-0">
-                <p className="text-sm font-bold text-[var(--mn-text)]">{drawOptionName(locale, option)}</p>
-                {notes.length > 0 && <p className="mt-0.5 text-xs font-medium text-[var(--mn-text-muted)]">{notes.join(" · ")}</p>}
+                <p className="text-label-large text-on-surface">{drawOptionName(locale, option)}</p>
+                {notes.length > 0 && <p className="mt-0.5 text-body-small text-on-surface-variant">{notes.join(" · ")}</p>}
               </div>
-              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm sm:justify-end">
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-body-medium sm:justify-end">
                 {option.firstTimePrice !== null && (
-                  <span className="inline-flex items-baseline gap-1.5 text-xs">
-                    <span className="font-bold text-[var(--mn-text-muted)]">{t(locale, "gacha.options.firstTime")}</span>
+                  <span className="inline-flex items-baseline gap-1.5 text-body-small">
+                    <span className="font-bold text-on-surface-variant">{t(locale, "gacha.options.firstTime")}</span>
                     <DrawPrice locale={locale} option={option} amount={option.firstTimePrice} />
                   </span>
                 )}

@@ -40,8 +40,8 @@ export default function PlayerNamecard({ server, profileId, images, playerName, 
       onError={() => setFailed(true)}
       className={
         isThumbnail
-          ? "h-8 w-14 shrink-0 rounded border border-[var(--mn-border)]/50 bg-[var(--mn-cream-deep)] object-cover"
-          : "aspect-[1224/688] w-full rounded-xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-cream-deep)] object-cover"
+          ? "h-8 w-14 shrink-0 rounded border border-outline-variant/50 bg-surface-container-highest object-cover"
+          : "aspect-[1224/688] w-full rounded-shape-md border border-outline-variant bg-surface-container-highest object-cover"
       }
     />
   );

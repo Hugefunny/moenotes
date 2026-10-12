@@ -25,8 +25,8 @@ interface Props {
   servers: GameServer[];
 }
 
-const panelHeader = "flex flex-wrap items-center justify-between gap-3 border-b border-[var(--mn-border)] bg-gradient-to-r from-[color-mix(in_oklab,var(--mn-accent)_6%,transparent)] to-transparent px-6 py-4 sm:px-8";
-const panelTitle = "font-[var(--mn-font-display)] text-xl text-[var(--mn-text)] sm:text-2xl";
+const panelHeader = "flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-6 py-4 sm:px-8";
+const panelTitle = "font-[var(--md-ref-typeface-brand)] text-xl text-on-surface sm:text-2xl";
 
 /** The entry as the page's server has it (docs/servers.md). */
 export default function RewardDetail({ locale, entry: faceted, servers }: Props) {
@@ -55,24 +55,24 @@ function RewardDetailView({ locale, entry, schedules }: { locale: AppLocale; ent
     <div className="w-full space-y-8">
       <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(22rem,2fr)_3fr] lg:items-start">
         <aside className="flex w-full flex-col gap-6 lg:sticky lg:top-24">
-          <div className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-paper)] p-4 shadow-[var(--mn-shadow-stamp-lg)]">
-            <BannerImage eager className="rounded-xl border border-[var(--mn-glass-border)]" src={entry.bannerUrl} alt={entry.title} fallback={entry.title} imageClassName={rewardBannerCrop(entry.kind)} />
+          <div className="rounded-shape-lg border border-outline-variant bg-surface-container-low p-4 shadow-elevation-1">
+            <BannerImage eager className="rounded-shape-md border border-outline-variant" src={entry.bannerUrl} alt={entry.title} fallback={entry.title} imageClassName={rewardBannerCrop(entry.kind)} />
           </div>
-          <div className="mn-paper overflow-hidden">
-            <div className="border-b border-[var(--mn-border)] bg-gradient-to-r from-[color-mix(in_oklab,var(--mn-accent)_6%,transparent)] to-transparent p-6">
+          <div className="md3-surface overflow-hidden">
+            <div className="border-b border-outline-variant p-6">
               <ScheduleBadge locale={locale} startAt={entry.startAt} endAt={entry.endAt} now={now} />
-              <h2 className="mt-3 font-[var(--mn-font-display)] text-2xl leading-tight text-[var(--mn-text)] sm:text-3xl">{entry.title}</h2>
-              {(entry.kind === "seasonPass" || entry.kind === "monthlyPass") && entry.description && <p className="mt-3 whitespace-pre-line text-sm leading-7 text-[var(--mn-text-muted)]">{entry.description}</p>}
+              <h2 className="mt-3 font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-medium">{entry.title}</h2>
+              {(entry.kind === "seasonPass" || entry.kind === "monthlyPass") && entry.description && <p className="mt-3 whitespace-pre-line text-body-medium leading-7 text-on-surface-variant">{entry.description}</p>}
             </div>
-            <div className="divide-y divide-dashed divide-[var(--mn-border)]/60 px-6 py-2">
+            <div className="divide-y divide-dashed divide-outline-variant/60 px-6 py-2">
               {facts.map(([label, value]) => (
-                <div key={label} className="flex items-center justify-between gap-4 py-3.5 text-sm">
-                  <span className="shrink-0 font-semibold text-[var(--mn-text-muted)]">{label}</span>
-                  <span className="min-w-0 text-right font-semibold text-[var(--mn-text)]">{value}</span>
+                <div key={label} className="flex items-center justify-between gap-4 py-3.5 text-body-medium">
+                  <span className="shrink-0 font-semibold text-on-surface-variant">{label}</span>
+                  <span className="min-w-0 text-right font-semibold text-on-surface">{value}</span>
                 </div>
               ))}
             </div>
-            <TimesNote locale={locale} value={entry.startAt || entry.endAt} timeZone={timeZone} className="px-6 pb-5 text-xs text-[var(--mn-text-muted)]" />
+            <TimesNote locale={locale} value={entry.startAt || entry.endAt} timeZone={timeZone} className="px-6 pb-5 text-body-small text-on-surface-variant" />
             <div className="px-6 pb-5 empty:hidden">{schedules}</div>
           </div>
         </aside>
@@ -83,7 +83,7 @@ function RewardDetailView({ locale, entry, schedules }: { locale: AppLocale; ent
           {entry.kind === "mission" && <MissionGroupView entry={entry} locale={locale} />}
           {entry.kind === "monthlyPass" && <MonthlyPassView entry={entry} locale={locale} />}
           <div className="flex justify-start">
-            <a href={localizePath(getRoutePathById("rewards"), locale)} className="mn-focus mn-stamp-press inline-flex rounded-full border border-[var(--mn-border)] bg-[var(--mn-paper)] px-6 py-3 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]">
+            <a href={localizePath(getRoutePathById("rewards"), locale)} className="md3-state inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
               {t(locale, "rewards.backToList")}
             </a>
           </div>
@@ -121,7 +121,7 @@ function entryFacts(entry: RewardEntryDetail, locale: AppLocale): Array<[string,
 
 function Panel({ title, actions, children }: { title: string; actions?: ReactNode; children: ReactNode }) {
   return (
-    <div className="mn-paper overflow-hidden">
+    <div className="md3-surface overflow-hidden">
       <div className={panelHeader}><h3 className={panelTitle}>{title}</h3>{actions}</div>
       <div className="p-4 sm:p-6">{children}</div>
     </div>
@@ -130,14 +130,14 @@ function Panel({ title, actions, children }: { title: string; actions?: ReactNod
 
 function Segmented<T extends string | number>({ label, options, value, onChange, format }: { label: string; options: T[]; value: T; onChange: (value: T) => void; format: (value: T) => string }) {
   return (
-    <div className="mn-segmented flex max-w-full flex-wrap gap-1 rounded-full border border-[var(--mn-glass-border)] bg-[var(--mn-surface-strong)] p-1" role="group" aria-label={label}>
+    <div className="md3-segmented" role="group" aria-label={label}>
       {options.map((option) => (
         <button
           key={option}
           type="button"
           onClick={() => onChange(option)}
           aria-pressed={value === option}
-          className={`mn-focus rounded-full px-3 py-1 text-xs font-bold transition ${value === option ? "bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]" : "text-[var(--mn-text-muted)] hover:bg-[var(--mn-cream-deep)]"}`}
+          className="md3-segment md3-state"
         >
           {format(option)}
         </button>
@@ -147,7 +147,7 @@ function Segmented<T extends string | number>({ label, options, value, onChange,
 }
 
 function RewardList({ rewards, locale }: { rewards: MissionViewModel["rewards"]; locale: AppLocale }) {
-  if (rewards.length === 0) return <span className="text-xs text-[var(--mn-text-muted)]">—</span>;
+  if (rewards.length === 0) return <span className="text-body-small text-on-surface-variant">—</span>;
   return (
     <div className="flex min-w-0 flex-col gap-2">
       {rewards.map((reward, index) => <RewardChip key={`${reward.kind}:${reward.id}:${index}`} reward={reward} locale={locale} />)}
@@ -163,25 +163,25 @@ function SeasonPassView({ entry, locale }: { entry: SeasonPassDetail; locale: Ap
   return (
     <>
       <Panel title={t(locale, "rewards.levelRewards")}>
-        <div className="hidden grid-cols-[5.5rem_minmax(0,1fr)_minmax(0,1fr)] gap-4 border-b border-[var(--mn-glass-border)] px-3 pb-2 text-xs font-bold text-[var(--mn-text-muted)] md:grid">
+        <div className="hidden grid-cols-[5.5rem_minmax(0,1fr)_minmax(0,1fr)] gap-4 border-b border-outline-variant px-3 pb-2 text-label-medium text-on-surface-variant md:grid">
           <span>{t(locale, "rewards.level")}</span>
           <span>{t(locale, "rewards.free")}</span>
-          <span className="text-[var(--mn-accent-deep)]">{t(locale, "rewards.premium")}</span>
+          <span className="text-primary">{t(locale, "rewards.premium")}</span>
         </div>
-        <ol className="divide-y divide-dashed divide-[var(--mn-border)]/60">
+        <ol className="divide-y divide-dashed divide-outline-variant/60">
           {entry.levels.map((level) => (
-            <li key={level.level} className={`grid gap-3 px-3 py-3 md:grid-cols-[5.5rem_minmax(0,1fr)_minmax(0,1fr)] md:gap-4 ${level.featured ? "rounded-xl bg-[var(--mn-accent-soft)]" : ""}`}>
+            <li key={level.level} className={`grid gap-3 px-3 py-3 md:grid-cols-[5.5rem_minmax(0,1fr)_minmax(0,1fr)] md:gap-4 ${level.featured ? "rounded-shape-md bg-secondary-container" : ""}`}>
               <div className="flex items-baseline gap-2 md:flex-col md:gap-0.5">
-                <span className="font-mono text-base font-black tabular-nums text-[var(--mn-text)]">{t(locale, "rewards.levelValue", { level: level.level })}</span>
-                <span className="font-mono text-[11px] tabular-nums text-[var(--mn-text-muted)]">{t(locale, "rewards.points", { count: level.point.toLocaleString(locale) })}</span>
-                {level.featured && <span className="text-[11px] font-bold text-[var(--mn-accent-deep)]">{t(locale, "rewards.featured")}</span>}
+                <span className="font-mono text-title-medium tabular-nums text-on-surface">{t(locale, "rewards.levelValue", { level: level.level })}</span>
+                <span className="font-mono text-label-small tabular-nums text-on-surface-variant">{t(locale, "rewards.points", { count: level.point.toLocaleString(locale) })}</span>
+                {level.featured && <span className="text-label-small text-primary">{t(locale, "rewards.featured")}</span>}
               </div>
               <div className="min-w-0">
-                <span className="mb-1 block text-[11px] font-bold text-[var(--mn-text-muted)] md:hidden">{t(locale, "rewards.free")}</span>
+                <span className="mb-1 block text-label-small text-on-surface-variant md:hidden">{t(locale, "rewards.free")}</span>
                 <RewardList rewards={level.free} locale={locale} />
               </div>
               <div className="min-w-0">
-                <span className="mb-1 block text-[11px] font-bold text-[var(--mn-accent-deep)] md:hidden">{t(locale, "rewards.premium")}</span>
+                <span className="mb-1 block text-label-small text-primary md:hidden">{t(locale, "rewards.premium")}</span>
                 <RewardList rewards={level.premium} locale={locale} />
               </div>
             </li>
@@ -205,13 +205,13 @@ function SeasonPassView({ entry, locale }: { entry: SeasonPassDetail; locale: Ap
 
 function MissionList({ missions, locale }: { missions: MissionViewModel[]; locale: AppLocale }) {
   return (
-    <ol className="divide-y divide-dashed divide-[var(--mn-border)]/60">
+    <ol className="divide-y divide-dashed divide-outline-variant/60">
       {missions.map((mission) => (
         <li key={mission.id} className="grid gap-3 py-3.5 sm:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] sm:items-center sm:gap-6">
-          <p className="min-w-0 whitespace-pre-line text-sm font-medium leading-6 text-[var(--mn-text)]">{mission.description}</p>
+          <p className="min-w-0 whitespace-pre-line text-body-medium leading-6 text-on-surface">{mission.description}</p>
           <div className="min-w-0 sm:justify-self-end">
             {mission.points > 0
-              ? <span className="inline-flex rounded-full border border-[color-mix(in_srgb,var(--mn-accent)_45%,transparent)] bg-[var(--mn-accent-soft)] px-2.5 py-1 font-mono text-xs font-bold tabular-nums text-[var(--mn-accent-deep)]">{t(locale, "rewards.missionPoints", { count: mission.points })}</span>
+              ? <span className="inline-flex rounded-full border border-primary/45 bg-secondary-container px-2.5 py-1 font-mono text-label-medium tabular-nums text-primary">{t(locale, "rewards.missionPoints", { count: mission.points })}</span>
               : <RewardList rewards={mission.rewards} locale={locale} />}
           </div>
         </li>
@@ -227,8 +227,8 @@ function LoginBonusView({ entry, locale }: { entry: LoginBonusDetail; locale: Ap
         <Panel key={sheet.sheet} title={entry.sheets.length > 1 ? t(locale, "rewards.sheet", { sheet: sheet.sheet }) : t(locale, "rewards.dailyRewards")}>
           <ol className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
             {sheet.days.map((day) => (
-              <li key={day.day} className={`mn-list-card-row flex min-w-0 flex-col gap-2.5 border p-3 ${day.decorated ? "border-[var(--mn-accent)] bg-[var(--mn-accent-soft)]" : "border-[var(--mn-glass-border)] bg-[var(--mn-surface)]"}`}>
-                <span className={`text-xs font-black ${day.decorated ? "text-[var(--mn-accent-deep)]" : "text-[var(--mn-text-muted)]"}`}>{t(locale, "rewards.day", { day: day.day })}</span>
+              <li key={day.day} className={`mn-list-card-row flex min-w-0 flex-col gap-2.5 border p-3 ${day.decorated ? "border-primary bg-secondary-container" : "border-outline-variant bg-surface-container"}`}>
+                <span className={`text-label-medium ${day.decorated ? "text-primary" : "text-on-surface-variant"}`}>{t(locale, "rewards.day", { day: day.day })}</span>
                 <RewardList rewards={day.rewards} locale={locale} />
               </li>
             ))}
@@ -286,8 +286,8 @@ function MonthlyPassView({ entry, locale }: { entry: MonthlyPassDetail; locale: 
         <Panel title={t(locale, "rewards.dailyRewards")}>
           <ol className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
             {ranges.map((range) => (
-              <li key={range.from} className="mn-list-card-row flex min-w-0 flex-col gap-2.5 border border-[var(--mn-glass-border)] bg-[var(--mn-surface)] p-3">
-                <span className="text-xs font-black text-[var(--mn-text-muted)]">
+              <li key={range.from} className="mn-list-card-row flex min-w-0 flex-col gap-2.5 border border-outline-variant bg-surface-container p-3">
+                <span className="text-label-medium text-on-surface-variant">
                   {range.from === range.to ? t(locale, "rewards.day", { day: range.from }) : t(locale, "rewards.monthlyPass.dayRange", { from: range.from, to: range.to })}
                 </span>
                 <RewardList rewards={range.rewards} locale={locale} />
@@ -298,10 +298,10 @@ function MonthlyPassView({ entry, locale }: { entry: MonthlyPassDetail; locale: 
       )}
       {entry.continuationRewards.length > 0 && (
         <Panel title={t(locale, "rewards.monthlyPass.continuation")}>
-          <ol className="divide-y divide-dashed divide-[var(--mn-border)]/60">
+          <ol className="divide-y divide-dashed divide-outline-variant/60">
             {entry.continuationRewards.map((step) => (
               <li key={step.purchaseCount} className="grid gap-3 py-3 sm:grid-cols-[8rem_minmax(0,1fr)] sm:items-center">
-                <span className="text-sm font-black text-[var(--mn-text)]">{t(locale, "rewards.monthlyPass.purchase", { count: step.purchaseCount })}</span>
+                <span className="text-label-large text-on-surface">{t(locale, "rewards.monthlyPass.purchase", { count: step.purchaseCount })}</span>
                 <RewardList rewards={step.rewards} locale={locale} />
               </li>
             ))}
@@ -314,10 +314,10 @@ function MonthlyPassView({ entry, locale }: { entry: MonthlyPassDetail; locale: 
 
 function NotFound({ locale }: { locale: AppLocale }) {
   return (
-    <div className="mn-paper p-8 text-center sm:p-12">
-      <h2 className="font-[var(--mn-font-display)] text-2xl text-[var(--mn-text)]">{t(locale, "rewards.notFoundTitle")}</h2>
-      <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-7 text-[var(--mn-text-muted)]">{t(locale, "rewards.notFoundDescription")}</p>
-      <a href={localizePath(getRoutePathById("rewards"), locale)} className="mn-focus mn-stamp-press mt-6 inline-flex rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-6 py-3 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]">
+    <div className="md3-surface p-8 text-center sm:p-12">
+      <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "rewards.notFoundTitle")}</h2>
+      <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "rewards.notFoundDescription")}</p>
+      <a href={localizePath(getRoutePathById("rewards"), locale)} className="md3-state mt-6 inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
         {t(locale, "rewards.backToList")}
       </a>
     </div>

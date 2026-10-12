@@ -92,9 +92,9 @@ export default function MusicRanking({ locale, musicId, cards }: Props) {
   const assetUrl = useServerAssetUrl(load.state === "ready" ? load.server : server ?? PRIMARY_SERVER);
 
   return (
-    <section ref={rootRef} className="mn-paper overflow-hidden" aria-labelledby="music-ranking-title">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--mn-border)] bg-gradient-to-r from-[color-mix(in_oklab,var(--mn-accent)_6%,transparent)] to-transparent px-6 py-4 sm:px-8">
-        <h3 id="music-ranking-title" className="font-[var(--mn-font-display)] text-xl text-[var(--mn-text)] sm:text-2xl">
+    <section ref={rootRef} className="md3-surface overflow-hidden" aria-labelledby="music-ranking-title">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-6 py-4 sm:px-8">
+        <h3 id="music-ranking-title" className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-small">
           {t(locale, "music.ranking.title")}
         </h3>
         <GameServerSwitch locale={locale} value={server} onChange={pickServer} />
@@ -102,7 +102,7 @@ export default function MusicRanking({ locale, musicId, cards }: Props) {
 
       <div className="px-4 py-4 sm:px-6">
         {load.state === "ready" && load.fetchedAt !== null && (
-          <p className="mb-3 px-2 text-right text-[11px] font-semibold text-[var(--mn-text-muted)]" title={new Date(load.fetchedAt).toLocaleString(locale)}>
+          <p className="mb-3 px-2 text-right text-label-small text-on-surface-variant" title={new Date(load.fetchedAt).toLocaleString(locale)}>
             {t(locale, "music.ranking.updatedAgo", { time: formatAge(load.fetchedAt, load.serverTime ?? load.fetchedAt, locale) })}
             {load.stale && ` · ${t(locale, "music.ranking.refreshing")}`}
           </p>
@@ -112,12 +112,12 @@ export default function MusicRanking({ locale, musicId, cards }: Props) {
 
         {load.state === "error" && (
           <div className="px-2 py-8 text-center" role="status">
-            <p className="text-sm font-bold text-[var(--mn-text)]">{t(locale, `music.ranking.errors.${load.kind}`)}</p>
-            <p className="mx-auto mt-1.5 max-w-md text-xs leading-6 text-[var(--mn-text-muted)]">{t(locale, `music.ranking.errors.${load.kind}Hint`)}</p>
+            <p className="text-label-large text-on-surface">{t(locale, `music.ranking.errors.${load.kind}`)}</p>
+            <p className="mx-auto mt-1.5 max-w-md text-body-small leading-6 text-on-surface-variant">{t(locale, `music.ranking.errors.${load.kind}Hint`)}</p>
             <button
               type="button"
               onClick={() => setAttempt((value) => value + 1)}
-              className="mn-focus mn-stamp-press mt-4 rounded-full border border-[var(--mn-border)] bg-[var(--mn-paper)] px-5 py-2 text-xs font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]"
+              className="md3-state mt-4 rounded-full border border-outline-variant bg-surface-container-low px-5 py-2 text-label-medium text-on-surface shadow-elevation-1"
             >
               {t(locale, "music.ranking.retry")}
             </button>
@@ -125,7 +125,7 @@ export default function MusicRanking({ locale, musicId, cards }: Props) {
         )}
 
         {load.state === "ready" && rows.length === 0 && (
-          <p className="px-2 py-8 text-center text-sm font-semibold text-[var(--mn-text-muted)]">{t(locale, "music.ranking.empty")}</p>
+          <p className="px-2 py-8 text-center text-label-large text-on-surface-variant">{t(locale, "music.ranking.empty")}</p>
         )}
 
         {rows.length > 0 && load.state === "ready" && <RankingList key={load.server} locale={locale} rows={rows} cards={cards} assetUrl={assetUrl} server={load.server} />}

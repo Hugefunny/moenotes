@@ -24,8 +24,8 @@ interface Props {
   servers: GameServer[];
 }
 
-const panelHeader = "border-b border-[var(--mn-border)] bg-gradient-to-r from-[color-mix(in_oklab,var(--mn-accent)_6%,transparent)] to-transparent px-6 py-4 sm:px-8";
-const panelTitle = "font-[var(--mn-font-display)] text-xl text-[var(--mn-text)] sm:text-2xl";
+const panelHeader = "border-b border-outline-variant px-6 py-4 sm:px-8";
+const panelTitle = "font-[var(--md-ref-typeface-brand)] text-xl text-on-surface sm:text-2xl";
 // Unlimited stacks carry int32 max; anything that large reads as "no cap".
 const UNCAPPED = 2_000_000_000;
 /** Targets listed per usage before the rest fold behind a toggle. */
@@ -60,20 +60,20 @@ function ItemDetailView({ locale, detail }: { locale: AppLocale; detail: ItemDet
   return (
     <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(20rem,2fr)_3fr] lg:items-start">
       <aside className="flex w-full flex-col gap-6 lg:sticky lg:top-24">
-        <div className="mn-paper overflow-hidden">
-          <div className="flex flex-col items-center gap-4 border-b border-[var(--mn-border)] bg-gradient-to-r from-[color-mix(in_oklab,var(--mn-accent)_6%,transparent)] to-transparent p-6 text-center">
+        <div className="md3-surface overflow-hidden">
+          <div className="flex flex-col items-center gap-4 border-b border-outline-variant p-6 text-center">
             <ItemIcon locale={locale} imagePath={item.imagePath} name={item.name} className="h-28 w-28" />
             <div className="min-w-0">
-              <h2 className="font-[var(--mn-font-display)] text-2xl leading-tight text-[var(--mn-text)] sm:text-3xl">{item.name}</h2>
-              {detail.reading && <p className="mt-1 text-xs font-semibold text-[var(--mn-text-muted)]">{detail.reading}</p>}
+              <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-medium">{item.name}</h2>
+              {detail.reading && <p className="mt-1 text-label-medium text-on-surface-variant">{detail.reading}</p>}
             </div>
           </div>
-          {item.desc && <p className="whitespace-pre-line px-6 pt-5 text-sm font-medium leading-7 text-[var(--mn-text)]">{item.desc}</p>}
-          <dl className="divide-y divide-dashed divide-[var(--mn-border)]/60 px-6 py-2">
+          {item.desc && <p className="whitespace-pre-line px-6 pt-5 text-body-medium leading-7 text-on-surface">{item.desc}</p>}
+          <dl className="divide-y divide-dashed divide-outline-variant/60 px-6 py-2">
             {facts.map(([label, value]) => (
-              <div key={label} className="flex items-center justify-between gap-4 py-3.5 text-sm">
-                <dt className="shrink-0 font-semibold text-[var(--mn-text-muted)]">{label}</dt>
-                <dd className="min-w-0 text-right font-semibold text-[var(--mn-text)]">{value}</dd>
+              <div key={label} className="flex items-center justify-between gap-4 py-3.5 text-body-medium">
+                <dt className="shrink-0 font-semibold text-on-surface-variant">{label}</dt>
+                <dd className="min-w-0 text-right font-semibold text-on-surface">{value}</dd>
               </div>
             ))}
           </dl>
@@ -84,7 +84,7 @@ function ItemDetailView({ locale, detail }: { locale: AppLocale; detail: ItemDet
         <SourcesPanel locale={locale} sources={detail.sources} />
         <UsagesPanel locale={locale} usages={detail.usages} />
         <div className="flex justify-start">
-          <a href={localizePath(getRoutePathById("items"), locale)} className="mn-focus mn-stamp-press inline-flex rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-6 py-3 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]">
+          <a href={localizePath(getRoutePathById("items"), locale)} className="md3-state inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
             {t(locale, "items.detail.backToList")}
           </a>
         </div>
@@ -97,10 +97,10 @@ function ItemIcon({ locale, imagePath, name, className }: { locale: AppLocale; i
   const src = useAssetUrl()(getItemIconUrl(imagePath, locale));
   const [failed, setFailed] = useState(false);
   return (
-    <span className={`grid shrink-0 place-items-center rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-cream-deep)] p-3 shadow-inner ${className}`}>
+    <span className={`grid shrink-0 place-items-center rounded-shape-lg border border-outline-variant bg-surface-container-highest p-3 shadow-inner ${className}`}>
       {src && !failed
         ? <img className="h-full w-full object-contain" src={src} alt={name} onError={() => setFailed(true)} />
-        : <span className="text-xs font-semibold text-[var(--mn-text-muted)]">{name}</span>}
+        : <span className="text-label-medium text-on-surface-variant">{name}</span>}
     </span>
   );
 }
@@ -123,32 +123,32 @@ function SourcesPanel({ locale, sources }: { locale: AppLocale; sources: ItemSou
     return [...map];
   }, [sources]);
   return (
-    <div className="mn-paper overflow-hidden">
+    <div className="md3-surface overflow-hidden">
       <div className={panelHeader}>
         <h3 className={panelTitle}>{t(locale, "items.sources.title")}</h3>
-        <p className="mt-1 text-xs font-medium text-[var(--mn-text-muted)]">{t(locale, "items.sources.description")}</p>
+        <p className="mt-1 text-body-small text-on-surface-variant">{t(locale, "items.sources.description")}</p>
       </div>
       {groups.length === 0 ? (
-        <p className="px-6 py-6 text-sm font-medium text-[var(--mn-text-muted)] sm:px-8">{t(locale, "items.sources.empty")}</p>
+        <p className="px-6 py-6 text-body-medium text-on-surface-variant sm:px-8">{t(locale, "items.sources.empty")}</p>
       ) : (
         <div className="space-y-5 px-4 py-5 sm:px-6">
           {groups.map(([kind, entries]) => (
             <CollapsibleGroup key={kind} locale={locale} title={t(locale, `items.sources.kinds.${kind}`)} count={entries.length} limit={6}>
               {(visible) => (
-                <ul className="divide-y divide-dashed divide-[var(--mn-border)]/60">
+                <ul className="divide-y divide-dashed divide-outline-variant/60">
                   {entries.slice(0, visible).map((source) => {
                     const name = sourceName(locale, source);
                     return (
-                      <li key={`${source.kind}:${source.key}`} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2.5 text-sm">
+                      <li key={`${source.kind}:${source.key}`} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2.5 text-body-medium">
                         <span className="min-w-0">
                           {source.link
-                            ? <a href={localizePath(entityLinkPath(source.link), locale)} className="mn-focus font-semibold text-[var(--mn-text)] underline decoration-dotted underline-offset-4 hover:text-[var(--mn-accent-deep)]">{name}</a>
-                            : <span className="font-semibold text-[var(--mn-text)]">{name}</span>}
-                          <span className="ml-2 text-xs font-medium text-[var(--mn-text-muted)]">
+                            ? <a href={localizePath(entityLinkPath(source.link), locale)} className="font-semibold text-on-surface underline decoration-dotted underline-offset-4 hover:text-primary">{name}</a>
+                            : <span className="font-semibold text-on-surface">{name}</span>}
+                          <span className="ml-2 text-body-small text-on-surface-variant">
                             {source.details.map((detail) => t(locale, `items.sources.details.${detail}`)).join(" · ")}
                           </span>
                         </span>
-                        <span className="font-mono text-xs font-bold tabular-nums text-[var(--mn-accent-deep)]">
+                        <span className="font-mono text-label-medium tabular-nums text-primary">
                           {t(locale, "items.sources.total", { count: source.total.toLocaleString(locale) })}
                         </span>
                       </li>
@@ -166,13 +166,13 @@ function SourcesPanel({ locale, sources }: { locale: AppLocale; sources: ItemSou
 
 function UsagesPanel({ locale, usages }: { locale: AppLocale; usages: ItemUsageEntry[] }) {
   return (
-    <div className="mn-paper overflow-hidden">
+    <div className="md3-surface overflow-hidden">
       <div className={panelHeader}>
         <h3 className={panelTitle}>{t(locale, "items.usages.title")}</h3>
-        <p className="mt-1 text-xs font-medium text-[var(--mn-text-muted)]">{t(locale, "items.usages.description")}</p>
+        <p className="mt-1 text-body-small text-on-surface-variant">{t(locale, "items.usages.description")}</p>
       </div>
       {usages.length === 0 ? (
-        <p className="px-6 py-6 text-sm font-medium text-[var(--mn-text-muted)] sm:px-8">{t(locale, "items.usages.empty")}</p>
+        <p className="px-6 py-6 text-body-medium text-on-surface-variant sm:px-8">{t(locale, "items.usages.empty")}</p>
       ) : (
         <div className="space-y-5 px-4 py-5 sm:px-6">
           {usages.map((usage) => (
@@ -188,7 +188,7 @@ function UsagesPanel({ locale, usages }: { locale: AppLocale; usages: ItemUsageE
                 <ul className="flex flex-wrap gap-2">
                   {usage.targets.slice(0, visible).map((target) => (
                     <li key={target.id}>
-                      <a href={localizePath(entityLinkPath(target.link), locale)} className="mn-focus inline-flex rounded-lg border border-[var(--mn-border)]/60 bg-[var(--mn-cream-deep)]/40 px-2.5 py-1 text-xs font-semibold text-[var(--mn-text)] transition hover:border-[var(--mn-accent)] hover:bg-[var(--mn-accent-soft)]">
+                      <a href={localizePath(entityLinkPath(target.link), locale)} className="inline-flex rounded-shape-sm border border-outline-variant/60 bg-surface-container-highest/40 px-2.5 py-1 text-label-medium text-on-surface transition hover:border-primary hover:bg-secondary-container">
                         {target.name || `#${target.id}`}
                       </a>
                     </li>
@@ -209,15 +209,15 @@ function CollapsibleGroup({ locale, title, aside, count, limit, children }: { lo
   return (
     <section>
       <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
-        <h4 className="text-sm font-black text-[var(--mn-text)]">
+        <h4 className="text-label-large text-on-surface">
           {title}
-          <span className="ml-2 text-xs font-semibold text-[var(--mn-text-muted)]">{count.toLocaleString(locale)}</span>
+          <span className="ml-2 text-label-medium text-on-surface-variant">{count.toLocaleString(locale)}</span>
         </h4>
-        {aside && <span className="text-xs font-bold text-[var(--mn-accent-deep)]">{aside}</span>}
+        {aside && <span className="text-label-medium text-primary">{aside}</span>}
       </div>
       {children(foldable && !expanded ? limit : count)}
       {foldable && (
-        <button type="button" onClick={() => setExpanded((value) => !value)} aria-expanded={expanded} className="mn-focus mt-2 rounded-full border border-[var(--mn-border)] bg-[var(--mn-paper)] px-3 py-1 text-xs font-bold text-[var(--mn-text-muted)] transition hover:text-[var(--mn-text)]">
+        <button type="button" onClick={() => setExpanded((value) => !value)} aria-expanded={expanded} className="mt-2 rounded-full border border-outline-variant bg-surface-container-low px-3 py-1 text-label-medium text-on-surface-variant transition hover:text-on-surface">
           {expanded ? t(locale, "items.detail.showLess") : t(locale, "items.detail.showAll", { count })}
         </button>
       )}
@@ -227,9 +227,9 @@ function CollapsibleGroup({ locale, title, aside, count, limit, children }: { lo
 
 function NotFound({ locale }: { locale: AppLocale }) {
   return (
-    <div className="mn-paper p-8 text-center sm:p-12">
-      <h2 className="font-[var(--mn-font-display)] text-2xl text-[var(--mn-text)]">{t(locale, "items.detail.notFoundTitle")}</h2>
-      <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-7 text-[var(--mn-text-muted)]">{t(locale, "items.detail.notFoundDescription")}</p>
+    <div className="md3-surface p-8 text-center sm:p-12">
+      <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "items.detail.notFoundTitle")}</h2>
+      <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "items.detail.notFoundDescription")}</p>
     </div>
   );
 }

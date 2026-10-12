@@ -150,10 +150,10 @@ export default function RewardsExplorer({ locale, servers, initialEntries }: Pro
     <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer}>
       <section className="min-w-0" aria-live="polite">
         {filteredEntries.length === 0 ? (
-          <div className="mn-paper p-8 text-center sm:p-12">
-            <h2 className="font-[var(--mn-font-display)] text-2xl text-[var(--mn-text)]">{t(locale, "rewards.emptyTitle")}</h2>
-            <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-7 text-[var(--mn-text-muted)]">{t(locale, "rewards.emptyDescription")}</p>
-            <button type="button" onClick={resetFilters} className="mn-focus mn-stamp-press mt-6 rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-6 py-3 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]">
+          <div className="md3-surface p-8 text-center sm:p-12">
+            <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "rewards.emptyTitle")}</h2>
+            <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "rewards.emptyDescription")}</p>
+            <button type="button" onClick={resetFilters} className="md3-state mt-6 rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
               {t(locale, "rewards.reset")}
             </button>
           </div>
@@ -173,24 +173,24 @@ function RewardEntryCard({ entry, locale, now, timeZone, onClick }: { entry: Rew
     <a
       href={localizePath(`${getRoutePathById("rewards")}/${entry.slug}`, locale)}
       onClick={onClick}
-      className="mn-list-card group flex min-w-0 flex-col overflow-hidden border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp)] transition hover:-translate-y-1 hover:shadow-[var(--mn-shadow-stamp-lg)]"
+      className="mn-list-card group flex min-w-0 flex-col overflow-hidden border border-outline-variant bg-surface-container-low shadow-elevation-1 transition hover:shadow-elevation-1"
       data-list-item-id={entry.slug}
       aria-label={t(locale, "rewards.openDetail", { title: entry.title })}
     >
-      <div className="relative border-b border-[var(--mn-glass-border)]">
+      <div className="relative border-b border-outline-variant">
         <BannerImage src={entry.bannerUrl} alt="" fallback={entry.title} imageClassName={rewardBannerCrop(entry.kind)} />
         <div className="absolute left-2 top-2 flex max-w-[calc(100%-1rem)] flex-wrap gap-1.5">
-          <span className="inline-flex items-center rounded-full border border-[var(--mn-glass-border)] bg-[var(--mn-paper)] px-2.5 py-1 text-[11px] font-bold leading-none text-[var(--mn-ink-soft)]">{t(locale, `rewards.kinds.${entry.kind}`)}</span>
+          <span className="inline-flex items-center rounded-full border border-outline-variant bg-surface-container-low px-2.5 py-1 text-label-small text-on-surface-variant">{t(locale, `rewards.kinds.${entry.kind}`)}</span>
           <ScheduleBadge locale={locale} startAt={entry.startAt} endAt={entry.endAt} now={now} />
         </div>
       </div>
       <div className="flex flex-1 flex-col gap-3 p-3 sm:p-4">
         <div className="min-w-0">
-          <h3 className="line-clamp-2 text-sm font-black leading-5 text-[var(--mn-text)] transition-colors group-hover:text-[var(--mn-accent-deep)]">{entry.title}</h3>
-          <p className="mt-1 truncate text-xs font-medium tabular-nums text-[var(--mn-text-muted)]">{schedule}</p>
+          <h3 className="line-clamp-2 text-label-large leading-5 text-on-surface transition-colors group-hover:text-primary">{entry.title}</h3>
+          <p className="mt-1 truncate text-body-small tabular-nums text-on-surface-variant">{schedule}</p>
         </div>
         {entry.highlights.length > 0 && (
-          <div className="mt-auto flex flex-wrap gap-2.5 border-t border-dashed border-[var(--mn-text-muted)]/40 pt-3">
+          <div className="mt-auto flex flex-wrap gap-2.5 border-t border-dashed border-on-surface-variant/40 pt-3">
             {entry.highlights.map((reward) => <RewardChip key={`${reward.kind}:${reward.id}`} reward={reward} locale={locale} variant="icon" linked={false} />)}
           </div>
         )}

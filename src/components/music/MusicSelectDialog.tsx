@@ -72,14 +72,14 @@ export default function MusicSelectDialog({
         </div>
 
         <div className="min-w-0 space-y-3">
-          <p className="px-1 text-xs font-medium text-[var(--mn-text-muted)]">{t(locale, songOnly ? "music.picker.songHint" : "music.picker.hint")}</p>
+          <p className="px-1 text-body-small text-on-surface-variant">{t(locale, songOnly ? "music.picker.songHint" : "music.picker.hint")}</p>
           {music.sorted.length === 0 ? (
-            <div className="mn-paper p-8 text-center">
-              <p className="font-[var(--mn-font-display)] text-lg text-[var(--mn-text)]">{t(locale, "music.emptyTitle")}</p>
+            <div className="md3-surface p-8 text-center">
+              <p className="font-[var(--md-ref-typeface-brand)] text-title-large text-on-surface">{t(locale, "music.emptyTitle")}</p>
               <button
                 type="button"
                 onClick={music.reset}
-                className="mn-focus mn-stamp-press mt-4 rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-5 py-2 text-xs font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]"
+                className="md3-state mt-4 rounded-full border border-outline-variant bg-surface-container-low px-5 py-2 text-label-medium text-on-surface shadow-elevation-1"
               >
                 {t(locale, "music.reset")}
               </button>
@@ -123,18 +123,16 @@ function SongOption({ locale, song, current, preferred, songOnly, onPick }: {
   return (
     <li
       data-song-id={song.id}
-      className={`group min-w-0 overflow-hidden rounded-2xl border-[1.5px] bg-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp)] transition ${
-        selected ? "border-[var(--mn-accent)] ring-2 ring-[var(--mn-accent)]" : "border-[var(--mn-border)] hover:-translate-y-0.5 hover:shadow-[var(--mn-shadow-stamp-lg)]"
-      }`}
+      className={`group min-w-0 overflow-hidden rounded-shape-lg border bg-surface-container-low shadow-elevation-1 transition ${ selected ? "border-primary ring-2 ring-primary" : "border-outline-variant hover:shadow-elevation-1" }`}
     >
       <button
         type="button"
         disabled={!coverDifficulty}
         onClick={() => coverDifficulty && onPick(coverDifficulty)}
         aria-label={t(locale, "music.picker.pickSong", { title })}
-        className="mn-focus block w-full text-left"
+        className="block w-full text-left"
       >
-        <span className="relative block aspect-square w-full overflow-hidden border-b-[1.5px] border-[var(--mn-border)] bg-[var(--mn-cream-deep)]">
+        <span className="relative block aspect-square w-full overflow-hidden border-b-[1.5px] border-outline-variant bg-surface-container-highest">
           <img className="h-full w-full object-cover transition duration-300 group-hover:scale-105" src={song.jacketUrl} alt="" loading="lazy" />
           <img
             className="absolute left-2 top-2 h-5 w-auto object-contain drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]"
@@ -145,10 +143,10 @@ function SongOption({ locale, song, current, preferred, songOnly, onPick }: {
           />
         </span>
         <span className="block px-2.5 pb-1.5 pt-2">
-          <span className={`block truncate font-[var(--mn-font-display)] text-sm font-bold ${selected ? "text-[var(--mn-accent-deep)]" : "text-[var(--mn-text)]"}`}>
+          <span className={`block truncate font-[var(--md-ref-typeface-brand)] text-label-large ${selected ? "text-primary" : "text-on-surface"}`}>
             {title}
           </span>
-          <span className="block truncate text-[10px] font-medium text-[var(--mn-text-muted)]">{song.bandName}</span>
+          <span className="block truncate text-label-small text-on-surface-variant">{song.bandName}</span>
         </span>
         {/* Song-only: the levels are shown but not picked, so they stay part of the song's button. */}
         {songOnly && (
@@ -179,9 +177,7 @@ function SongOption({ locale, song, current, preferred, songOnly, onPick }: {
               aria-label={t(locale, "music.picker.pickDifficulty", { title, difficulty: label })}
               aria-pressed={current === key}
               title={label}
-              className={`mn-focus rounded border py-0.5 text-center font-black transition hover:brightness-95 ${DIFFICULTY_CHIP_CLASSES[key]} ${
-                current === key ? "ring-2 ring-[var(--mn-accent)] ring-offset-1 ring-offset-[var(--mn-paper)]" : ""
-              }`}
+              className={`rounded border py-0.5 text-center font-black transition hover:brightness-95 ${DIFFICULTY_CHIP_CLASSES[key]} ${ current === key ? "ring-2 ring-primary ring-offset-1 ring-offset-surface-container-low" : "" }`}
             >
               <DifficultyChipFace difficulty={key} level={entry.displayLevel} />
             </button>
@@ -196,7 +192,7 @@ function DifficultyChipFace({ difficulty, level }: { difficulty: MusicDifficulty
   return (
     <>
       <span className="block text-[7px] leading-none opacity-60">{DIFFICULTY_SHORT_LABELS[difficulty]}</span>
-      <span className="font-mono text-[11px] leading-tight">{level}</span>
+      <span className="font-mono text-label-small">{level}</span>
     </>
   );
 }

@@ -150,10 +150,10 @@ export default function EventTracker({ locale, events, songs, deckCards, servers
       <div className="flex flex-wrap items-center justify-between gap-3">
         <GameServerSwitch locale={locale} value={server} onChange={pickServer} />
         {catalog.length > 1 && (
-          <label className="flex min-w-0 items-center gap-2 text-xs font-bold text-[var(--mn-text-muted)]">
+          <label className="flex min-w-0 items-center gap-2 text-label-medium text-on-surface-variant">
             <span className="shrink-0">{t(locale, "eventTracker.eventLabel")}</span>
             <select
-              className="mn-focus min-w-0 max-w-[18rem] truncate rounded-full border border-[var(--mn-border)] bg-[var(--mn-paper)] px-3 py-1.5 text-xs font-bold text-[var(--mn-text)]"
+              className="min-w-0 max-w-[18rem] truncate rounded-full border border-outline-variant bg-surface-container-low px-3 py-1.5 text-label-medium text-on-surface"
               value={pinned ?? ""}
               onChange={(change) => pickEvent(change.target.value || null)}
             >
@@ -169,7 +169,7 @@ export default function EventTracker({ locale, events, songs, deckCards, servers
       </div>
 
       {load.state === "loading" && (
-        <SiriusLoader locale={locale} label={t(locale, "eventTracker.loading")} className="mn-paper min-h-72" />
+        <SiriusLoader locale={locale} label={t(locale, "eventTracker.loading")} className="md3-surface min-h-72" />
       )}
 
       {load.state === "error" && (
@@ -199,14 +199,14 @@ export default function EventTracker({ locale, events, songs, deckCards, servers
             name={eventName(event.eventId)}
           />
 
-          <section className="mn-paper overflow-hidden" aria-labelledby="event-tracker-challenges">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--mn-border)] bg-gradient-to-r from-[color-mix(in_oklab,var(--mn-accent)_6%,transparent)] to-transparent px-6 py-4 sm:px-8">
-              <h2 id="event-tracker-challenges" className="font-[var(--mn-font-display)] text-xl text-[var(--mn-text)] sm:text-2xl">
+          <section className="md3-surface overflow-hidden" aria-labelledby="event-tracker-challenges">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-6 py-4 sm:px-8">
+              <h2 id="event-tracker-challenges" className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-small">
                 {t(locale, "eventTracker.challenges.title")}
               </h2>
             </div>
             {challenges.length === 0 ? (
-              <p className="px-6 py-8 text-center text-sm font-semibold text-[var(--mn-text-muted)]">{t(locale, "eventTracker.challenges.none")}</p>
+              <p className="px-6 py-8 text-center text-label-large text-on-surface-variant">{t(locale, "eventTracker.challenges.none")}</p>
             ) : (
               <>
                 <SongTabs locale={locale} server={server} challenges={challenges} songs={songs} selected={challenge?.challengeMusicId ?? null} onSelect={setSong} />
@@ -246,7 +246,7 @@ function EventHeader({ locale, server, servers, event, entry, name }: {
   const art = { name, bannerUrl: shown?.bannerUrl ?? "", logoUrl: shown?.logoUrl ?? "", backgroundUrl: shown?.backgroundUrl ?? "" };
 
   return (
-    <div className="mn-paper overflow-hidden">
+    <div className="md3-surface overflow-hidden">
       <div className="grid gap-0 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
         {/* The banner keeps its 7:3 width inside its column; sized by the row's height it would spill over the text. */}
         <div className="min-w-0 self-center overflow-hidden">
@@ -259,17 +259,17 @@ function EventHeader({ locale, server, servers, event, entry, name }: {
             <StatusChip tone={event.eventStatus === "nowOn" ? "live" : event.eventStatus === "aggregation" || event.eventStatus === "feature" ? "wait" : "done"}>
               {t(locale, `eventTracker.eventStatus.${event.eventStatus}`)}
             </StatusChip>
-            <span className="font-mono text-[11px] font-bold text-[var(--mn-text-muted)]">#{event.eventId}</span>
+            <span className="font-mono text-label-small text-on-surface-variant">#{event.eventId}</span>
           </div>
-          <h2 className="font-[var(--mn-font-display)] text-2xl leading-tight text-[var(--mn-text)] sm:text-3xl">{name}</h2>
-          <p className="text-xs font-semibold tabular-nums text-[var(--mn-text-muted)]">
+          <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-medium">{name}</h2>
+          <p className="text-label-medium tabular-nums text-on-surface-variant">
             {formatServerSchedule(event.startAt, event.endAt, server, locale)}
           </p>
           <Countdown locale={locale} event={event} />
           {entry?.servers.includes(server) && (
             <a
               href={localizePath(eventPath(Number(event.eventId)), locale)}
-              className="mn-focus w-fit text-xs font-bold text-[var(--mn-accent-deep)] underline-offset-4 hover:underline"
+              className="w-fit text-label-medium text-primary underline-offset-4 hover:underline"
             >
               {t(locale, "eventTracker.openEvent")}
             </a>
@@ -294,9 +294,9 @@ function Countdown({ locale, event }: { locale: AppLocale; event: RankdEvent }) 
         : [null, 0] as const;
   if (!key) return null;
   return (
-    <p className="text-sm font-bold text-[var(--mn-text)]">
+    <p className="text-label-large text-on-surface">
       {t(locale, `eventTracker.countdown.${key}`)}{" "}
-      <span className="font-mono tabular-nums text-[var(--mn-accent-deep)]">{formatDuration(locale, target - now)}</span>
+      <span className="font-mono tabular-nums text-primary">{formatDuration(locale, target - now)}</span>
     </p>
   );
 }
@@ -317,7 +317,7 @@ function SongTabs({ locale, server, challenges, songs, selected, onSelect }: {
   onSelect: (challengeMusicId: string) => void;
 }) {
   return (
-    <div className="flex gap-2 overflow-x-auto border-b border-[var(--mn-border)] px-4 py-3 sm:px-6" role="tablist" aria-label={t(locale, "eventTracker.challenges.songs")}>
+    <div className="flex gap-2 overflow-x-auto border-b border-outline-variant px-4 py-3 sm:px-6" role="tablist" aria-label={t(locale, "eventTracker.challenges.songs")}>
       {challenges.map((entry, index) => {
         const song = songs[entry.musicId];
         const active = entry.challengeMusicId === selected;
@@ -328,19 +328,15 @@ function SongTabs({ locale, server, challenges, songs, selected, onSelect }: {
             role="tab"
             aria-selected={active}
             onClick={() => onSelect(entry.challengeMusicId)}
-            className={`mn-focus flex min-w-[11rem] max-w-[16rem] shrink-0 items-center gap-2.5 rounded-2xl border p-2 text-left transition ${
-              active
-                ? "border-[var(--mn-accent)] bg-[var(--mn-accent-soft)]"
-                : "border-[var(--mn-border)] bg-[var(--mn-paper)] hover:border-[var(--mn-accent)]"
-            }`}
+            className={`flex min-w-[11rem] max-w-[16rem] shrink-0 items-center gap-2.5 rounded-shape-lg border p-2 text-left transition ${ active ? "border-primary bg-secondary-container" : "border-outline-variant bg-surface-container-low hover:border-primary" }`}
           >
             <SongJacket song={song} server={server} className="h-11 w-11" />
             <span className="min-w-0">
-              <span className="block text-[10px] font-black tracking-wider text-[var(--mn-text-muted)]">{t(locale, "eventTracker.challenges.songNumber", { n: index + 1 })}</span>
-              <span className={`block truncate text-sm font-bold ${active ? "text-[var(--mn-accent-deep)]" : "text-[var(--mn-text)]"}`}>
+              <span className="block text-label-small text-on-surface-variant">{t(locale, "eventTracker.challenges.songNumber", { n: index + 1 })}</span>
+              <span className={`block truncate text-label-large ${active ? "text-primary" : "text-on-surface"}`}>
                 {song?.title || t(locale, "eventTracker.songFallback", { id: entry.musicId })}
               </span>
-              <span className="mt-0.5 flex items-center gap-1 text-[10px] font-semibold text-[var(--mn-text-muted)]">
+              <span className="mt-0.5 flex items-center gap-1 text-label-small text-on-surface-variant">
                 <StatusDot status={entry.collectStatus} />
                 {t(locale, `eventTracker.collect.${entry.collectStatus}`)}
               </span>
@@ -355,9 +351,9 @@ function SongTabs({ locale, server, challenges, songs, selected, onSelect }: {
 function SongJacket({ song, server, className }: { song: TrackerSong | undefined | null; server: GameServer; className: string }) {
   const source = song?.servers.length && !song.servers.includes(server) ? song.servers[0]! : server;
   return song?.jacketUrl ? (
-    <img className={`${className} shrink-0 rounded-lg border border-[var(--mn-glass-border)] bg-[var(--mn-cream-deep)] object-cover`} src={serverAssetUrl(song.jacketUrl, source)} alt="" loading="lazy" />
+    <img className={`${className} shrink-0 rounded-shape-sm border border-outline-variant bg-surface-container-highest object-cover`} src={serverAssetUrl(song.jacketUrl, source)} alt="" loading="lazy" />
   ) : (
-    <span className={`${className} mn-texture-orbit shrink-0 rounded-lg`} aria-hidden="true" />
+    <span className={`${className} md3-placeholder shrink-0 rounded-shape-sm`} aria-hidden="true" />
   );
 }
 
@@ -421,16 +417,16 @@ function ChallengeBoard({ locale, server, eventId, challenge, song, cards, serve
   return (
     <div className="px-4 py-4 sm:px-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3 px-2">
-        <a href={song ? localizePath(`${getRoutePathById("music")}/${challenge.musicId}`, locale) : undefined} className="mn-focus group flex min-w-0 items-center gap-3">
+        <a href={song ? localizePath(`${getRoutePathById("music")}/${challenge.musicId}`, locale) : undefined} className="group flex min-w-0 items-center gap-3">
           <SongJacket song={song} server={server} className="h-14 w-14" />
           <span className="min-w-0">
-            <span className="block truncate font-[var(--mn-font-display)] text-lg font-bold text-[var(--mn-text)] group-hover:text-[var(--mn-accent-deep)]">
+            <span className="block truncate font-[var(--md-ref-typeface-brand)] text-title-large text-on-surface group-hover:text-primary">
               {song?.title || t(locale, "eventTracker.songFallback", { id: challenge.musicId })}
             </span>
-            {song?.bandName && <span className="block truncate text-xs font-semibold text-[var(--mn-text-muted)]">{song.bandName}</span>}
+            {song?.bandName && <span className="block truncate text-label-medium text-on-surface-variant">{song.bandName}</span>}
           </span>
         </a>
-        <div className="flex flex-col items-end gap-1 text-right text-[11px] font-semibold text-[var(--mn-text-muted)]">
+        <div className="flex flex-col items-end gap-1 text-right text-label-small text-on-surface-variant">
           <span className="flex items-center gap-1.5">
             <StatusDot status={challenge.collectStatus} />
             {t(locale, `eventTracker.collect.${challenge.collectStatus}`)}
@@ -460,13 +456,13 @@ function ChallengeBoard({ locale, server, eventId, challenge, song, cards, serve
           <BoardNotice locale={locale} server={server} challenge={{ ...challenge, collectStatus: load.kind === "notStarted" ? "pending" : load.kind }} />
         )
       ) : top.length === 0 ? (
-        <p className="px-2 py-8 text-center text-sm font-semibold text-[var(--mn-text-muted)]">{t(locale, "music.ranking.empty")}</p>
+        <p className="px-2 py-8 text-center text-label-large text-on-surface-variant">{t(locale, "music.ranking.empty")}</p>
       ) : (
         <RankingList locale={locale} rows={top} cards={cards} assetUrl={assetUrl} boundaries={boundaries} server={server} />
       )}
 
       {finalQuality === "lastSeen" && (
-        <p className="mt-4 border-t border-[var(--mn-glass-border)] px-2 pt-3 text-xs leading-6 text-[var(--mn-text-muted)]">
+        <p className="mt-4 border-t border-outline-variant px-2 pt-3 text-body-small leading-6 text-on-surface-variant">
           {t(locale, "eventTracker.challenges.lastSeen")}
         </p>
       )}
@@ -516,11 +512,11 @@ function PointRankingPanel({ locale, server, event, servers }: { locale: AppLoca
   const missing = data ? missingRanks(data) : [];
 
   return (
-    <section className="mn-paper overflow-hidden" aria-labelledby="event-tracker-points">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--mn-border)] bg-gradient-to-r from-[color-mix(in_oklab,var(--mn-accent)_6%,transparent)] to-transparent px-6 py-4 sm:px-8">
-        <h2 id="event-tracker-points" className="font-[var(--mn-font-display)] text-xl text-[var(--mn-text)] sm:text-2xl">{t(locale, "eventTracker.points.title")}</h2>
+    <section className="md3-surface overflow-hidden" aria-labelledby="event-tracker-points">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-6 py-4 sm:px-8">
+        <h2 id="event-tracker-points" className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-small">{t(locale, "eventTracker.points.title")}</h2>
         {enabled && (
-          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[var(--mn-text-muted)]">
+          <span className="flex items-center gap-1.5 text-label-small text-on-surface-variant">
             <StatusDot status={status} />
             {t(locale, `eventTracker.collect.${status}`)}
           </span>
@@ -528,30 +524,30 @@ function PointRankingPanel({ locale, server, event, servers }: { locale: AppLoca
       </div>
       <div className="px-4 py-4 sm:px-6">
         {!enabled ? (
-          <p className="px-2 py-4 text-sm leading-7 text-[var(--mn-text-muted)]">{t(locale, "eventTracker.points.disabled")}</p>
+          <p className="px-2 py-4 text-body-medium leading-7 text-on-surface-variant">{t(locale, "eventTracker.points.disabled")}</p>
         ) : !readable ? (
-          <p className="px-2 py-4 text-sm leading-7 text-[var(--mn-text-muted)]">{t(locale, `eventTracker.board.${status === "missed" ? "missed" : "pending"}`)}</p>
+          <p className="px-2 py-4 text-body-medium leading-7 text-on-surface-variant">{t(locale, `eventTracker.board.${status === "missed" ? "missed" : "pending"}`)}</p>
         ) : !data ? (
           failed
-            ? <p className="px-2 py-4 text-sm font-semibold text-[var(--mn-text-muted)]">{t(locale, "music.ranking.errors.failed")}</p>
+            ? <p className="px-2 py-4 text-label-large text-on-surface-variant">{t(locale, "music.ranking.errors.failed")}</p>
             : <RankingLoading locale={locale} label={t(locale, "music.ranking.loading")} />
         ) : (
           <>
-            <p className="mb-3 px-2 text-right text-[11px] font-semibold text-[var(--mn-text-muted)]">
+            <p className="mb-3 px-2 text-right text-label-small text-on-surface-variant">
               {t(locale, "music.ranking.updatedAgo", { time: formatAge(data.updatedAt, latest.serverTime ?? Date.now(), locale) })}
               {data.stale && ` · ${t(locale, "eventTracker.points.interrupted")}`}
               {data.frozen && ` · ${t(locale, "eventTracker.points.frozen")}`}
             </p>
-            <ol className="divide-y divide-dashed divide-[var(--mn-border)]/50">
+            <ol className="divide-y divide-dashed divide-outline-variant/50">
               {rows.map((row, index) => {
                 const profile = row.profile;
                 const thumbnails = profile?.profileCard?.thumbnailUrl;
                 const namecardImages = Array.isArray(thumbnails) ? thumbnails.length : 0;
                 return (
                   <li key={`${row.rank}:${profile?.id ?? index}`} className="grid grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center gap-3 px-2 py-2">
-                    <span className={`font-mono text-base font-black ${row.rank <= 3 ? "text-[var(--mn-accent-deep)]" : "text-[var(--mn-text)]"}`}>
+                    <span className={`font-mono text-title-medium ${row.rank <= 3 ? "text-primary" : "text-on-surface"}`}>
                       {numbers.format(row.rank)}
-                      {row.dup && <span className="ml-0.5 align-top text-[9px] font-bold text-[var(--mn-text-muted)]" title={t(locale, "eventTracker.points.tied")}>=</span>}
+                      {row.dup && <span className="ml-0.5 align-top text-label-small text-on-surface-variant" title={t(locale, "eventTracker.points.tied")}>=</span>}
                     </span>
                     <span className="flex min-w-0 items-center gap-2">
                       {profile && namecardImages > 0 && (
@@ -564,15 +560,15 @@ function PointRankingPanel({ locale, server, event, servers }: { locale: AppLoca
                           useRankingApi={true}
                         />
                       )}
-                      <span className="truncate text-sm font-bold text-[var(--mn-text)]">{profile?.name ?? ""}</span>
+                      <span className="truncate text-label-large text-on-surface">{profile?.name ?? ""}</span>
                     </span>
-                    <span className="text-right font-mono text-sm font-black tabular-nums text-[var(--mn-text)]">{numbers.format(row.point)}</span>
+                    <span className="text-right font-mono text-label-large tabular-nums text-on-surface">{numbers.format(row.point)}</span>
                   </li>
                 );
               })}
             </ol>
             {missing.length > 0 && (
-              <p className="mt-3 px-2 text-xs text-[var(--mn-text-muted)]">
+              <p className="mt-3 px-2 text-body-small text-on-surface-variant">
                 {t(locale, "eventTracker.points.notReturned", { ranks: missing.map((rank) => numbers.format(rank)).join(", ") })}
               </p>
             )}
@@ -584,26 +580,26 @@ function PointRankingPanel({ locale, server, event, servers }: { locale: AppLoca
 }
 
 const dotTone: Record<string, string> = {
-  collecting: "bg-[var(--mn-mint-deep)] animate-pulse",
-  finalizing: "bg-[var(--mn-accent)]",
-  archiving: "bg-[var(--mn-accent)]",
-  archived: "bg-[var(--mn-text-muted)]",
-  pending: "bg-[var(--mn-pink)]",
+  collecting: "bg-on-success-container animate-pulse",
+  finalizing: "bg-primary",
+  archiving: "bg-primary",
+  archived: "bg-on-surface-variant",
+  pending: "bg-category1",
 };
 
 function StatusDot({ status }: { status: string }) {
-  return <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${dotTone[status] ?? "bg-[var(--mn-border)]"}`} aria-hidden="true" />;
+  return <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${dotTone[status] ?? "bg-outline-variant"}`} aria-hidden="true" />;
 }
 
 const chipTone = {
-  live: "border-[color-mix(in_srgb,var(--mn-accent)_45%,transparent)] bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]",
-  wait: "border-[color-mix(in_srgb,var(--mn-pink)_70%,transparent)] bg-[var(--mn-pink-soft)] text-[var(--mn-ink-soft)]",
-  done: "border-[var(--mn-glass-border)] bg-[var(--mn-cream-deep)] text-[var(--mn-text-muted)]",
+  live: "border-primary/45 bg-secondary-container text-primary",
+  wait: "border-category1/70 bg-category1-container text-on-surface-variant",
+  done: "border-outline-variant bg-surface-container-highest text-on-surface-variant",
 };
 
 function StatusChip({ tone, children }: { tone: keyof typeof chipTone; children: ReactNode }) {
   return (
-    <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-bold leading-none ${chipTone[tone]}`}>
+    <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-label-small ${chipTone[tone]}`}>
       <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-current" aria-hidden="true" />
       {children}
     </span>
@@ -612,9 +608,9 @@ function StatusChip({ tone, children }: { tone: keyof typeof chipTone; children:
 
 function Notice({ title, hint, action, compact = false }: { title: string; hint?: string; action?: ReactNode; compact?: boolean }) {
   return (
-    <div className={compact ? "px-2 py-8 text-center" : "mn-paper p-8 text-center"} role="status">
-      <p className={compact ? "text-sm font-bold text-[var(--mn-text)]" : "font-[var(--mn-font-display)] text-xl text-[var(--mn-text)]"}>{title}</p>
-      {hint && <p className="mx-auto mt-2 max-w-lg text-xs leading-6 text-[var(--mn-text-muted)]">{hint}</p>}
+    <div className={compact ? "px-2 py-8 text-center" : "md3-surface p-8 text-center"} role="status">
+      <p className={compact ? "text-label-large text-on-surface" : "font-[var(--md-ref-typeface-brand)] text-xl text-on-surface"}>{title}</p>
+      {hint && <p className="mx-auto mt-2 max-w-lg text-body-small leading-6 text-on-surface-variant">{hint}</p>}
       {action && <div className="mt-4 flex justify-center">{action}</div>}
     </div>
   );
@@ -625,7 +621,7 @@ function RetryButton({ locale, onClick, label }: { locale: AppLocale; onClick: (
     <button
       type="button"
       onClick={onClick}
-      className="mn-focus mn-stamp-press rounded-full border border-[var(--mn-border)] bg-[var(--mn-paper)] px-5 py-2 text-xs font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]"
+      className="md3-state rounded-full border border-outline-variant bg-surface-container-low px-5 py-2 text-label-medium text-on-surface shadow-elevation-1"
     >
       {label ?? t(locale, "music.ranking.retry")}
     </button>

@@ -191,14 +191,14 @@ export default function ChartSheetDialog({ locale, song, difficulty: requested, 
       type="button"
       onClick={download}
       disabled={downloadState === "downloading"}
-      className="grid h-8 w-8 place-items-center rounded-full border-2 border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-text-muted)] shadow-[var(--mn-shadow-stamp-sm)] transition hover:text-[var(--mn-text)] disabled:opacity-50"
+      className="grid h-8 w-8 place-items-center rounded-full border-2 border-outline-variant bg-surface-container-low text-on-surface-variant transition hover:text-on-surface disabled:opacity-50"
       aria-label={t(locale, "music.chartPreview.download")}
       title={t(locale, "music.chartPreview.download")}
     >
       {downloadState === "idle" && <DownloadIcon />}
       {downloadState === "downloading" && <Spinner />}
       {downloadState === "success" && (
-        <svg className="h-4 w-4 text-[var(--mn-mint)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+        <svg className="h-4 w-4 text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
         </svg>
       )}
@@ -268,17 +268,17 @@ export default function ChartSheetDialog({ locale, song, difficulty: requested, 
   );
 }
 
-const primaryButton = "mn-focus mn-stamp-press inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--mn-border)] bg-[var(--mn-accent-deep)] px-6 py-2.5 text-sm font-bold text-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp)]";
+const primaryButton = " md3-state inline-flex min-h-10 items-center gap-2 rounded-full border border-outline-variant bg-primary px-6 py-2.5 text-sm font-bold text-on-primary shadow-elevation-1";
 
 /** Progress and failure, in the frame the viewer takes once the sheet is drawn. */
 function SheetStatus({ locale, sheet, onRetry }: { locale: AppLocale; sheet: SheetState; onRetry: () => void }) {
-  const frame = "flex h-[60vh] w-full flex-col items-center justify-center gap-3 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-cream-deep)] p-6 text-center";
+  const frame = "flex h-[60vh] w-full flex-col items-center justify-center gap-3 rounded-shape-lg border border-outline-variant bg-surface-container-highest p-6 text-center";
 
   if (sheet.stage === "failed") {
     return (
       <div className={frame} role="alert">
-        <h4 className="font-[var(--mn-font-display)] text-lg text-[var(--mn-text)]">{t(locale, `music.chartPreview.${sheet.kind}Title`)}</h4>
-        <p className="max-w-md text-sm font-medium leading-7 text-[var(--mn-text-muted)]">{t(locale, `music.chartPreview.${sheet.kind}Description`)}</p>
+        <h4 className="font-[var(--md-ref-typeface-brand)] text-title-large text-on-surface">{t(locale, `music.chartPreview.${sheet.kind}Title`)}</h4>
+        <p className="max-w-md text-body-medium leading-7 text-on-surface-variant">{t(locale, `music.chartPreview.${sheet.kind}Description`)}</p>
         {sheet.kind !== "unsupported" && (
           <button type="button" onClick={onRetry} className={primaryButton}>{t(locale, "music.chartPreview.retry")}</button>
         )}
@@ -290,7 +290,7 @@ function SheetStatus({ locale, sheet, onRetry }: { locale: AppLocale; sheet: She
   return (
     <div className={frame}>
       <SiriusLoader locale={locale} label={t(locale, `music.chartPreview.${stage}`)} />
-      <p className="max-w-md text-xs font-medium leading-6 text-[var(--mn-text-muted)]">{t(locale, `music.chartPreview.${stage}Hint`)}</p>
+      <p className="max-w-md text-body-small leading-6 text-on-surface-variant">{t(locale, `music.chartPreview.${stage}Hint`)}</p>
     </div>
   );
 }
@@ -393,15 +393,15 @@ function SheetViewer({ locale, url, width, height, alt }: { locale: AppLocale; u
     event.preventDefault();
   };
 
-  const iconButton = "mn-focus mn-stamp-press grid h-10 w-10 place-items-center rounded-full border border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp-sm)]";
+  const iconButton = " md3-state grid h-10 w-10 place-items-center rounded-full border border-outline-variant bg-surface-container-low text-on-surface ";
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-end gap-2">
         <button type="button" className={iconButton} onClick={() => zoomAtCentre(0.8)} aria-label={t(locale, "music.chartPreview.zoomOut")}><MinusIcon /></button>
-        <span className="w-12 text-center font-mono text-xs font-bold text-[var(--mn-text)]" aria-live="polite">{Math.round(view.scale * 100)}%</span>
+        <span className="w-12 text-center font-mono text-label-medium text-on-surface" aria-live="polite">{Math.round(view.scale * 100)}%</span>
         <button type="button" className={iconButton} onClick={() => zoomAtCentre(1.25)} aria-label={t(locale, "music.chartPreview.zoomIn")}><PlusIcon /></button>
-        <button type="button" className={`${iconButton} w-auto px-4 text-xs font-bold`} onClick={fit}>{t(locale, "music.chartPreview.fit")}</button>
+        <button type="button" className={`${iconButton} w-auto px-4 text-label-medium`} onClick={fit}>{t(locale, "music.chartPreview.fit")}</button>
       </div>
       <div
         ref={viewportRef}
@@ -417,7 +417,7 @@ function SheetViewer({ locale, url, width, height, alt }: { locale: AppLocale; u
           const point = localPoint(event.clientX, event.clientY);
           zoomAt(point.x, point.y, 2);
         }}
-        className="mn-focus relative h-[60vh] w-full cursor-grab touch-none select-none overflow-hidden rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-cream-deep)] active:cursor-grabbing"
+        className="relative h-[60vh] w-full cursor-grab touch-none select-none overflow-hidden rounded-shape-lg border border-outline-variant bg-surface-container-highest active:cursor-grabbing"
       >
         <img
           className="pointer-events-none absolute left-0 top-0 max-w-none origin-top-left"
@@ -442,8 +442,8 @@ function Segmented({ label, options, value, disabled, onChange }: {
 }) {
   return (
     <div className="space-y-2">
-      <span className="block text-xs font-bold text-[var(--mn-text-muted)]">{label}</span>
-      <div className="mn-segmented flex w-fit flex-wrap gap-1 rounded-full border border-[var(--mn-glass-border)] bg-[var(--mn-surface-strong)] p-1" role="group" aria-label={label}>
+      <span className="block text-label-medium text-on-surface-variant">{label}</span>
+      <div className="md3-segmented w-fit" role="group" aria-label={label}>
         {options.map((option) => (
           <button
             key={option.key}
@@ -453,7 +453,7 @@ function Segmented({ label, options, value, disabled, onChange }: {
             title={option.title}
             aria-label={option.title}
             onClick={() => onChange(option.key)}
-            className={`mn-focus inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${option.key === value ? "bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]" : "text-[var(--mn-text-muted)] hover:bg-[var(--mn-cream-deep)]"}`}
+            className="md3-segment md3-state"
           >
             {option.dot && <span className={`h-2 w-2 shrink-0 rounded-full ${option.dot}`} aria-hidden="true" />}
             {option.label}

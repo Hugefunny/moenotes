@@ -69,35 +69,35 @@ export default function GachaSimulator({ locale, gacha }: Props) {
 
   const rarities = Object.keys(tally.byRarity).map(Number).sort((a, b) => b - a);
   const ten = gacha.drawPlans.ten;
-  const buttonBase = "mn-focus mn-stamp-press inline-flex items-center justify-center rounded-full border px-5 py-2 text-sm font-bold shadow-[var(--mn-shadow-stamp)]";
+  const buttonBase = " md3-state inline-flex items-center justify-center rounded-full border px-5 py-2 text-sm font-bold shadow-elevation-1";
 
   return (
-    <div className="mn-paper overflow-hidden">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--mn-border)] bg-gradient-to-r from-[color-mix(in_oklab,var(--mn-accent)_6%,transparent)] to-transparent px-6 py-4 sm:px-8">
-        <h3 className="font-[var(--mn-font-display)] text-xl text-[var(--mn-text)] sm:text-2xl">{t(locale, "gacha.simulator.title")}</h3>
+    <div className="md3-surface overflow-hidden">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-6 py-4 sm:px-8">
+        <h3 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-small">{t(locale, "gacha.simulator.title")}</h3>
         <div className="flex flex-wrap items-center gap-2">
           {options.length > 0 ? options.map((option) => (
             <button
               key={option.slot}
               type="button"
               onClick={() => run(drawOptionPlan(option), option)}
-              className={`${buttonBase} gap-1.5 border-[var(--mn-border)] ${option.drawCount >= 10 ? "bg-[var(--mn-accent-deep)] text-[var(--mn-paper)]" : "bg-[var(--mn-paper)] text-[var(--mn-text)]"}`}
+              className={`${buttonBase} gap-1.5 border-outline-variant ${option.drawCount >= 10 ? "bg-primary text-on-primary" : "bg-surface-container-low text-on-surface"}`}
             >
               <DrawCurrencyIcon locale={locale} option={option} />
               {drawOptionName(locale, option)}
             </button>
           )) : (
             <>
-              <button type="button" onClick={() => run(gacha.drawPlans.single)} className={`${buttonBase} border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-text)]`}>
+              <button type="button" onClick={() => run(gacha.drawPlans.single)} className={`${buttonBase} border-outline-variant bg-surface-container-low text-on-surface`}>
                 {t(locale, "gacha.simulator.single")}
               </button>
-              <button type="button" onClick={() => run(ten)} className={`${buttonBase} border-[var(--mn-border)] bg-[var(--mn-accent-deep)] text-[var(--mn-paper)]`}>
+              <button type="button" onClick={() => run(ten)} className={`${buttonBase} border-outline-variant bg-primary text-on-primary`}>
                 {t(locale, "gacha.simulator.ten")}
               </button>
             </>
           )}
           {tally.total > 0 && (
-            <button type="button" onClick={reset} className="mn-focus rounded-full px-3 py-2 text-xs font-bold text-[var(--mn-text-muted)] hover:bg-[var(--mn-cream-deep)] hover:text-[var(--mn-text)]">
+            <button type="button" onClick={reset} className="rounded-full px-3 py-2 text-label-medium text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface">
               {t(locale, "gacha.simulator.reset")}
             </button>
           )}
@@ -106,19 +106,19 @@ export default function GachaSimulator({ locale, gacha }: Props) {
 
       <div className="space-y-4 p-4 sm:p-6">
         {tally.total > 0 && (
-          <div className="flex flex-wrap items-center gap-2 text-xs font-bold" aria-live="polite">
-            <span className="rounded-full bg-[var(--mn-cream-deep)] px-2.5 py-1 text-[var(--mn-text)]">{t(locale, "gacha.simulator.draws", { count: tally.total })}</span>
+          <div className="flex flex-wrap items-center gap-2 text-label-medium" aria-live="polite">
+            <span className="rounded-full bg-surface-container-highest px-2.5 py-1 text-on-surface">{t(locale, "gacha.simulator.draws", { count: tally.total })}</span>
             {rarities.map((rarity) => (
-              <span key={rarity} className={`rounded-full px-2.5 py-1 ${rarity >= TOP_RARITY ? "bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]" : "bg-[var(--mn-surface)] text-[var(--mn-ink-soft)]"}`}>
+              <span key={rarity} className={`rounded-full px-2.5 py-1 ${rarity >= TOP_RARITY ? "bg-secondary-container text-primary" : "bg-surface-container text-on-surface-variant"}`}>
                 {t(locale, `cards.rarities.${rarity}`)} {tally.byRarity[rarity]}
                 <span className="ml-1 font-mono font-medium opacity-70">{((tally.byRarity[rarity]! / tally.total) * 100).toFixed(1)}%</span>
               </span>
             ))}
-            {tally.pickups > 0 && <span className="rounded-full bg-[var(--mn-accent-deep)] px-2.5 py-1 text-[var(--mn-paper)]">{t(locale, "gacha.simulator.pickups", { count: tally.pickups })}</span>}
+            {tally.pickups > 0 && <span className="rounded-full bg-primary px-2.5 py-1 text-on-primary">{t(locale, "gacha.simulator.pickups", { count: tally.pickups })}</span>}
             {Object.entries(tally.spent).map(([currencyId, amount]) => {
               const option = currencies.get(Number(currencyId));
               return (
-                <span key={currencyId} className="inline-flex items-center gap-1 rounded-full border border-[var(--mn-glass-border)] bg-[var(--mn-paper)] px-2.5 py-1 text-[var(--mn-text)]" title={option?.currency?.name || undefined}>
+                <span key={currencyId} className="inline-flex items-center gap-1 rounded-full border border-outline-variant bg-surface-container-low px-2.5 py-1 text-on-surface" title={option?.currency?.name || undefined}>
                   {t(locale, "gacha.simulator.spent")}
                   {option && <DrawCurrencyIcon locale={locale} option={option} className="h-3.5 w-3.5" />}
                   <span className="font-mono tabular-nums">{amount.toLocaleString(locale)}</span>
@@ -129,7 +129,7 @@ export default function GachaSimulator({ locale, gacha }: Props) {
         )}
 
         {results.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-[var(--mn-glass-border)] px-4 py-8 text-center text-sm text-[var(--mn-text-muted)]">{t(locale, "gacha.simulator.idle")}</p>
+          <p className="rounded-shape-lg border border-dashed border-outline-variant px-4 py-8 text-center text-body-medium text-on-surface-variant">{t(locale, "gacha.simulator.idle")}</p>
         ) : (
           <ol className="grid grid-cols-5 gap-2 sm:gap-3">
             {results.map((entry, index) => {
@@ -143,7 +143,7 @@ export default function GachaSimulator({ locale, gacha }: Props) {
                 <li
                   key={`${round}-${index}`}
                   title={label}
-                  className={`mn-draw-reveal relative overflow-hidden rounded-xl border bg-[var(--mn-cream-deep)] ${top ? "border-[var(--mn-accent)] shadow-[0_0_0_2px_color-mix(in_srgb,var(--mn-accent)_28%,transparent)]" : "border-[var(--mn-glass-border)]"}`}
+                  className={`mn-draw-reveal relative overflow-hidden rounded-shape-md border bg-surface-container-highest ${top ? "border-primary shadow-[0_0_0_2px_color-mix(in_srgb,var(--md-sys-color-primary)_28%,transparent)]" : "border-outline-variant"}`}
                   style={{ animationDelay: `${index * 60}ms` }}
                 >
                   <span className="sr-only">{label}</span>
@@ -153,13 +153,13 @@ export default function GachaSimulator({ locale, gacha }: Props) {
                     <div className="relative aspect-[3/4]">
                       <img className="h-full w-full object-cover" src={assetUrl(getSupportCardThumbnailUrl(support.assetId))} alt="" loading="lazy" />
                       <span className="absolute inset-x-0 bottom-0 flex justify-center bg-gradient-to-t from-black/45 to-transparent pb-1 pt-4">
-                        {supportIcon ? <img className="h-4 w-auto" src={supportIcon} alt="" /> : <span className="text-[10px] font-black text-white">{t(locale, `cards.rarities.${support.rarity}`)}</span>}
+                        {supportIcon ? <img className="h-4 w-auto" src={supportIcon} alt="" /> : <span className="text-label-small text-white">{t(locale, `cards.rarities.${support.rarity}`)}</span>}
                       </span>
                     </div>
                   ) : (
                     <div className="grid aspect-[3/4] place-items-center p-2">
                       <img className="max-h-[60%] w-auto object-contain" src={item ? assetUrl(getItemIconUrl(item.imagePath, locale)) : ""} alt="" loading="lazy" />
-                      <span className="font-mono text-[11px] font-bold text-[var(--mn-accent-deep)]">{t(locale, "gacha.itemAmount", { count: formatCompactCount(entry.amount) })}</span>
+                      <span className="font-mono text-label-small text-primary">{t(locale, "gacha.itemAmount", { count: formatCompactCount(entry.amount) })}</span>
                     </div>
                   )}
                   {entry.pickup && entry.kind !== "item" && <ListCardBadge label={pickupBadge} position="right-1 top-1 scale-90 origin-top-right" />}
@@ -169,7 +169,7 @@ export default function GachaSimulator({ locale, gacha }: Props) {
           </ol>
         )}
 
-        <div className="space-y-1 border-t border-[var(--mn-glass-border)] pt-3 text-xs leading-6 text-[var(--mn-text-muted)]">
+        <div className="space-y-1 border-t border-outline-variant pt-3 text-body-small leading-6 text-on-surface-variant">
           {ten.guaranteeCount > 0 && <p>{t(locale, "gacha.simulator.guarantee", { count: ten.guaranteeCount, rarity: t(locale, `cards.rarities.${ten.guaranteeRarity}`) })}</p>}
           <p>{t(locale, "gacha.simulator.note")}</p>
         </div>

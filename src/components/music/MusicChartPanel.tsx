@@ -30,9 +30,9 @@ interface ChartPanelProps {
   comboTiers: readonly MusicComboTiersModel[];
 }
 
-const sectionHeader = "border-b border-[var(--mn-border)] bg-gradient-to-r from-[color-mix(in_oklab,var(--mn-accent)_6%,transparent)] to-transparent px-6 py-4 sm:px-8";
-const subHeading = "text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]";
-const linkButton = "mn-focus mn-stamp-press inline-flex items-center gap-1.5 rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-4 py-2 text-xs font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp-sm)] transition hover:border-[var(--mn-accent)] hover:text-[var(--mn-accent-deep)]";
+const sectionHeader = "border-b border-outline-variant px-6 py-4 sm:px-8";
+const subHeading = "text-label-medium text-on-surface-variant";
+const linkButton = " md3-state inline-flex items-center gap-1.5 rounded-full border border-outline-variant bg-surface-container-low px-4 py-2 text-xs font-bold text-on-surface  transition hover:border-primary hover:text-primary";
 
 /** One difficulty at a time: its figures (music-data.json), the Gekisou missions, the combo tier rewards and tool links. */
 export default function MusicChartPanel({ locale, song, metrics, status, comboTiers }: ChartPanelProps) {
@@ -61,9 +61,9 @@ export default function MusicChartPanel({ locale, song, metrics, status, comboTi
   ];
 
   return (
-    <div className="mn-paper overflow-hidden">
+    <div className="md3-surface overflow-hidden">
       <div className={sectionHeader}>
-        <h3 className="font-[var(--mn-font-display)] text-xl text-[var(--mn-text)] sm:text-2xl">{t(locale, "music.chart.title")}</h3>
+        <h3 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-small">{t(locale, "music.chart.title")}</h3>
       </div>
       <div className="space-y-6 p-6 sm:p-8">
         <LevelSwitch
@@ -74,16 +74,16 @@ export default function MusicChartPanel({ locale, song, metrics, status, comboTi
           onChange={(option) => setPicked(MUSIC_DIFFICULTIES[option] ?? difficulty)}
         />
 
-        <div className={`rounded-2xl border p-4 ${difficultyStyles[difficulty].cardBg}`}>
+        <div className={`rounded-shape-lg border p-4 ${difficultyStyles[difficulty].cardBg}`}>
           <dl className="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
             {cells.map(([label, content]) => (
               <div key={label} className="min-w-0">
-                <dt className="truncate text-[11px] font-bold text-[var(--mn-text-muted)]">{label}</dt>
-                <dd className="mt-0.5 font-mono text-lg font-black text-[var(--mn-text)]">{content}</dd>
+                <dt className="truncate text-label-small text-on-surface-variant">{label}</dt>
+                <dd className="mt-0.5 font-mono text-title-large text-on-surface">{content}</dd>
               </div>
             ))}
           </dl>
-          <p className="mt-3 text-[11px] leading-5 text-[var(--mn-text-muted)]">
+          <p className="mt-3 text-label-small leading-5 text-on-surface-variant">
             {status === "error" ? t(locale, "music.chart.unavailable") : t(locale, "music.chart.efficiencyHint", { overhead: METRICS_OVERHEAD_MS / 1000 })}
           </p>
         </div>
@@ -93,9 +93,9 @@ export default function MusicChartPanel({ locale, song, metrics, status, comboTi
             <h4 className={subHeading}>{t(locale, "music.gekisou.title")}</h4>
             <ol className="mt-2 grid grid-cols-3 gap-2">
               {missions.map((mission, index) => (
-                <li key={index} className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2 text-center">
-                  <span className="block text-[10px] font-bold text-[var(--mn-text-muted)]">{t(locale, "music.gekisou.range", { index: index + 1 })}</span>
-                  <span className="mt-0.5 block text-sm font-black text-[var(--mn-accent-deep)]">{t(locale, `music.gekisou.missions.${GEKISOU_MISSION_KEYS[mission]}`)}</span>
+                <li key={index} className="rounded-shape-md border border-outline-variant bg-surface-container px-3 py-2 text-center">
+                  <span className="block text-label-small text-on-surface-variant">{t(locale, "music.gekisou.range", { index: index + 1 })}</span>
+                  <span className="mt-0.5 block text-label-large text-primary">{t(locale, `music.gekisou.missions.${GEKISOU_MISSION_KEYS[mission]}`)}</span>
                 </li>
               ))}
             </ol>
@@ -107,12 +107,12 @@ export default function MusicChartPanel({ locale, song, metrics, status, comboTi
             <h4 className={subHeading}>{t(locale, "music.comboTiers.title")}</h4>
             <ul className="mt-2 grid gap-2 sm:grid-cols-2">
               {tiers.map((tier) => (
-                <li key={tier.percent} className="flex items-center justify-between gap-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-paper)] px-3 py-2">
+                <li key={tier.percent} className="flex items-center justify-between gap-3 rounded-shape-md border border-outline-variant bg-surface-container-low px-3 py-2">
                   <span className="shrink-0">
-                    <span className="block text-sm font-black text-[var(--mn-accent-deep)]">
+                    <span className="block text-label-large text-primary">
                       {tier.percent === 100 ? t(locale, "music.comboTiers.fullCombo") : t(locale, "music.comboTiers.tier", { percent: tier.percent })}
                     </span>
-                    <span className="block font-mono text-[10px] font-semibold text-[var(--mn-text-muted)]">
+                    <span className="block font-mono text-label-small text-on-surface-variant">
                       {t(locale, "music.comboTiers.combo", { count: comboNeeded(chart, tier.percent).toLocaleString(locale) })}
                     </span>
                   </span>
@@ -149,32 +149,32 @@ function comboNeeded(chart: SongDifficultyModel, percent: number): number {
 export function MusicExpRewards({ locale, rewards }: { locale: AppLocale; rewards: MusicExpRewardsModel }) {
   if (!rewards.ranks.length || !rewards.fields.length) return null;
   return (
-    <div className="mn-paper overflow-hidden">
+    <div className="md3-surface overflow-hidden">
       <div className={sectionHeader}>
-        <h3 className="font-[var(--mn-font-display)] text-xl text-[var(--mn-text)] sm:text-2xl">{t(locale, "music.expRewards.title")}</h3>
+        <h3 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-small">{t(locale, "music.expRewards.title")}</h3>
       </div>
       <div className="p-6 sm:p-8">
-        <div className="overflow-x-auto rounded-xl border border-[var(--mn-border)]">
-          <table className="min-w-full divide-y divide-[var(--mn-border)] text-sm">
-            <thead className="bg-[var(--mn-surface)] text-left text-[11px] font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">
+        <div className="overflow-x-auto rounded-shape-md border border-outline-variant">
+          <table className="min-w-full divide-y divide-outline-variant text-body-medium">
+            <thead className="bg-surface-container text-left text-label-medium text-on-surface-variant">
               <tr>
                 <th scope="col" className="px-3 py-2">{t(locale, "music.live.rank")}</th>
                 {rewards.fields.map((field) => <th key={field} scope="col" className="whitespace-nowrap px-3 py-2 text-right">{t(locale, `music.expRewards.fields.${field}`)}</th>)}
               </tr>
             </thead>
-            <tbody className="divide-y divide-dashed divide-[var(--mn-border)]/50 bg-[var(--mn-paper)]">
+            <tbody className="divide-y divide-dashed divide-outline-variant/50 bg-surface-container-low">
               {rewards.ranks.map((rank) => (
                 <tr key={rank.liveScoreRank}>
-                  <th scope="row" className="px-3 py-2 text-left font-black text-[var(--mn-accent-deep)]">{rank.rank}</th>
+                  <th scope="row" className="px-3 py-2 text-left font-black text-primary">{rank.rank}</th>
                   {rewards.fields.map((field) => (
-                    <td key={field} className="px-3 py-2 text-right font-mono font-semibold text-[var(--mn-text)]">{rank.values[field].toLocaleString(locale)}</td>
+                    <td key={field} className="px-3 py-2 text-right font-mono font-semibold text-on-surface">{rank.values[field].toLocaleString(locale)}</td>
                   ))}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        <p className="mt-3 text-[11px] leading-5 text-[var(--mn-text-muted)]">{t(locale, "music.expRewards.hint")}</p>
+        <p className="mt-3 text-label-small leading-5 text-on-surface-variant">{t(locale, "music.expRewards.hint")}</p>
       </div>
     </div>
   );

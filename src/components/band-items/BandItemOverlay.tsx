@@ -56,22 +56,22 @@ export default function BandItemOverlay({ locale, server, item, onClose }: Props
                 alt={item.name}
                 width={270}
                 height={516}
-                className="h-auto w-28 sm:w-full rounded-xl border border-[var(--mn-border)]/40 bg-[var(--mn-cream-deep)] object-contain"
+                className="h-auto w-28 sm:w-full rounded-shape-md border border-outline-variant/40 bg-surface-container-highest object-contain"
                 onError={() => setArtFailed(true)}
               />
             ) : null}
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--mn-text-muted)]/80">{item.bandName}</p>
-            <p className="mt-1 text-[11px] font-semibold text-[var(--mn-text-muted)]/70">
+            <p className="text-label-medium text-on-surface-variant/80">{item.bandName}</p>
+            <p className="mt-1 text-label-small text-on-surface-variant/70">
               {t(locale, "bandItems.maxLevel", { level: item.maxLevel })}
             </p>
-            <h3 className="mt-4 text-xs font-bold uppercase tracking-widest text-[var(--mn-text-muted)]">
+            <h3 className="mt-4 text-label-medium text-on-surface-variant">
               {t(locale, "bandItems.upgradeTitle")}
             </h3>
             <div className="mt-3" aria-busy={upgrades.status === "loading"}>
               {upgrades.status === "loading" ? (
-                <p className="text-sm font-medium text-[var(--mn-text-muted)]">{t(locale, "bandItems.upgradeLoading")}</p>
+                <p className="text-body-medium text-on-surface-variant">{t(locale, "bandItems.upgradeLoading")}</p>
               ) : (
                 <BandItemUpgradeTable locale={locale} steps={upgrades.steps} maxLevel={item.maxLevel} />
               )}

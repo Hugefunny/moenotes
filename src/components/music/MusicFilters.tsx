@@ -232,7 +232,7 @@ export default function MusicFilters({ locale, controller, variant = "plain", on
 }
 
 function CountBadge({ count }: { count: number }) {
-  return <span className="ml-1.5 font-mono text-[10px] font-semibold opacity-70">{count}</span>;
+  return <span className="ml-1.5 font-mono text-label-small opacity-70">{count}</span>;
 }
 
 /** People of one credit field, most credited first; the rest behind "show all" (selected ones always shown). */
@@ -261,7 +261,7 @@ function CreditFilter({ locale, title, options, selected, onChange }: {
             type="button"
             onClick={() => setExpanded((value) => !value)}
             aria-expanded={expanded}
-            className="mn-focus rounded-lg px-2 py-1.5 text-xs font-bold text-[var(--mn-accent-deep)] hover:underline"
+            className="rounded-shape-sm px-2 py-1.5 text-label-medium text-primary hover:underline"
           >
             {expanded ? t(locale, "music.filters.showFewer") : t(locale, "music.filters.showAll", { count: options.length })}
           </button>

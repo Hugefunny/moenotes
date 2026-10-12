@@ -29,16 +29,16 @@ interface Props {
  * the locale reads them (its own storefront first). No exchange rates: each storefront's own list price.
  */
 export default function ShopPrice({ locale, payment, compact = false }: Props) {
-  const figure = "font-mono text-sm font-black tabular-nums text-[var(--mn-accent-deep)]";
+  const figure = "font-mono text-label-large tabular-nums text-primary";
   if (payment.kind === "ad") return <span className={figure}>{t(locale, "shop.payments.ad")}</span>;
   if (payment.kind === "money") {
     const prices = orderShopPrices(payment.prices, locale);
-    if (!prices.length) return <span className="text-xs font-semibold text-[var(--mn-text-muted)]">{t(locale, "shop.payments.money")}</span>;
+    if (!prices.length) return <span className="text-label-medium text-on-surface-variant">{t(locale, "shop.payments.money")}</span>;
     const shown = compact ? prices.slice(0, locale === "zh-TW" ? 2 : 1) : prices;
     return (
       <span className="inline-flex flex-wrap items-baseline gap-x-2 gap-y-0.5" title={prices.map((price) => formatShopPrice(price, locale)).join(" / ")}>
         {shown.map((price, index) => (
-          <span key={price.currency} className={index === 0 ? figure : "font-mono text-xs font-bold tabular-nums text-[var(--mn-text-muted)]"}>{formatShopPrice(price, locale)}</span>
+          <span key={price.currency} className={index === 0 ? figure : "font-mono text-label-medium tabular-nums text-on-surface-variant"}>{formatShopPrice(price, locale)}</span>
         ))}
       </span>
     );
@@ -48,7 +48,7 @@ export default function ShopPrice({ locale, payment, compact = false }: Props) {
     <span className={`inline-flex items-center gap-1 ${figure}`} title={payment.currency?.name || undefined}>
       {payment.currency?.imageUrl ? <CurrencyIcon src={payment.currency.imageUrl} /> : null}
       {payment.amount.toLocaleString(locale)}
-      {!compact && payment.currency?.name ? <span className="ml-1 font-sans text-xs font-semibold text-[var(--mn-text-muted)]">{payment.currency.name}</span> : null}
+      {!compact && payment.currency?.name ? <span className="ml-1 font-sans text-label-medium text-on-surface-variant">{payment.currency.name}</span> : null}
     </span>
   );
 }

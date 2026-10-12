@@ -31,7 +31,7 @@ export function EventScene({ event, alt, eager = false, className = "" }: Props)
   const hasLogo = Boolean(logo) && !failed.has(logo);
 
   return (
-    <div className={`relative overflow-hidden bg-[var(--mn-cream-deep)] ${className}`.trim()}>
+    <div className={`relative overflow-hidden bg-surface-container-highest ${className}`.trim()}>
       {hasBackground ? (
         <img
           className="absolute inset-0 h-full w-full object-cover object-[30%_35%]"
@@ -43,7 +43,7 @@ export function EventScene({ event, alt, eager = false, className = "" }: Props)
           onError={() => fail(background)}
         />
       ) : (
-        <div className="mn-texture-orbit absolute inset-0" aria-hidden="true" />
+        <div className="md3-placeholder absolute inset-0" aria-hidden="true" />
       )}
       {hasBackground && <div className="absolute inset-y-0 right-0 w-3/5 bg-gradient-to-l from-black/30 to-transparent" aria-hidden="true" />}
       {hasLogo ? (
@@ -56,7 +56,7 @@ export function EventScene({ event, alt, eager = false, className = "" }: Props)
           onError={() => fail(logo)}
         />
       ) : (
-        <span className={`absolute right-[5%] top-1/2 line-clamp-3 max-w-[45%] -translate-y-1/2 text-right text-lg font-black sm:text-2xl ${hasBackground ? "text-white drop-shadow" : "text-[var(--mn-text)]"}`}>{event.name}</span>
+        <span className={`absolute right-[5%] top-1/2 line-clamp-3 max-w-[45%] -translate-y-1/2 text-right text-title-large sm:text-headline-small ${hasBackground ? "text-white drop-shadow" : "text-on-surface"}`}>{event.name}</span>
       )}
     </div>
   );

@@ -52,7 +52,7 @@ export default function ExchangeExplorer({ locale, servers, initialCategories }:
           </section>
         ))}
         {categories.length === 0 ? (
-          <p className="mn-paper p-8 text-center text-sm font-medium text-[var(--mn-text-muted)]">{t(locale, "exchange.pageDescription")}</p>
+          <p className="md3-surface p-8 text-center text-body-medium text-on-surface-variant">{t(locale, "exchange.pageDescription")}</p>
         ) : null}
       </div>
     </ServerScope>
@@ -65,11 +65,7 @@ function CategoryTab({ active, onClick, label }: { active: boolean; onClick: () 
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`mn-focus mn-stamp-press shrink-0 rounded-full border-[1.5px] px-4 py-2 text-xs font-bold transition sm:text-sm ${
-        active
-          ? "border-[var(--mn-accent-deep)] bg-[var(--mn-accent-deep)] text-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp)]"
-          : "border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-text)] hover:border-[var(--mn-accent-deep)]/50"
-      }`}
+      className={`md3-state shrink-0 rounded-full border px-4 py-2 text-label-medium transition sm:text-label-large ${ active ? "border-primary bg-primary text-on-primary shadow-elevation-1" : "border-outline-variant bg-surface-container-low text-on-surface hover:border-primary/50" }`}
     >
       {label}
     </button>
@@ -89,13 +85,13 @@ function CategoryHeading({ category, note }: { category: ExchangeCategoryViewMod
           width={356}
           height={446}
           loading="lazy"
-          className="h-16 w-auto shrink-0 rounded-lg border border-[var(--mn-border)]/40 object-contain sm:h-20"
+          className="h-16 w-auto shrink-0 rounded-shape-sm border border-outline-variant/40 object-contain sm:h-20"
           onError={() => setFailed(true)}
         />
       ) : null}
       <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
-        <h2 id={`exchange-category-${category.id}`} className="font-[var(--mn-font-display)] text-xl tracking-tight text-[var(--mn-text)] sm:text-2xl">{category.name}</h2>
-        {note ? <span className="text-xs font-bold text-[var(--mn-text-muted)]">{note}</span> : null}
+        <h2 id={`exchange-category-${category.id}`} className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-small">{category.name}</h2>
+        {note ? <span className="text-label-medium text-on-surface-variant">{note}</span> : null}
       </div>
     </div>
   );
@@ -109,24 +105,24 @@ function ExchangeCard({ exchange, locale, timeZone, now }: { exchange: ExchangeS
   return (
     <a
       href={localizePath(exchangePath(exchange.id), locale)}
-      className="mn-list-card group flex h-full min-w-0 flex-col overflow-hidden border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp)] transition hover:-translate-y-1 hover:shadow-[var(--mn-shadow-stamp-lg)]"
+      className="mn-list-card group flex h-full min-w-0 flex-col overflow-hidden border border-outline-variant bg-surface-container-low shadow-elevation-1 transition hover:shadow-elevation-1"
       data-list-item-id={exchange.id}
       aria-label={t(locale, "exchange.openDetail", { name: exchange.name })}
     >
-      <div className="relative border-b border-[var(--mn-glass-border)]">
+      <div className="relative border-b border-outline-variant">
         <BannerImage src={exchange.bannerUrl} alt="" fallback={exchange.name} />
         <div className="absolute left-2 top-2 flex max-w-[calc(100%-1rem)] flex-wrap gap-1.5">
           <ScheduleBadge locale={locale} startAt={exchange.startAt} endAt={exchange.endAt} now={now} />
         </div>
       </div>
       <div className="flex flex-1 flex-col gap-1.5 p-3 sm:p-4">
-        <h3 className="line-clamp-2 text-sm font-black leading-5 text-[var(--mn-text)] transition-colors group-hover:text-[var(--mn-accent-deep)]">{exchange.name}</h3>
-        <p className="truncate text-xs font-medium tabular-nums text-[var(--mn-text-muted)]">{schedule}</p>
-        <div className="mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-1 pt-1.5 text-xs font-medium text-[var(--mn-text-muted)]">
+        <h3 className="line-clamp-2 text-label-large leading-5 text-on-surface transition-colors group-hover:text-primary">{exchange.name}</h3>
+        <p className="truncate text-body-small tabular-nums text-on-surface-variant">{schedule}</p>
+        <div className="mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-1 pt-1.5 text-body-small text-on-surface-variant">
           {exchange.currency.name ? (
             <span className="inline-flex min-w-0 items-center gap-1">
               {currencyUrl && !currencyFailed ? <img src={currencyUrl} alt="" loading="lazy" className="h-4 w-4 shrink-0 object-contain" onError={() => setCurrencyFailed(true)} /> : null}
-              <span className="truncate font-bold text-[var(--mn-text)]">{exchange.currency.name}</span>
+              <span className="truncate font-bold text-on-surface">{exchange.currency.name}</span>
             </span>
           ) : <span />}
           <span className="shrink-0">{t(locale, "exchange.productCount", { count: exchange.productCount })}</span>
