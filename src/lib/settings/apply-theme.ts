@@ -1,6 +1,7 @@
 import { ACCENT_PALETTE_STORAGE_KEY, DEFAULT_ACCENT, SETTINGS_STORAGE_KEY } from "@/config/settings";
 import { HOME_LAYOUT_STORAGE_KEY, HOME_LAYOUT_STYLE_ID, HOME_MODULES } from "@/lib/home/layout";
-import { accentPalettes, type AccentPalette, type AccentPalettes } from "@/lib/settings/accent";
+import { colorDeclarations, MD3_ROLES, roleChannelVariable, roleCssVariable, type Md3Colors } from "@/lib/md3/roles";
+import { ACCENT_CACHE_VERSION, accentCache, type AccentCache } from "@/lib/settings/accent";
 import type { AppSettings, ColorScheme } from "@/types/settings";
 
 export function resolveColorScheme(colorScheme: ColorScheme): "light" | "dark" {
@@ -11,27 +12,31 @@ export function resolveColorScheme(colorScheme: ColorScheme): "light" | "dark" {
   return "light";
 }
 
-const ACCENT_VARIABLES: ReadonlyArray<readonly [keyof AccentPalette, string]> = [["accent", "--mn-accent"], ["deep", "--mn-accent-deep"], ["soft", "--mn-accent-soft"]];
-
-/** Overrides the accent variables with a band palette, or removes the overrides (the stylesheet's default palette). */
-function applyAccent(root: HTMLElement, palette: AccentPalette | null): void {
-  for (const [key, variable] of ACCENT_VARIABLES) {
-    if (palette) root.style.setProperty(variable, palette[key]);
-    else root.style.removeProperty(variable);
+/** Sets a band's Material 3 colors on <html>, or removes them (the stylesheet's default scheme, src/styles/md3/colors.css). */
+function applyScheme(root: HTMLElement, colors: Md3Colors | null): void {
+  for (const role of MD3_ROLES) {
+    root.style.removeProperty(roleCssVariable(role));
+    root.style.removeProperty(roleChannelVariable(role));
   }
-  if (palette) root.dataset.accent = "band";
-  else delete root.dataset.accent;
+  if (colors) {
+    for (const [name, value] of colorDeclarations(colors)) root.style.setProperty(name, value);
+    root.dataset.accent = "band";
+  } else {
+    delete root.dataset.accent;
+  }
 }
 
-/** Keeps the bootstrap script's palette cache in step with the setting (direct storage: this file is allowed to). */
-function cachePalettes(palettes: AccentPalettes | null): void {
+/** Keeps the bootstrap script's scheme cache in step with the setting (direct storage: this file is allowed to). */
+function cacheSchemes(cache: AccentCache | null): void {
   try {
-    if (palettes) window.localStorage.setItem(ACCENT_PALETTE_STORAGE_KEY, JSON.stringify(palettes));
+    if (cache) window.localStorage.setItem(ACCENT_PALETTE_STORAGE_KEY, JSON.stringify(cache));
     else window.localStorage.removeItem(ACCENT_PALETTE_STORAGE_KEY);
   } catch {
-    // storage unavailable: the next page load starts with the default accent until hydration
+    // storage unavailable: the next page load starts with the default scheme until hydration
   }
 }
+
+let appliedAccent: { color: string; cache: AccentCache | null } | null = null;
 
 export function applySettingsToDocument(settings: AppSettings): void {
   if (typeof document === "undefined") return;
@@ -41,14 +46,17 @@ export function applySettingsToDocument(settings: AppSettings): void {
   root.dataset.themePreference = settings.colorScheme;
   root.style.colorScheme = resolved;
   root.dataset.density = settings.density;
-  const palettes = settings.accentColor === DEFAULT_ACCENT ? null : accentPalettes(settings.accentColor);
-  applyAccent(root, palettes ? palettes[resolved] : null);
-  cachePalettes(palettes);
+  // Generating schemes takes a few milliseconds; settings change far more often than the accent.
+  if (appliedAccent?.color !== settings.accentColor) {
+    appliedAccent = { color: settings.accentColor, cache: settings.accentColor === DEFAULT_ACCENT ? null : accentCache(settings.accentColor) };
+    cacheSchemes(appliedAccent.cache);
+  }
+  applyScheme(root, appliedAccent.cache ? appliedAccent.cache[resolved] : null);
 }
 
 /**
- * Runs in the head before anything paints: theme, density, the accent palette (cached by applySettingsToDocument)
- * and the home layout (src/lib/home/layout.ts), so a reload never flashes the defaults.
+ * Runs in the head before anything paints: theme, density, the band's Material 3 colors (cached by
+ * applySettingsToDocument) and the home layout (src/lib/home/layout.ts), so a reload never flashes the defaults.
  */
 export function buildThemeBootstrapScript(): string {
   return `
@@ -73,11 +81,17 @@ export function buildThemeBootstrapScript(): string {
   try {
     var accent = typeof settings.accentColor === 'string' ? settings.accentColor.toUpperCase() : '';
     var cached = JSON.parse(localStorage.getItem(${JSON.stringify(ACCENT_PALETTE_STORAGE_KEY)}) || 'null');
-    var palette = cached && accent && String(cached.color).toUpperCase() === accent ? cached[resolved] : null;
-    if (palette && palette.accent && palette.deep && palette.soft) {
-      root.style.setProperty('--mn-accent', palette.accent);
-      root.style.setProperty('--mn-accent-deep', palette.deep);
-      root.style.setProperty('--mn-accent-soft', palette.soft);
+    var colors = cached && cached.version === ${ACCENT_CACHE_VERSION} && accent && String(cached.color).toUpperCase() === accent ? cached[resolved] : null;
+    if (colors && typeof colors === 'object') {
+      var roles = ${JSON.stringify(MD3_ROLES)};
+      for (var i = 0; i < roles.length; i++) {
+        var hex = colors[roles[i]];
+        if (typeof hex !== 'string' || !/^#[0-9a-f]{6}$/i.test(hex)) continue;
+        var name = '--md-sys-color-' + roles[i].replace(/[A-Z]/g, function(m){ return '-' + m.toLowerCase(); });
+        var n = parseInt(hex.slice(1), 16);
+        root.style.setProperty(name, hex);
+        root.style.setProperty(name + '-rgb', ((n >> 16) & 255) + ' ' + ((n >> 8) & 255) + ' ' + (n & 255));
+      }
       root.dataset.accent = 'band';
     }
   } catch(e) {}
