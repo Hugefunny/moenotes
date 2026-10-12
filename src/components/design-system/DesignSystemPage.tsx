@@ -1,872 +1,523 @@
-import SiriusLoader, { SiriusIcon } from "@/components/shared/SiriusLoader";
-import SortControl, { type SortFieldOption } from "@/components/shared/SortControl";
+import { useState, type ReactNode } from "react";
+import Alert from "@mui/material/Alert";
+import Autocomplete from "@mui/material/Autocomplete";
+import Badge from "@mui/material/Badge";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardActionArea from "@mui/material/CardActionArea";
+import CardContent from "@mui/material/CardContent";
+import Checkbox from "@mui/material/Checkbox";
+import Chip from "@mui/material/Chip";
+import CircularProgress from "@mui/material/CircularProgress";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import Fab from "@mui/material/Fab";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
+import LinearProgress from "@mui/material/LinearProgress";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import Pagination from "@mui/material/Pagination";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import Slider from "@mui/material/Slider";
+import Snackbar from "@mui/material/Snackbar";
+import Switch from "@mui/material/Switch";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
+import TextField from "@mui/material/TextField";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
 import BrandLogo from "@/components/shared/BrandLogo";
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { withMd3 } from "@/components/md3/Md3Provider";
 import type { AppLocale } from "@/config/locales";
+import { DEFAULT_ACCENT } from "@/config/settings";
 import { t } from "@/i18n";
-import Modal from "@/components/shared/Modal";
-import Popover from "@/components/shared/Popover";
-import BaseFilters, { FilterSection, FilterButton, FilterToggle } from "@/components/shared/BaseFilters";
-import QuickFilterButton, { QuickFilterProvider } from "@/components/shared/QuickFilterButton";
-import { useSpringAnimation } from "@/lib/animation/use-animation";
+import { MD3_DEFAULT_SEED } from "@/lib/md3/scheme";
+import type { ThemeBandColor } from "@/lib/masterdata/build-settings";
+import { useSettings } from "@/lib/settings/use-settings";
 import FoundationSection from "./FoundationSection";
-
-const TABS = ["colors", "typography", "components", "modals", "filters", "animations", "foundation"] as const;
-type TabId = (typeof TABS)[number];
 
 interface Props {
   locale: AppLocale;
+  bands: ThemeBandColor[];
 }
 
-export default function DesignSystemPage({ locale }: Props) {
-  const [activeTab, setActiveTab] = useState<TabId>("colors");
-  const { springTransition, floatHoverProps, floatTapProps } = useSpringAnimation();
+const SECTIONS = ["color", "type", "shape", "buttons", "selection", "inputs", "chips", "feedback", "containers", "navigation", "foundation"] as const;
+type SectionId = (typeof SECTIONS)[number];
 
-  // Lifted Filter States
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
-  const [sortBy, setSortBy] = useState("default");
-  const [language, setLanguage] = useState("all");
-  const [toggle, setToggle] = useState(false);
+const k = (key: string) => `designSystem.md3.${key}`;
 
-  const total = 128;
-  const filtered = search || category !== "all" || toggle || language !== "all" ? 42 : total;
-  const hasActive = search !== "" || category !== "all" || toggle || sortBy !== "default" || language !== "all";
-
-  const reset = () => { setSearch(""); setCategory("all"); setSortBy("default"); setLanguage("all"); setToggle(false); };
-
-  const sortOptions = [
-    { value: "nameAsc", reverseValue: "nameDesc", label: t(locale, "designSystem.filters.name"), initialDirection: "asc" },
-    { value: "dateDesc", reverseValue: "dateAsc", label: t(locale, "designSystem.filters.date"), initialDirection: "desc" },
-    { value: "levelDesc", reverseValue: "levelAsc", label: t(locale, "designSystem.filters.level"), initialDirection: "desc" },
-  ] satisfies SortFieldOption[];
-
-  const languageOptions = [
-    { value: "all", label: t(locale, "designSystem.filters.all") },
-    { value: "zh", label: "简体中文" }, // i18n-allow-hardcoded
-    { value: "ja", label: "日本語" }, // i18n-allow-hardcoded
-    { value: "en", label: "English" },
-  ];
-
+const icons = {
+  plus: <path d="M12 5v14M5 12h14" />,
+  heart: <path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z" />,
+  settings: <><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" /></>,
+  search: <><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></>,
+  more: <><circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" /></>,
+  check: <path d="m5 12 5 5 9-10" />,
+  bell: <><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0" /></>,
+};
+function Icon({ name }: { name: keyof typeof icons }) {
   return (
-    <QuickFilterProvider>
-    <div className="space-y-10">
-      {/* Page Header */}
-      <header className="mn-system-header">
-        <BrandLogo className="mn-brand-system" />
-        <div className="mb-2 inline-flex items-center gap-1.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-accent-soft)] px-3 py-1 font-[var(--mn-font-display)] text-xs tracking-wider text-[var(--mn-accent-deep)] shadow-[var(--mn-shadow-stamp-sm)]">
-          SIRIUS / DESIGN SYSTEM
-        </div>
-        <h1 className="font-[var(--mn-font-display)] text-4xl tracking-tight text-[var(--mn-text)] sm:text-5xl">
-          {t(locale, "designSystem.title")}
-        </h1>
-        <p className="mt-3 max-w-2xl text-base leading-relaxed text-[var(--mn-text-muted)]">
-          {t(locale, "designSystem.subtitle")}
-        </p>
-      </header>
-
-      <section className="mn-paper flex flex-wrap items-center justify-around gap-8 p-6" aria-label={t(locale, "loader.loading")}>
-        <SiriusLoader locale={locale} />
-        <SiriusLoader locale={locale} compact />
-        <span className="inline-flex items-center gap-2"><SiriusIcon />{t(locale, "loader.loading")}</span>
-      </section>
-
-      {/* Tab Navigation */}
-      <nav className="mn-system-tabs sticky top-[var(--mn-header-bottom,5rem)] sm:top-24 z-20 border border-[var(--mn-border)] bg-[var(--mn-paper)] p-2 shadow-[var(--mn-shadow-stamp-sm)] rounded-2xl mx-1 sm:mx-3 sm:rounded-xl sm:p-2.5 transition-all duration-300">
-        <div className="w-full min-w-0 overflow-x-auto no-scrollbar touch-pan-x flex flex-nowrap items-center gap-2 md:flex-wrap md:overflow-visible px-2 py-0.5">
-          {TABS.map((tab) => (
-            // Capsule tab → float animation
-            <motion.button
-              key={tab}
-              aria-pressed={activeTab === tab}
-              onClick={() => setActiveTab(tab)}
-              {...floatHoverProps}
-              {...floatTapProps}
-              transition={springTransition}
-              className={`shrink-0 rounded-xl border border-[var(--mn-border)] px-4 py-1.5 text-xs font-bold transition-colors sm:text-sm ${
-                activeTab === tab
-                  ? "bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)] shadow-[var(--mn-shadow-stamp-sm)]"
-                  : "bg-[var(--mn-paper)] text-[var(--mn-text-muted)] hover:shadow-[var(--mn-shadow-stamp-sm)]"
-              }`}
-            >
-              {t(locale, `designSystem.sections.${tab}`)}
-            </motion.button>
-          ))}
-        </div>
-      </nav>
-
-      {/* Sections */}
-      {activeTab === "colors" && <ColorsSection locale={locale} />}
-      {activeTab === "typography" && <TypographySection locale={locale} />}
-      {activeTab === "components" && <ComponentsSection locale={locale} />}
-      {activeTab === "modals" && <ModalsSection locale={locale} />}
-      {activeTab === "filters" && (
-        <FiltersSection
-          locale={locale}
-          search={search}
-          setSearch={setSearch}
-          category={category}
-          setCategory={setCategory}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          language={language}
-          setLanguage={setLanguage}
-          toggle={toggle}
-          setToggle={setToggle}
-          filtered={filtered}
-          total={total}
-          hasActive={hasActive}
-          reset={reset}
-          sortOptions={sortOptions}
-          languageOptions={languageOptions}
-        />
-      )}
-      {activeTab === "animations" && <AnimationsSection locale={locale} />}
-      {activeTab === "foundation" && (
-        <SectionCard>
-          <SectionTitle title={t(locale, "designSystem.sections.foundation")} />
-          <FoundationSection locale={locale} />
-        </SectionCard>
-      )}
-      <QuickFilterButton
-        title={t(locale, "designSystem.sections.filters")}
-        buttonLabel={t(locale, "filter.title")}
-        content={
-          <div className="w-full min-w-0">
-            <BaseFilters
-              title={t(locale, "filter.title")}
-              searchValue={search}
-              onSearchChange={setSearch}
-              searchLabel={t(locale, "filter.search")}
-              searchPlaceholder={t(locale, "designSystem.filters.searchPlaceholder")}
-              resultCount={filtered}
-              totalCount={total}
-              hasActiveFilters={hasActive}
-              onReset={reset}
-              resetLabel={t(locale, "filter.reset")}
-              expandLabel={t(locale, "filter.expand")}
-              disableCollapse={true}
-            >
-              <FilterSection title={t(locale, "designSystem.filters.category")}>
-                <div className="flex flex-wrap gap-2">
-                  {(["all", "typeA", "typeB"] as const).map((cat) => (
-                    <FilterButton key={cat} active={category === cat} onClick={() => setCategory(cat)}>
-                      {t(locale, `designSystem.filters.${cat}` as const)}
-                    </FilterButton>
-                  ))}
-                </div>
-              </FilterSection>
-              <SortControl label={t(locale, "filter.sort")} value={sortBy} defaultOption={{ value: "default", label: t(locale, "sorting.default") }} options={sortOptions} ascendingLabel={t(locale, "sorting.ascending")} descendingLabel={t(locale, "sorting.descending")} onChange={setSortBy} />
-              <FilterSection title={t(locale, "designSystem.filters.language")}>
-                <FilterSelect value={language} options={languageOptions} onChange={setLanguage} />
-              </FilterSection>
-              <FilterToggle checked={toggle} onChange={setToggle} label={t(locale, "designSystem.filters.onlyComplete")} />
-            </BaseFilters>
-          </div>
-        }
-      />
-    </div>
-    </QuickFilterProvider>
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {icons[name]}
+    </svg>
   );
 }
 
-// ── Section Wrapper ─────────────────────────────────────────────────────────────
-
-function SectionCard({ children }: { children: React.ReactNode }) {
+function Section({ id, locale, children }: { id: SectionId; locale: AppLocale; children: ReactNode }) {
   return (
-    <section className="mn-system-section rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-paper)] p-4 shadow-[var(--mn-shadow-stamp-lg)] sm:p-6 md:p-8">
-      {children}
+    <section id={`md3-${id}`} aria-labelledby={`md3-${id}-title`} className="md3-surface scroll-mt-28 p-4 sm:p-6">
+      <h2 id={`md3-${id}-title`} className="mb-5 font-[var(--md-ref-typeface-brand)] text-title-large text-on-surface">{t(locale, k(`sections.${id}`))}</h2>
+      <div className="space-y-6">{children}</div>
     </section>
   );
 }
 
-function SectionTitle({ title }: { title: string }) {
+function Sub({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <h2 className="mb-6 flex items-center gap-2 font-[var(--mn-font-display)] text-2xl tracking-tight text-[var(--mn-text)]">
-      <span className="h-8 w-1.5 rounded-xl bg-[var(--mn-accent-deep)]" />
-      {title}
-    </h2>
-  );
-}
-
-// ── Colors Section ──────────────────────────────────────────────────────────────
-
-function ColorsSection({ locale }: { locale: AppLocale }) {
-  const colors = [
-    { key: "accent", var: "--mn-accent", cls: "bg-[var(--mn-accent)]" },
-    { key: "pink", var: "--mn-pink", cls: "bg-[var(--mn-pink)]" },
-    { key: "cyan", var: "--mn-cyan", cls: "bg-[var(--mn-cyan)]" },
-    { key: "amber", var: "--mn-amber", cls: "bg-[var(--mn-amber)]" },
-    { key: "mint", var: "--mn-mint", cls: "bg-[var(--mn-mint)]" },
-    { key: "yellow", var: "--mn-yellow", cls: "bg-[var(--mn-yellow)]" },
-    { key: "cream-deep", var: "--mn-cream-deep", cls: "bg-[var(--mn-cream-deep)]" },
-    { key: "ink-soft", var: "--mn-ink-soft", cls: "bg-[var(--mn-ink-soft)]" },
-    { key: "paper", var: "--mn-paper", cls: "bg-[var(--mn-paper)] border border-[var(--mn-border)]" },
-    { key: "background", var: "--mn-bg", cls: "bg-[var(--mn-bg)] border border-[var(--mn-border)]" },
-    { key: "surface", var: "--mn-surface", cls: "bg-[var(--mn-surface)] border border-[var(--mn-border)]" },
-    { key: "border", var: "--mn-border", cls: "bg-[var(--mn-border)]" },
-    { key: "text", var: "--mn-text", cls: "bg-[var(--mn-text)]" },
-    { key: "muted", var: "--mn-text-muted", cls: "bg-[var(--mn-text-muted)]" },
-  ];
-
-  return (
-    <SectionCard>
-      <SectionTitle title={t(locale, "designSystem.sections.colors")} />
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-        {colors.map((c) => (
-          <div key={c.key} className="flex h-28 flex-col overflow-hidden rounded-2xl border border-[var(--mn-border)] shadow-[var(--mn-shadow-stamp-sm)]">
-            <div className={`flex-1 ${c.cls}`} />
-            <div className="border-t border-[var(--mn-border)] bg-[var(--mn-paper)] p-2">
-              <div className="text-xs font-bold text-[var(--mn-text)]">{t(locale, `designSystem.colors.${c.key}`)}</div>
-              <div className="mt-0.5 font-mono text-[10px] text-[var(--mn-text-muted)]">{c.var}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-      {/* Textures */}
-      <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <div className="mn-texture-stars flex h-20 items-center justify-center rounded-2xl border border-[var(--mn-border)] text-xs font-bold text-[var(--mn-accent-deep)]">{t(locale, "designSystem.sirius.stars")}</div>
-        <div className="mn-texture-nebula flex h-20 items-center justify-center rounded-2xl border border-[var(--mn-border)] text-xs font-bold text-[var(--mn-text)]">{t(locale, "designSystem.sirius.nebula")}</div>
-        <div className="mn-texture-orbit flex h-20 items-center justify-center rounded-2xl border border-[var(--mn-border)] text-xs font-bold text-[var(--mn-text-muted)]">{t(locale, "designSystem.sirius.orbit")}</div>
-        <div className="mn-texture-grid flex h-20 items-center justify-center rounded-2xl border border-[var(--mn-border)] text-xs font-bold text-[var(--mn-text-muted)]">{t(locale, "designSystem.sirius.grid")}</div>
-      </div>
-    </SectionCard>
-  );
-}
-
-// ── Typography Section ──────────────────────────────────────────────────────────
-
-function TypographySection({ locale }: { locale: AppLocale }) {
-  const fonts = [
-    { key: "display", var: "var(--mn-font-display)", sample: "BANG! DREAM", sizes: ["text-5xl", "text-3xl", "text-xl"] },
-    { key: "body", var: "var(--mn-font-body)", sample: "5 つの音、5 つの物語", sizes: ["text-2xl", "text-base", "text-sm"] }, // i18n-allow-hardcoded
-    { key: "hand", var: "var(--mn-font-hand)", sample: "SIRIUS / OUR NOTES", sizes: ["text-4xl", "text-2xl", "text-lg"] },
-    { key: "note", var: "var(--mn-font-note)", sample: "06h 45m / −16° 43′", sizes: ["text-3xl", "text-xl", "text-base"] },
-  ];
-
-  return (
-    <SectionCard>
-      <SectionTitle title={t(locale, "designSystem.sections.typography")} />
-      <div className="space-y-8">
-        {fonts.map((font) => (
-          <div key={font.key} className="border-b border-[var(--mn-border)] pb-8 last:border-0">
-            <div className="mb-3 flex items-center gap-3">
-               <span className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-accent-soft)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[var(--mn-accent-deep)]">
-                {t(locale, `designSystem.typography.${font.key}`)}
-              </span>
-              <span className="font-mono text-xs text-[var(--mn-text-muted)]">{font.var}</span>
-            </div>
-            <div className="space-y-2">
-              {font.sizes.map((size, i) => (
-                <div key={i} className={`${size} text-[var(--mn-text)]`} style={{ fontFamily: font.var }}>
-                  {font.sample}
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </SectionCard>
-  );
-}
-
-// ── Components Section ──────────────────────────────────────────────────────────
-
-function ComponentsSection({ locale }: { locale: AppLocale }) {
-  return (
-    <div className="space-y-6">
-      {/* Buttons */}
-      <SectionCard>
-        <SectionTitle title={t(locale, "designSystem.components.buttons")} />
-        <div className="flex flex-wrap items-center gap-4">
-          <button className="mn-stamp-press rounded-xl border border-[var(--mn-border)] bg-[var(--mn-accent-deep)] px-6 py-3 font-[var(--mn-font-display)] text-sm tracking-wider text-[var(--mn-bg)] shadow-[var(--mn-shadow-stamp)]">
-            {t(locale, "designSystem.components.primary")}
-          </button>
-          <button className="mn-stamp-press rounded-xl border border-[var(--mn-border)] bg-[var(--mn-paper)] px-6 py-3 font-[var(--mn-font-display)] text-sm tracking-wider text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]">
-            {t(locale, "designSystem.components.outline")}
-          </button>
-          <button className="rounded-xl px-5 py-3 text-sm font-bold text-[var(--mn-text-muted)] transition hover:bg-[var(--mn-cream-deep)] hover:text-[var(--mn-text)]">
-            {t(locale, "designSystem.components.ghost")}
-          </button>
-          <span className="mn-stamp mn-stamp-press cursor-pointer rounded-xl px-4 py-1.5 text-xs shadow-[var(--mn-shadow-stamp)]">
-            {t(locale, "designSystem.components.stamp")}
-          </span>
-        </div>
-      </SectionCard>
-
-      {/* Inputs */}
-      <SectionCard>
-        <SectionTitle title={t(locale, "designSystem.components.inputs")} />
-        <div className="max-w-sm space-y-4">
-          <div>
-            <label htmlFor="std-input" className="mb-1 block text-sm font-bold text-[var(--mn-text)]">Standard Input</label>
-            <input id="std-input" type="text" placeholder="Type something..." className="w-full rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-5 py-2.5 text-sm text-[var(--mn-text)] placeholder:text-[var(--mn-text-muted)] focus:border-[var(--mn-accent-deep)] focus:bg-[var(--mn-paper)] focus:outline-none" />
-          </div>
-          <div>
-            <label htmlFor="err-input" className="mb-1 block text-sm font-bold text-[var(--mn-text)]">Input with Error</label>
-            <input id="err-input" type="text" defaultValue="Invalid" className="w-full rounded-xl border border-[var(--mn-accent-deep)] bg-[var(--mn-surface)] px-5 py-2.5 text-sm text-[var(--mn-accent-deep)] focus:outline-none" />
-            <p className="mt-1 text-xs font-bold text-[var(--mn-accent-deep)]">Please enter a valid value</p>
-          </div>
-        </div>
-      </SectionCard>
-
-      {/* Badges */}
-      <SectionCard>
-        <SectionTitle title={t(locale, "designSystem.components.badges")} />
-        <div className="flex flex-wrap gap-3">
-          <span className="mn-stamp rounded-xl px-4 py-1.5 text-xs">ACCENT</span>
-          <span className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-pink-soft)] px-4 py-1.5 text-xs font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp-sm)]">PINK</span>
-          <span className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-cyan)] px-4 py-1.5 text-xs font-bold text-[#202e4c] shadow-[var(--mn-shadow-stamp-sm)]">CYAN</span>
-          <span className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-amber)] px-4 py-1.5 text-xs font-bold text-[#202e4c] shadow-[var(--mn-shadow-stamp-sm)]">AMBER</span>
-          <span className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-paper)] px-4 py-1.5 text-xs font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp-sm)]">OUTLINE</span>
-        </div>
-      </SectionCard>
-
-      {/* Cards */}
-      <SectionCard>
-        <SectionTitle title={t(locale, "designSystem.components.cards")} />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="mn-list-card mn-card relative p-5">
-            <p className="font-[var(--mn-font-display)] text-lg">mn-card</p>
-            <p className="mt-1 text-sm text-[var(--mn-text-muted)]">{t(locale, "designSystem.sirius.card")}</p>
-          </div>
-          <div className="mn-list-card mn-sticker relative p-5">
-            <p className="font-[var(--mn-font-display)] text-lg">mn-sticker</p>
-            <p className="mt-1 text-sm text-[var(--mn-text-muted)]">{t(locale, "designSystem.sirius.raised")}</p>
-          </div>
-          <div className="mn-paper relative rounded-3xl p-5">
-            <p className="font-[var(--mn-font-display)] text-lg">mn-paper</p>
-            <p className="mt-1 text-sm text-[var(--mn-text-muted)]">{t(locale, "designSystem.sirius.surface")}</p>
-          </div>
-        </div>
-      </SectionCard>
-
-      <SectionCard>
-        <SectionTitle title={t(locale, "designSystem.colors.surface")} />
-        <div className="mn-glass-stage">
-          <div className="mn-glass-sample">
-            <p className="text-lg text-[var(--mn-text)]">{t(locale, "designSystem.sirius.raised")}</p>
-            <p className="mt-3 text-sm leading-7 text-[var(--mn-text-muted)]">{t(locale, "designSystem.subtitle")}</p>
-          </div>
-        </div>
-      </SectionCard>
-
-      {/* Select (Dropdown) */}
-      <SectionCard>
-        <SectionTitle title={t(locale, "designSystem.components.select")} />
-        <div className="grid max-w-sm gap-4">
-          <SelectDemo locale={locale} />
-        </div>
-        <p className="mt-4 font-mono text-xs text-[var(--mn-text-muted)]">
-{`<Select label="..." value={v} options={[...]} onChange={...} />`}
-        </p>
-      </SectionCard>
-
-      {/* Checkbox */}
-      <SectionCard>
-        <SectionTitle title={t(locale, "designSystem.components.checkbox")} />
-        <div className="flex flex-wrap items-center gap-6">
-          <CheckboxDemo defaultChecked />
-          <CheckboxDemo />
-          <CheckboxDemo accent />
-        </div>
-        <p className="mt-4 font-mono text-xs text-[var(--mn-text-muted)]">
-{`<Checkbox checked={v} onChange={...} label="..." />`}
-        </p>
-      </SectionCard>
+    <div className="space-y-3">
+      <h3 className="text-title-small text-on-surface-variant">{title}</h3>
+      {children}
     </div>
   );
 }
 
-// ── Modals Section ──────────────────────────────────────────────────────────────
-
-function ModalsSection({ locale }: { locale: AppLocale }) {
-  const [modalSize, setModalSize] = useState<"sm" | "md" | "lg" | "xl">("md");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
-  const [copyState, setCopyState] = useState<("idle" | "copying" | "success")>("idle");
-  const [downloadState, setDownloadState] = useState<("idle" | "downloading" | "success")>("idle");
-
-  const openModal = (size: "sm" | "md" | "lg" | "xl") => {
-    setModalSize(size);
-    setIsModalOpen(true);
-  };
-
-  const handleCopy = async () => {
-    setCopyState("copying");
-    await new Promise((r) => setTimeout(r, 800));
-    setCopyState("success");
-    setTimeout(() => setCopyState("idle"), 1500);
-  };
-
-  const handleDownload = async () => {
-    setDownloadState("downloading");
-    await new Promise((r) => setTimeout(r, 800));
-    setDownloadState("success");
-    setTimeout(() => setDownloadState("idle"), 1500);
-  };
-
-  const copyHeaderActions = (
-    <>
-      <button
-        onClick={handleDownload}
-        disabled={downloadState === "downloading"}
-        className="grid h-8 w-8 place-items-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-text-muted)] shadow-[var(--mn-shadow-stamp-sm)] transition hover:text-[var(--mn-text)] disabled:opacity-50"
-      >
-        {downloadState === "idle" && (
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-          </svg>
-        )}
-        {downloadState === "downloading" && <SiriusIcon />}
-        {downloadState === "success" && <svg className="h-4 w-4 text-[var(--mn-mint)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
-      </button>
-      <button
-        onClick={handleCopy}
-        disabled={copyState === "copying"}
-        className="grid h-8 w-8 place-items-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-text-muted)] shadow-[var(--mn-shadow-stamp-sm)] transition hover:text-[var(--mn-text)] disabled:opacity-50"
-      >
-        {copyState === "idle" && (
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-          </svg>
-        )}
-        {copyState === "copying" && <SiriusIcon />}
-        {copyState === "success" && <svg className="h-4 w-4 text-[var(--mn-mint)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
-      </button>
-    </>
-  );
-
+function Swatch({ role, label }: { role: string; label?: string }) {
   return (
-    <div className="space-y-6">
-      <SectionCard>
-        <SectionTitle title={t(locale, "designSystem.sections.modals")} />
-        <div className="flex flex-wrap items-center gap-4">
-          {(["sm", "md", "lg", "xl"] as const).map((size) => (
-            <button
-              key={size}
-              onClick={() => openModal(size)}
-              className="mn-stamp-press rounded-xl border border-[var(--mn-border)] bg-[var(--mn-paper)] px-6 py-3 font-[var(--mn-font-display)] text-sm tracking-wider text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]"
-            >
-              {t(locale, `designSystem.modals.open${size.charAt(0).toUpperCase() + size.slice(1)}` as const)}
-            </button>
-          ))}
-          <button
-            onClick={() => setIsCopyModalOpen(true)}
-            className="mn-stamp-press rounded-xl border border-[var(--mn-border)] bg-[var(--mn-mint)] px-6 py-3 font-[var(--mn-font-display)] text-sm tracking-wider text-[var(--mn-bg)] shadow-[var(--mn-shadow-stamp)]"
-          >
-            {t(locale, "designSystem.modals.copyModal")}
-          </button>
-        </div>
-        <p className="mt-4 font-mono text-xs text-[var(--mn-text-muted)]">
-          {`<Modal isOpen={…} onClose={…} title="..." size="sm | md | lg | xl">{children}</Modal>`}
-        </p>
-      </SectionCard>
-
-      {/* Regular Modal */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={t(locale, "designSystem.modals.title")} size={modalSize}>
-        <div className="space-y-4">
-          <p className="text-sm leading-relaxed text-[var(--mn-text-muted)]">{t(locale, "designSystem.modals.body")}</p>
-          <div className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4">
-            <h3 className="mb-2 text-sm font-bold text-[var(--mn-text)]">Features</h3>
-            <ul className="space-y-1 text-sm text-[var(--mn-text-muted)]">
-              <li>• createPortal — z-index free</li>
-              <li>• framer-motion spring animation</li>
-              <li>• ESC / backdrop / browser back</li>
-              <li>• Body scroll lock</li>
-              <li>• sm / md / lg / xl sizes</li>
-              <li>• clean header style</li>
-            </ul>
-          </div>
-          <span className="inline-flex items-center gap-1 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-accent-soft)] px-3 py-1 text-xs font-bold text-[var(--mn-accent-deep)]">
-            {t(locale, "designSystem.modals.currentSize")}: {modalSize}
-          </span>
-        </div>
-      </Modal>
-
-      {/* Copy Modal */}
-      <Modal isOpen={isCopyModalOpen} onClose={() => { setIsCopyModalOpen(false); setCopyState("idle"); setDownloadState("idle"); }} title={t(locale, "designSystem.modals.copyModalTitle")} size="lg" headerActions={copyHeaderActions}>
-        <div className="space-y-3">
-          <p className="text-sm text-[var(--mn-text-muted)]">Copy Modal variant — copy/save actions in the header via headerActions prop.</p>
-          <div className="flex items-center justify-center rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-8">
-            <div className="flex h-40 w-60 items-center justify-center rounded-2xl border border-dashed border-[var(--mn-border)] bg-[var(--mn-paper)] text-sm text-[var(--mn-text-muted)]">
-              Image Placeholder
-            </div>
-          </div>
-        </div>
-      </Modal>
+    <div className="flex min-w-0 flex-col overflow-hidden rounded-shape-md border border-outline-variant">
+      <div className="h-14" style={{ background: `var(--md-sys-color-${role})` }} />
+      <div className="min-w-0 bg-surface px-3 py-2">
+        <div className="truncate text-label-medium text-on-surface">{label ?? role}</div>
+        <div className="truncate font-[var(--md-ref-typeface-mono)] text-body-small text-on-surface-variant">--md-sys-color-{role}</div>
+      </div>
     </div>
   );
 }
 
-// ── Filters Section ─────────────────────────────────────────────────────────────
-
-interface FiltersSectionProps {
-  locale: AppLocale;
-  search: string;
-  setSearch: (v: string) => void;
-  category: string;
-  setCategory: (v: string) => void;
-  sortBy: string;
-  setSortBy: (v: string) => void;
-  language: string;
-  setLanguage: (v: string) => void;
-  toggle: boolean;
-  setToggle: (v: boolean) => void;
-  filtered: number;
-  total: number;
-  hasActive: boolean;
-  reset: () => void;
-  sortOptions: SortFieldOption[];
-  languageOptions: { value: string; label: string }[];
-}
-
-function FiltersSection({
-  locale,
-  search,
-  setSearch,
-  category,
-  setCategory,
-  sortBy,
-  setSortBy,
-  language,
-  setLanguage,
-  toggle,
-  setToggle,
-  filtered,
-  total,
-  hasActive,
-  reset,
-  sortOptions,
-  languageOptions,
-}: FiltersSectionProps) {
+function ColorGroup({ locale, group }: { locale: AppLocale; group: string }) {
   return (
-    <SectionCard>
-      <SectionTitle title={t(locale, "designSystem.sections.filters")} />
-      <div className="grid grid-cols-1 w-full max-w-full gap-6 lg:grid-cols-2">
-        <div className="w-full min-w-0">
-          <BaseFilters
-            variant="card"
-            title={t(locale, "filter.title")}
-            searchValue={search}
-            onSearchChange={setSearch}
-            searchLabel={t(locale, "filter.search")}
-            searchPlaceholder={t(locale, "designSystem.filters.searchPlaceholder")}
-            resultCount={filtered}
-            totalCount={total}
-            hasActiveFilters={hasActive}
-            onReset={reset}
-            resetLabel={t(locale, "filter.reset")}
-            expandLabel={t(locale, "filter.expand")}
-          >
-            <FilterSection title={t(locale, "designSystem.filters.category")}>
-              <div className="flex flex-wrap gap-2">
-                {(["all", "typeA", "typeB"] as const).map((cat) => (
-                  <FilterButton key={cat} active={category === cat} onClick={() => setCategory(cat)}>
-                    {t(locale, `designSystem.filters.${cat}` as const)}
-                  </FilterButton>
-                ))}
-              </div>
-            </FilterSection>
-            <SortControl label={t(locale, "filter.sort")} value={sortBy} defaultOption={{ value: "default", label: t(locale, "sorting.default") }} options={sortOptions} ascendingLabel={t(locale, "sorting.ascending")} descendingLabel={t(locale, "sorting.descending")} onChange={setSortBy} />
-            <FilterSection title={t(locale, "designSystem.filters.language")}>
-              <FilterSelect value={language} options={languageOptions} onChange={setLanguage} />
-            </FilterSection>
-            <FilterToggle checked={toggle} onChange={setToggle} label={t(locale, "designSystem.filters.onlyComplete")} />
-          </BaseFilters>
-        </div>
-        <div className="w-full min-w-0 space-y-4">
-          <div className="w-full min-w-0 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4">
-            <h4 className="mb-2 text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">Current State</h4>
-            <div className="space-y-1 font-mono text-xs text-[var(--mn-text-muted)]">
-              <div>search: "{search || "(empty)"}"</div>
-              <div>category: "{category}"</div>
-              <div>sortBy: "{sortBy}"</div>
-              <div>language: "{language}"</div>
-              <div>toggle: {String(toggle)}</div>
-              <div>filtered: {filtered} / {total}</div>
-            </div>
-          </div>
-          <div className="w-full min-w-0 rounded-2xl border border-dashed border-[var(--mn-border)] bg-[var(--mn-paper)] p-4">
-            <h4 className="mb-2 text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">API</h4>
-            <pre className="w-full max-w-full overflow-x-auto text-[10px] text-[var(--mn-text-muted)]">
-{`<BaseFilters searchValue={...} onSearchChange={...}>
-  <FilterSection title="...">
-    <FilterButton active={...} onClick={...}>...</FilterButton>
-  </FilterSection>
-  <FilterSection title="Sort by">
-    <FilterSelect value={v} options={[...]} onChange={...} />
-  </FilterSection>
-  <FilterToggle checked={...} onChange={...} label="..." />
-</BaseFilters>`}
-            </pre>
-          </div>
-        </div>
+    <Sub title={t(locale, k(`roles.${group}`))}>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {[group, `on-${group}`, `${group}-container`, `on-${group}-container`].map((role) => <Swatch key={role} role={role} />)}
       </div>
-    </SectionCard>
+    </Sub>
   );
 }
 
-function FilterSelect({ value, options, onChange }: { value: string; options: { value: string; label: string }[]; onChange: (v: string) => void }) {
-  const selected = options.find((o) => o.value === value);
-
+function ThemeControls({ locale, bands }: Props) {
+  const { settings, updateSettings } = useSettings();
+  const seeds = [{ key: DEFAULT_ACCENT, label: t(locale, k("seedDefault")), color: MD3_DEFAULT_SEED }, ...bands.map((band) => ({ key: band.color, label: band.name, color: band.color }))];
+  const resolvedTheme = settings.colorScheme === "dark" ? "dark" : settings.colorScheme === "light" ? "light" : null;
   return (
-    <Popover
-      matchTriggerWidth
-      trigger={({ ref, onClick, ...aria }) => (
-        <button
-          ref={ref as React.Ref<HTMLButtonElement>}
-          type="button"
-          className="mn-stamp-press flex w-full min-w-0 items-center justify-between rounded-xl border border-[var(--mn-border)] bg-[var(--mn-paper)] px-4 py-2.5 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]"
-          onClick={onClick}
-          {...aria}
-        >
-          <span className="truncate">{selected?.label}</span>
-          {chevronDown}
-        </button>
-      )}
-    >
-      {({ close }) =>
-        options.map((opt) => (
-          <button
-            key={opt.value}
-            className={`w-full rounded-xl px-4 py-2 text-left text-sm font-bold transition hover:bg-[var(--mn-cream-deep)] ${opt.value === value ? "bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]" : "text-[var(--mn-text-muted)] hover:text-[var(--mn-text)]"}`}
-            onClick={() => { onChange(opt.value); close(); }}
-          >
-            {opt.label}
-          </button>
-        ))
-      }
-    </Popover>
+    <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="min-w-0 space-y-2">
+        <div className="text-label-large text-on-surface">{t(locale, k("seed"))}</div>
+        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t(locale, k("seed"))}>
+          {seeds.map((seed) => {
+            const selected = settings.accentColor === seed.key;
+            return (
+              <Chip
+                key={seed.key}
+                variant="filter"
+                role="radio"
+                aria-checked={selected}
+                onClick={() => updateSettings({ accentColor: seed.key })}
+                icon={<span className="block h-[18px] w-[18px] rounded-full border border-outline-variant" style={{ background: seed.color }} />}
+                label={seed.label}
+              />
+            );
+          })}
+        </div>
+        <p className="text-body-small text-on-surface-variant">{t(locale, k("seedHint"))}</p>
+      </div>
+      <div className="min-w-0 space-y-2">
+        <div className="text-label-large text-on-surface">{t(locale, k("theme"))}</div>
+        <ToggleButtonGroup exclusive value={resolvedTheme} onChange={(_, value: "light" | "dark" | null) => value && updateSettings({ colorScheme: value })} aria-label={t(locale, k("theme"))}>
+          <ToggleButton value="light">{t(locale, k("light"))}</ToggleButton>
+          <ToggleButton value="dark">{t(locale, k("dark"))}</ToggleButton>
+        </ToggleButtonGroup>
+      </div>
+      <div className="min-w-0 space-y-2">
+        <div className="text-label-large text-on-surface">{t(locale, k("density"))}</div>
+        <ToggleButtonGroup exclusive value={settings.density} onChange={(_, value: "comfortable" | "compact" | null) => value && updateSettings({ density: value })} aria-label={t(locale, k("density"))}>
+          <ToggleButton value="comfortable">{t(locale, k("comfortable"))}</ToggleButton>
+          <ToggleButton value="compact">{t(locale, k("compact"))}</ToggleButton>
+        </ToggleButtonGroup>
+      </div>
+    </div>
   );
 }
 
-// ── Animations Section ──────────────────────────────────────────────────────────
-
-function AnimationsSection({ locale }: { locale: AppLocale }) {
-  const {
-    floatHoverProps, floatTapProps,
-    stampHoverProps, stampTapProps,
-    springTransition, staggerContainer, staggerItem,
-  } = useSpringAnimation();
-
+function ColorSection({ locale }: { locale: AppLocale }) {
   return (
-    <div className="space-y-6">
-      {/* Spring Hover — float animation (rise + hover scale) */}
-      <SectionCard>
-        <SectionTitle title={t(locale, "designSystem.animations.spring")} />
-        <p className="mb-4 text-sm text-[var(--mn-text-muted)]">{t(locale, "designSystem.animations.springDesc")}</p>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {Array.from({ length: 4 }, (_, i) => (
-            <motion.div
-              key={i}
-              {...floatHoverProps}
-              transition={springTransition}
-              className="mn-card relative flex h-32 items-center justify-center rounded-2xl p-4"
-            >
-              <div className="text-center">
-                <svg className="mx-auto h-7 w-7 text-[var(--mn-accent)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="4"/><ellipse cx="12" cy="12" rx="11" ry="5" transform="rotate(-35 12 12)"/></svg>
-                <div className="mt-1 text-xs font-bold text-[var(--mn-text-muted)]">Card {i + 1}</div>
-              </div>
-            </motion.div>
+    <Section id="color" locale={locale}>
+      {["primary", "secondary", "tertiary", "error", "success", "warning"].map((group) => <ColorGroup key={group} locale={locale} group={group} />)}
+      <Sub title={t(locale, k("roles.surfaces"))}>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {["surface", "surface-dim", "surface-bright", "surface-container-lowest", "surface-container-low", "surface-container", "surface-container-high", "surface-container-highest", "on-surface", "on-surface-variant", "inverse-surface", "inverse-on-surface"].map((role) => <Swatch key={role} role={role} />)}
+        </div>
+      </Sub>
+      <Sub title={t(locale, k("roles.outline"))}>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {["outline", "outline-variant", "inverse-primary", "scrim"].map((role) => <Swatch key={role} role={role} />)}
+        </div>
+      </Sub>
+      <Sub title={t(locale, k("roles.categories"))}>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <div key={n} className="flex min-w-0 flex-col overflow-hidden rounded-shape-md border border-outline-variant">
+              <div className="h-10" style={{ background: `var(--md-sys-color-category${n})` }} />
+              <div className="px-3 py-2 text-label-medium" style={{ background: `var(--md-sys-color-category${n}-container)`, color: `var(--md-sys-color-on-category${n}-container)` }}>category{n}</div>
+            </div>
           ))}
         </div>
-      </SectionCard>
+      </Sub>
+    </Section>
+  );
+}
 
-      {/* Tap Feedback — split by shape */}
-      <SectionCard>
-        <SectionTitle title={t(locale, "designSystem.animations.tap")} />
-        <p className="mb-4 text-sm text-[var(--mn-text-muted)]">{t(locale, "designSystem.animations.tapDesc")}</p>
+function TypeSection({ locale }: { locale: AppLocale }) {
+  const scale = ["displayLarge", "displayMedium", "displaySmall", "headlineLarge", "headlineMedium", "headlineSmall", "titleLarge", "titleMedium", "titleSmall", "labelLarge", "labelMedium", "labelSmall", "bodyLarge", "bodyMedium", "bodySmall"] as const;
+  const sample = t(locale, "designSystem.title");
+  return (
+    <Section id="type" locale={locale}>
+      <div className="divide-y divide-outline-variant">
+        {scale.map((variant) => (
+          <div key={variant} className="flex min-w-0 flex-col gap-1 py-3 sm:flex-row sm:items-baseline sm:gap-6">
+            <span className="w-36 shrink-0 font-[var(--md-ref-typeface-mono)] text-body-small text-on-surface-variant">{variant}</span>
+            <Typography variant={variant} component="span" className="min-w-0 truncate text-on-surface">{sample}</Typography>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
 
-        {/* ── Stamp sub-area: Circular → stamp animation ── */}
-        <div className="mb-6">
-          <div className="mb-3 flex items-center gap-2">
-            <span className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-accent-soft)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[var(--mn-accent-deep)]">{t(locale, "designSystem.components.stamp")}</span>
-            <span className="text-xs text-[var(--mn-text-muted)]">{t(locale, "designSystem.animations.tapDesc")}</span>
+function ShapeSection({ locale }: { locale: AppLocale }) {
+  const shapes = [["none", "none"], ["extraSmall", "extra-small"], ["small", "small"], ["medium", "medium"], ["large", "large"], ["extraLarge", "extra-large"], ["full", "full"]] as const;
+  return (
+    <Section id="shape" locale={locale}>
+      <div className="grid grid-cols-3 gap-3 sm:grid-cols-7">
+        {shapes.map(([key, token]) => (
+          <div key={key} className="flex flex-col items-center gap-2">
+            <div className="h-16 w-16 bg-primary-container" style={{ borderRadius: `var(--md-sys-shape-corner-${token})` }} />
+            <span className="text-center text-label-medium text-on-surface-variant">{t(locale, k(`shapes.${key}`))}</span>
           </div>
-          <div className="flex flex-wrap items-end gap-6">
-            {/* Circular → stamp */}
-            <div className="flex flex-col items-center gap-1.5">
-              <motion.button
-                {...stampHoverProps}
-                {...stampTapProps}
-                transition={springTransition}
-                className="grid h-14 w-14 place-items-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-accent-deep)] text-[var(--mn-bg)] shadow-[var(--mn-shadow-stamp)] hover:shadow-[var(--mn-shadow-stamp-sm)]"
-              >
-                <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-              </motion.button>
-              <span className="text-[10px] font-bold text-[var(--mn-text-muted)]">Circular</span>
-            </div>
-            {/* Circular → stamp */}
-            <div className="flex flex-col items-center gap-1.5">
-              <motion.button
-                {...stampHoverProps}
-                {...stampTapProps}
-                transition={springTransition}
-                className="grid h-14 w-14 place-items-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-accent-deep)] text-[var(--mn-bg)] shadow-[var(--mn-shadow-stamp)] hover:shadow-[var(--mn-shadow-stamp-sm)]"
-              >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-              </motion.button>
-              <span className="text-[10px] font-bold text-[var(--mn-text-muted)]">Circular</span>
-            </div>
-            {/* Pill → stamp */}
-            <div className="flex flex-col items-center gap-1.5">
-              <motion.button
-                {...stampHoverProps}
-                {...stampTapProps}
-                transition={springTransition}
-                className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-amber)] px-8 py-3.5 font-[var(--mn-font-display)] text-sm text-[var(--mn-bg)] shadow-[var(--mn-shadow-stamp)] hover:shadow-[var(--mn-shadow-stamp-sm)]"
-              >
-                TAP ME
-              </motion.button>
-              <span className="text-[10px] font-bold text-[var(--mn-text-muted)]">Pill</span>
-            </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-3 gap-4 sm:grid-cols-6">
+        {[0, 1, 2, 3, 4, 5].map((level) => (
+          <div key={level} className="grid h-20 place-items-center rounded-shape-md bg-surface-container-low text-label-medium text-on-surface" style={{ boxShadow: `var(--md-sys-elevation-level${level})` }}>
+            {t(locale, k("elevation"), { n: level })}
           </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+function ButtonsSection({ locale }: { locale: AppLocale }) {
+  const variants = ["filled", "tonal", "elevated", "outlined", "text"] as const;
+  const [favorite, setFavorite] = useState(true);
+  return (
+    <Section id="buttons" locale={locale}>
+      <div className="flex flex-wrap items-center gap-3">
+        {variants.map((variant) => <Button key={variant} variant={variant}>{t(locale, k(`buttonsList.${variant}`))}</Button>)}
+      </div>
+      <div className="flex flex-wrap items-center gap-3">
+        {variants.map((variant) => <Button key={variant} variant={variant} startIcon={<Icon name="plus" />}>{t(locale, k("buttonsList.withIcon"))}</Button>)}
+      </div>
+      <div className="flex flex-wrap items-center gap-3">
+        {variants.map((variant) => <Button key={variant} variant={variant} disabled>{t(locale, k("buttonsList.disabled"))}</Button>)}
+      </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button size="small">{t(locale, k("buttonsList.small"))}</Button>
+        <Button>{t(locale, k("buttonsList.filled"))}</Button>
+        <Button size="large">{t(locale, k("buttonsList.large"))}</Button>
+        <Button variant="tonal" color="error">{t(locale, k("roles.error"))}</Button>
+        <Button variant="outlined" color="tertiary">{t(locale, k("roles.tertiary"))}</Button>
+      </div>
+      <Sub title={t(locale, k("iconButtons"))}>
+        <div className="flex flex-wrap items-center gap-3">
+          <IconButton aria-label={t(locale, k("settings"))}><Icon name="settings" /></IconButton>
+          <IconButton data-variant="filled" aria-label={t(locale, k("settings"))}><Icon name="settings" /></IconButton>
+          <IconButton data-variant="tonal" aria-label={t(locale, k("settings"))}><Icon name="settings" /></IconButton>
+          <IconButton data-variant="outlined" aria-label={t(locale, k("settings"))}><Icon name="settings" /></IconButton>
+          <IconButton data-variant="filled" aria-pressed={favorite} aria-label={t(locale, k("favorite"))} onClick={() => setFavorite((value) => !value)}><Icon name="heart" /></IconButton>
+          <IconButton aria-label={t(locale, k("settings"))} disabled><Icon name="settings" /></IconButton>
         </div>
-
-        {/* ── Float sub-area: Capsule / Pill → float animation ── */}
-        <div>
-          <div className="mb-3 flex items-center gap-2">
-            <span className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-paper)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[var(--mn-text)]">Float</span>
-            <span className="text-xs text-[var(--mn-text-muted)]">Capsule / Pill → rise up slightly</span>
-          </div>
-          <div className="flex flex-wrap items-end gap-6">
-            {/* Capsule → float */}
-            {[
-              { label: "Tab A", bg: "var(--mn-accent)", textColor: "var(--mn-bg)" },
-              { label: "Tab B", bg: "var(--mn-pink)", textColor: "var(--mn-bg)" },
-              { label: "Tab C", bg: "var(--mn-paper)", textColor: "var(--mn-text)" },
-            ].map((item) => (
-              <div key={item.label} className="flex flex-col items-center gap-1.5">
-                <motion.button
-                  {...floatHoverProps}
-                  {...floatTapProps}
-                  transition={springTransition}
-                  className="rounded-xl border border-[var(--mn-border)] px-5 py-2.5 text-xs font-bold shadow-[var(--mn-shadow-stamp-sm)]"
-                  style={{ background: item.bg, color: item.textColor }}
-                >
-                  {item.label}
-                </motion.button>
-                <span className="text-[10px] font-bold text-[var(--mn-text-muted)]">Capsule</span>
-              </div>
-            ))}
-          </div>
+      </Sub>
+      <Sub title={t(locale, k("buttonsList.fab"))}>
+        <div className="flex flex-wrap items-center gap-4">
+          <Fab size="small" aria-label={t(locale, k("buttonsList.extendedFab"))}><Icon name="plus" /></Fab>
+          <Fab aria-label={t(locale, k("buttonsList.extendedFab"))}><Icon name="plus" /></Fab>
+          <Fab color="secondary" aria-label={t(locale, k("buttonsList.extendedFab"))}><Icon name="plus" /></Fab>
+          <Fab color="tertiary" aria-label={t(locale, k("buttonsList.extendedFab"))}><Icon name="plus" /></Fab>
+          <Fab color="surface" aria-label={t(locale, k("buttonsList.extendedFab"))}><Icon name="plus" /></Fab>
+          <Fab variant="extended"><Icon name="plus" />{t(locale, k("buttonsList.extendedFab"))}</Fab>
         </div>
-      </SectionCard>
+      </Sub>
+    </Section>
+  );
+}
 
-      {/* Stagger Animation */}
-      <SectionCard>
-        <SectionTitle title={t(locale, "designSystem.animations.stagger")} />
-        <p className="mb-4 text-sm text-[var(--mn-text-muted)]">{t(locale, "designSystem.animations.staggerDesc")}</p>
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-40px" }}
-          className="grid grid-cols-2 gap-3 sm:grid-cols-4"
-        >
-          {Array.from({ length: 8 }, (_, i) => (
-            <motion.div
-              key={i}
-              variants={staggerItem}
-              className="flex h-20 items-center justify-center rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] text-xs font-bold text-[var(--mn-text-muted)] shadow-[var(--mn-shadow-stamp-sm)]"
-            >
-              Item {i + 1}
-            </motion.div>
-          ))}
-        </motion.div>
-      </SectionCard>
-
-      {/* Wobble */}
-      <SectionCard>
-        <SectionTitle title={t(locale, "designSystem.animations.wobble")} />
-        <p className="mb-4 text-sm text-[var(--mn-text-muted)]">{t(locale, "designSystem.animations.wobbleDesc")}</p>
+function SelectionSection({ locale }: { locale: AppLocale }) {
+  const [checked, setChecked] = useState(true);
+  const [radio, setRadio] = useState("day");
+  const [on, setOn] = useState(true);
+  const [slider, setSlider] = useState(40);
+  const [range, setRange] = useState<number[]>([20, 70]);
+  const [segment, setSegment] = useState("week");
+  const [multi, setMulti] = useState<string[]>(["day"]);
+  const periods = ["day", "week", "month"] as const;
+  return (
+    <Section id="selection" locale={locale}>
+      <div className="grid gap-6 md:grid-cols-2">
+        <Sub title={t(locale, k("selectionList.checkbox"))}>
+          <div className="flex flex-wrap items-center">
+            <FormControlLabel control={<Checkbox checked={checked} onChange={(event) => setChecked(event.target.checked)} />} label={t(locale, k("selectionList.switchLabel"))} />
+            <FormControlLabel control={<Checkbox indeterminate />} label={t(locale, k("selectionList.week"))} />
+            <FormControlLabel control={<Checkbox disabled />} label={t(locale, k("buttonsList.disabled"))} />
+          </div>
+        </Sub>
+        <Sub title={t(locale, k("selectionList.radio"))}>
+          <RadioGroup row value={radio} onChange={(event) => setRadio(event.target.value)}>
+            {periods.map((period) => <FormControlLabel key={period} value={period} control={<Radio />} label={t(locale, k(`selectionList.${period}`))} />)}
+          </RadioGroup>
+        </Sub>
+        <Sub title={t(locale, k("selectionList.switchLabel"))}>
+          <div className="flex items-center gap-2">
+            <Switch checked={on} onChange={(event) => setOn(event.target.checked)} slotProps={{ input: { "aria-label": t(locale, k("selectionList.switchLabel")) } }} />
+            <Switch disabled slotProps={{ input: { "aria-label": t(locale, k("buttonsList.disabled")) } }} />
+            <Switch checked disabled slotProps={{ input: { "aria-label": t(locale, k("buttonsList.disabled")) } }} />
+          </div>
+        </Sub>
+        <Sub title={t(locale, k("selectionList.slider"))}>
+          <Slider value={slider} onChange={(_, value) => setSlider(value as number)} valueLabelDisplay="auto" aria-label={t(locale, k("selectionList.slider"))} />
+          <Slider value={range} onChange={(_, value) => setRange(value as number[])} valueLabelDisplay="auto" step={10} marks getAriaLabel={() => t(locale, k("selectionList.slider"))} />
+        </Sub>
+      </div>
+      <Sub title={t(locale, k("selectionList.segmented"))}>
         <div className="flex flex-wrap gap-4">
-          {Array.from({ length: 5 }, (_, i) => (
-            <div
-              key={i}
-              className="mn-glow mn-card grid h-16 w-16 cursor-pointer place-items-center rounded-xl text-2xl"
-            >
-              <svg className="h-7 w-7 text-[var(--mn-accent-deep)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="m12 2 2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z"/></svg>
-            </div>
+          <ToggleButtonGroup exclusive value={segment} onChange={(_, value: string | null) => value && setSegment(value)} aria-label={t(locale, k("selectionList.segmented"))}>
+            {periods.map((period) => <ToggleButton key={period} value={period}>{segment === period ? <Icon name="check" /> : null}{t(locale, k(`selectionList.${period}`))}</ToggleButton>)}
+          </ToggleButtonGroup>
+          <ToggleButtonGroup value={multi} onChange={(_, value: string[]) => setMulti(value)} aria-label={t(locale, k("selectionList.segmented"))}>
+            {periods.map((period) => <ToggleButton key={period} value={period}>{t(locale, k(`selectionList.${period}`))}</ToggleButton>)}
+          </ToggleButtonGroup>
+        </div>
+      </Sub>
+    </Section>
+  );
+}
+
+function InputsSection({ locale, bands }: Props) {
+  const [name, setName] = useState("");
+  const [server, setServer] = useState("jp");
+  const bandNames = bands.map((band) => band.name);
+  return (
+    <Section id="inputs" locale={locale}>
+      <div className="grid gap-4 md:grid-cols-2">
+        <TextField label={t(locale, k("inputsList.label"))} helperText={t(locale, k("inputsList.helper"))} value={name} onChange={(event) => setName(event.target.value)} />
+        <TextField variant="filled" label={t(locale, k("inputsList.label"))} helperText={t(locale, k("inputsList.helper"))} />
+        <TextField error label={t(locale, k("inputsList.label"))} helperText={t(locale, k("inputsList.error"))} />
+        <TextField label={t(locale, k("inputsList.label"))} disabled />
+        <TextField select label={t(locale, k("inputsList.select"))} value={server} onChange={(event) => setServer(event.target.value)}>
+          {["jp", "tw", "kr", "en"].map((value) => <MenuItem key={value} value={value}>{value.toUpperCase()}</MenuItem>)}
+        </TextField>
+        <Autocomplete options={bandNames} renderInput={(params) => <TextField {...params} label={t(locale, k("inputsList.autocomplete"))} />} />
+        <TextField
+          className="md:col-span-2"
+          placeholder={t(locale, k("inputsList.search"))}
+          slotProps={{ input: { startAdornment: <InputAdornment position="start"><Icon name="search" /></InputAdornment>, sx: { borderRadius: "var(--md-sys-shape-corner-full)", backgroundColor: "var(--md-sys-color-surface-container-high)", "& .MuiOutlinedInput-notchedOutline": { borderColor: "transparent" } } }, htmlInput: { "aria-label": t(locale, k("inputsList.search")) } }}
+        />
+      </div>
+    </Section>
+  );
+}
+
+function ChipsSection({ locale }: { locale: AppLocale }) {
+  const [filters, setFilters] = useState<string[]>(["day"]);
+  const toggle = (value: string) => setFilters((current) => (current.includes(value) ? current.filter((item) => item !== value) : [...current, value]));
+  return (
+    <Section id="chips" locale={locale}>
+      <div className="flex flex-wrap items-center gap-2">
+        <Chip variant="assist" label={t(locale, k("chipsList.assist"))} icon={<Icon name="bell" />} onClick={() => {}} />
+        {(["day", "week", "month"] as const).map((value) => (
+          <Chip key={value} variant="filter" aria-pressed={filters.includes(value)} icon={filters.includes(value) ? <Icon name="check" /> : undefined} label={t(locale, k(`selectionList.${value}`))} onClick={() => toggle(value)} />
+        ))}
+        <Chip variant="input" label={t(locale, k("chipsList.input"))} onDelete={() => {}} />
+        <Chip variant="assist" label={t(locale, k("chipsList.suggestion"))} onClick={() => {}} />
+        <Chip variant="filter" label={t(locale, k("buttonsList.disabled"))} disabled />
+      </div>
+      <Sub title={t(locale, k("chipsList.tonal"))}>
+        <div className="flex flex-wrap items-center gap-2">
+          <Chip variant="tonal" color="success" label={t(locale, k("chipsList.ongoing"))} />
+          <Chip variant="tonal" color="tertiary" label={t(locale, k("chipsList.upcoming"))} />
+          <Chip variant="tonal" label={t(locale, k("chipsList.ended"))} />
+          <Chip variant="tonal" color="error" label={t(locale, k("roles.error"))} />
+          <Chip variant="tonal" color="warning" label={t(locale, k("roles.warning"))} />
+        </div>
+      </Sub>
+    </Section>
+  );
+}
+
+function FeedbackSection({ locale }: { locale: AppLocale }) {
+  const [snackbar, setSnackbar] = useState(false);
+  return (
+    <Section id="feedback" locale={locale}>
+      <Sub title={t(locale, k("feedbackList.progress"))}>
+        <div className="flex flex-wrap items-center gap-6">
+          <CircularProgress aria-label={t(locale, k("feedbackList.progress"))} />
+          <CircularProgress variant="determinate" value={64} aria-label={t(locale, k("feedbackList.progress"))} />
+          <div className="min-w-48 flex-1 space-y-3">
+            <LinearProgress aria-label={t(locale, k("feedbackList.progress"))} />
+            <LinearProgress variant="determinate" value={64} aria-label={t(locale, k("feedbackList.progress"))} />
+          </div>
+        </div>
+      </Sub>
+      <Sub title={t(locale, k("feedbackList.alert"))}>
+        <div className="grid gap-2 md:grid-cols-2">
+          <Alert severity="info">{t(locale, k("feedbackList.alertInfo"))}</Alert>
+          <Alert severity="success">{t(locale, k("feedbackList.alertSuccess"))}</Alert>
+          <Alert severity="warning">{t(locale, k("feedbackList.alertWarning"))}</Alert>
+          <Alert severity="error">{t(locale, k("feedbackList.alertError"))}</Alert>
+        </div>
+      </Sub>
+      <div className="flex flex-wrap items-center gap-6">
+        <Button variant="tonal" onClick={() => setSnackbar(true)}>{t(locale, k("feedbackList.showSnackbar"))}</Button>
+        <Tooltip title={t(locale, k("feedbackList.tooltipText"))}>
+          <Button variant="outlined">{t(locale, k("feedbackList.tooltip"))}</Button>
+        </Tooltip>
+        <Badge badgeContent={8} color="error">
+          <IconButton aria-label={t(locale, k("feedbackList.badge"))}><Icon name="bell" /></IconButton>
+        </Badge>
+        <Badge variant="dot" color="error">
+          <IconButton aria-label={t(locale, k("feedbackList.badge"))}><Icon name="bell" /></IconButton>
+        </Badge>
+      </div>
+      <Snackbar
+        open={snackbar}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar(false)}
+        message={t(locale, k("feedbackList.snackbarText"))}
+        action={<Button variant="text" size="small" sx={{ color: "var(--md-sys-color-inverse-primary)" }} onClick={() => setSnackbar(false)}>{t(locale, k("feedbackList.undo"))}</Button>}
+      />
+    </Section>
+  );
+}
+
+function ContainersSection({ locale }: { locale: AppLocale }) {
+  const [dialog, setDialog] = useState(false);
+  const cards = [["elevated", "elevated"], ["filled", "filled"], ["outlined", "outlined"]] as const;
+  return (
+    <Section id="containers" locale={locale}>
+      <div className="grid gap-4 md:grid-cols-3">
+        {cards.map(([key, variant]) => (
+          <Card key={key} variant={variant}>
+            <CardActionArea>
+              <CardContent>
+                <div className="text-title-medium text-on-surface">{t(locale, k(`containersList.${key}`))}</div>
+                <p className="mt-1 text-body-medium text-on-surface-variant">{t(locale, k("containersList.cardBody"))}</p>
+              </CardContent>
+            </CardActionArea>
+          </Card>
+        ))}
+      </div>
+      <Sub title={t(locale, k("containersList.listCard"))}>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[1, 2, 3, 4].map((n) => (
+            <a key={n} href={`#md3-containers`} className="md3-list-card block p-3">
+              <div className="mb-2 aspect-[4/3] rounded-shape-sm md3-placeholder" />
+              <div className="truncate text-title-small text-on-surface">{t(locale, "designSystem.foundation.sampleItem", { n })}</div>
+              <div className="text-body-small text-on-surface-variant">{t(locale, k("chipsList.ongoing"))}</div>
+            </a>
           ))}
         </div>
-      </SectionCard>
+      </Sub>
+      <Button variant="tonal" onClick={() => setDialog(true)}>{t(locale, k("containersList.openDialog"))}</Button>
+      <Dialog open={dialog} onClose={() => setDialog(false)} aria-labelledby="md3-dialog-title" maxWidth="xs" fullWidth>
+        <DialogTitle id="md3-dialog-title">{t(locale, k("containersList.dialogTitle"))}</DialogTitle>
+        <DialogContent>{t(locale, k("containersList.dialogBody"))}</DialogContent>
+        <DialogActions>
+          <Button variant="text" onClick={() => setDialog(false)}>{t(locale, k("containersList.cancel"))}</Button>
+          <Button variant="text" onClick={() => setDialog(false)}>{t(locale, k("containersList.confirm"))}</Button>
+        </DialogActions>
+      </Dialog>
+    </Section>
+  );
+}
+
+function NavigationSection({ locale }: { locale: AppLocale }) {
+  const [tab, setTab] = useState(0);
+  const [page, setPage] = useState(3);
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+  return (
+    <Section id="navigation" locale={locale}>
+      <Sub title={t(locale, k("navigationList.tabs"))}>
+        <Tabs value={tab} onChange={(_, value: number) => setTab(value)} variant="scrollable" allowScrollButtonsMobile aria-label={t(locale, k("navigationList.tabs"))}>
+          {(["day", "week", "month"] as const).map((period) => <Tab key={period} label={t(locale, k(`selectionList.${period}`))} />)}
+        </Tabs>
+      </Sub>
+      <Sub title={t(locale, k("navigationList.pagination"))}>
+        <Pagination count={12} page={page} onChange={(_, value) => setPage(value)} siblingCount={1} />
+      </Sub>
+      <Sub title={t(locale, k("navigationList.menu"))}>
+        <Button variant="outlined" endIcon={<Icon name="more" />} aria-haspopup="menu" aria-expanded={Boolean(anchor)} onClick={(event) => setAnchor(event.currentTarget)}>
+          {t(locale, k("navigationList.openMenu"))}
+        </Button>
+        <Menu anchorEl={anchor} open={Boolean(anchor)} onClose={() => setAnchor(null)}>
+          {(["edit", "duplicate", "remove"] as const).map((item) => <MenuItem key={item} onClick={() => setAnchor(null)}>{t(locale, k(`navigationList.${item}`))}</MenuItem>)}
+        </Menu>
+      </Sub>
+    </Section>
+  );
+}
+
+function DesignSystemPage({ locale, bands }: Props) {
+  const [section, setSection] = useState<SectionId>("color");
+  const jump = (id: SectionId) => {
+    setSection(id);
+    document.getElementById(`md3-${id}`)?.scrollIntoView({ block: "start" });
+  };
+  return (
+    <div className="space-y-6">
+      <header className="md3-surface overflow-hidden p-6 sm:p-8">
+        <BrandLogo className="mn-brand-system" />
+        <Chip variant="tonal" color="primary" label={t(locale, k("badge"))} />
+        <h1 className="mt-3 font-[var(--md-ref-typeface-brand)] text-headline-large text-on-surface">{t(locale, "designSystem.title")}</h1>
+        <p className="mt-2 max-w-3xl text-body-large text-on-surface-variant">{t(locale, k("intro"))}</p>
+        <div className="mt-6">
+          <ThemeControls locale={locale} bands={bands} />
+        </div>
+      </header>
+      <nav className="sticky top-[var(--mn-header-bottom,5rem)] z-20 -mx-1 bg-surface md:top-24" aria-label={t(locale, "designSystem.title")}>
+        <Tabs value={section} onChange={(_, value: SectionId) => jump(value)} variant="scrollable" allowScrollButtonsMobile>
+          {SECTIONS.map((id) => <Tab key={id} value={id} label={t(locale, k(`sections.${id}`))} />)}
+        </Tabs>
+      </nav>
+      <ColorSection locale={locale} />
+      <TypeSection locale={locale} />
+      <ShapeSection locale={locale} />
+      <ButtonsSection locale={locale} />
+      <SelectionSection locale={locale} />
+      <InputsSection locale={locale} bands={bands} />
+      <ChipsSection locale={locale} />
+      <FeedbackSection locale={locale} />
+      <ContainersSection locale={locale} />
+      <NavigationSection locale={locale} />
+      <Section id="foundation" locale={locale}>
+        <FoundationSection locale={locale} />
+      </Section>
     </div>
   );
 }
 
-// ── Select & Checkbox Demos ───────────────────────────────────────────────────
-
-const chevronDown = (
-  <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
-);
-
-const checkSvg = (
-  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7" /></svg>
-);
-
-function SelectDemo({ locale }: { locale: AppLocale }) {
-  const options = [
-    { value: "a", label: t(locale, "designSystem.components.optA") },
-    { value: "b", label: t(locale, "designSystem.components.optB") },
-    { value: "c", label: t(locale, "designSystem.components.optC") },
-  ];
-  const [value, setValue] = useState("a");
-  const selected = options.find((o) => o.value === value);
-
-  return (
-    <div>
-      <label htmlFor="demo-select" className="mb-1 block text-sm font-bold text-[var(--mn-text)]">{t(locale, "designSystem.components.select")}</label>
-      <Popover
-        matchTriggerWidth
-        trigger={({ ref, onClick, ...aria }) => (
-          <button
-            ref={ref as React.Ref<HTMLButtonElement>}
-            id="demo-select"
-            type="button"
-            className="mn-stamp-press flex w-full min-w-0 items-center justify-between rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-5 py-3 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]"
-            onClick={onClick}
-            {...aria}
-          >
-            <span className="truncate">{selected?.label ?? t(locale, "designSystem.components.selectPlaceholder")}</span>
-            {chevronDown}
-          </button>
-        )}
-      >
-        {({ close }) =>
-          options.map((opt) => (
-            <button
-              key={opt.value}
-              className={`w-full rounded-xl px-4 py-2 text-left text-sm font-bold transition hover:bg-[var(--mn-cream-deep)] ${opt.value === value ? "bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]" : "text-[var(--mn-text-muted)] hover:text-[var(--mn-text)]"}`}
-              onClick={() => { setValue(opt.value); close(); }}
-            >
-              {opt.label}
-            </button>
-          ))
-        }
-      </Popover>
-    </div>
-  );
-}
-
-function CheckboxDemo({ defaultChecked = false, accent = false }: { defaultChecked?: boolean; accent?: boolean }) {
-  const [checked, setChecked] = useState(defaultChecked);
-  return (
-    <label className="inline-flex cursor-pointer items-center gap-2.5">
-      <button
-        type="button"
-        role="checkbox"
-        aria-checked={checked}
-        className={`grid h-5 w-5 shrink-0 place-items-center rounded-xl border transition ${checked ? (accent ? "border-[var(--mn-accent-deep)] bg-[var(--mn-accent-deep)] text-[var(--mn-bg)]" : "border-[var(--mn-border)] bg-[var(--mn-accent-deep)] text-[var(--mn-bg)]") : "border-[var(--mn-border)] bg-[var(--mn-paper)]"}`}
-        onClick={() => setChecked(!checked)}
-      >
-        {checked && checkSvg}
-      </button>
-      <span className="text-sm font-bold text-[var(--mn-text)]">
-        {accent ? "Accent" : checked ? "Checked" : "Unchecked"}
-      </span>
-    </label>
-  );
-}
+export default withMd3(DesignSystemPage);
