@@ -62,7 +62,7 @@ export function CharacterFilter({
         >
           <span className="flex items-center" title={char.name} aria-label={char.name}>
             <img
-              className="h-5 w-5 rounded-full object-cover bg-[var(--mn-cream-deep)]"
+              className="h-6 w-6 rounded-full object-cover bg-surface-container-highest"
               src={char.faceIconUrl ?? getCharacterFaceIconUrl(char.id)}
               alt={char.name}
               loading="lazy"

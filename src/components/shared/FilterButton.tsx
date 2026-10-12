@@ -1,45 +1,25 @@
-import type { ReactNode } from "react";
-import { motion } from "framer-motion";
-import { useSpringAnimation } from "@/lib/animation/use-animation";
+import type { CSSProperties, ReactNode } from "react";
+import { Icon } from "@/components/shared/icons";
 
 export interface FilterButtonProps {
   active: boolean;
   onClick: () => void;
+  /** A content color (e.g. an attribute or band color) for the selected state instead of secondary-container. */
   activeBg?: string;
   activeColor?: string;
   children: ReactNode;
 }
 
-export default function FilterButton({
-  active,
-  onClick,
-  activeBg,
-  activeColor,
-  children,
-}: FilterButtonProps) {
-  const { floatTapProps, floatHoverProps, springTransition } = useSpringAnimation();
-  const motionProps = { ...floatHoverProps, ...floatTapProps };
-
+/**
+ * Material 3 filter chip (32dp, small shape): outlined when off; selected it fills with secondary-container and
+ * leads with a check mark. Plain CSS (`.md3-filter-chip`), since filter panels render dozens of them.
+ */
+export default function FilterButton({ active, onClick, activeBg, activeColor, children }: FilterButtonProps) {
+  const style: CSSProperties | undefined = active && activeBg ? { background: activeBg, color: activeColor ?? "var(--md-sys-color-on-primary)", borderColor: "transparent" } : undefined;
   return (
-    <motion.button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      {...motionProps}
-      transition={springTransition}
-      className={[
-        "mn-filter-chip relative rounded-lg border border-[var(--mn-border)] px-3 py-1.5",
-        "text-xs font-bold transition-colors sm:text-sm",
-        active
-          ? "text-[var(--mn-bg)] shadow-[var(--mn-shadow-stamp-sm)]"
-          : "bg-[var(--mn-paper)] hover:shadow-[var(--mn-shadow-stamp-sm)]",
-      ].join(" ")}
-      style={{
-        background: active ? (activeBg ?? "var(--mn-accent-deep)") : undefined,
-        color: active ? (activeColor ?? "var(--mn-bg)") : undefined,
-      }}
-    >
+    <button type="button" onClick={onClick} aria-pressed={active} className="md3-filter-chip md3-state" style={style}>
+      {active && <Icon name="check" className="h-[18px] w-[18px] shrink-0" />}
       {children}
-    </motion.button>
+    </button>
   );
 }

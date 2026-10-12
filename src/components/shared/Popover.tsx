@@ -1,12 +1,6 @@
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
-import { createPortal } from "react-dom";
+import { useCallback, useState, type ReactNode } from "react";
+import MuiPopover from "@mui/material/Popover";
+import { Md3Provider } from "@/components/md3/Md3Provider";
 
 export interface PopoverRenderProps {
   /** Close the popover. */
@@ -35,151 +29,53 @@ export interface PopoverProps {
   matchTriggerWidth?: boolean;
 }
 
-interface Coords {
-  top?: number | undefined;
-  bottom?: number | undefined;
-  left: number;
-  width: number;
-  maxHeight: number;
-  placement: "bottom" | "top";
-}
-
-const VIEWPORT_MARGIN = 8;
-
 /**
- * Portal-based popover. Renders its panel into document.body so it never gets
- * clipped by any ancestor's overflow (modals, header cards, scroll containers).
- * Uses fixed viewport coordinates so it works reliably inside scrolling overlays
- * and auto-flips above the trigger when there is insufficient space below.
+ * Material 3 menu surface anchored to a trigger (MUI Popover: portal, kept inside the viewport, Escape and outside
+ * click close it, focus returns to the trigger). The panel is surface-container with the extra-small shape.
  */
 export default function Popover({
   trigger,
   children,
   align = "start",
-  offset = 6,
+  offset = 4,
   panelClassName = "",
   minWidth,
   matchTriggerWidth = false,
 }: PopoverProps) {
-  const [open, setOpen] = useState(false);
-  const triggerRef = useRef<HTMLElement | null>(null);
-  const panelRef = useRef<HTMLDivElement | null>(null);
-  const [coords, setCoords] = useState<Coords | null>(null);
-
-  const close = useCallback(() => setOpen(false), []);
-
-  const setTriggerRef = useCallback((node: HTMLElement | null) => {
-    triggerRef.current = node;
-  }, []);
-
-  const updateCoords = useCallback(() => {
-    const trigEl = triggerRef.current;
-    if (!trigEl) return;
-    const rect = trigEl.getBoundingClientRect();
-    const vh = window.innerHeight;
-    const vw = window.innerWidth;
-
-    const availableBelow = Math.max(0, vh - rect.bottom - offset - VIEWPORT_MARGIN);
-    const availableAbove = Math.max(0, rect.top - offset - VIEWPORT_MARGIN);
-    const placeTop = availableBelow < 160 && availableAbove > availableBelow;
-    const maxHeight = Math.max(80, placeTop ? availableAbove : availableBelow);
-
-    const width = rect.width;
-    const panelWidth = matchTriggerWidth ? width : Math.max(minWidth ?? width, width);
-    const maxAllowedWidth = Math.max(0, vw - VIEWPORT_MARGIN * 2);
-    const effectiveWidth = Math.min(panelWidth, maxAllowedWidth);
-
-    let left = align === "end" ? rect.right - effectiveWidth : rect.left;
-    left = Math.max(VIEWPORT_MARGIN, Math.min(left, vw - effectiveWidth - VIEWPORT_MARGIN));
-
-    setCoords({
-      top: placeTop ? undefined : Math.round(rect.bottom + offset),
-      bottom: placeTop ? Math.round(vh - rect.top + offset) : undefined,
-      left: Math.round(left),
-      width: Math.round(effectiveWidth),
-      maxHeight: Math.round(maxHeight),
-      placement: placeTop ? "top" : "bottom",
-    });
-  }, [align, offset, minWidth, matchTriggerWidth]);
-
-  const toggle = useCallback(() => {
-    setOpen((prev) => {
-      if (!prev) {
-        updateCoords();
-      }
-      return !prev;
-    });
-  }, [updateCoords]);
-
-  useLayoutEffect(() => {
-    if (open) updateCoords();
-  }, [open, updateCoords]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onScrollResize = () => updateCoords();
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        setOpen(false);
-        triggerRef.current?.focus();
-      }
-    };
-    window.addEventListener("resize", onScrollResize);
-    window.addEventListener("scroll", onScrollResize, true);
-    window.visualViewport?.addEventListener("resize", onScrollResize);
-    window.visualViewport?.addEventListener("scroll", onScrollResize);
-    document.addEventListener("keydown", onKeyDown, true);
-    return () => {
-      window.removeEventListener("resize", onScrollResize);
-      window.removeEventListener("scroll", onScrollResize, true);
-      window.visualViewport?.removeEventListener("resize", onScrollResize);
-      window.visualViewport?.removeEventListener("scroll", onScrollResize);
-      document.removeEventListener("keydown", onKeyDown, true);
-    };
-  }, [open, updateCoords]);
-
-  const panelStyle: React.CSSProperties = coords
-    ? {
-        position: "fixed",
-        top: coords.top !== undefined ? `${coords.top}px` : undefined,
-        bottom: coords.bottom !== undefined ? `${coords.bottom}px` : undefined,
-        left: `${coords.left}px`,
-        ...(matchTriggerWidth ? { width: `${coords.width}px` } : { minWidth: `${minWidth ?? coords.width}px` }),
-        maxWidth: `calc(100vw - ${VIEWPORT_MARGIN * 2}px)`,
-        maxHeight: `${coords.maxHeight}px`,
-        overflowY: "auto",
-      }
-    : { position: "fixed", visibility: "hidden" };
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+  const [triggerNode, setTriggerNode] = useState<HTMLElement | null>(null);
+  const open = Boolean(anchor);
+  const close = useCallback(() => setAnchor(null), []);
+  const toggle = useCallback(() => setAnchor((current) => (current ? null : triggerNode)), [triggerNode]);
+  const width = triggerNode?.getBoundingClientRect().width ?? 0;
+  const horizontal = align === "end" ? "right" : "left";
 
   return (
     <>
-      {trigger({
-        ref: setTriggerRef,
-        onClick: toggle,
-        "aria-expanded": open,
-        "aria-haspopup": true,
-      })}
-      {open &&
-        createPortal(
-          <>
-            <div
-              className="fixed inset-0 z-[210] cursor-pointer"
-              onClick={close}
-              onPointerDown={close}
-              aria-hidden="true"
-            />
-            <div
-              ref={panelRef}
-              style={panelStyle}
-              className={`mn-popover-panel z-[220] rounded-2xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] p-2 shadow-[var(--mn-shadow-stamp)] ${panelClassName}`}
-              role="menu"
-            >
-              {typeof children === "function" ? children({ close }) : children}
-            </div>
-          </>,
-          document.body,
-        )}
+      {trigger({ ref: setTriggerNode, onClick: toggle, "aria-expanded": open, "aria-haspopup": true })}
+      <Md3Provider>
+        <MuiPopover
+          open={open}
+          anchorEl={anchor}
+          onClose={close}
+          anchorOrigin={{ vertical: "bottom", horizontal }}
+          transformOrigin={{ vertical: "top", horizontal }}
+          marginThreshold={8}
+          slotProps={{
+            paper: {
+              role: "menu",
+              className: `mn-popover-panel py-2 ${panelClassName}`,
+              style: {
+                marginTop: offset,
+                ...(matchTriggerWidth ? { width } : { minWidth: minWidth ?? width }),
+                maxWidth: "calc(100vw - 16px)",
+              },
+            },
+          }}
+        >
+          {typeof children === "function" ? children({ close }) : children}
+        </MuiPopover>
+      </Md3Provider>
     </>
   );
 }

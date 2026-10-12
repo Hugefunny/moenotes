@@ -60,12 +60,12 @@
 .mn-range-thumb:focus-visible { outline: none; }
 .mn-range-thumb::-webkit-slider-runnable-track { height: 100%; background: transparent; }
 .mn-range-thumb::-moz-range-track { background: transparent; }
-.mn-range-thumb::-webkit-slider-thumb { box-sizing: border-box; width: 18px; height: 18px; border: 2px solid var(--md-sys-color-primary); border-radius: 50%; background: var(--md-sys-color-surface-container-high); box-shadow: var(--md-sys-elevation-level1); cursor: grab; pointer-events: auto; -webkit-appearance: none; appearance: none; }
-.mn-range-thumb::-moz-range-thumb { box-sizing: border-box; width: 18px; height: 18px; border: 2px solid var(--md-sys-color-primary); border-radius: 50%; background: var(--md-sys-color-surface-container-high); box-shadow: var(--md-sys-elevation-level1); cursor: grab; pointer-events: auto; }
+.mn-range-thumb::-webkit-slider-thumb { box-sizing: border-box; width: 20px; height: 20px; border: 0; border-radius: 50%; background: var(--md-sys-color-primary); box-shadow: none; cursor: grab; pointer-events: auto; -webkit-appearance: none; appearance: none; }
+.mn-range-thumb::-moz-range-thumb { box-sizing: border-box; width: 20px; height: 20px; border: 0; border-radius: 50%; background: var(--md-sys-color-primary); box-shadow: none; cursor: grab; pointer-events: auto; }
 .mn-range-thumb:active::-webkit-slider-thumb { cursor: grabbing; }
 .mn-range-thumb:active::-moz-range-thumb { cursor: grabbing; }
-.mn-range-thumb:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--md-sys-color-primary); outline-offset: 2px; }
-.mn-range-thumb:focus-visible::-moz-range-thumb { outline: 2px solid var(--md-sys-color-primary); outline-offset: 2px; }
+.mn-range-thumb:focus-visible::-webkit-slider-thumb { outline: 3px solid var(--md-sys-color-secondary); outline-offset: 2px; }
+.mn-range-thumb:focus-visible::-moz-range-thumb { outline: 3px solid var(--md-sys-color-secondary); outline-offset: 2px; }
 /* BrowserNotice: shown to in-app browsers and outdated engines, so plain unlayered CSS; every M3 variable has a hex
    fallback first (the default light scheme), for engines without custom properties. */
 .mn-browser-notice { position: fixed; z-index: 60; left: 12px; right: 12px; bottom: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); max-width: 28rem; margin: 0 auto; padding: 16px 52px 16px 16px; border-radius: 12px; background: #e8e7ef; background: var(--md-sys-color-surface-container-high); color: #1a1b20; color: var(--md-sys-color-on-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, .3), 0 4px 8px 3px rgba(0, 0, 0, .15); font-size: 14px; line-height: 20px; text-align: left; }

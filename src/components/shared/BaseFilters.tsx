@@ -1,7 +1,6 @@
 import SortControl, { type SortControlProps } from "./SortControl";
-import { type ReactNode, useEffect, useId, useState, useRef, useCallback } from "react";
-import { motion } from "framer-motion";
-import { useSpringAnimation } from "@/lib/animation/use-animation";
+import { type ReactNode, useCallback, useEffect, useId, useRef, useState } from "react";
+import { Icon } from "@/components/shared/icons";
 
 // Re-export for convenience
 export { default as FilterButton } from "@/components/shared/FilterButton";
@@ -44,13 +43,12 @@ export interface FilterToggleProps {
 
 // ── FilterSection ──────────────────────────────────────────────────────────────
 
+/** A titled group of filter controls (M3 title-small label). */
 export function FilterSection({ title, aside, children }: FilterSectionProps) {
   return (
     <div>
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <span className="block text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">
-          {title}
-        </span>
+      <div className="mb-2 flex min-h-6 items-center justify-between gap-3">
+        <span className="block text-title-small text-on-surface-variant">{title}</span>
         {aside}
       </div>
       {children}
@@ -60,35 +58,21 @@ export function FilterSection({ title, aside, children }: FilterSectionProps) {
 
 // ── FilterToggle ───────────────────────────────────────────────────────────────
 
+/** A labelled on/off filter: an M3 list row with a trailing switch (the whole row toggles). */
 export function FilterToggle({ checked, onChange, label }: FilterToggleProps) {
-  const { stampTapProps, springTransition } = useSpringAnimation();
-
   return (
-    <motion.button
+    <button
       type="button"
+      role="switch"
+      aria-checked={checked}
       onClick={() => onChange(!checked)}
-      aria-pressed={checked}
-      {...stampTapProps}
-      transition={springTransition}
-      className="flex w-full items-center justify-between rounded-xl border border-[var(--mn-border)] bg-[var(--mn-paper)] px-5 py-3 transition-colors hover:shadow-[var(--mn-shadow-stamp-sm)] cursor-pointer"
+      className="md3-state flex min-h-14 w-full items-center justify-between gap-4 rounded-shape-md px-4 text-left text-body-large text-on-surface"
     >
-      <span className={`text-sm font-bold ${checked ? "text-[var(--mn-text)]" : "text-[var(--mn-text-muted)]"}`}>
-        {label}
+      <span className="min-w-0">{label}</span>
+      <span aria-hidden="true" className={`md3-switch ${checked ? "md3-switch--on" : ""}`}>
+        <span className="md3-switch__thumb">{checked && <Icon name="check" className="h-4 w-4" strokeWidth={2.5} />}</span>
       </span>
-      <div
-        className={`grid h-5 w-5 place-items-center rounded-xl border transition-colors ${
-          checked
-            ? "border-[var(--mn-accent)] bg-[var(--mn-accent)] shadow-[0_0_0_2px_color-mix(in_oklab,var(--mn-accent)_20%,transparent)]"
-            : "border-[var(--mn-border)] bg-[var(--mn-surface)]"
-        }`}
-      >
-        {checked && (
-          <svg className="h-3 w-3 text-[var(--mn-bg)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
-        )}
-      </div>
-    </motion.button>
+    </button>
   );
 }
 
@@ -139,33 +123,34 @@ function FilterSearchInput({ id, value, onChange, placeholder }: FilterSearchInp
   return (
     <input
       id={id}
-      type="text"
+      type="search"
       placeholder={placeholder}
       value={localValue}
       onChange={handleChange}
       onCompositionStart={handleCompositionStart}
       onCompositionEnd={handleCompositionEnd}
-      className="w-full min-w-0 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] py-2.5 pl-11 pr-5 text-sm text-[var(--mn-text)] placeholder:text-[var(--mn-text-muted)] focus:border-[var(--mn-accent)] focus:bg-[var(--mn-paper)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_oklab,var(--mn-accent)_20%,transparent)]"
+      className="md3-text-field md3-search-field !h-12 !pl-12 !pr-4"
     />
   );
 }
 
 // ── BaseFilters ────────────────────────────────────────────────────────────────
 
+/** The filter panel of an explorer page: search bar, result count, sort, the page's sections and a reset button. */
 export default function BaseFilters({
   variant = "plain",
   sort,
-  title = "Filter",
+  title = "",
   searchValue,
   onSearchChange,
-  searchLabel = "Search",
+  searchLabel = "",
   searchPlaceholder,
   resultCount,
   totalCount,
   hasActiveFilters = false,
   onReset,
-  resetLabel = "Reset",
-  expandLabel = "Expand",
+  resetLabel = "",
+  expandLabel = "",
   children,
   disableCollapse = false,
 }: BaseFiltersProps) {
@@ -177,53 +162,28 @@ export default function BaseFilters({
   useEffect(() => {
     const query = window.matchMedia("(min-width: 1024px)");
     const handleChange = () => setIsDesktop(query.matches);
-
     handleChange();
     query.addEventListener("change", handleChange);
     return () => query.removeEventListener("change", handleChange);
   }, []);
 
-  // Shared inner controls: search, result counts, filter sections, reset button
+  const count = totalCount !== undefined
+    ? resultCount !== undefined && resultCount !== totalCount ? `${resultCount} / ${totalCount}` : `${totalCount}`
+    : null;
+
   const filterControls = (
-    <div className="space-y-4">
-      {/* Search */}
-      <div>
-        <label className="sr-only" htmlFor={`${contentId}-search`}>
-          {searchLabel}
-        </label>
-        <div className="relative">
-          <svg
-            className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mn-text-muted)] pointer-events-none"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <FilterSearchInput
-            id={`${contentId}-search`}
-            placeholder={searchPlaceholder ?? "Search..."}
-            value={searchValue}
-            onChange={onSearchChange}
-          />
-        </div>
+    <div className="space-y-5">
+      <div className="relative">
+        <label className="sr-only" htmlFor={`${contentId}-search`}>{searchLabel || searchPlaceholder}</label>
+        <Icon name="search" className="pointer-events-none absolute left-4 top-1/2 h-6 w-6 -translate-y-1/2 text-on-surface-variant" />
+        <FilterSearchInput id={`${contentId}-search`} placeholder={searchPlaceholder ?? searchLabel} value={searchValue} onChange={onSearchChange} />
       </div>
 
-      {/* Result Count & Reset summary */}
       {totalCount !== undefined && totalCount > 0 && (
-        <div className="flex items-center justify-between text-xs font-bold text-[var(--mn-text-muted)] px-1">
-          <span>
-            {resultCount !== undefined && resultCount !== totalCount
-              ? `${resultCount} / ${totalCount}`
-              : `${totalCount}`}
-          </span>
+        <div className="flex min-h-10 items-center justify-between gap-3 px-1" aria-live="polite">
+          <span className="text-label-large text-on-surface-variant">{count}</span>
           {hasActiveFilters && onReset && (
-            <button
-              type="button"
-              onClick={onReset}
-              className="text-xs font-bold text-[var(--mn-accent)] hover:underline cursor-pointer"
-            >
+            <button type="button" onClick={onReset} className="md3-state min-h-10 rounded-full px-3 text-label-large text-primary">
               {resetLabel}
             </button>
           )}
@@ -232,89 +192,56 @@ export default function BaseFilters({
 
       {sort && <SortControl {...sort} />}
 
-      {/* Custom Sections */}
-      <div className="space-y-4 pt-1">{children}</div>
+      <div className="space-y-5">{children}</div>
 
-      {/* Full Reset Button */}
       {hasActiveFilters && onReset && (
-        <button
-          type="button"
-          onClick={onReset}
-          className="mn-stamp-press flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] py-2.5 text-sm font-bold text-[var(--mn-text-muted)] transition hover:bg-[var(--mn-cream-deep)] hover:text-[var(--mn-text)] cursor-pointer mt-4"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
+        <button type="button" onClick={onReset} className="md3-state flex h-10 w-full items-center justify-center gap-2 rounded-full border border-outline-variant text-label-large text-primary">
+          <Icon name="close" className="h-[18px] w-[18px]" />
           {resetLabel}
         </button>
       )}
     </div>
   );
 
-  // 1. Plain flat variant (Inside FilterDrawer)
   if (variant === "plain") {
     return <div className="w-full">{filterControls}</div>;
   }
 
-  // 2. Standalone Card variant (For in-page static layouts like DesignSystem)
+  // Standalone card (dialogs, in-page pickers): an outlined M3 card that folds below 1024px.
   return (
-    <div className="w-full max-w-full rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp)]">
-      {/* Header */}
+    <div className="w-full max-w-full overflow-hidden rounded-shape-md border border-outline-variant bg-surface">
       <button
         type="button"
-        className={`flex w-full ${!disableCollapse ? "cursor-pointer" : "cursor-default"} select-none items-center justify-between rounded-t-[22px] border-b-2 border-[var(--mn-border)] bg-gradient-to-r from-[color-mix(in_oklab,var(--mn-accent)_10%,transparent)] to-transparent px-4 sm:px-5 py-4 text-left lg:cursor-default`}
-        onClick={() => !disableCollapse && !isDesktop && setCollapsed((c) => !c)}
+        className={`md3-state flex min-h-14 w-full select-none items-center justify-between gap-3 px-4 text-left ${disableCollapse ? "cursor-default" : "lg:cursor-default"}`}
+        onClick={() => !disableCollapse && !isDesktop && setCollapsed((value) => !value)}
         disabled={disableCollapse}
         aria-expanded={isExpanded}
         aria-controls={contentId}
       >
-        <span className="flex items-center gap-2 font-[var(--mn-font-display)] text-sm font-bold tracking-tight text-[var(--mn-text)]">
-          <svg className="h-5 w-5 text-[var(--mn-accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-          </svg>
-          {title}
-          {hasActiveFilters && collapsed && (
-            <span className="h-2 w-2 animate-pulse rounded-xl bg-[var(--mn-accent)] lg:hidden" />
-          )}
+        <span className="flex min-w-0 items-center gap-3 text-title-medium text-on-surface">
+          <Icon name="filter" className="h-6 w-6 shrink-0 text-on-surface-variant" />
+          <span className="truncate">{title}</span>
+          {hasActiveFilters && collapsed && <span className="h-2 w-2 shrink-0 rounded-full bg-primary lg:hidden" />}
         </span>
-        <span className="flex items-center gap-2">
-          {totalCount !== undefined && (
-            <span className="text-xs font-bold text-[var(--mn-text-muted)]">
-              {resultCount !== undefined && resultCount !== totalCount
-                ? `${resultCount} / ${totalCount}`
-                : `${totalCount ?? 0}`}
-            </span>
-          )}
-          {!disableCollapse && (
-            <svg
-              className={`h-4 w-4 text-[var(--mn-text-muted)] transition-transform duration-200 lg:hidden ${isExpanded ? "rotate-180" : ""}`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          )}
+        <span className="flex shrink-0 items-center gap-2">
+          {count !== null && <span className="text-label-large text-on-surface-variant">{count}</span>}
+          {!disableCollapse && <Icon name="chevronDown" className={`h-6 w-6 text-on-surface-variant transition-transform duration-200 lg:hidden ${isExpanded ? "rotate-180" : ""}`} />}
         </span>
       </button>
 
-      {/* Collapsible content */}
-      <div id={contentId} className={isExpanded ? "block" : "hidden"}>
+      <div id={contentId} className={isExpanded ? "block border-t border-outline-variant" : "hidden"}>
         <div className="p-4 sm:p-5">{filterControls}</div>
       </div>
 
-      {/* Expand hint bar (mobile only) */}
       {collapsed && !disableCollapse && (
         <button
           type="button"
-          className="flex w-full cursor-pointer select-none items-center justify-center gap-1 rounded-b-[22px] border-t-2 border-[var(--mn-border)] bg-[var(--mn-surface)] py-2.5 text-xs text-[var(--mn-text-muted)] transition hover:bg-[var(--mn-cream-deep)] hover:text-[var(--mn-text)] lg:hidden"
+          className="md3-state flex min-h-10 w-full items-center justify-center gap-1 border-t border-outline-variant text-label-large text-primary lg:hidden"
           onClick={() => setCollapsed(false)}
           aria-expanded={isExpanded}
           aria-controls={contentId}
         >
-          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-          </svg>
+          <Icon name="chevronDown" className="h-[18px] w-[18px]" />
           {expandLabel}
         </button>
       )}

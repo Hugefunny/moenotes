@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { FilterSection } from "@/components/shared/BaseFilters";
 
-/** Keep in sync with `.mn-range-thumb` in components.css. */
-const THUMB_SIZE = 18;
+/** Keep in sync with `.mn-range-thumb` in components.css (M3 slider handle). */
+const THUMB_SIZE = 20;
 
 export type RangeValue = [number | null, number | null];
 
@@ -71,9 +71,9 @@ export function RangeFilter({
   };
 
   const slider = (
-    <div className={`relative h-[18px] ${className ?? ""}`}>
-      <div aria-hidden="true" className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-[var(--mn-cream-deep)]" />
-      <div aria-hidden="true" className="absolute top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-[var(--mn-accent)]" style={fill} />
+    <div className={`relative h-5 ${className ?? ""}`}>
+      <div aria-hidden="true" className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-secondary-container" />
+      <div aria-hidden="true" className="absolute top-1/2 h-1 -translate-y-1/2 rounded-full bg-primary" style={fill} />
       {current.map((position, index) => {
         const other = current[1 - index] ?? position;
         const isLower = position < other || (position === other && index === 0);
@@ -100,7 +100,7 @@ export function RangeFilter({
   return (
     <FilterSection
       title={title}
-      aside={<span className="font-mono text-xs font-bold text-[var(--mn-text)]">{formatRange(formatValue(low), formatValue(high))}</span>}
+      aside={<span className="text-label-large tabular-nums text-on-surface">{formatRange(formatValue(low), formatValue(high))}</span>}
     >
       {slider}
     </FilterSection>

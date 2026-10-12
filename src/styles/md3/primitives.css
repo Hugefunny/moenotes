@@ -65,6 +65,47 @@
     background-size: 16px 16px;
   }
 
+  /* ── Filter chip (M3): outlined small shape; selected fills with secondary-container ── */
+  .md3-filter-chip {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 32px; padding: 0 16px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: var(--md-sys-shape-corner-small);
+    background: transparent; color: var(--md-sys-color-on-surface-variant);
+    font: inherit; font-size: var(--md-sys-typescale-label-large-size); line-height: var(--md-sys-typescale-label-large-line-height); letter-spacing: var(--md-sys-typescale-label-large-tracking); font-weight: 500;
+    cursor: pointer; transition: background-color var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard), color var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+  }
+  .md3-filter-chip[aria-pressed="true"] { padding-left: 8px; border-color: transparent; background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
+  .md3-filter-chip:disabled { cursor: default; color: rgb(var(--md-sys-color-on-surface-rgb) / 0.38); border-color: rgb(var(--md-sys-color-on-surface-rgb) / 0.12); }
+  html[data-density="compact"] .md3-filter-chip { min-height: 28px; padding-inline: 12px; }
+  html[data-density="compact"] .md3-filter-chip[aria-pressed="true"] { padding-left: 6px; }
+
+  /* ── Outlined text field (M3) for plain inputs (search boxes in filter panels) ── */
+  .md3-text-field {
+    width: 100%; min-width: 0; height: 56px; padding: 0 16px; border: 1px solid var(--md-sys-color-outline); border-radius: var(--md-sys-shape-corner-extra-small);
+    background: transparent; color: var(--md-sys-color-on-surface);
+    font: inherit; font-size: var(--md-sys-typescale-body-large-size); line-height: var(--md-sys-typescale-body-large-line-height); letter-spacing: var(--md-sys-typescale-body-large-tracking);
+  }
+  .md3-text-field::placeholder { color: var(--md-sys-color-on-surface-variant); opacity: 1; }
+  .md3-text-field:hover { border-color: var(--md-sys-color-on-surface); }
+  .md3-text-field:focus { outline: none; border-color: var(--md-sys-color-primary); box-shadow: inset 0 0 0 1px var(--md-sys-color-primary); }
+  html[data-density="compact"] .md3-text-field { height: 44px; }
+  /* M3 search bar: a full-shape tonal field. */
+  .md3-search-field { border: 0; border-radius: var(--md-sys-shape-corner-full); background: var(--md-sys-color-surface-container-high); }
+  .md3-search-field:hover { background: var(--md-sys-color-surface-container-highest); }
+  .md3-search-field:focus { box-shadow: inset 0 0 0 2px var(--md-sys-color-primary); }
+
+  /* ── Switch (M3) visual for a role="switch" button: 52x32 track, thumb grows when on ── */
+  .md3-switch {
+    position: relative; display: inline-flex; flex-shrink: 0; align-items: center; width: 52px; height: 32px; padding: 0 4px;
+    border: 2px solid var(--md-sys-color-outline); border-radius: var(--md-sys-shape-corner-full); background: var(--md-sys-color-surface-container-highest);
+    transition: background-color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard), border-color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+  }
+  .md3-switch__thumb {
+    display: grid; place-items: center; width: 16px; height: 16px; border-radius: var(--md-sys-shape-corner-full); background: var(--md-sys-color-outline);
+    transition: transform var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard), width var(--md-sys-motion-duration-short4), height var(--md-sys-motion-duration-short4), background-color var(--md-sys-motion-duration-short4);
+  }
+  .md3-switch--on { border-color: var(--md-sys-color-primary); background: var(--md-sys-color-primary); }
+  .md3-switch--on .md3-switch__thumb { width: 24px; height: 24px; transform: translateX(16px); background: var(--md-sys-color-on-primary); color: var(--md-sys-color-on-primary-container); }
+
   /* ── Legacy surface classes, resolved to M3 until their pages are rewritten ── */
   .mn-paper, .mn-glass, .mn-system-section {
     position: relative;
