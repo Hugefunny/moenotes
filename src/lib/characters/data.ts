@@ -93,7 +93,7 @@ export function normalizeCharacters(
       name,
       enName,
       shortName,
-      mainColor: char.mainColorCode.trim() || "var(--mn-accent)",
+      mainColor: char.mainColorCode.trim() || "var(--md-sys-color-primary)",
       subColor: char.subColorCode.trim() || "#FFFFFF",
       bandPart: char.bandPart,
       birthday,

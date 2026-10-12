@@ -53,13 +53,13 @@
   .md3-section-heading h2 { flex: 1 1 auto; min-width: 0; margin: 0; font-family: var(--md-ref-typeface-brand); font-size: var(--md-sys-typescale-title-large-size); line-height: var(--md-sys-typescale-title-large-line-height); font-weight: 400; color: var(--md-sys-color-on-surface); overflow-wrap: anywhere; }
 
   /* ── Placeholder art (missing banners/thumbnails): a tonal tile instead of the old orbit texture ── */
-  .md3-placeholder, .mn-texture-orbit {
+  .md3-placeholder {
     background-color: var(--md-sys-color-surface-container-high);
     background-image: radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--md-sys-color-primary) 10%, transparent), transparent 60%);
     color: var(--md-sys-color-on-surface-variant);
   }
   /* Checkerboard behind transparent artwork. */
-  .md3-transparency-grid, .mn-stripes-cream {
+  .md3-transparency-grid {
     background-color: var(--md-sys-color-surface-container);
     background-image: conic-gradient(var(--md-sys-color-surface-container-high) 25%, transparent 0 50%, var(--md-sys-color-surface-container-high) 0 75%, transparent 0);
     background-size: 16px 16px;
@@ -146,26 +146,4 @@
   .md3-tab[aria-selected="true"]::after, .md3-tab[aria-pressed="true"]::after, .md3-tab[aria-current="page"]::after {
     content: ""; position: absolute; left: 16px; right: 16px; bottom: 0; height: 3px; border-radius: 3px 3px 0 0; background: var(--md-sys-color-primary);
   }
-
-  /* ── Legacy surface classes, resolved to M3 until their pages are rewritten ── */
-  .mn-paper, .mn-glass, .mn-system-section {
-    position: relative;
-    border-radius: var(--md-sys-shape-corner-large);
-    background: var(--md-sys-color-surface-container-low);
-    color: var(--md-sys-color-on-surface);
-  }
-  .mn-card, .mn-sticker {
-    border-radius: var(--md-sys-shape-corner-medium);
-    border: 1px solid var(--md-sys-color-outline-variant);
-    background: var(--md-sys-color-surface-container-low);
-  }
-  .mn-stamp {
-    display: inline-flex; align-items: center; justify-content: center;
-    border-radius: var(--md-sys-shape-corner-full);
-    background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary);
-  }
-  .mn-focus { outline: 3px solid transparent; outline-offset: 2px; }
-  .mn-focus:focus-visible { outline-color: var(--md-sys-color-secondary); }
-  /* The old "stamp" press gave a lift and a glow; M3 shows interaction with a state layer instead. */
-  .mn-stamp-press, .mn-stamp-press-lg { transition: background-color var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard), color var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard); }
 }

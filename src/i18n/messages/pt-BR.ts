@@ -1740,8 +1740,8 @@ export const ptBR = {
     quickFilter: "Abrir filtros rápidos"
   },
   about: {
-    teamIntro: "somos uma pequena equipe da <a href=\"https://github.com/moe-sekai\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-[var(--mn-accent-deep)] underline decoration-2 decoration-[var(--mn-accent)] underline-offset-4 hover:text-[var(--mn-accent)]\">StarMoe</a>. Durante os dois anos construindo o <em>MoeSekai</em>, pensamos: como uma boa wiki deveria ser de verdade?",
-    paragraph1: "Vimos demais <strong>tabelas geek</strong> e <strong>grades monótonas</strong>. Os dados são precisos, mas não parecem o mundo que nos fez chorar. Então desta vez, para o novo projeto BanG Dream! \"Our Notes\", decidimos traduzi-lo em outra linguagem — <span class=\"bg-[var(--mn-yellow)]/40 px-1 py-0.5 font-bold border-b border-[var(--mn-accent)]/40\">como um caderno que se pode folhear, anotar e guardar.</span>",
+    teamIntro: "somos uma pequena equipe da <a href=\"https://github.com/moe-sekai\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-[var(--md-sys-color-primary)] underline decoration-2 decoration-[var(--md-sys-color-primary)] underline-offset-4 hover:text-[var(--md-sys-color-primary)]\">StarMoe</a>. Durante os dois anos construindo o <em>MoeSekai</em>, pensamos: como uma boa wiki deveria ser de verdade?",
+    paragraph1: "Vimos demais <strong>tabelas geek</strong> e <strong>grades monótonas</strong>. Os dados são precisos, mas não parecem o mundo que nos fez chorar. Então desta vez, para o novo projeto BanG Dream! \"Our Notes\", decidimos traduzi-lo em outra linguagem — <span class=\"bg-[var(--md-sys-color-warning-container)]/40 px-1 py-0.5 font-bold border-b border-[var(--md-sys-color-primary)]/40\">como um caderno que se pode folhear, anotar e guardar.</span>",
     paragraph2: "Em vez de gradientes azuis frios e painéis brilhantes, escolhemos papel creme, texto em tinta preta, laranja de pôr do sol e amarelo marca-texto. Porque a juventude não é uma paleta gerada por algoritmo; a juventude é aquela página rabiscada de novo e de novo, e que brilha mais a cada reescrita.",
     badgeMe: "Eu",
     signature: "Exmeaning",

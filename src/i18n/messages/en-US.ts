@@ -2816,8 +2816,8 @@ export const enUS = {
     overlayClose: "Close",
   },
   about: {
-    teamIntro: "we are a small team from <a href=\"https://github.com/moe-sekai\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-[var(--mn-accent-deep)] underline decoration-2 decoration-[var(--mn-accent)] underline-offset-4 hover:text-[var(--mn-accent)]\">StarMoe</a>. During the two years of building <em>MoeSekai</em>, we have been thinking: what should a good wiki actually look like?",
-    paragraph1: "We have seen too many <strong>geeky tables</strong> and <strong>monotonous grids</strong>. The data is accurate, but it doesn't feel like the world that moved us to tears. So this time, for the new BanG Dream! project \"Our Notes\", we decided to translate it into a different language — <span class=\"bg-[var(--mn-yellow)]/40 px-1 py-0.5 font-bold border-b border-[var(--mn-accent)]/40\">like a notebook that can be flipped through, written on, and treasured.</span>",
+    teamIntro: "we are a small team from <a href=\"https://github.com/moe-sekai\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-[var(--md-sys-color-primary)] underline decoration-2 decoration-[var(--md-sys-color-primary)] underline-offset-4 hover:text-[var(--md-sys-color-primary)]\">StarMoe</a>. During the two years of building <em>MoeSekai</em>, we have been thinking: what should a good wiki actually look like?",
+    paragraph1: "We have seen too many <strong>geeky tables</strong> and <strong>monotonous grids</strong>. The data is accurate, but it doesn't feel like the world that moved us to tears. So this time, for the new BanG Dream! project \"Our Notes\", we decided to translate it into a different language — <span class=\"bg-[var(--md-sys-color-warning-container)]/40 px-1 py-0.5 font-bold border-b border-[var(--md-sys-color-primary)]/40\">like a notebook that can be flipped through, written on, and treasured.</span>",
     paragraph2: "Inspired by Sirius, blue-white starlight and violet nebulae connect every page. Clear typography and quiet surfaces leave room for the music, the characters, and their stories.",
     badgeMe: "Me",
     signature: "Exmeaning",

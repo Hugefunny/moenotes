@@ -1,7 +1,5 @@
-/* Legacy bridge: the pre-Material-3 `--mn-*` tokens, now aliases of Material 3 roles (src/styles/md3/colors.css).
-   Every page not yet rewritten for Material 3 takes the M3 colors, shapes and elevation through these names.
-   Do not use them in new code; this file goes once the last caller has moved to `--md-sys-*` / the Tailwind M3
-   utilities (bg-surface-container, text-on-surface-variant, …). */
+/* Layout and data variables. Colors, shapes, type and elevation are Material 3 tokens (./md3/*.css); the legacy
+   --mn-* color tokens are retired and rejected by `bun run lint:arch`. */
 :root {
   --mn-layout-max-width: 120rem;
   --mn-filter-drawer-w: 20rem;
@@ -11,67 +9,16 @@
   /* Height of the top app bar (M3 small top app bar: 64dp). */
   --md-app-bar-height: 64px;
 
-  /* ── Neutrals ── */
-  --mn-bg: var(--md-sys-color-surface);
-  --mn-paper: var(--md-sys-color-surface-container-low);
-  --mn-surface: var(--md-sys-color-surface-container);
-  --mn-surface-strong: var(--md-sys-color-surface-container-high);
-  --mn-glass: var(--md-sys-color-surface-container-low);
-  --mn-glass-border: var(--md-sys-color-outline-variant);
-  --mn-text: var(--md-sys-color-on-surface);
-  --mn-ink-soft: var(--md-sys-color-on-surface-variant);
-  --mn-text-muted: var(--md-sys-color-on-surface-variant);
-  --mn-border: var(--md-sys-color-outline-variant);
-  --mn-cream-deep: var(--md-sys-color-surface-container-highest);
-
-  /* ── Accent → primary / secondary container ── */
-  --mn-accent: var(--md-sys-color-primary);
-  --mn-accent-deep: var(--md-sys-color-primary);
-  --mn-accent-soft: var(--md-sys-color-secondary-container);
-
-  /* ── Category hues (harmonized extended colors) ── */
-  --mn-pink: var(--md-sys-color-category1);
-  --mn-pink-soft: var(--md-sys-color-category1-container);
-  --mn-cyan: var(--md-sys-color-category2);
-  --mn-amber: var(--md-sys-color-category3);
-  --mn-peach: var(--md-sys-color-category3-container);
-  --mn-yellow: var(--md-sys-color-warning-container);
-  --mn-mint: var(--md-sys-color-success);
-  --mn-mint-deep: var(--md-sys-color-on-success-container);
-  --mn-mint-soft: var(--md-sys-color-success-container);
-  --mn-rose: var(--md-sys-color-error);
-  --mn-danger: var(--md-sys-color-error);
-
-  /* ── Cache categories (settings' Data tab): fixed categorical hues, deliberately not seed-derived ── */
+  /* Cache categories (settings' Data tab): fixed categorical hues, deliberately not seed-derived. */
   --mn-cache-live2d: #2a78d6;
   --mn-cache-images: #eb6834;
   --mn-cache-audio: #1baf7a;
   --mn-cache-chart: #eda100;
   --mn-cache-data: #e87ba4;
 
-  /* ── Elevation ── */
-  --mn-shadow: var(--md-sys-elevation-level0);
-  --mn-shadow-stamp-sm: var(--md-sys-elevation-level0);
-  --mn-shadow-stamp: var(--md-sys-elevation-level1);
-  --mn-shadow-stamp-lg: var(--md-sys-elevation-level1);
-  --mn-glass-highlight: transparent;
-  --mn-glass-shadow: var(--md-sys-elevation-level0);
-
-  /* ── Sirius "orbit" accents (selected rows, current tabs) → M3 selected state ── */
-  --mn-orbit-night: var(--md-sys-color-secondary-container);
-  --mn-orbit-light: var(--md-sys-color-on-secondary-container);
-  --mn-orbit-edge: transparent;
-  --mn-orbit-heading: none;
-
-  /* ── Fonts ── */
-  --mn-font-display-common: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --mn-font-display-sc: "Inter", "PingFang SC", "Microsoft YaHei", ui-sans-serif, system-ui, sans-serif;
-  --mn-font-body-common: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --mn-font-body-sc: "Inter", "PingFang SC", "Microsoft YaHei", ui-sans-serif, system-ui, sans-serif;
-  --mn-font-display: var(--mn-font-display-sc);
-  --mn-font-body: var(--mn-font-body-sc);
-  --mn-font-hand: var(--md-ref-typeface-plain);
-  --mn-font-note: var(--md-ref-typeface-mono);
+  /* Font stacks behind the M3 typefaces (src/styles/md3/tokens.css --md-ref-typeface-*). */
+  --mn-font-display: "Inter", "PingFang SC", "Microsoft YaHei", ui-sans-serif, system-ui, sans-serif;
+  --mn-font-body: "Inter", "PingFang SC", "Microsoft YaHei", ui-sans-serif, system-ui, sans-serif;
 }
 
 html[data-theme="dark"] {

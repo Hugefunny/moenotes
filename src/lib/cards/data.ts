@@ -117,7 +117,7 @@ export function normalizeCards(
         title,
         characterName,
         bandName,
-        characterColor: character?.mainColorCode.trim() || "var(--mn-accent)",
+        characterColor: character?.mainColorCode.trim() || "var(--md-sys-color-primary)",
         performancePower: card.performancePowerMax,
         technicPower: card.technicPowerMax,
         visualPower: card.visualPowerMax,

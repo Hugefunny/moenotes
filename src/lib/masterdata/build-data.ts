@@ -341,7 +341,7 @@ export function charactersOn(server: GameServer, locale: AppLocale): Promise<{ c
       id: band.id,
       name: localizeMasterText(textMap.get(band.nameTextID), locale) || band.nameTextID,
       description: localizeMasterText(textMap.get(band.descriptionTextID || band.descriptionTextId || ""), locale),
-      color: band.mainColorCode?.trim() || "var(--mn-accent)",
+      color: band.mainColorCode?.trim() || "var(--md-sys-color-primary)",
     }));
     return { characters: normalized, bands: resolvedBands };
   });

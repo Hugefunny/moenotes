@@ -80,7 +80,7 @@ export function normalizeSupportCards(
           return {
             id: charId,
             name: resolveText(char.nameTextID),
-            color: char.mainColorCode.trim() || "var(--mn-accent)",
+            color: char.mainColorCode.trim() || "var(--md-sys-color-primary)",
             bandId: char.bandID,
           };
         })

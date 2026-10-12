@@ -2851,8 +2851,8 @@ export const jaJP = {
     overlayClose: "閉じる",
   },
   about: {
-    teamIntro: "私たちは <a href=\"https://github.com/moe-sekai\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-[var(--mn-accent-deep)] underline decoration-2 decoration-[var(--mn-accent)] underline-offset-4 hover:text-[var(--mn-accent)]\">StarMoe</a> から来た小さなチームです。<em>MoeSekai</em> を作ってからの2年間、私たちは考え続けてきました：良いWikiとは、一体どのような形であるべきなのか？",
-    paragraph1: "私たちは、あまりにも多くの<strong>ギーク的な表</strong>や、<strong>何年も変わらないグリッド</strong>を見てきました。データは正確ですが、私たちが涙したあの世界とは似ても似つかないものでした。だからこそ今回、BanG Dream! の新しいプロジェクト「Our Notes」において、私たちは別の言葉で表現することを決意しました——<span class=\"bg-[var(--mn-yellow)]/40 px-1 py-0.5 font-bold border-b border-[var(--mn-accent)]/40\">めくられ、書き込まれ、大切にしまわれるノートのように。</span>",
+    teamIntro: "私たちは <a href=\"https://github.com/moe-sekai\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-[var(--md-sys-color-primary)] underline decoration-2 decoration-[var(--md-sys-color-primary)] underline-offset-4 hover:text-[var(--md-sys-color-primary)]\">StarMoe</a> から来た小さなチームです。<em>MoeSekai</em> を作ってからの2年間、私たちは考え続けてきました：良いWikiとは、一体どのような形であるべきなのか？",
+    paragraph1: "私たちは、あまりにも多くの<strong>ギーク的な表</strong>や、<strong>何年も変わらないグリッド</strong>を見てきました。データは正確ですが、私たちが涙したあの世界とは似ても似つかないものでした。だからこそ今回、BanG Dream! の新しいプロジェクト「Our Notes」において、私たちは別の言葉で表現することを決意しました——<span class=\"bg-[var(--md-sys-color-warning-container)]/40 px-1 py-0.5 font-bold border-b border-[var(--md-sys-color-primary)]/40\">めくられ、書き込まれ、大切にしまわれるノートのように。</span>",
     paragraph2: "シリウスをモチーフに、青白い星の光と淡い紫の星雲でページをつなぎます。読みやすい文字と落ち着いたパネルが、少女たちの音楽と物語を引き立てます。",
     badgeMe: "我",
     signature: "東雪",

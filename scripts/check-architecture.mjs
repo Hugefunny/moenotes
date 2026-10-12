@@ -119,6 +119,23 @@ function checkFile(file) {
   }
 
   checkMuiImports(repoPath, source);
+  checkLegacyTokens(repoPath, source);
+}
+
+/**
+ * The pre-Material-3 color, shadow and font tokens (--mn-accent, --mn-paper, --mn-shadow-stamp, …) and their
+ * surface classes are retired: colors are M3 roles (--md-sys-color-* / bg-surface-container-low, text-primary, …).
+ * Layout and data variables (--mn-layout-*, --mn-sidebar-offset, --mn-filter-*, --mn-density-*, --mn-cache-*,
+ * chart data's --mn-cd-*) stay.
+ */
+const LEGACY_TOKEN = /--mn-(?:bg|paper|glass(?:-[a-z]+)?|surface(?:-strong)?|cream-deep|text(?:-muted)?|ink-soft|border|accent(?:-deep|-soft)?|rose|danger|mint(?:-deep|-soft)?|pink(?:-soft)?|cyan|amber|peach|yellow|orbit-[a-z]+|shadow(?:-stamp(?:-sm|-lg)?)?|panel-fill|overlay-shadow|radius-[a-z]+|dot-ink)\b/;
+const LEGACY_CLASS = /(?:^|[\s"'`])(?:mn-paper|mn-glass|mn-card|mn-sticker|mn-stamp(?:-press(?:-lg)?)?|mn-focus|mn-system-section|mn-segmented|mn-stripes-cream|mn-texture-orbit|mn-orbit-[a-z]+)(?=[\s"'`])/;
+
+function checkLegacyTokens(repoPath, source) {
+  const token = source.match(LEGACY_TOKEN);
+  if (token) errors.push(`${repoPath}: legacy token ${token[0]}; use the Material 3 roles (--md-sys-color-*, Tailwind bg-surface-* / text-on-*).`);
+  const cls = source.match(LEGACY_CLASS);
+  if (cls) errors.push(`${repoPath}: legacy class ${cls[0].trim()}; use the Material 3 primitives (md3-surface, md3-state, md3-segmented, …).`);
 }
 
 /**

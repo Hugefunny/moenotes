@@ -177,7 +177,7 @@ function IconButton({ label, onClick, pressed, children }: { label: string; onCl
       aria-label={label}
       title={label}
       {...(pressed === undefined ? {} : { "aria-pressed": pressed })}
-      className="mn-icon-button grid h-10 w-10 place-items-center border border-outline-variant bg-surface-container-low text-on-surface-variant hover:border-primary hover:bg-secondary-container hover:text-primary"
+      className="md3-state grid h-10 w-10 place-items-center rounded-full text-on-surface-variant hover:border-primary hover:bg-secondary-container hover:text-primary"
     >
       <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
     </button>

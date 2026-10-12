@@ -20,14 +20,14 @@ export type CalendarKind = (typeof CALENDAR_KINDS)[number];
 
 /** Semantic colors of the kinds (CSS variables of the design tokens); birthdays use the character's color. */
 export const CALENDAR_KIND_COLORS: Readonly<Record<CalendarKind, string>> = {
-  event: "var(--mn-accent)",
-  gacha: "var(--mn-pink)",
-  loginBonus: "var(--mn-mint)",
-  seasonPass: "var(--mn-amber)",
-  monthlyPass: "var(--mn-amber)",
-  mission: "var(--mn-cyan)",
-  realLive: "var(--mn-rose)",
-  birthday: "var(--mn-peach)",
+  event: "var(--md-sys-color-primary)",
+  gacha: "var(--md-sys-color-category1)",
+  loginBonus: "var(--md-sys-color-success)",
+  seasonPass: "var(--md-sys-color-category3)",
+  monthlyPass: "var(--md-sys-color-category3)",
+  mission: "var(--md-sys-color-category2)",
+  realLive: "var(--md-sys-color-error)",
+  birthday: "var(--md-sys-color-category3-container)",
 };
 
 /** Something dated on one server, as the build hands it to the page (MasterData timestamps, server time). */

@@ -162,10 +162,10 @@ export default function SnapSkillPicker({ locale, choices, selections, cards, lo
           <div className="min-w-0 space-y-3">
             <button type="button" className="mn-cd-snap-none" onClick={() => slot !== null && commit(slot, null)}><span aria-hidden="true">–</span><strong>{tr("none")}</strong><span>{tr("noneHint")}</span></button>
             {loading ? <SiriusLoader locale={locale} compact className="mn-cd-snap-state" label={tr("loading")} /> : error ? <p className="mn-cd-snap-state" role="alert">{error}</p> : picker.sorted.length === 0 ? (
-              <div className="mn-paper p-8 text-center">
+              <div className="md3-surface p-8 text-center">
                 <p className="font-[var(--md-ref-typeface-brand)] text-lg text-[var(--md-sys-color-on-surface)]">{tr("empty")}</p>
                 <button type="button" onClick={picker.reset}
-                  className="mn-focus mn-stamp-press mt-4 rounded-full border-[1.5px] border-[var(--md-sys-color-outline-variant)] bg-[var(--md-sys-color-surface-container-low)] px-5 py-2 text-xs font-bold text-[var(--md-sys-color-on-surface)] shadow-[var(--md-sys-elevation-level1)]">
+                  className="md3-state mt-4 rounded-full border-[1.5px] border-[var(--md-sys-color-outline-variant)] bg-[var(--md-sys-color-surface-container-low)] px-5 py-2 text-xs font-bold text-[var(--md-sys-color-on-surface)] shadow-[var(--md-sys-elevation-level1)]">
                   {t(locale, "filter.reset")}
                 </button>
               </div>
@@ -177,7 +177,7 @@ export default function SnapSkillPicker({ locale, choices, selections, cards, lo
                   return <li key={key} data-skill-group={key} data-skill-kind={first.kind} data-skill-id={first.skillId} data-support-card-id={first.cardId} className="min-w-0">
                     <button type="button" aria-pressed={isStaged} title={title(first)}
                       onClick={() => { setRejection(null); setStaged({ key, level: isCurrent && slot !== null ? selections[slot]!.level : first.level }); }}
-                      className={`mn-focus group flex w-full min-w-0 flex-col items-center gap-1 rounded-2xl border-[1.5px] p-1.5 text-center transition ${
+                      className={`md3-state group flex w-full min-w-0 flex-col items-center gap-1 rounded-2xl border-[1.5px] p-1.5 text-center transition ${
                         isStaged ? "border-[var(--md-sys-color-primary)] bg-[var(--md-sys-color-surface-container-low)] ring-2 ring-[var(--md-sys-color-primary)]" : "border-transparent hover:-translate-y-0.5 hover:border-[var(--md-sys-color-outline-variant)] hover:bg-[var(--md-sys-color-surface-container-low)]"}`}>
                       {art(first, "w-full")}
                       <span className={`block w-full truncate text-xs font-black ${isStaged ? "text-[var(--md-sys-color-primary)]" : "text-[var(--md-sys-color-on-surface)]"}`}>{card?.name || title(first)}</span>

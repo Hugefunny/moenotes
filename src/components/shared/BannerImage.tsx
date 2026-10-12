@@ -21,7 +21,7 @@ export default function BannerImage({ src: neutralSrc, alt, fallback, className 
   return (
     <div className={`relative aspect-[7/3] overflow-hidden bg-surface-container-highest ${className}`.trim()}>
       {failed ? (
-        <div className="mn-texture-orbit grid h-full place-items-center p-4 text-center text-sm font-bold text-on-surface-variant">
+        <div className="md3-placeholder grid h-full place-items-center p-4 text-center text-label-large text-on-surface-variant">
           <span className="line-clamp-2">{fallback}</span>
         </div>
       ) : (

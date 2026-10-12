@@ -2805,8 +2805,8 @@ export const koKR = {
     overlayClose: "닫기",
   },
   about: {
-    teamIntro: "우리는 <a href=\"https://github.com/moe-sekai\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-[var(--mn-accent-deep)] underline decoration-2 decoration-[var(--mn-accent)] underline-offset-4 hover:text-[var(--mn-accent)]\">StarMoe</a>의 작은 팀입니다. <em>MoeSekai</em>를 만들어 온 2년 동안 계속 고민했습니다. 좋은 위키는 어떤 모습이어야 할까요?",
-    paragraph1: "우리는 너무 많은 <strong>긱스러운 표</strong>와 <strong>단조로운 그리드</strong>를 보았습니다. 데이터는 정확하지만, 우리를 울렸던 그 세계처럼 느껴지지 않았습니다. 그래서 이번 BanG Dream! 신작 \"Our Notes\"를 다른 언어로 옮기기로 했습니다 — <span class=\"bg-[var(--mn-yellow)]/40 px-1 py-0.5 font-bold border-b border-[var(--mn-accent)]/40\">넘기고, 적고, 소중히 간직할 수 있는 노트처럼.</span>",
+    teamIntro: "우리는 <a href=\"https://github.com/moe-sekai\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-[var(--md-sys-color-primary)] underline decoration-2 decoration-[var(--md-sys-color-primary)] underline-offset-4 hover:text-[var(--md-sys-color-primary)]\">StarMoe</a>의 작은 팀입니다. <em>MoeSekai</em>를 만들어 온 2년 동안 계속 고민했습니다. 좋은 위키는 어떤 모습이어야 할까요?",
+    paragraph1: "우리는 너무 많은 <strong>긱스러운 표</strong>와 <strong>단조로운 그리드</strong>를 보았습니다. 데이터는 정확하지만, 우리를 울렸던 그 세계처럼 느껴지지 않았습니다. 그래서 이번 BanG Dream! 신작 \"Our Notes\"를 다른 언어로 옮기기로 했습니다 — <span class=\"bg-[var(--md-sys-color-warning-container)]/40 px-1 py-0.5 font-bold border-b border-[var(--md-sys-color-primary)]/40\">넘기고, 적고, 소중히 간직할 수 있는 노트처럼.</span>",
     paragraph2: "시리우스에서 영감을 받은 청백색 별빛과 연보라 성운이 페이지를 연결합니다. 읽기 쉬운 글자와 차분한 패널로 소녀들의 음악과 이야기를 담습니다.",
     badgeMe: "나",
     signature: "Exmeaning",

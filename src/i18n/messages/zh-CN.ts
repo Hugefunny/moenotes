@@ -2862,8 +2862,8 @@ export const zhCN = {
     overlayClose: "关闭",
   },
   about: {
-    teamIntro: "我们是来自 <a href=\"https://github.com/moe-sekai\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-[var(--mn-accent-deep)] underline decoration-2 decoration-[var(--mn-accent)] underline-offset-4 hover:text-[var(--mn-accent)]\">StarMoe</a> 的小团队。做 <em>MoeSekai</em> 的两年里，我们一直在想：一个好的 wiki, 到底应该长什么样？",
-    paragraph1: "我们看过太多<strong>极客式的表格</strong>、太多<strong>万年不变的栅格</strong>，数据是准的，可一点都不像那个让我们流泪的世界。所以这一次，对于 BanG Dream! 的全新企划「Our Notes」，我们决定换一种语言来翻译它——<span class=\"bg-[var(--mn-yellow)]/40 px-1 py-0.5 font-bold border-b border-[var(--mn-accent)]/40\">像一本可以被翻阅、被涂写、被珍藏的笔记本。</span>",
+    teamIntro: "我们是来自 <a href=\"https://github.com/moe-sekai\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-[var(--md-sys-color-primary)] underline decoration-2 decoration-[var(--md-sys-color-primary)] underline-offset-4 hover:text-[var(--md-sys-color-primary)]\">StarMoe</a> 的小团队。做 <em>MoeSekai</em> 的两年里，我们一直在想：一个好的 wiki, 到底应该长什么样？",
+    paragraph1: "我们看过太多<strong>极客式的表格</strong>、太多<strong>万年不变的栅格</strong>，数据是准的，可一点都不像那个让我们流泪的世界。所以这一次，对于 BanG Dream! 的全新企划「Our Notes」，我们决定换一种语言来翻译它——<span class=\"bg-[var(--md-sys-color-warning-container)]/40 px-1 py-0.5 font-bold border-b border-[var(--md-sys-color-primary)]/40\">像一本可以被翻阅、被涂写、被珍藏的笔记本。</span>",
     paragraph2: "以天狼星为灵感，让蓝白星光与淡紫星云连接每一个页面。清晰的文字与安静的面板，为少女们的音乐、相遇和故事留出空间。",
     badgeMe: "我",
     signature: "東雪",

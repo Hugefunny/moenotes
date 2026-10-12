@@ -228,7 +228,7 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
                           <span>Band</span>
                           <span className="text-on-surface">{song.bandName}</span>
                         </div>
-                        <div className="flex justify-between border-b border(--mn-border)/20 pb-1">
+                        <div className="flex justify-between border-b border-outline-variant pb-1">
                           <span>Attribute</span>
                           <span className="text-on-surface">{attributeName}</span>
                         </div>

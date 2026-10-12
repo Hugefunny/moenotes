@@ -1733,8 +1733,8 @@ export const ruRU = {
     quickFilter: "Открыть быстрые фильтры"
   },
   about: {
-    teamIntro: "мы небольшая команда <a href=\"https://github.com/moe-sekai\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-[var(--mn-accent-deep)] underline decoration-2 decoration-[var(--mn-accent)] underline-offset-4 hover:text-[var(--mn-accent)]\">StarMoe</a>. За два года создания <em>MoeSekai</em> мы думали: каким на самом деле должно быть хорошее вики?",
-    paragraph1: "Мы видели слишком много <strong>гик-таблиц</strong> и <strong>однообразных сеток</strong>. Данные точны, но не ощущаются как мир, который доводил нас до слёз. Поэтому на этот раз для нового проекта BanG Dream! «Our Notes» мы решили перевести его на другой язык — <span class=\"bg-[var(--mn-yellow)]/40 px-1 py-0.5 font-bold border-b border-[var(--mn-accent)]/40\">как блокнот, который можно листать, исписывать и беречь.</span>",
+    teamIntro: "мы небольшая команда <a href=\"https://github.com/moe-sekai\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-[var(--md-sys-color-primary)] underline decoration-2 decoration-[var(--md-sys-color-primary)] underline-offset-4 hover:text-[var(--md-sys-color-primary)]\">StarMoe</a>. За два года создания <em>MoeSekai</em> мы думали: каким на самом деле должно быть хорошее вики?",
+    paragraph1: "Мы видели слишком много <strong>гик-таблиц</strong> и <strong>однообразных сеток</strong>. Данные точны, но не ощущаются как мир, который доводил нас до слёз. Поэтому на этот раз для нового проекта BanG Dream! «Our Notes» мы решили перевести его на другой язык — <span class=\"bg-[var(--md-sys-color-warning-container)]/40 px-1 py-0.5 font-bold border-b border-[var(--md-sys-color-primary)]/40\">как блокнот, который можно листать, исписывать и беречь.</span>",
     paragraph2: "Вместо холодных синих градиентов и светящихся панелей мы выбрали кремовую бумагу, чернильный текст, закатный оранжевый и маркерный жёлтый. Потому что юность — не палитра, сгенерированная алгоритмом; юность — та страница, которую снова и снова перечёркивают, и которая с каждой перезаписью светится ярче.",
     badgeMe: "Я",
     signature: "Exmeaning",
