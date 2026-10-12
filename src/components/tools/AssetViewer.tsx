@@ -45,7 +45,7 @@ type FileCategory = "all" | "folder" | "image" | "audio" | "video" | "data";
 
 const PAGE_SIZE = 50;
 const ROOT: Location = { directory: "", page: 0 };
-const buttonClass = "mn-focus rounded-lg p-2 text-[var(--mn-text-muted)] transition hover:bg-[var(--mn-accent-soft)] hover:text-[var(--mn-text)] disabled:cursor-not-allowed disabled:opacity-30";
+const buttonClass = " rounded-shape-sm p-2 text-on-surface-variant transition hover:bg-secondary-container hover:text-on-surface disabled:cursor-not-allowed disabled:opacity-30";
 
 function Icon({ name, className = "" }: { name: IconName; className?: string }) {
   const paths: Record<IconName, ReactNode> = {
@@ -174,7 +174,7 @@ function ToolButton({ icon, label, onClick, disabled = false, active = false }: 
   return (
     <button
       type="button"
-      className={`${buttonClass} ${active ? "bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]" : ""}`}
+      className={`${buttonClass} ${active ? "bg-secondary-container text-primary" : ""}`}
       title={label}
       aria-label={label}
       aria-pressed={icon === "list" || icon === "grid" || icon === "sidebar" ? active : undefined}
@@ -191,18 +191,18 @@ function ScopeSelect({ title, value, options, onChange }: { title: string; value
   return (
     <FilterSection title={title}>
       <Popover matchTriggerWidth trigger={({ ref, onClick, ...aria }) => (
-        <button ref={ref} type="button" onClick={onClick} {...aria} disabled={!options.length} aria-label={`${title}: ${options.find((option) => option.value === value)?.label ?? ""}`} className="mn-focus mn-stamp-press flex w-full items-center justify-between gap-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-paper)] px-3 py-2.5 text-left text-sm font-bold disabled:opacity-50">
+        <button ref={ref} type="button" onClick={onClick} {...aria} disabled={!options.length} aria-label={`${title}: ${options.find((option) => option.value === value)?.label ?? ""}`} className="md3-state flex w-full items-center justify-between gap-2 rounded-shape-md border border-outline-variant bg-surface-container-low px-3 py-2.5 text-left text-label-large disabled:opacity-50">
           <span className="flex min-w-0 items-center gap-2">
             {selected?.flag && <ServerFlag server={selected.flag} className="h-4 w-4" />}
             <span className="min-w-0 truncate">{selected?.label ?? "—"}</span>
           </span>
-          <Icon name="chevronDown" className="h-4 w-4 shrink-0 text-[var(--mn-text-muted)]" />
+          <Icon name="chevronDown" className="h-4 w-4 shrink-0 text-on-surface-variant" />
         </button>
       )}>
         {({ close }) => (
           <div className="space-y-1" role="group" aria-label={title}>
             {options.map((option) => (
-              <button key={option.value} type="button" aria-pressed={option.value === value} className={`mn-focus flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm ${option.value === value ? "bg-[var(--mn-accent-soft)] font-bold text-[var(--mn-accent-deep)]" : "hover:bg-[var(--mn-surface)]"}`} onClick={() => { onChange(option.value); close(); }}>
+              <button key={option.value} type="button" aria-pressed={option.value === value} className={`flex w-full items-center gap-2 rounded-shape-sm px-3 py-2 text-left text-body-medium ${option.value === value ? "bg-secondary-container font-bold text-primary" : "hover:bg-surface-container"}`} onClick={() => { onChange(option.value); close(); }}>
                 {option.flag && <ServerFlag server={option.flag} className="h-4 w-4" />}
                 {option.label}
               </button>
@@ -443,10 +443,10 @@ export default function AssetViewer({ locale }: Props) {
   const refresh = () => { if (failed) failed.reload(); else { regions.reload(); catalogs.reload(); status.reload(); browse.reload(); } };
 
   return (
-    <section className="min-w-0 text-[var(--mn-text)]" aria-label={t(locale, "assetBrowser.title")}>
-      <div className="overflow-hidden rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp-sm)]">
+    <section className="min-w-0 text-on-surface" aria-label={t(locale, "assetBrowser.title")}>
+      <div className="overflow-hidden rounded-shape-lg border border-outline-variant bg-surface-container-low">
         {/* Top Header Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-outline-variant bg-surface-container px-3 py-2">
           {/* History Navigation Buttons */}
           <div className="flex items-center gap-0.5 shrink-0">
             <ToolButton icon="sidebar" label={t(locale, "assetBrowser.toggleTree")} active={showTree} onClick={() => setShowTree((v) => !v)} />
@@ -457,7 +457,7 @@ export default function AssetViewer({ locale }: Props) {
           </div>
 
           {/* Breadcrumb Single-Row Path Bar */}
-          <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto whitespace-nowrap px-2 py-0.5 text-xs no-scrollbar">
+          <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto whitespace-nowrap px-2 py-0.5 text-body-small no-scrollbar">
             <button
               type="button"
               className={`${buttonClass} flex shrink-0 items-center gap-1.5 px-2 py-1`}
@@ -468,10 +468,10 @@ export default function AssetViewer({ locale }: Props) {
             </button>
             {crumbs.map((crumb, index) => (
               <span key={crumb.directory} className="flex shrink-0 items-center gap-1">
-                <span aria-hidden="true" className="text-[var(--mn-text-muted)]">/</span>
+                <span aria-hidden="true" className="text-on-surface-variant">/</span>
                 <button
                   type="button"
-                  className={`${buttonClass} max-w-48 truncate px-2 py-1 ${index === crumbs.length - 1 ? "font-bold text-[var(--mn-text)] bg-[var(--mn-accent-soft)]" : ""}`}
+                  className={`${buttonClass} max-w-48 truncate px-2 py-1 ${index === crumbs.length - 1 ? "font-bold text-on-surface bg-secondary-container" : ""}`}
                   title={crumb.name}
                   onClick={() => navigate({ directory: crumb.directory, page: 0 })}
                 >
@@ -498,13 +498,13 @@ export default function AssetViewer({ locale }: Props) {
                 value={query}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={t(locale, "assetBrowser.searchPlaceholder")}
-                className="mn-focus w-36 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-paper)] py-1.5 pl-8 pr-3 text-xs placeholder:text-[var(--mn-text-muted)] sm:w-48"
+                className="w-36 rounded-shape-sm border border-outline-variant bg-surface-container-low py-1.5 pl-8 pr-3 text-body-small placeholder:text-on-surface-variant sm:w-48"
               />
-              <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--mn-text-muted)]">
+              <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant">
                 <Icon name="search" className="h-3.5 w-3.5" />
               </span>
               {query && (
-                <button type="button" onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--mn-text-muted)] hover:text-[var(--mn-text)]" aria-label={t(locale, "assetBrowser.clear")}>
+                <button type="button" onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface" aria-label={t(locale, "assetBrowser.clear")}>
                   <Icon name="close" className="h-3 w-3" />
                 </button>
               )}
@@ -518,7 +518,7 @@ export default function AssetViewer({ locale }: Props) {
         </div>
 
         {/* Sub-bar: Language & Scan Status */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--mn-border)] px-4 py-2 text-xs text-[var(--mn-text-muted)]">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-outline-variant px-4 py-2 text-body-small text-on-surface-variant">
           <span className="flex items-center gap-2">
             <span>{language ? languageNames.of(language) ?? language : ""}</span>
             {catalog && <span>· {catalog.version} ({new Date(catalog.created * 1000).toLocaleDateString(locale)})</span>}
@@ -535,17 +535,17 @@ export default function AssetViewer({ locale }: Props) {
         <div className="flex min-h-[38rem] flex-col md:flex-row">
           {/* Left: Directory Tree Sidebar */}
           {showTree && (
-            <aside className="w-full shrink-0 border-b border-[var(--mn-border)] bg-[var(--mn-surface)] md:w-64 md:border-b-0 md:border-r lg:w-72" aria-label={t(locale, "assetBrowser.directoryTree")}>
-              <div className="flex items-center justify-between border-b border-[var(--mn-border)] px-3 py-2 text-xs font-bold text-[var(--mn-text-muted)]">
+            <aside className="w-full shrink-0 border-b border-outline-variant bg-surface-container md:w-64 md:border-b-0 md:border-r lg:w-72" aria-label={t(locale, "assetBrowser.directoryTree")}>
+              <div className="flex items-center justify-between border-b border-outline-variant px-3 py-2 text-label-medium text-on-surface-variant">
                 <span className="flex items-center gap-1.5 whitespace-nowrap">
                   <Icon name="folder" className="text-amber-500" />
                   <span>{t(locale, "assetBrowser.directoryTree")}</span>
                 </span>
-                <button type="button" onClick={() => navigate(ROOT)} className="shrink-0 text-[11px] font-normal hover:text-[var(--mn-accent)]">
+                <button type="button" onClick={() => navigate(ROOT)} className="shrink-0 text-label-small font-normal hover:text-primary">
                   {t(locale, "assetBrowser.root")}
                 </button>
               </div>
-              <div className="max-h-80 overflow-y-auto p-2 text-xs md:max-h-[36rem]">
+              <div className="max-h-80 overflow-y-auto p-2 text-body-small md:max-h-[36rem]">
                 <TreeNode
                   name={t(locale, "assetBrowser.root")}
                   path=""
@@ -564,21 +564,21 @@ export default function AssetViewer({ locale }: Props) {
           {/* Center: Unified Vertical Explorer (Folders + Files) */}
           <div className="flex min-w-0 flex-1 flex-col">
             {/* Category Filter Chips */}
-            <div className="flex items-center justify-between gap-3 border-b border-[var(--mn-border)] bg-[var(--mn-surface)] px-4 py-2 text-xs overflow-x-auto">
-              <div className="flex items-center gap-1.5 shrink-0 text-[11px]" role="group" aria-label={t(locale, "assetBrowser.files")}>
+            <div className="flex items-center justify-between gap-3 border-b border-outline-variant bg-surface-container px-4 py-2 text-body-small overflow-x-auto">
+              <div className="flex items-center gap-1.5 shrink-0 text-label-small" role="group" aria-label={t(locale, "assetBrowser.files")}>
                 {(["all", "folder", "image", "audio", "video", "data"] as const).map((cat) => (
                   <button
                     key={cat}
                     type="button"
                     onClick={() => setCategoryFilter(cat)}
-                    className={`mn-focus whitespace-nowrap rounded-full px-2.5 py-1 font-medium transition ${categoryFilter === cat ? "bg-[var(--mn-accent)] text-white shadow-xs" : "border border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-text-muted)] hover:text-[var(--mn-text)]"}`}
+                    className={`whitespace-nowrap rounded-full px-2.5 py-1 font-medium transition ${categoryFilter === cat ? "bg-primary text-white shadow-xs" : "border border-outline-variant bg-surface-container-low text-on-surface-variant hover:text-on-surface"}`}
                   >
                     {t(locale, `assetBrowser.kinds.${cat === "data" ? "text" : cat}`)}
                     {cat === "all" ? ` (${subfolders.length + fileCount})` : cat === "folder" ? ` (${subfolders.length})` : ""}
                   </button>
                 ))}
               </div>
-              <span className="shrink-0 text-[11px] text-[var(--mn-text-muted)]">
+              <span className="shrink-0 text-label-small text-on-surface-variant">
                 {subfolders.length > 0 && `${subfolders.length} ${t(locale, "assetBrowser.folders")} · `}
                 {fileCount} {t(locale, "assetBrowser.files")}
               </span>
@@ -587,47 +587,47 @@ export default function AssetViewer({ locale }: Props) {
             {failed ? (
               <div role="alert" className="my-auto space-y-3 p-12 text-center">
                 <p className="font-bold">{t(locale, "assetBrowser.loadError")}</p>
-                <p className="text-sm text-[var(--mn-text-muted)]">{t(locale, failed.error instanceof AssetBrowserError && failed.error.status === 404 ? "assetBrowser.notAvailable" : "assetBrowser.loadErrorHint")}</p>
-                <button type="button" className={`${buttonClass} border border-[var(--mn-border)]`} onClick={failed.reload}>{t(locale, "assetBrowser.retry")}</button>
+                <p className="text-body-medium text-on-surface-variant">{t(locale, failed.error instanceof AssetBrowserError && failed.error.status === 404 ? "assetBrowser.notAvailable" : "assetBrowser.loadErrorHint")}</p>
+                <button type="button" className={`${buttonClass} border border-outline-variant`} onClick={failed.reload}>{t(locale, "assetBrowser.retry")}</button>
               </div>
             ) : loading ? (
-              <SiriusLoader locale={locale} label={t(locale, "assetBrowser.loading")} className="my-auto min-h-72 text-[var(--mn-text-muted)]" />
+              <SiriusLoader locale={locale} label={t(locale, "assetBrowser.loading")} className="my-auto min-h-72 text-on-surface-variant" />
             ) : !displayedFolders.length && !filteredFiles.length ? (
-              <div className="my-auto flex min-h-72 flex-col items-center justify-center gap-3 p-8 text-center text-sm text-[var(--mn-text-muted)]">
+              <div className="my-auto flex min-h-72 flex-col items-center justify-center gap-3 p-8 text-center text-body-medium text-on-surface-variant">
                 <Icon name="folder" className="h-10 w-10 text-amber-500 opacity-40" />
                 <p>{t(locale, emptyMessage)}</p>
-                {hasFilters && <button type="button" className={`${buttonClass} border border-[var(--mn-border)]`} onClick={resetFilters}>{t(locale, "filter.reset")}</button>}
+                {hasFilters && <button type="button" className={`${buttonClass} border border-outline-variant`} onClick={resetFilters}>{t(locale, "filter.reset")}</button>}
               </div>
             ) : view === "list" ? (
               /* Single Unified Table: Subfolders + Files together vertically */
               <div className="flex-1 overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="sticky top-0 z-10 border-b border-[var(--mn-border)] bg-[var(--mn-surface)] text-[var(--mn-text-muted)]">
+                <table className="w-full text-left text-body-small">
+                  <thead className="sticky top-0 z-10 border-b border-outline-variant bg-surface-container text-on-surface-variant">
                     <tr>
                       <th scope="col" className="px-4 py-2.5 font-bold">{t(locale, "assetBrowser.name")}</th>
                       <th scope="col" className="w-28 px-4 py-2.5 font-bold text-right">{t(locale, "assetBrowser.resourceType")}</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[var(--mn-border)]">
+                  <tbody className="divide-y divide-outline-variant">
                     {/* Subfolders rows */}
                     {displayedFolders.map((folder) => (
                       <tr
                         key={`folder:${folder.path}`}
-                        className="group cursor-pointer transition hover:bg-[var(--mn-accent-soft)]"
+                        className="group cursor-pointer transition hover:bg-secondary-container"
                         onClick={() => navigate({ directory: folder.path, page: 0 })}
                       >
                         <td className="px-4 py-2.5">
                           <div className="flex items-center gap-3">
-                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500 transition group-hover:scale-110">
+                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-shape-sm bg-amber-500/10 text-amber-500 transition group-hover:scale-110">
                               <Icon name="folder" className="h-5 w-5" />
                             </span>
-                            <span className="font-semibold text-sm text-[var(--mn-text)] group-hover:text-[var(--mn-accent)]">
+                            <span className="text-label-large text-on-surface group-hover:text-primary">
                               {folder.name}
                             </span>
                           </div>
                         </td>
                         <td className="px-4 py-2.5 text-right">
-                          <span className="inline-flex items-center rounded-md border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                          <span className="inline-flex items-center rounded-shape-sm border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-label-small text-amber-600 dark:text-amber-400">
                             {t(locale, "assetBrowser.kinds.folder")}
                           </span>
                         </td>
@@ -644,7 +644,7 @@ export default function AssetViewer({ locale }: Props) {
                       return (
                         <tr
                           key={`file:${file.bundle_id}:${file.path}:${file.path_id}:${index}`}
-                          className="group cursor-pointer transition hover:bg-[var(--mn-surface)]"
+                          className="group cursor-pointer transition hover:bg-surface-container"
                           onClick={() => {
                             setSelectedFile(file);
                             setShowModal(true);
@@ -658,23 +658,23 @@ export default function AssetViewer({ locale }: Props) {
                                   src={preview.url}
                                   alt={fileName}
                                   loading="lazy"
-                                  className="h-10 w-10 shrink-0 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-paper)] object-contain shadow-xs transition group-hover:scale-105"
+                                  className="h-10 w-10 shrink-0 rounded-shape-sm border border-outline-variant bg-surface-container-low object-contain shadow-xs transition group-hover:scale-105"
                                 />
                               ) : (
-                                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-accent)]">
+                                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-shape-sm border border-outline-variant bg-surface-container-low text-primary">
                                   <Icon name={fileIcon(file)} className="h-5 w-5" />
                                 </span>
                               )}
                               <div className="min-w-0 flex-1">
-                                <span className="block truncate font-medium text-xs text-[var(--mn-text)] group-hover:text-[var(--mn-accent)]">
+                                <span className="block truncate text-body-small text-on-surface group-hover:text-primary">
                                   {fileName}
                                 </span>
-                                {query && <span className="block truncate text-[10px] text-[var(--mn-text-muted)]">{file.path}</span>}
+                                {query && <span className="block truncate text-label-small text-on-surface-variant">{file.path}</span>}
                               </div>
                             </div>
                           </td>
                           <td className="px-4 py-2 text-right">
-                            <span className={`inline-flex items-center rounded-md border px-2 py-0.5 font-mono text-[10px] font-bold ${getFileBadgeColor(category)}`}>
+                            <span className={`inline-flex items-center rounded-shape-sm border px-2 py-0.5 font-mono text-label-small ${getFileBadgeColor(category)}`}>
                               {ext || file.kind}
                             </span>
                           </td>
@@ -694,11 +694,11 @@ export default function AssetViewer({ locale }: Props) {
                       key={`folder:${folder.path}`}
                       type="button"
                       onClick={() => navigate({ directory: folder.path, page: 0 })}
-                      className="mn-focus group flex flex-col items-center justify-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 text-center transition hover:border-[var(--mn-accent)] hover:bg-[var(--mn-accent-soft)]"
+                      className="group flex flex-col items-center justify-center rounded-shape-md border border-outline-variant bg-surface-container p-4 text-center transition hover:border-primary hover:bg-secondary-container"
                     >
                       <Icon name="folder" className="mb-2 h-10 w-10 text-amber-500 transition group-hover:scale-110" />
-                      <span className="w-full truncate text-xs font-semibold">{folder.name}</span>
-                      <span className="text-[10px] text-[var(--mn-text-muted)]">{t(locale, "assetBrowser.kinds.folder")}</span>
+                      <span className="w-full truncate text-label-medium">{folder.name}</span>
+                      <span className="text-label-small text-on-surface-variant">{t(locale, "assetBrowser.kinds.folder")}</span>
                     </button>
                   ))}
 
@@ -717,20 +717,20 @@ export default function AssetViewer({ locale }: Props) {
                           setSelectedFile(file);
                           setShowModal(true);
                         }}
-                        className="mn-focus group flex flex-col justify-between rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 text-left transition hover:border-[var(--mn-accent)] hover:shadow-xs"
+                        className="group flex flex-col justify-between rounded-shape-md border border-outline-variant bg-surface-container p-3 text-left transition hover:border-primary hover:shadow-xs"
                       >
-                        <div className="mb-2 flex h-24 w-full items-center justify-center overflow-hidden rounded-lg bg-[var(--mn-paper)]">
+                        <div className="mb-2 flex h-24 w-full items-center justify-center overflow-hidden rounded-shape-sm bg-surface-container-low">
                           {preview?.type === "image" ? (
                             <img src={preview.url} alt={fileName} loading="lazy" className="h-full w-full object-contain transition group-hover:scale-105" />
                           ) : (
-                            <Icon name={fileIcon(file)} className="h-9 w-9 text-[var(--mn-accent)] opacity-80" />
+                            <Icon name={fileIcon(file)} className="h-9 w-9 text-primary opacity-80" />
                           )}
                         </div>
                         <div className="min-w-0 space-y-1">
-                          <span className="block truncate text-xs font-medium group-hover:text-[var(--mn-accent)]">
+                          <span className="block truncate text-body-small group-hover:text-primary">
                             {fileName}
                           </span>
-                          <span className={`inline-block rounded px-1.5 py-0.5 border font-mono text-[9px] font-bold ${getFileBadgeColor(category)}`}>
+                          <span className={`inline-block rounded px-1.5 py-0.5 border font-mono text-label-small ${getFileBadgeColor(category)}`}>
                             {ext || file.kind}
                           </span>
                         </div>
@@ -742,7 +742,7 @@ export default function AssetViewer({ locale }: Props) {
             )}
 
             {/* Bottom Pagination Bar */}
-            <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-[var(--mn-border)] bg-[var(--mn-surface)] px-4 py-2 text-xs text-[var(--mn-text-muted)]">
+            <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-outline-variant bg-surface-container px-4 py-2 text-body-small text-on-surface-variant">
               <span aria-live="polite">
                 {t(locale, "assetBrowser.itemCount", { count: subfolders.length + fileCount })}
               </span>
@@ -800,13 +800,13 @@ function TreeNode({
   return (
     <div>
       <div
-        className={`flex items-center gap-1 rounded-lg px-2 py-1 transition ${isActive ? "bg-[var(--mn-accent-soft)] font-bold text-[var(--mn-accent-deep)]" : "hover:bg-[var(--mn-paper)]"}`}
+        className={`flex items-center gap-1 rounded-shape-sm px-2 py-1 transition ${isActive ? "bg-secondary-container font-bold text-primary" : "hover:bg-surface-container-low"}`}
         style={{ paddingLeft: `${depth * 14 + 6}px` }}
       >
         <button
           type="button"
           onClick={() => onToggleExpand(path)}
-          className="mn-focus flex h-4 w-4 shrink-0 items-center justify-center text-[var(--mn-text-muted)] hover:text-[var(--mn-text)]"
+          className="flex h-4 w-4 shrink-0 items-center justify-center text-on-surface-variant hover:text-on-surface"
           aria-label={isExpanded ? "Collapse" : "Expand"}
         >
           {isLoading ? (
@@ -818,7 +818,7 @@ function TreeNode({
         <button
           type="button"
           onClick={() => onSelect(path)}
-          className="mn-focus flex min-w-0 flex-1 items-center gap-1.5 truncate text-left"
+          className="flex min-w-0 flex-1 items-center gap-1.5 truncate text-left"
           title={name}
         >
           <Icon name={isExpanded ? "folderOpen" : "folder"} className="h-4 w-4 shrink-0 text-amber-500" />
@@ -875,15 +875,15 @@ function ContentDetails({
       {file && (
         <div className="space-y-4">
           {/* Large Preview */}
-          <div className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 text-center">
+          <div className="rounded-shape-md border border-outline-variant bg-surface-container p-4 text-center">
             {preview?.type === "image" ? (
               <div className="space-y-2">
-                <img src={preview.url} alt={file.path} className="max-h-80 max-w-full rounded-lg object-contain mx-auto shadow-sm" />
+                <img src={preview.url} alt={file.path} className="max-h-80 max-w-full rounded-shape-sm object-contain mx-auto shadow-sm" />
                 <a
                   href={preview.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-block text-xs font-semibold text-[var(--mn-accent)] hover:underline"
+                  className="inline-block text-label-medium text-primary hover:underline"
                 >
                   {t(locale, "assetBrowser.openImage")} ↗
                 </a>
@@ -892,10 +892,10 @@ function ContentDetails({
               <audio controls src={preview.url} className="w-full" />
             ) : (
               <div className="flex items-center gap-3 py-4">
-                <Icon name={fileIcon(file)} className="h-8 w-8 text-[var(--mn-accent)] shrink-0" />
+                <Icon name={fileIcon(file)} className="h-8 w-8 text-primary shrink-0" />
                 <div className="min-w-0 flex-1 text-left">
-                  <p className="truncate font-bold text-sm">{file.path.split("/").pop()}</p>
-                  <p className="truncate text-xs text-[var(--mn-text-muted)]">{file.path}</p>
+                  <p className="truncate text-label-large">{file.path.split("/").pop()}</p>
+                  <p className="truncate text-body-small text-on-surface-variant">{file.path}</p>
                 </div>
               </div>
             )}
@@ -905,7 +905,7 @@ function ContentDetails({
           <div>
             <button
               type="button"
-              className={`${buttonClass} w-full border border-[var(--mn-border)] text-xs flex items-center justify-center gap-1.5 py-2`}
+              className={`${buttonClass} w-full border border-outline-variant text-body-small flex items-center justify-center gap-1.5 py-2`}
               onClick={copyPath}
             >
               <Icon name={copyPathState ? "check" : "copy"} className={copyPathState ? "text-emerald-500" : ""} />
@@ -914,13 +914,13 @@ function ContentDetails({
           </div>
 
           {/* Clean Property List (No technical IDs) */}
-          <dl className="divide-y divide-[var(--mn-border)] rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 text-xs">
+          <dl className="divide-y divide-outline-variant rounded-shape-md border border-outline-variant bg-surface-container px-3 text-body-small">
             <div className="grid gap-1 py-2.5 sm:grid-cols-[7rem_minmax(0,1fr)] sm:gap-4">
-              <dt className="text-[var(--mn-text-muted)]">{t(locale, "assetBrowser.fileKey")}</dt>
+              <dt className="text-on-surface-variant">{t(locale, "assetBrowser.fileKey")}</dt>
               <dd className="min-w-0 break-all font-mono select-text">{file.path}</dd>
             </div>
             <div className="grid gap-1 py-2.5 sm:grid-cols-[7rem_minmax(0,1fr)] sm:gap-4">
-              <dt className="text-[var(--mn-text-muted)]">{t(locale, "assetBrowser.resourceType")}</dt>
+              <dt className="text-on-surface-variant">{t(locale, "assetBrowser.resourceType")}</dt>
               <dd className="min-w-0 font-medium">{getFileExtension(file.path).toUpperCase() || file.kind}</dd>
             </div>
           </dl>

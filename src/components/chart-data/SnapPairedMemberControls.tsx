@@ -93,15 +93,15 @@ export default function SnapPairedMemberControls({ locale, members, value, onCha
         </div>
 
         <div className="min-w-0 space-y-3">
-          <p className="px-1 text-xs font-medium text-[var(--mn-text-muted)]">{tr("profileHint")}</p>
+          <p className="px-1 text-xs font-medium text-[var(--md-sys-color-on-surface-variant)]">{tr("profileHint")}</p>
           <button type="button" className={`mn-cd-snap-none${draft === null ? " selected" : ""}`} aria-pressed={draft === null} onClick={() => choose(null)}>
             <span aria-hidden="true">–</span><strong>{tr("memberUnset")}</strong><span>{tr("memberNoneHint")}</span>
           </button>
           {picker.sorted.length === 0 ? (
             <div className="mn-paper p-8 text-center">
-              <p className="font-[var(--mn-font-display)] text-lg text-[var(--mn-text)]">{tr("memberEmpty")}</p>
+              <p className="font-[var(--md-ref-typeface-brand)] text-lg text-[var(--md-sys-color-on-surface)]">{tr("memberEmpty")}</p>
               <button type="button" onClick={picker.reset}
-                className="mn-focus mn-stamp-press mt-4 rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-5 py-2 text-xs font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]">
+                className="mn-focus mn-stamp-press mt-4 rounded-full border-[1.5px] border-[var(--md-sys-color-outline-variant)] bg-[var(--md-sys-color-surface-container-low)] px-5 py-2 text-xs font-bold text-[var(--md-sys-color-on-surface)] shadow-[var(--md-sys-elevation-level1)]">
                 {t(locale, "filter.reset")}
               </button>
             </div>
@@ -112,10 +112,10 @@ export default function SnapPairedMemberControls({ locale, members, value, onCha
                 return <li key={entry.id} data-member-id={entry.id} className="min-w-0">
                   <button type="button" disabled={!!issue} title={issue ? issueText(issue) : undefined} aria-pressed={selected} onClick={() => choose(selection)}
                     className={`mn-focus group flex w-full min-w-0 flex-col items-center gap-1 rounded-2xl border-[1.5px] p-1.5 text-center transition disabled:cursor-not-allowed disabled:opacity-40 ${
-                      selected ? "border-[var(--mn-accent)] bg-[var(--mn-paper)] ring-2 ring-[var(--mn-accent)]" : "border-transparent enabled:hover:-translate-y-0.5 enabled:hover:border-[var(--mn-border)] enabled:hover:bg-[var(--mn-paper)]"}`}>
+                      selected ? "border-[var(--md-sys-color-primary)] bg-[var(--md-sys-color-surface-container-low)] ring-2 ring-[var(--md-sys-color-primary)]" : "border-transparent enabled:hover:-translate-y-0.5 enabled:hover:border-[var(--md-sys-color-outline-variant)] enabled:hover:bg-[var(--md-sys-color-surface-container-low)]"}`}>
                     {art(entry, "w-full")}
-                    <span className={`block w-full truncate text-xs font-black ${selected ? "text-[var(--mn-accent-deep)]" : "text-[var(--mn-text)]"}`}>{entry.vm?.characterName || entry.name}</span>
-                    <span className="block w-full truncate text-[10px] font-medium text-[var(--mn-text-muted)]">{entry.vm?.title || tr("memberId", { id: entry.id })}</span>
+                    <span className={`block w-full truncate text-xs font-black ${selected ? "text-[var(--md-sys-color-primary)]" : "text-[var(--md-sys-color-on-surface)]"}`}>{entry.vm?.characterName || entry.name}</span>
+                    <span className="block w-full truncate text-[10px] font-medium text-[var(--md-sys-color-on-surface-variant)]">{entry.vm?.title || tr("memberId", { id: entry.id })}</span>
                   </button>
                 </li>;
               })}

@@ -106,9 +106,7 @@ export default function Live2DStage({ locale, manifestUrl, onReady }: Live2DStag
       ref={frameRef}
       role="region"
       aria-label={t(locale, "live2d.stageLabel")}
-      className={`overflow-hidden bg-[linear-gradient(180deg,var(--mn-cream-deep),var(--mn-paper))] ${fullscreen
-        ? ""
-        : "rounded-2xl border-[1.5px] border-[var(--mn-border)] shadow-[var(--mn-shadow-stamp)]"}`}
+      className={`overflow-hidden bg-[linear-gradient(180deg,var(--md-sys-color-surface-container-highest),var(--md-sys-color-surface-container-low))] ${fullscreen ? "" : "rounded-shape-lg border border-outline-variant shadow-elevation-1"}`}
     >
       {/* Models are 2:3; the player fits the canvas into whatever box this is. */}
       <div className={`relative ${fullscreen ? "h-screen w-screen" : "aspect-[3/4] max-h-[80vh] w-full @lg:aspect-square"}`}>
@@ -121,7 +119,7 @@ export default function Live2DStage({ locale, manifestUrl, onReady }: Live2DStag
             onClick={toggleFullscreen}
             aria-label={t(locale, fullscreen ? "live2d.exitFullscreen" : "live2d.fullscreen")}
             title={t(locale, fullscreen ? "live2d.exitFullscreen" : "live2d.fullscreen")}
-            className="mn-focus absolute right-3 top-3 z-20 grid h-9 w-9 place-items-center rounded-full bg-black/45 text-white/85 backdrop-blur-sm transition hover:bg-black/70 hover:text-white"
+            className="absolute right-3 top-3 z-20 grid h-9 w-9 place-items-center rounded-full bg-black/45 text-white/85 backdrop-blur-sm transition hover:bg-black/70 hover:text-white"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               {fullscreen
@@ -141,7 +139,7 @@ export default function Live2DStage({ locale, manifestUrl, onReady }: Live2DStag
               onClick={() => setView(IDENTITY_VIEW)}
               title={t(locale, "live2d.zoomReset")}
               aria-label={t(locale, "live2d.zoomReset")}
-              className="mn-focus min-w-12 rounded-full px-2 py-1 text-center font-mono text-[11px] font-bold transition hover:bg-white/15"
+              className="min-w-12 rounded-full px-2 py-1 text-center font-mono text-label-small transition hover:bg-white/15"
             >
               {Math.round(view.zoom * 100)}%
             </button>
@@ -162,10 +160,10 @@ export default function Live2DStage({ locale, manifestUrl, onReady }: Live2DStag
             <SiriusLoader locale={locale} compact label={t(locale, "live2d.loading")} />
             {status.total > 0 && (
               <>
-                <div className="mt-3 h-1.5 w-48 overflow-hidden rounded-full bg-[color-mix(in_oklab,var(--mn-border)_25%,transparent)]">
-                  <div className="h-full rounded-full bg-[var(--mn-accent)] transition-[width]" style={{ width: `${Math.min(100, Math.round((status.loaded / status.total) * 100))}%` }} />
+                <div className="mt-3 h-1.5 w-48 overflow-hidden rounded-full bg-outline-variant/25">
+                  <div className="h-full rounded-full bg-primary transition-[width]" style={{ width: `${Math.min(100, Math.round((status.loaded / status.total) * 100))}%` }} />
                 </div>
-                <p className="mt-2 font-mono text-[10px] text-[var(--mn-text-muted)]">
+                <p className="mt-2 font-mono text-label-small text-on-surface-variant">
                   {formatBytes(status.loaded)} / {formatBytes(status.total)}
                 </p>
               </>
@@ -175,19 +173,19 @@ export default function Live2DStage({ locale, manifestUrl, onReady }: Live2DStag
 
         {(status.kind === "error" || status.kind === "unsupported") && (
           <StageMessage>
-            <h3 className="font-[var(--mn-font-display)] text-lg text-[var(--mn-text)] sm:text-xl">
+            <h3 className="font-[var(--md-ref-typeface-brand)] text-title-large text-on-surface sm:text-headline-small">
               {t(locale, status.kind === "unsupported" ? "live2d.unsupportedTitle" : "live2d.loadErrorTitle")}
             </h3>
-            <p className="mt-2 max-w-md text-xs font-medium leading-6 text-[var(--mn-text-muted)] sm:text-sm">
+            <p className="mt-2 max-w-md text-body-small leading-6 text-on-surface-variant sm:text-body-medium">
               {t(locale, status.kind === "unsupported" ? "live2d.unsupportedDescription" : "live2d.loadErrorDescription")}
             </p>
             {status.kind === "error" && (
               <>
-                <p className="mt-2 max-w-md break-all font-mono text-[10px] text-[var(--mn-text-muted)]">{status.detail}</p>
+                <p className="mt-2 max-w-md break-all font-mono text-label-small text-on-surface-variant">{status.detail}</p>
                 <button
                   type="button"
                   onClick={() => setAttempt((value) => value + 1)}
-                  className="mn-focus mn-stamp-press mt-4 rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-5 py-2 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]"
+                  className="md3-state mt-4 rounded-full border border-outline-variant bg-surface-container-low px-5 py-2 text-label-large text-on-surface shadow-elevation-1"
                 >
                   {t(locale, "live2d.retry")}
                 </button>
@@ -208,7 +206,7 @@ function ZoomButton({ label, disabled, onClick, children }: { label: string; dis
       disabled={disabled}
       title={label}
       aria-label={label}
-      className="mn-focus grid h-7 w-7 place-items-center rounded-full transition hover:bg-white/15 disabled:opacity-35"
+      className="grid h-7 w-7 place-items-center rounded-full transition hover:bg-white/15 disabled:opacity-35"
     >
       <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">{children}</svg>
     </button>

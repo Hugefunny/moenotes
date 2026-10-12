@@ -77,7 +77,7 @@ function Scatter({ ctx, list, onTip }: { ctx: ChartDataContext; list: ChartRow[]
     <div ref={box} className="mn-cd-scatter-canvas">
     <div className="mn-cd-plot-summary"><span>{tr("plotted", { n: pts.length })}</span><span className="mn-cd-frontier-key">{tr("paretoCount", { n: frontier.length })}</span></div>
     <svg viewBox={`0 0 ${W} ${H}`} className="mn-cd-plot mn-cd-scatter" role="img" aria-label={label}>
-      <defs><linearGradient id={gradient} x1="0" x2="1" y1="0" y2="1"><stop stopColor="var(--mn-accent-deep)" /><stop offset="1" stopColor="var(--mn-pink)" /></linearGradient></defs>
+      <defs><linearGradient id={gradient} x1="0" x2="1" y1="0" y2="1"><stop stopColor="var(--md-sys-color-primary)" /><stop offset="1" stopColor="var(--md-sys-color-category1)" /></linearGradient></defs>
       <rect className="plot-surface" x={m.l} y={m.t} width={W-m.l-m.r} height={H-m.t-m.b} rx={12} />
       <g className="grid">
         {ticks(ex[0], ex[1], W < 500 ? 4 : 8).map((v) => (
@@ -176,7 +176,7 @@ function BandChart({ ctx }: { ctx: ChartDataContext }) {
         return (
           <div key={k} className="mn-cd-hbar">
             <span className="mn-cd-hbar-name">{name}</span>
-            <span className="mn-cd-hbar-track"><span className="mn-cd-hbar-fill" style={{ width: `${(100 * n) / max}%`, background: b?.mainColor ?? "var(--mn-text-muted)" }} /></span>
+            <span className="mn-cd-hbar-track"><span className="mn-cd-hbar-fill" style={{ width: `${(100 * n) / max}%`, background: b?.mainColor ?? "var(--md-sys-color-on-surface-variant)" }} /></span>
             <b>{String(n)}</b>
           </div>
         );

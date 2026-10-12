@@ -151,7 +151,7 @@ export default function ChartDataTool({ locale, guide }: Props) {
       skills,
       title: (r) => localizeDataText(r.title, locale) || String(r.musicId),
       bandName: (r) => localizeDataText(r.bandName, locale) || localizeDataText(bandOf(r)?.name, locale),
-      bandColor: (r) => bandOf(r)?.mainColor ?? "var(--mn-text-muted)",
+      bandColor: (r) => bandOf(r)?.mainColor ?? "var(--md-sys-color-on-surface-variant)",
       jacketUrl: (r) => (r.song.jacket ? getMusicJacketUrl(r.song.jacket) : null),
       songHref: (r) => localizePath(`${getRoutePathById("music")}/${r.musicId}`, locale),
       previewHref: (r) => (isMusicDifficulty(r.difficulty) ? getChartPreviewHref(locale, { musicId: r.musicId, difficulty: r.difficulty }) : getChartPreviewHref(locale)),

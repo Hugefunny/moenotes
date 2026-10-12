@@ -143,7 +143,7 @@ export default function StoryPlayerTool({ locale, stories }: Props) {
       ) : (
         <StageEmpty locale={locale} site={site} onChoose={openPicker} onInfo={openInfo} onRetry={() => setSiteAttempt((value) => value + 1)} />
       )}
-      <p className="px-1 text-right text-[11px] font-semibold tracking-wide text-[var(--mn-text-muted)]">{t(locale, "storyPlayer.credit")}</p>
+      <p className="px-1 text-right text-label-small text-on-surface-variant">{t(locale, "storyPlayer.credit")}</p>
 
       <StoryPickerDialog locale={locale} entries={entries} open={pickerOpen} onClose={() => setPickerOpen(false)} currentId={advId} onSelect={choose} />
       <StoryInfoDialog locale={locale} open={infoOpen} onClose={() => setInfoOpen(false)} runtimes={runtimes} />
@@ -239,19 +239,19 @@ function StoryHeader({ locale, entry, languages, language, switching, onLanguage
     <>
       <EpisodeArtwork locale={locale} entry={entry} />
       <span className="min-w-0">
-        {eyebrow && <span className="block truncate text-[11px] font-black text-[var(--mn-accent)]">{eyebrow}</span>}
-        <span className="mt-0.5 line-clamp-2 font-[var(--mn-font-display)] text-base font-bold text-[var(--mn-text)] transition-colors group-hover:text-[var(--mn-accent-deep)] sm:text-lg">{title}</span>
-        <span className="mt-0.5 block font-mono text-[10px] text-[var(--mn-text-muted)]">ADV {entry.advId}{bytes > 0 ? ` · ${formatMegabytes(bytes)}` : ""}</span>
+        {eyebrow && <span className="block truncate text-label-small text-primary">{eyebrow}</span>}
+        <span className="mt-0.5 line-clamp-2 font-[var(--md-ref-typeface-brand)] text-title-medium text-on-surface transition-colors group-hover:text-primary sm:text-title-large">{title}</span>
+        <span className="mt-0.5 block font-mono text-label-small text-on-surface-variant">ADV {entry.advId}{bytes > 0 ? ` · ${formatMegabytes(bytes)}` : ""}</span>
       </span>
     </>
   );
 
   return (
-    <div className="mn-paper flex flex-col gap-3 p-3 sm:p-4 @3xl:flex-row @3xl:items-center">
+    <div className="md3-surface flex flex-col gap-3 p-3 sm:p-4 @3xl:flex-row @3xl:items-center">
       {entry.category === "other" ? (
         <div className="flex min-w-0 flex-1 items-center gap-3">{summary}</div>
       ) : (
-        <a href={localizePath(`/story/${entry.advId}`, locale)} title={t(locale, "storyPlayer.readText")} className="mn-focus group flex min-w-0 flex-1 items-center gap-3 rounded-xl">
+        <a href={localizePath(`/story/${entry.advId}`, locale)} title={t(locale, "storyPlayer.readText")} className="group flex min-w-0 flex-1 items-center gap-3 rounded-shape-md">
           {summary}
         </a>
       )}
@@ -272,7 +272,7 @@ function StoryHeader({ locale, entry, languages, language, switching, onLanguage
         <button
           type="button"
           onClick={onPick}
-          className="mn-focus mn-stamp-press inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-[var(--mn-accent)] px-4 text-sm font-bold text-white shadow-[var(--mn-shadow-stamp)] hover:bg-[var(--mn-accent-deep)]"
+          className="md3-state inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-primary px-4 text-label-large text-white shadow-elevation-1 hover:bg-primary"
         >
           <StoryListIcon className="h-4 w-4" />
           {t(locale, "storyPlayer.chooseStory")}
@@ -286,15 +286,15 @@ function StoryHeader({ locale, entry, languages, language, switching, onLanguage
 function EpisodeArtwork({ locale, entry }: { locale: AppLocale; entry: StoryPlayerEntry }) {
   const [failed, setFailed] = useState(false);
   const url = getStoryPlayerArtworkUrl(entry.image, locale, entry.assetServer);
-  const box = "h-14 w-24 shrink-0 rounded-xl border-[1.5px] border-[var(--mn-border)] sm:h-16 sm:w-28";
+  const box = "h-14 w-24 shrink-0 rounded-shape-md border border-outline-variant sm:h-16 sm:w-28";
   if (!url || failed) {
     return (
-      <span className={`${box} grid place-items-center bg-[linear-gradient(135deg,var(--mn-accent-soft),var(--mn-cream-deep))] text-[var(--mn-accent-deep)]`} aria-hidden="true">
+      <span className={`${box} grid place-items-center bg-[linear-gradient(135deg,var(--md-sys-color-secondary-container),var(--md-sys-color-surface-container-highest))] text-primary`} aria-hidden="true">
         <StoryListIcon className="h-6 w-6 opacity-70" />
       </span>
     );
   }
-  return <img src={url} alt="" onError={() => setFailed(true)} className={`${box} bg-[var(--mn-cream-deep)] object-cover`} />;
+  return <img src={url} alt="" onError={() => setFailed(true)} className={`${box} bg-surface-container-highest object-cover`} />;
 }
 
 /** The story languages the episode has, as a compact dropdown. */
@@ -323,7 +323,7 @@ function LanguageSelect({ locale, languages, value, busy, onChange }: {
           title={name}
           className={`${PILL} gap-1.5 px-3 disabled:cursor-default`}
         >
-          <LanguageIcon className="h-4 w-4 shrink-0 text-[var(--mn-accent-deep)]" />
+          <LanguageIcon className="h-4 w-4 shrink-0 text-primary" />
           <span>{label}</span>
           {busy
             ? <SiriusIcon className="h-3.5 w-3.5" />
@@ -341,7 +341,7 @@ function LanguageSelect({ locale, languages, value, busy, onChange }: {
             onChange(code);
             close();
           }}
-          className={`w-full rounded-xl px-4 py-2 text-left text-sm font-bold transition hover:bg-[var(--mn-cream-deep)] ${code === value ? "bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]" : "text-[var(--mn-text-muted)] hover:text-[var(--mn-text)]"}`}
+          className={`w-full rounded-shape-md px-4 py-2 text-left text-label-large transition hover:bg-surface-container-highest ${code === value ? "bg-secondary-container text-primary" : "text-on-surface-variant hover:text-on-surface"}`}
         >
           {t(locale, `storyPlayer.languages.${code}`)}
         </button>
@@ -372,16 +372,16 @@ function StoryInfoDialog({ locale, open, onClose, runtimes }: { locale: AppLocal
 
   return (
     <Modal isOpen={open} onClose={onClose} title={t(locale, "storyPlayer.info.title")} closeLabel={t(locale, "actions.close")} size="md">
-      <div className="space-y-5 text-sm leading-6 text-[var(--mn-text-muted)]">
+      <div className="space-y-5 text-body-medium leading-6 text-on-surface-variant">
         <section className="space-y-2">
-          <h3 className="text-xs font-black uppercase tracking-wider text-[var(--mn-text)]">{t(locale, "storyPlayer.info.controls")}</h3>
+          <h3 className="text-label-medium text-on-surface">{t(locale, "storyPlayer.info.controls")}</h3>
           <ul className="grid gap-1.5 sm:grid-cols-2">
             {legend.map((item) => (
-              <li key={item.key} className="flex items-start gap-2.5 rounded-xl bg-[var(--mn-surface)] px-3 py-2">
+              <li key={item.key} className="flex items-start gap-2.5 rounded-shape-md bg-surface-container px-3 py-2">
                 <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-black/85 text-white">{item.icon}</span>
                 <span className="min-w-0">
-                  <span className="block text-xs font-black text-[var(--mn-text)]">{t(locale, `storyPlayer.info.legend.${item.key}.name`)}</span>
-                  <span className="block text-[11px] leading-4">{t(locale, `storyPlayer.info.legend.${item.key}.description`)}</span>
+                  <span className="block text-label-medium text-on-surface">{t(locale, `storyPlayer.info.legend.${item.key}.name`)}</span>
+                  <span className="block text-label-small leading-4">{t(locale, `storyPlayer.info.legend.${item.key}.description`)}</span>
                 </span>
               </li>
             ))}
@@ -389,14 +389,14 @@ function StoryInfoDialog({ locale, open, onClose, runtimes }: { locale: AppLocal
         </section>
 
         <section className="space-y-2">
-          <h3 className="text-xs font-black uppercase tracking-wider text-[var(--mn-text)]">{t(locale, "storyPlayer.info.shortcuts")}</h3>
+          <h3 className="text-label-medium text-on-surface">{t(locale, "storyPlayer.info.shortcuts")}</h3>
           <ul className="flex flex-wrap gap-x-4 gap-y-1.5">
             {keys.map((item) => (
-              <li key={item.key} className="flex items-center gap-1.5 text-xs">
+              <li key={item.key} className="flex items-center gap-1.5 text-body-small">
                 {item.keys.map((key, position) => (
                   <span key={key} className="flex items-center gap-1.5">
                     {position > 0 && <span aria-hidden="true">/</span>}
-                    <kbd className="rounded-md border border-b-2 border-[var(--mn-border)] bg-[var(--mn-paper)] px-1.5 py-px font-mono text-[11px] font-bold text-[var(--mn-text)]">{key}</kbd>
+                    <kbd className="rounded-shape-sm border border-b-2 border-outline-variant bg-surface-container-low px-1.5 py-px font-mono text-label-small text-on-surface">{key}</kbd>
                   </span>
                 ))}
                 <span>{t(locale, `storyPlayer.info.legend.${item.key}.name`)}</span>
@@ -406,12 +406,12 @@ function StoryInfoDialog({ locale, open, onClose, runtimes }: { locale: AppLocal
         </section>
 
         <section className="space-y-2">
-          <h3 className="text-xs font-black uppercase tracking-wider text-[var(--mn-text)]">{t(locale, "storyPlayer.info.about")}</h3>
+          <h3 className="text-label-medium text-on-surface">{t(locale, "storyPlayer.info.about")}</h3>
           <p>{t(locale, "storyPlayer.notice")}</p>
           {motionSync ? (
             <Note>
               {t(locale, "storyPlayer.motionSyncLicense")}{" "}
-              <a href={assetConfig.motionSyncLicense} target="_blank" rel="noreferrer" className="font-bold text-[var(--mn-accent-deep)] underline underline-offset-2">
+              <a href={assetConfig.motionSyncLicense} target="_blank" rel="noreferrer" className="font-bold text-primary underline underline-offset-2">
                 {t(locale, "storyPlayer.motionSyncLicenseLink")}
               </a>
             </Note>
@@ -426,8 +426,8 @@ function StoryInfoDialog({ locale, open, onClose, runtimes }: { locale: AppLocal
 
 function Note({ children }: { children: ReactNode }) {
   return (
-    <p className="flex gap-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-accent-soft)] px-3 py-2 text-xs leading-5 text-[var(--mn-ink-soft)]">
-      <InfoIcon className="mt-0.5 h-4 w-4 shrink-0 text-[var(--mn-accent-deep)]" />
+    <p className="flex gap-2 rounded-shape-md border border-outline-variant bg-secondary-container px-3 py-2 text-body-small leading-5 text-on-surface-variant">
+      <InfoIcon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
       <span>{children}</span>
     </p>
   );
@@ -436,26 +436,26 @@ function Note({ children }: { children: ReactNode }) {
 function StageEmpty({ locale, site, onChoose, onInfo, onRetry }: { locale: AppLocale; site: SiteState; onChoose: () => void; onInfo: () => void; onRetry: () => void }) {
   const empty = site.kind === "ready" && site.entries.length === 0;
   return (
-    <div className="relative grid aspect-[13/6] min-h-64 w-full place-items-center overflow-hidden rounded-2xl border-[1.5px] border-[var(--mn-border)] bg-[linear-gradient(180deg,var(--mn-cream-deep),var(--mn-paper))] px-6 text-center shadow-[var(--mn-shadow-stamp)]">
+    <div className="relative grid aspect-[13/6] min-h-64 w-full place-items-center overflow-hidden rounded-shape-lg border border-outline-variant bg-[linear-gradient(180deg,var(--md-sys-color-surface-container-highest),var(--md-sys-color-surface-container-low))] px-6 text-center shadow-elevation-1">
       <StageSignature />
       <div className="relative">
         {site.kind === "loading" && <SiriusLoader locale={locale} compact label={t(locale, "storyPlayer.listLoading")} />}
         {site.kind === "error" && (
           <>
-            <p className="text-sm font-bold text-[var(--mn-rose)]">{t(locale, "storyPlayer.listError")}</p>
+            <p className="text-label-large text-error">{t(locale, "storyPlayer.listError")}</p>
             <button type="button" onClick={onRetry} className={`${PILL} mt-4 px-4`}>{t(locale, "storyPlayer.retry")}</button>
           </>
         )}
-        {empty && <p className="text-sm font-bold text-[var(--mn-text-muted)]">{t(locale, "storyPlayer.listEmpty")}</p>}
+        {empty && <p className="text-label-large text-on-surface-variant">{t(locale, "storyPlayer.listEmpty")}</p>}
         {site.kind === "ready" && !empty && (
           <>
-            <h2 className="font-[var(--mn-font-display)] text-xl text-[var(--mn-text)] sm:text-2xl">{t(locale, "storyPlayer.emptyTitle")}</h2>
-            <p className="mx-auto mt-2 max-w-md text-xs font-medium leading-6 text-[var(--mn-text-muted)] sm:text-sm">{t(locale, "storyPlayer.emptyDescription")}</p>
+            <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-small">{t(locale, "storyPlayer.emptyTitle")}</h2>
+            <p className="mx-auto mt-2 max-w-md text-body-small leading-6 text-on-surface-variant sm:text-body-medium">{t(locale, "storyPlayer.emptyDescription")}</p>
             <div className="mt-5 flex flex-wrap justify-center gap-2">
               <button
                 type="button"
                 onClick={onChoose}
-                className="mn-focus mn-stamp-press inline-flex items-center gap-2 rounded-full bg-[var(--mn-accent)] px-6 py-3 text-sm font-bold text-white shadow-[var(--mn-shadow-stamp)] hover:bg-[var(--mn-accent-deep)]"
+                className="md3-state inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-label-large text-white shadow-elevation-1 hover:bg-primary"
               >
                 <StoryListIcon className="h-4 w-4" />
                 {t(locale, "storyPlayer.chooseStory")}
@@ -480,7 +480,7 @@ function IconButton({ label, disabled = false, onClick, children }: { label: str
   );
 }
 
-const PILL = "mn-focus inline-flex h-9 shrink-0 items-center rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] text-xs font-bold text-[var(--mn-text)] transition enabled:hover:border-[var(--mn-accent)] enabled:hover:text-[var(--mn-accent-deep)]";
+const PILL = " inline-flex h-9 shrink-0 items-center rounded-full border border-outline-variant bg-surface-container-low text-xs font-bold text-on-surface transition enabled:hover:border-primary enabled:hover:text-primary";
 
 /**
  * Replaces the address of the current history entry. A closing modal leaves its own entry with `history.back()`,

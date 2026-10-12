@@ -70,7 +70,7 @@
   --mn-font-body-sc: "Inter", "PingFang SC", "Microsoft YaHei", ui-sans-serif, system-ui, sans-serif;
   --mn-font-display: var(--mn-font-display-sc);
   --mn-font-body: var(--mn-font-body-sc);
-  --mn-font-hand: var(--mn-font-body);
+  --mn-font-hand: var(--md-ref-typeface-plain);
   --mn-font-note: var(--md-ref-typeface-mono);
 }
 

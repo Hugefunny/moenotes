@@ -58,16 +58,16 @@ export default function ChartQuickSettings({ locale, player }: { locale: AppLoca
 
   if (!items.length) return null;
   return (
-    <div className="mn-paper flex flex-wrap items-end gap-x-6 gap-y-4 p-4" aria-busy={busy}>
-      <p className="w-full text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">{t(locale, "chartPreview3d.quick.title")}</p>
+    <div className="md3-surface flex flex-wrap items-end gap-x-6 gap-y-4 p-4" aria-busy={busy}>
+      <p className="w-full text-label-medium text-on-surface-variant">{t(locale, "chartPreview3d.quick.title")}</p>
       {items.map((item) => {
         const name = item.name as QuickOption;
         const value = draft[name] ?? item.value;
         const label = t(locale, `chartPreview3d.quick.options.${name}`);
         if (item.type === "bool") {
           return (
-            <label key={name} className="inline-flex cursor-pointer items-center gap-2 text-sm font-bold text-[var(--mn-text)]">
-              <input type="checkbox" className="h-4 w-4 accent-[var(--mn-accent)]" checked={value === true} onChange={(event) => apply(name, event.target.checked)} />
+            <label key={name} className="inline-flex cursor-pointer items-center gap-2 text-label-large text-on-surface">
+              <input type="checkbox" className="h-4 w-4 accent-primary" checked={value === true} onChange={(event) => apply(name, event.target.checked)} />
               {label}
             </label>
           );
@@ -77,8 +77,8 @@ export default function ChartQuickSettings({ locale, player }: { locale: AppLoca
         const number = typeof value === "number" ? value : Number(value) || min;
         const shown = item.type === "float" ? number.toFixed(2) : `${Math.round(number)}%`;
         return (
-          <label key={name} className="flex min-w-[12rem] flex-1 flex-col gap-1.5 text-xs font-bold text-[var(--mn-text-muted)]">
-            <span className="flex justify-between gap-3"><span>{label}</span><span className="font-mono text-[var(--mn-text)]">{shown}</span></span>
+          <label key={name} className="flex min-w-[12rem] flex-1 flex-col gap-1.5 text-label-medium text-on-surface-variant">
+            <span className="flex justify-between gap-3"><span>{label}</span><span className="font-mono text-on-surface">{shown}</span></span>
             <input
               type="range"
               min={min}
@@ -89,7 +89,7 @@ export default function ChartQuickSettings({ locale, player }: { locale: AppLoca
                 const next = Number(event.target.value);
                 apply(name, item.type === "float" ? Math.round(next * 100) / 100 : Math.round(next), APPLY_DELAY_MS);
               }}
-              className="w-full accent-[var(--mn-accent)]"
+              className="w-full accent-primary"
             />
           </label>
         );
@@ -101,7 +101,7 @@ export default function ChartQuickSettings({ locale, player }: { locale: AppLoca
           setBusy(true);
           void player.setSettings(defaults).catch(() => undefined).finally(() => setBusy(false));
         }}
-        className="mn-focus mn-stamp-press rounded-full border border-[var(--mn-border)] bg-[var(--mn-paper)] px-4 py-1.5 text-xs font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp-sm)]"
+        className="md3-state rounded-full border border-outline-variant bg-surface-container-low px-4 py-1.5 text-label-medium text-on-surface"
       >
         {t(locale, "chartPreview3d.quick.reset")}
       </button>

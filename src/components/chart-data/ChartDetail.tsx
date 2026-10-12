@@ -9,7 +9,7 @@ import { currentSnapRanking } from "@/lib/chart-data/snap-client";
 import { MISSIONS, ScenarioPanel } from "./SettingsPanel";
 import { Heading, Icon, Jacket, fmt, fmtInt, diffShort, SongLink, type ChartDataContext } from "./shared";
 
-const KIND_COLOR: Record<string, string> = { tap: "var(--mn-accent)", flick: "var(--mn-pink)", slide: "var(--mn-mint)", trace: "var(--mn-amber)", combo: "var(--mn-border)" };
+const KIND_COLOR: Record<string, string> = { tap: "var(--md-sys-color-primary)", flick: "var(--md-sys-color-category1)", slide: "var(--md-sys-color-success)", trace: "var(--md-sys-color-category3)", combo: "var(--md-sys-color-outline-variant)" };
 type Figured = ChartRow & { base: number; weights: number[] };
 
 function Tile({ label, value, sub, wide = false }: { label: string; value: string; sub?: string | null; wide?: boolean }) {

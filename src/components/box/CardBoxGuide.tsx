@@ -43,7 +43,7 @@ function ExampleArtwork({ example, locale }: { example: ExampleCard; locale: App
 }
 
 function ExampleSheet({ examples, locale, compact = false }: { examples: readonly ExampleCard[]; locale: AppLocale; compact?: boolean }) {
-  return <div className={`cgb-shot-sheet${compact ? " cgb-shot-compact" : ""}`}>
+  return <div className={`cgb-shot-sheet ${compact ? " cgb-shot-compact" : ""}`}>
     <div className="cgb-shot-heading"><GuideGlyph kind="capture" /><span>{t(locale, "deckWorkspace.guide.visual.gameList")}</span></div>
     <div className="cgb-shot-grid">{examples.map(example => <ExampleArtwork key={`${example.kind}:${example.card.id}`} example={example} locale={locale} />)}</div>
   </div>;
@@ -55,7 +55,7 @@ function GuideIllustration({ step, examples, member, locale }: { step: GuideStep
   const unknown = t(locale, "deckWorkspace.unknown");
   const example = examples[0];
   const rarity = example ? ({ 2: "R", 3: "SR", 4: "SSR", 10: "EX", 20: "BD" } as const)[example.card.rarity] : "";
-  return <figure className={`cgb-illustration cgb-illustration-${step}`}>
+  return <figure className={`cgb-illustration cgb-illustration- ${step}`}>
     <div className="cgb-stage">
       {step === "screenshots" && <ExampleSheet examples={examples.slice(0, 6)} locale={locale} />}
       {step === "import" && <div className="cgb-batch-picture">

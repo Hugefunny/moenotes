@@ -150,7 +150,7 @@ export default function StoryStage({ locale, manifest, language, title, simple, 
       role="region"
       data-state={status.kind}
       aria-label={t(locale, "storyPlayer.stageLabel")}
-      className={`overflow-hidden bg-black [container-type:inline-size] [-webkit-tap-highlight-color:transparent] ${fullscreen ? "" : "rounded-2xl border-[1.5px] border-[var(--mn-border)] shadow-[var(--mn-shadow-stamp)]"}`}
+      className={`overflow-hidden bg-black [container-type:inline-size] [-webkit-tap-highlight-color:transparent] ${fullscreen ? "" : "rounded-shape-lg border border-outline-variant shadow-elevation-1"}`}
     >
       {/* The story screen is 13:6 (the game's ADV viewport); the controls lie over its bottom and hide while it plays. */}
       <div
@@ -181,14 +181,14 @@ export default function StoryStage({ locale, manifest, language, title, simple, 
 
         {status.kind === "loading" && (
           <StageMessage>
-            {title && <p className="max-w-md font-[var(--mn-font-display)] text-base text-white sm:text-lg">{title}</p>}
+            {title && <p className="max-w-md font-[var(--md-ref-typeface-brand)] text-body-large text-white sm:text-title-large">{title}</p>}
             <SiriusLoader locale={locale} compact label={t(locale, "storyPlayer.loading")} />
             {status.total > 0 && (
               <>
                 <div className="mx-auto mt-3 h-1.5 w-48 overflow-hidden rounded-full bg-white/20">
-                  <div className="h-full rounded-full bg-[var(--mn-accent)] transition-[width]" style={{ width: `${Math.min(100, Math.round((status.loaded / status.total) * 100))}%` }} />
+                  <div className="h-full rounded-full bg-primary transition-[width]" style={{ width: `${Math.min(100, Math.round((status.loaded / status.total) * 100))}%` }} />
                 </div>
-                <p className="mt-2 font-mono text-[10px] text-white/60">{formatMegabytes(status.loaded)} / {formatMegabytes(status.total)}</p>
+                <p className="mt-2 font-mono text-label-small text-white/60">{formatMegabytes(status.loaded)} / {formatMegabytes(status.total)}</p>
               </>
             )}
           </StageMessage>
@@ -196,14 +196,14 @@ export default function StoryStage({ locale, manifest, language, title, simple, 
 
         {(status.kind === "error" || status.kind === "unsupported" || status.kind === "refused") && (
           <StageMessage>
-            <h3 className="font-[var(--mn-font-display)] text-lg text-white sm:text-xl">{t(locale, `storyPlayer.${status.kind}Title`)}</h3>
-            <p className="mx-auto mt-2 max-w-md text-xs font-medium leading-6 text-white/70 sm:text-sm">{t(locale, `storyPlayer.${status.kind}Description`)}</p>
-            {status.kind !== "unsupported" && <p className="mx-auto mt-2 max-w-md break-all font-mono text-[10px] text-white/50">{status.detail}</p>}
+            <h3 className="font-[var(--md-ref-typeface-brand)] text-title-large text-white sm:text-headline-small">{t(locale, `storyPlayer.${status.kind}Title`)}</h3>
+            <p className="mx-auto mt-2 max-w-md text-body-small leading-6 text-white/70 sm:text-body-medium">{t(locale, `storyPlayer.${status.kind}Description`)}</p>
+            {status.kind !== "unsupported" && <p className="mx-auto mt-2 max-w-md break-all font-mono text-label-small text-white/50">{status.detail}</p>}
             {status.kind === "error" && (
               <button
                 type="button"
                 onClick={() => setAttempt((value) => value + 1)}
-                className="mn-focus mn-stamp-press mt-4 rounded-full border-[1.5px] border-white/30 bg-white/10 px-5 py-2 text-sm font-bold text-white hover:bg-white/20"
+                className="md3-state mt-4 rounded-full border border-white/30 bg-white/10 px-5 py-2 text-label-large text-white hover:bg-white/20"
               >
                 {t(locale, "storyPlayer.retry")}
               </button>

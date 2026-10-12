@@ -67,7 +67,7 @@ export default function StoryPickerDialog({ locale, entries, open, onClose, curr
     <Modal isOpen={open} onClose={onClose} title={t(locale, "storyPlayer.chooseStory")} closeLabel={t(locale, "actions.close")} size="xl">
       <div className="space-y-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-center">
-          <div role="tablist" aria-label={t(locale, "storyPlayer.sections")} className="flex min-w-0 shrink-0 gap-1 overflow-x-auto rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-surface)] p-1 [scrollbar-width:none]">
+          <div role="tablist" aria-label={t(locale, "storyPlayer.sections")} className="flex min-w-0 shrink-0 gap-1 overflow-x-auto rounded-full border border-outline-variant bg-surface-container p-1 [scrollbar-width:none]">
             {STORY_SECTIONS.map((key) => (
               <button
                 key={key}
@@ -75,18 +75,16 @@ export default function StoryPickerDialog({ locale, entries, open, onClose, curr
                 role="tab"
                 aria-selected={section === key}
                 onClick={() => setSection(key)}
-                className={`mn-focus inline-flex flex-1 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1.5 text-xs font-black transition sm:px-4 sm:text-sm ${
-                  section === key ? "bg-[var(--mn-accent)] text-white shadow-[var(--mn-shadow-stamp-sm)]" : "text-[var(--mn-text-muted)] hover:text-[var(--mn-text)]"
-                }`}
+                className={`inline-flex flex-1 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1.5 text-label-medium transition sm:px-4 sm:text-label-large ${ section === key ? "bg-primary text-white " : "text-on-surface-variant hover:text-on-surface" }`}
               >
                 {t(locale, `story.categories.${key}`)}
-                <span className={`font-mono text-[10px] ${section === key ? "text-white/80" : "text-[var(--mn-text-muted)]"}`}>{counts[key]}</span>
+                <span className={`font-mono text-label-small ${section === key ? "text-white/80" : "text-on-surface-variant"}`}>{counts[key]}</span>
               </button>
             ))}
           </div>
           <label className="relative min-w-0 flex-1">
             <span className="sr-only">{t(locale, "filter.search")}</span>
-            <svg className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mn-text-muted)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+            <svg className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
               <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
             </svg>
             <input
@@ -94,7 +92,7 @@ export default function StoryPickerDialog({ locale, entries, open, onClose, curr
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder={t(locale, "storyPlayer.searchPlaceholder")}
-              className="w-full min-w-0 rounded-full border border-[var(--mn-border)] bg-[var(--mn-surface)] py-2 pl-11 pr-4 text-sm text-[var(--mn-text)] placeholder:text-[var(--mn-text-muted)] focus:border-[var(--mn-accent)] focus:bg-[var(--mn-paper)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_oklab,var(--mn-accent)_20%,transparent)]"
+              className="w-full min-w-0 rounded-full border border-outline-variant bg-surface-container py-2 pl-11 pr-4 text-body-medium text-on-surface placeholder:text-on-surface-variant focus:border-primary focus:bg-surface-container-low focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </label>
         </div>
@@ -116,13 +114,13 @@ export default function StoryPickerDialog({ locale, entries, open, onClose, curr
 
         <div ref={listRef} role="tabpanel" aria-label={t(locale, `story.categories.${section}`)} className="space-y-4">
           {groups.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-[var(--mn-border)] bg-[var(--mn-paper)] p-8 text-center">
-              <p className="text-sm font-bold text-[var(--mn-text-muted)]">{t(locale, "storyPlayer.noMatches")}</p>
+            <div className="rounded-shape-lg border border-dashed border-outline-variant bg-surface-container-low p-8 text-center">
+              <p className="text-label-large text-on-surface-variant">{t(locale, "storyPlayer.noMatches")}</p>
               {(query || others.length > 0) && (
                 <button
                   type="button"
                   onClick={() => { setQuery(""); setOthers([]); }}
-                  className="mn-focus mt-3 rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-4 py-1.5 text-xs font-bold text-[var(--mn-text)] hover:border-[var(--mn-accent)]"
+                  className="mt-3 rounded-full border border-outline-variant bg-surface-container-low px-4 py-1.5 text-label-medium text-on-surface hover:border-primary"
                 >
                   {t(locale, "filter.reset")}
                 </button>
@@ -176,19 +174,19 @@ function EpisodeGroup({ locale, group, currentId, onPick }: { locale: AppLocale;
   const imageUrl = getStoryPlayerArtworkUrl(group.image, locale, group.entries[0]!.assetServer);
 
   return (
-    <section className="overflow-hidden rounded-3xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp-sm)]">
-      <header className="flex items-center gap-3 border-b-[1.5px] border-[var(--mn-border)] px-4 py-3">
-        {imageUrl && <HidingImage src={imageUrl} className="aspect-[3/1] w-28 shrink-0 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-cream-deep)] object-cover sm:w-36" />}
+    <section className="overflow-hidden rounded-shape-lg border border-outline-variant bg-surface-container-low">
+      <header className="flex items-center gap-3 border-b-[1.5px] border-outline-variant px-4 py-3">
+        {imageUrl && <HidingImage src={imageUrl} className="aspect-[3/1] w-28 shrink-0 rounded-shape-md border border-outline-variant bg-surface-container-highest object-cover sm:w-36" />}
         <div className="min-w-0">
-          {group.subtitle && <p className="truncate text-[11px] font-black uppercase tracking-wider text-[var(--mn-accent)]">{group.subtitle}</p>}
-          <h3 className="line-clamp-2 text-sm font-black text-[var(--mn-text)] sm:text-base">{title}</h3>
+          {group.subtitle && <p className="truncate text-label-medium text-primary">{group.subtitle}</p>}
+          <h3 className="line-clamp-2 text-label-large text-on-surface sm:text-title-medium">{title}</h3>
         </div>
       </header>
-      <div className="space-y-3 bg-[var(--mn-surface)] p-3 sm:p-4">
+      <div className="space-y-3 bg-surface-container p-3 sm:p-4">
         {runs.map((run) => (
           <div key={run.kind}>
             {run.kind !== "main" && (
-              <h4 className="mb-2 text-[11px] font-black uppercase tracking-wider text-[var(--mn-text-muted)]">
+              <h4 className="mb-2 text-label-medium text-on-surface-variant">
                 {t(locale, run.kind === "another" ? "story.ui.anotherStories" : "story.ui.extraStories")}
               </h4>
             )}
@@ -218,19 +216,17 @@ function EpisodeOption({ locale, entry, current, onPick }: { locale: AppLocale; 
       onClick={onPick}
       data-adv-id={entry.advId}
       aria-current={current ? "true" : undefined}
-      className={`mn-focus group flex h-full w-full min-w-0 items-center gap-3 rounded-2xl border-[1.5px] bg-[var(--mn-paper)] p-2 text-left shadow-[var(--mn-shadow-stamp-sm)] transition hover:-translate-y-0.5 hover:shadow-[var(--mn-shadow-stamp)] ${
-        current ? "border-[var(--mn-accent)] ring-2 ring-[var(--mn-accent)]" : "border-[var(--mn-border)]"
-      } ${imageUrl ? "" : "px-3"}`}
+      className={`group flex h-full w-full min-w-0 items-center gap-3 rounded-shape-lg border bg-surface-container-low p-2 text-left transition hover:shadow-elevation-1 ${ current ? "border-primary ring-2 ring-primary" : "border-outline-variant" } ${imageUrl ? "" : "px-3"}`}
     >
-      {imageUrl && <HidingImage src={imageUrl} className="h-14 w-24 shrink-0 rounded-xl bg-[var(--mn-cream-deep)] object-cover" />}
+      {imageUrl && <HidingImage src={imageUrl} className="h-14 w-24 shrink-0 rounded-shape-md bg-surface-container-highest object-cover" />}
       <span className="min-w-0 flex-1">
         {(label || current) && (
-          <span className="flex min-w-0 items-center gap-1.5 text-[11px] font-black text-[var(--mn-accent)]">
-            {label && <span className="truncate">{label}{entry.episodeNote && <span className="ml-1.5 font-bold text-[var(--mn-text-muted)]">{entry.episodeNote}</span>}</span>}
-            {current && <span className="shrink-0 rounded-full bg-[var(--mn-accent)] px-1.5 py-px text-[9px] text-white">{t(locale, "storyPlayer.playing")}</span>}
+          <span className="flex min-w-0 items-center gap-1.5 text-label-small text-primary">
+            {label && <span className="truncate">{label}{entry.episodeNote && <span className="ml-1.5 font-bold text-on-surface-variant">{entry.episodeNote}</span>}</span>}
+            {current && <span className="shrink-0 rounded-full bg-primary px-1.5 py-px text-label-small text-white">{t(locale, "storyPlayer.playing")}</span>}
           </span>
         )}
-        <span className={`mt-0.5 line-clamp-2 text-sm font-black ${current ? "text-[var(--mn-accent-deep)]" : "text-[var(--mn-text)] group-hover:text-[var(--mn-accent-deep)]"}`}>
+        <span className={`mt-0.5 line-clamp-2 text-label-large ${current ? "text-primary" : "text-on-surface group-hover:text-primary"}`}>
           {entry.title || `ADV ${entry.advId}`}
         </span>
       </span>

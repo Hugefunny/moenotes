@@ -208,7 +208,7 @@ export default function Live2DViewer({ locale, characters, bands }: Props) {
       ) : (
         <StageEmpty locale={locale} list={list} onChoose={openFilterDrawer} onRetry={() => setListAttempt((value) => value + 1)} />
       )}
-      <p className="px-1 text-right text-[11px] font-semibold tracking-wide text-[var(--mn-text-muted)]">{t(locale, "live2d.credit")}</p>
+      <p className="px-1 text-right text-label-small text-on-surface-variant">{t(locale, "live2d.credit")}</p>
     </div>
   );
 }
@@ -265,11 +265,11 @@ function ModelView({ locale, entry, costumes, onCostume, onChooseCharacter }: {
   return (
     <>
       <Live2DStage locale={locale} manifestUrl={model.manifestUrl} onReady={setPlayer} />
-      <aside className="mn-paper space-y-4 p-4 @4xl:max-h-[80vh] @4xl:overflow-y-auto" aria-label={t(locale, "live2d.controls")}>
+      <aside className="md3-surface space-y-4 p-4 @4xl:max-h-[80vh] @4xl:overflow-y-auto" aria-label={t(locale, "live2d.controls")}>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h2 className="truncate font-[var(--mn-font-display)] text-lg font-bold capitalize text-[var(--mn-text)]">{entry.name}</h2>
-            <p className="mt-1 break-all font-mono text-[10px] text-[var(--mn-text-muted)]">
+            <h2 className="truncate font-[var(--md-ref-typeface-brand)] text-title-large capitalize text-on-surface">{entry.name}</h2>
+            <p className="mt-1 break-all font-mono text-label-small text-on-surface-variant">
               {model.id}{model.bytes > 0 ? ` · ${(model.bytes / (1024 * 1024)).toFixed(1)} MB` : ""}
             </p>
           </div>
@@ -287,7 +287,7 @@ function ModelView({ locale, entry, costumes, onCostume, onChooseCharacter }: {
                 onClick={() => onCostume(costume.model.id)}
                 className={pillClass(costume.model.id === model.id)}
               >
-                <span className="mr-1.5 text-[10px] font-black opacity-70">{t(locale, `live2d.kind.${costume.model.kind}`)}</span>
+                <span className="mr-1.5 text-label-small opacity-70">{t(locale, `live2d.kind.${costume.model.kind}`)}</span>
                 {costume.costume}
               </button>
             ))}
@@ -304,7 +304,7 @@ function ModelView({ locale, entry, costumes, onCostume, onChooseCharacter }: {
                     type="button"
                     title={motion}
                     onClick={() => act((source) => source.playMotion(motion, { loop }))}
-                    className={`${pillClass(motion === state.motion)} truncate text-left font-mono text-[11px]`}
+                    className={`${pillClass(motion === state.motion)} truncate text-left font-mono text-label-small`}
                   >
                     {motion.replace(/^mtn_/, "")}
                   </button>
@@ -315,7 +315,7 @@ function ModelView({ locale, entry, costumes, onCostume, onChooseCharacter }: {
 
             <ControlGroup title={t(locale, "live2d.expressions")}>
               {state.expressions.length === 0 ? (
-                <p className="text-xs text-[var(--mn-text-muted)]">{t(locale, "live2d.noExpressions")}</p>
+                <p className="text-body-small text-on-surface-variant">{t(locale, "live2d.noExpressions")}</p>
               ) : (
                 <div className="flex max-h-36 flex-wrap gap-1.5 overflow-y-auto pr-1">
                   {state.expressions.map((expression) => (
@@ -324,7 +324,7 @@ function ModelView({ locale, entry, costumes, onCostume, onChooseCharacter }: {
                       type="button"
                       title={expression}
                       onClick={() => act((source) => source.setExpression(expression))}
-                      className={`${pillClass(expression === state.expression)} font-mono text-[11px]`}
+                      className={`${pillClass(expression === state.expression)} font-mono text-label-small`}
                     >
                       {expression.replace(/^exp_/, "")}
                     </button>
@@ -354,7 +354,7 @@ function ModelView({ locale, entry, costumes, onCostume, onChooseCharacter }: {
             </ControlGroup>
           </>
         ) : (
-          <p className="text-xs font-semibold text-[var(--mn-text-muted)]">{t(locale, "live2d.controlsWaiting")}</p>
+          <p className="text-label-medium text-on-surface-variant">{t(locale, "live2d.controlsWaiting")}</p>
         )}
       </aside>
     </>
@@ -364,13 +364,13 @@ function ModelView({ locale, entry, costumes, onCostume, onChooseCharacter }: {
 /** What the viewer shows: the game's own data, nothing edited. */
 function DataNotice({ locale }: { locale: AppLocale }) {
   return (
-    <aside className="mb-2 flex gap-3 rounded-2xl border border-solid border-[var(--mn-border)] bg-[var(--mn-accent-soft)] p-4 text-xs font-semibold leading-relaxed text-[var(--mn-ink-soft)]" aria-label={t(locale, "live2d.noticeTitle")}>
-      <svg className="mt-0.5 h-4 w-4 shrink-0 text-[var(--mn-accent-deep)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <aside className="mb-2 flex gap-3 rounded-shape-lg border border-solid border-outline-variant bg-secondary-container p-4 text-label-medium text-on-surface-variant" aria-label={t(locale, "live2d.noticeTitle")}>
+      <svg className="mt-0.5 h-4 w-4 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <circle cx="12" cy="12" r="9" /><path d="M12 11v6M12 7h.01" />
       </svg>
       <p>
-        <strong className="text-[var(--mn-text)]">{t(locale, "live2d.noticeTitle")}</strong>
-        <span className="mx-1.5 text-[var(--mn-text-muted)]">·</span>
+        <strong className="text-on-surface">{t(locale, "live2d.noticeTitle")}</strong>
+        <span className="mx-1.5 text-on-surface-variant">·</span>
         {t(locale, "live2d.notice")}
       </p>
     </aside>
@@ -380,7 +380,7 @@ function DataNotice({ locale }: { locale: AppLocale }) {
 function ControlGroup({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="space-y-2">
-      <h3 className="text-xs font-black uppercase tracking-wider text-[var(--mn-text-muted)]">{title}</h3>
+      <h3 className="text-label-medium text-on-surface-variant">{title}</h3>
       {children}
     </section>
   );
@@ -388,8 +388,8 @@ function ControlGroup({ title, children }: { title: string; children: ReactNode 
 
 function Toggle({ label, checked, onChange, disabled = false }: { label: string; checked: boolean; onChange: (checked: boolean) => void; disabled?: boolean }) {
   return (
-    <label className={`flex items-center gap-2 text-sm font-semibold text-[var(--mn-text)] ${disabled ? "opacity-45" : "cursor-pointer"}`}>
-      <input type="checkbox" className="h-4 w-4 accent-[var(--mn-accent-deep)]" checked={checked} disabled={disabled} onChange={(event) => onChange(event.target.checked)} />
+    <label className={`flex items-center gap-2 text-label-large text-on-surface ${disabled ? "opacity-45" : "cursor-pointer"}`}>
+      <input type="checkbox" className="h-4 w-4 accent-primary" checked={checked} disabled={disabled} onChange={(event) => onChange(event.target.checked)} />
       {label}
     </label>
   );
@@ -398,25 +398,25 @@ function Toggle({ label, checked, onChange, disabled = false }: { label: string;
 function StageEmpty({ locale, list, onChoose, onRetry }: { locale: AppLocale; list: ListState; onChoose: () => void; onRetry: () => void }) {
   const empty = list.kind === "ready" && list.models.length === 0;
   return (
-    <div className="relative grid aspect-[3/4] max-h-[80vh] w-full place-items-center overflow-hidden rounded-2xl border-[1.5px] border-[var(--mn-border)] bg-[linear-gradient(180deg,var(--mn-cream-deep),var(--mn-paper))] px-6 text-center shadow-[var(--mn-shadow-stamp)] @lg:aspect-[16/9]">
+    <div className="relative grid aspect-[3/4] max-h-[80vh] w-full place-items-center overflow-hidden rounded-shape-lg border border-outline-variant bg-[linear-gradient(180deg,var(--md-sys-color-surface-container-highest),var(--md-sys-color-surface-container-low))] px-6 text-center shadow-elevation-1 @lg:aspect-[16/9]">
       <StageSignature />
       <div className="relative">
         {list.kind === "loading" && <SiriusLoader locale={locale} compact label={t(locale, "live2d.listLoading")} />}
         {list.kind === "error" && (
           <>
-            <p className="text-sm font-bold text-[var(--mn-rose)]">{t(locale, "live2d.listError")}</p>
+            <p className="text-label-large text-error">{t(locale, "live2d.listError")}</p>
             <button type="button" onClick={onRetry} className={`${pillClass(false)} mt-4`}>{t(locale, "live2d.retry")}</button>
           </>
         )}
-        {empty && <p className="text-sm font-bold text-[var(--mn-text-muted)]">{t(locale, "live2d.listEmpty")}</p>}
+        {empty && <p className="text-label-large text-on-surface-variant">{t(locale, "live2d.listEmpty")}</p>}
         {list.kind === "ready" && !empty && (
           <>
-            <h2 className="font-[var(--mn-font-display)] text-xl text-[var(--mn-text)] sm:text-2xl">{t(locale, "live2d.emptyTitle")}</h2>
-            <p className="mx-auto mt-2 max-w-md text-xs font-medium leading-6 text-[var(--mn-text-muted)] sm:text-sm">{t(locale, "live2d.emptyDescription")}</p>
+            <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-small">{t(locale, "live2d.emptyTitle")}</h2>
+            <p className="mx-auto mt-2 max-w-md text-body-small leading-6 text-on-surface-variant sm:text-body-medium">{t(locale, "live2d.emptyDescription")}</p>
             <button
               type="button"
               onClick={onChoose}
-              className="mn-focus mn-stamp-press mt-5 inline-flex items-center gap-2 rounded-full bg-[var(--mn-accent)] px-6 py-3 text-sm font-bold text-white shadow-[var(--mn-shadow-stamp)] hover:bg-[var(--mn-accent-deep)]"
+              className="md3-state mt-5 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-label-large text-white shadow-elevation-1 hover:bg-primary"
             >
               {t(locale, "live2d.chooseCharacter")}
             </button>
@@ -447,9 +447,9 @@ function costumeLabel(locale: AppLocale, model: Live2DModel): string {
 }
 
 function pillClass(active: boolean): string {
-  return `mn-focus inline-flex items-center rounded-full border-[1.5px] px-3 py-1.5 text-xs font-bold transition ${
+  return ` inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-bold transition ${
     active
-      ? "border-[var(--mn-accent)] bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]"
-      : "border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-text)] hover:border-[var(--mn-accent)] hover:text-[var(--mn-accent-deep)]"
+      ? "border-primary bg-secondary-container text-primary"
+      : "border-outline-variant bg-surface-container-low text-on-surface hover:border-primary hover:text-primary"
   }`;
 }

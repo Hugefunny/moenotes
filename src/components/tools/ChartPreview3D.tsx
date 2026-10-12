@@ -62,7 +62,7 @@ export default function ChartPreview3D({ locale, songs: allSongs }: Props) {
       ) : (
         <StageEmpty locale={locale} onChooseSong={openDialog} />
       )}
-      <p className="-mt-2 px-1 text-right text-[11px] font-semibold tracking-wide text-[var(--mn-text-muted)]">{t(locale, "chartPreview3d.credit")}</p>
+      <p className="-mt-2 px-1 text-right text-label-small text-on-surface-variant">{t(locale, "chartPreview3d.credit")}</p>
 
       <MusicSelectDialog
         locale={locale}
@@ -89,22 +89,22 @@ function ChartHeader({ locale, song, difficulty, onDifficulty, onChangeSong }: {
   const current = song.difficulties.find((entry) => entry.difficulty === difficulty);
   const title = useSongTitle()(song);
   return (
-    <div className="mn-paper flex flex-col gap-4 p-4 lg:flex-row lg:items-center lg:p-5">
+    <div className="md3-surface flex flex-col gap-4 p-4 lg:flex-row lg:items-center lg:p-5">
       <a
         href={localizePath(`${getRoutePathById("music")}/${song.id}`, locale)}
-        className="mn-focus group flex min-w-0 flex-1 items-center gap-3"
+        className="group flex min-w-0 flex-1 items-center gap-3"
         title={t(locale, "music.openDetail", { title })}
       >
         <img
-          className="h-16 w-16 shrink-0 rounded-xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-cream-deep)] object-cover"
+          className="h-16 w-16 shrink-0 rounded-shape-md border border-outline-variant bg-surface-container-highest object-cover"
           src={song.jacketUrl}
           alt=""
         />
         <span className="min-w-0">
-          <span className="block truncate font-[var(--mn-font-display)] text-lg font-bold text-[var(--mn-text)] transition-colors group-hover:text-[var(--mn-accent-deep)] sm:text-xl">
+          <span className="block truncate font-[var(--md-ref-typeface-brand)] text-title-large text-on-surface transition-colors group-hover:text-primary sm:text-headline-small">
             {title}
           </span>
-          <span className="mt-1 flex min-w-0 items-center gap-1.5 text-xs font-semibold text-[var(--mn-text-muted)]">
+          <span className="mt-1 flex min-w-0 items-center gap-1.5 text-label-medium text-on-surface-variant">
             <img className="h-4 w-auto shrink-0 object-contain" src={getBandSmallIconUrl(song.bandId)} alt="" aria-hidden="true" />
             <span className="truncate">{song.bandName}</span>
             {current && <span className="shrink-0">· {t(locale, "music.notesCount", { count: current.notesCount })}</span>}
@@ -125,12 +125,10 @@ function ChartHeader({ locale, song, difficulty, onDifficulty, onChangeSong }: {
                 aria-checked={checked}
                 disabled={!entry}
                 onClick={() => onDifficulty(key)}
-                className={`mn-focus min-w-14 rounded-xl border px-2 py-1.5 text-center transition disabled:cursor-not-allowed disabled:opacity-35 ${DIFFICULTY_CHIP_CLASSES[key]} ${
-                  checked ? "ring-2 ring-[var(--mn-accent)] ring-offset-1 ring-offset-[var(--mn-paper)]" : "opacity-70 hover:opacity-100"
-                }`}
+                className={`min-w-14 rounded-shape-md border px-2 py-1.5 text-center transition disabled:cursor-not-allowed disabled:opacity-35 ${DIFFICULTY_CHIP_CLASSES[key]} ${ checked ? "ring-2 ring-primary ring-offset-1 ring-offset-surface-container-low" : "opacity-70 hover:opacity-100" }`}
               >
-                <span className="block text-[9px] font-black uppercase leading-none tracking-wider">{t(locale, `music.difficultyLevels.${key}`)}</span>
-                <span className="mt-1 block font-mono text-base font-black leading-none">{entry ? entry.displayLevel : "-"}</span>
+                <span className="block text-label-medium">{t(locale, `music.difficultyLevels.${key}`)}</span>
+                <span className="mt-1 block font-mono text-title-medium">{entry ? entry.displayLevel : "-"}</span>
               </button>
             );
           })}
@@ -138,7 +136,7 @@ function ChartHeader({ locale, song, difficulty, onDifficulty, onChangeSong }: {
         <button
           type="button"
           onClick={onChangeSong}
-          className="mn-focus mn-stamp-press inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-4 py-2.5 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)] transition hover:border-[var(--mn-accent)] hover:text-[var(--mn-accent-deep)]"
+          className="md3-state inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full border border-outline-variant bg-surface-container-low px-4 py-2.5 text-label-large text-on-surface shadow-elevation-1 transition hover:border-primary hover:text-primary"
         >
           <MusicGlyph className="h-4 w-4" />
           {t(locale, "chartPreview3d.changeSong")}
@@ -150,16 +148,16 @@ function ChartHeader({ locale, song, difficulty, onDifficulty, onChangeSong }: {
 
 function StageEmpty({ locale, onChooseSong }: { locale: AppLocale; onChooseSong: () => void }) {
   return (
-    <div className="relative grid aspect-video place-items-center overflow-hidden rounded-2xl border-[1.5px] border-[var(--mn-border)] bg-black px-6 text-center shadow-[var(--mn-shadow-stamp)]">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,color-mix(in_oklab,var(--mn-accent)_35%,transparent),transparent_65%)]" aria-hidden="true" />
+    <div className="relative grid aspect-video place-items-center overflow-hidden rounded-shape-lg border border-outline-variant bg-black px-6 text-center shadow-elevation-1">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,color-mix(in_oklab,var(--md-sys-color-primary)_35%,transparent),transparent_65%)]" aria-hidden="true" />
       <StageSignature />
       <div className="relative">
-        <h2 className="font-[var(--mn-font-display)] text-xl text-white sm:text-2xl">{t(locale, "chartPreview3d.emptyTitle")}</h2>
-        <p className="mx-auto mt-2 max-w-md text-xs font-medium leading-6 text-white/70 sm:text-sm">{t(locale, "chartPreview3d.emptyDescription")}</p>
+        <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-white sm:text-headline-small">{t(locale, "chartPreview3d.emptyTitle")}</h2>
+        <p className="mx-auto mt-2 max-w-md text-body-small leading-6 text-white/70 sm:text-body-medium">{t(locale, "chartPreview3d.emptyDescription")}</p>
         <button
           type="button"
           onClick={onChooseSong}
-          className="mn-focus mn-stamp-press mt-5 inline-flex items-center gap-2 rounded-full bg-[var(--mn-accent)] px-6 py-3 text-sm font-bold text-white shadow-[var(--mn-shadow-stamp)] hover:bg-[var(--mn-accent-deep)]"
+          className="md3-state mt-5 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-label-large text-white shadow-elevation-1 hover:bg-primary"
         >
           <MusicGlyph className="h-4 w-4" />
           {t(locale, "chartPreview3d.chooseSong")}

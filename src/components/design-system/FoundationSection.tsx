@@ -48,8 +48,8 @@ interface SampleRow {
 
 function Demo({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="space-y-3 border-b border-[var(--mn-border)] pb-8 last:border-0 last:pb-0">
-      <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">{title}</h3>
+    <div className="space-y-3 border-b border-outline-variant pb-8 last:border-0 last:pb-0">
+      <h3 className="text-label-medium text-on-surface-variant">{title}</h3>
       {children}
     </div>
   );
@@ -136,16 +136,16 @@ export default function FoundationSection({ locale }: { locale: AppLocale }) {
 
   return (
     <div className="space-y-8">
-      <p className="text-sm text-[var(--mn-text-muted)]">{f("hint")}</p>
+      <p className="text-body-medium text-on-surface-variant">{f("hint")}</p>
       <Demo title={f("collectionView")}>
         <CollectionViewSwitch locale={locale} views={["grid", "list", "table"] as const} value={view} onChange={setView} />
         {view === "table" ? (
-          <DataTable locale={locale} columns={columns} rows={sorted} rowKey={(row) => row.id} caption={f("dataTable")} empty={<p className="text-sm text-[var(--mn-text-muted)]">{f("sampleEmpty")}</p>} />
+          <DataTable locale={locale} columns={columns} rows={sorted} rowKey={(row) => row.id} caption={f("dataTable")} empty={<p className="text-body-medium text-on-surface-variant">{f("sampleEmpty")}</p>} />
         ) : (
           <div className={view === "grid" ? "grid grid-cols-2 gap-3 sm:grid-cols-3" : "space-y-2"}>
             {sorted.map((row) => (
-              <div key={row.id} className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-paper)] px-4 py-3 shadow-[var(--mn-shadow-stamp-sm)]">
-                <span className="text-sm font-bold text-[var(--mn-text)]">{row.name}</span>
+              <div key={row.id} className="flex items-center justify-between gap-3 rounded-shape-lg border border-outline-variant bg-surface-container-low px-4 py-3">
+                <span className="text-label-large text-on-surface">{row.name}</span>
                 <ScheduleCountdown locale={locale} startAt={row.startAt} endAt={row.endAt} now={now} />
               </div>
             ))}
@@ -158,7 +158,7 @@ export default function FoundationSection({ locale }: { locale: AppLocale }) {
           <SortControl {...sort} />
           <DateRangeFilter title={t(locale, "filter.dateRange")} value={range} onChange={setRange} fromLabel={t(locale, "filter.dateFrom")} toLabel={t(locale, "filter.dateTo")} clearLabel={t(locale, "filter.dateClear")} />
         </div>
-        <p className="text-xs font-semibold text-[var(--mn-text-muted)]">{f("sampleCount", { count: inRange.length, total: rows.length })}</p>
+        <p className="text-label-medium text-on-surface-variant">{f("sampleCount", { count: inRange.length, total: rows.length })}</p>
         <DataTable
           locale={locale}
           columns={columns}
@@ -166,7 +166,7 @@ export default function FoundationSection({ locale }: { locale: AppLocale }) {
           rowKey={(row) => row.id}
           rowHref={(row) => entityLinkPath({ routeId: "cards", detailId: row.id })}
           maxHeight="18rem"
-          empty={<p className="rounded-2xl border border-dashed border-[var(--mn-border)] p-6 text-center text-sm text-[var(--mn-text-muted)]">{f("sampleEmpty")}</p>}
+          empty={<p className="rounded-shape-lg border border-dashed border-outline-variant p-6 text-center text-body-medium text-on-surface-variant">{f("sampleEmpty")}</p>}
         />
       </Demo>
 
@@ -175,7 +175,7 @@ export default function FoundationSection({ locale }: { locale: AppLocale }) {
           <CharacterAvatarStack locale={locale} characters={[1, 2, 3, 4, 5, 6, 7, 8].map((id) => ({ id, name: f("sampleItem", { n: id }) }))} max={5} />
           <CharacterAvatarStack locale={locale} characters={[11, 12, 13].map((id) => ({ id, name: f("sampleItem", { n: id }) }))} size="sm" showNames />
         </div>
-        <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-[var(--mn-text-muted)]">
+        <div className="flex flex-wrap items-center gap-3 text-label-medium text-on-surface-variant">
           <span>{f("someServers")}</span>
           <ServerAvailabilityBadge locale={locale} entity={{ servers: ["jp"] }} servers={buildServers} />
           <ServerAvailabilityBadge locale={locale} entity={{ servers: ["jp", "tw"] }} servers={buildServers} showLabel />
@@ -187,8 +187,8 @@ export default function FoundationSection({ locale }: { locale: AppLocale }) {
       <Demo title={f("lightbox")}>
         <div className="flex flex-wrap gap-3">
           {images.map((image, index) => (
-            <button key={image.src} type="button" onClick={() => { setLightboxIndex(index); setLightboxOpen(true); }} className="mn-focus overflow-hidden rounded-xl border border-[var(--mn-border)] shadow-[var(--mn-shadow-stamp-sm)]" aria-label={`${f("openLightbox")}: ${image.alt}`}>
-              <img src={image.src} alt="" loading="lazy" className="h-24 w-24 bg-[var(--mn-cream-deep)] object-cover" />
+            <button key={image.src} type="button" onClick={() => { setLightboxIndex(index); setLightboxOpen(true); }} className="overflow-hidden rounded-shape-md border border-outline-variant" aria-label={`${f("openLightbox")}: ${image.alt}`}>
+              <img src={image.src} alt="" loading="lazy" className="h-24 w-24 bg-surface-container-highest object-cover" />
             </button>
           ))}
         </div>
@@ -221,13 +221,13 @@ export default function FoundationSection({ locale }: { locale: AppLocale }) {
       <Demo title={f("detailOverlay")}>
         <div className="flex flex-wrap gap-2">
           {rows.slice(0, 3).map((row) => (
-            <button key={row.id} type="button" onClick={() => overlay.open(row.id)} aria-haspopup="dialog" className="mn-focus mn-stamp-press rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-4 py-2 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp-sm)]">
+            <button key={row.id} type="button" onClick={() => overlay.open(row.id)} aria-haspopup="dialog" className="md3-state rounded-full border border-outline-variant bg-surface-container-low px-4 py-2 text-label-large text-on-surface">
               {f("openOverlay")}: {row.name}
             </button>
           ))}
         </div>
         <DetailOverlay locale={locale} open={overlayRow !== null} onClose={overlay.close} title={overlayRow?.name}>
-          <p className="text-sm leading-7 text-[var(--mn-text-muted)]">{f("overlayBody")}</p>
+          <p className="text-body-medium leading-7 text-on-surface-variant">{f("overlayBody")}</p>
           {overlayRow ? <ScheduleCountdown locale={locale} startAt={overlayRow.startAt} endAt={overlayRow.endAt} now={now} showPermanent /> : null}
         </DetailOverlay>
       </Demo>

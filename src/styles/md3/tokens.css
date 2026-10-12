@@ -12,8 +12,8 @@
   --md-sys-shape-corner-full: 9999px;
 
   /* ── Type ── */
-  --md-ref-typeface-brand: var(--mn-font-display);
-  --md-ref-typeface-plain: var(--mn-font-body);
+  --md-ref-typeface-brand: var(--md-ref-typeface-brand);
+  --md-ref-typeface-plain: var(--md-ref-typeface-plain);
   --md-ref-typeface-mono: "SFMono-Regular", "Cascadia Mono", Consolas, monospace;
   --md-sys-typescale-display-large-size: 57px;   --md-sys-typescale-display-large-line-height: 64px;   --md-sys-typescale-display-large-tracking: -0.25px;
   --md-sys-typescale-display-medium-size: 45px;  --md-sys-typescale-display-medium-line-height: 52px;  --md-sys-typescale-display-medium-tracking: 0px;

@@ -46,18 +46,18 @@ export default function MusicRankingTool({ locale, songs: allSongs, deckCards }:
     <div className="space-y-5">
       {song ? (
         <>
-          <div className="mn-paper flex flex-col gap-4 p-4 sm:flex-row sm:items-center lg:p-5">
+          <div className="md3-surface flex flex-col gap-4 p-4 sm:flex-row sm:items-center lg:p-5">
             <a
               href={localizePath(`${getRoutePathById("music")}/${song.id}`, locale)}
-              className="mn-focus group flex min-w-0 flex-1 items-center gap-3"
+              className="group flex min-w-0 flex-1 items-center gap-3"
               title={t(locale, "music.openDetail", { title: song.title })}
             >
-              <img className="h-16 w-16 shrink-0 rounded-xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-cream-deep)] object-cover" src={song.jacketUrl} alt="" />
+              <img className="h-16 w-16 shrink-0 rounded-shape-md border border-outline-variant bg-surface-container-highest object-cover" src={song.jacketUrl} alt="" />
               <span className="min-w-0">
-                <span className="block truncate font-[var(--mn-font-display)] text-lg font-bold text-[var(--mn-text)] transition-colors group-hover:text-[var(--mn-accent-deep)] sm:text-xl">
+                <span className="block truncate font-[var(--md-ref-typeface-brand)] text-title-large text-on-surface transition-colors group-hover:text-primary sm:text-headline-small">
                   {song.title}
                 </span>
-                <span className="mt-1 flex min-w-0 items-center gap-1.5 text-xs font-semibold text-[var(--mn-text-muted)]">
+                <span className="mt-1 flex min-w-0 items-center gap-1.5 text-label-medium text-on-surface-variant">
                   <img className="h-4 w-auto shrink-0 object-contain" src={getBandSmallIconUrl(song.bandId)} alt="" aria-hidden="true" />
                   <span className="truncate">{song.bandName}</span>
                 </span>
@@ -68,9 +68,9 @@ export default function MusicRankingTool({ locale, songs: allSongs, deckCards }:
           <MusicRanking key={song.id} locale={locale} musicId={song.id} cards={deckCards} />
         </>
       ) : (
-        <div className="mn-paper p-8 text-center sm:p-12">
-          <h2 className="font-[var(--mn-font-display)] text-2xl text-[var(--mn-text)]">{t(locale, "musicRanking.emptyTitle")}</h2>
-          <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-7 text-[var(--mn-text-muted)]">{t(locale, "musicRanking.emptyDescription")}</p>
+        <div className="md3-surface p-8 text-center sm:p-12">
+          <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "musicRanking.emptyTitle")}</h2>
+          <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "musicRanking.emptyDescription")}</p>
           <div className="mt-6 flex justify-center">
             <ChangeSongButton onClick={openDialog} label={t(locale, "musicRanking.chooseSong")} />
           </div>
@@ -96,7 +96,7 @@ function ChangeSongButton({ onClick, label }: { onClick: () => void; label: stri
     <button
       type="button"
       onClick={onClick}
-      className="mn-focus mn-stamp-press inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-4 py-2.5 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)] transition hover:border-[var(--mn-accent)] hover:text-[var(--mn-accent-deep)]"
+      className="md3-state inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full border border-outline-variant bg-surface-container-low px-4 py-2.5 text-label-large text-on-surface shadow-elevation-1 transition hover:border-primary hover:text-primary"
     >
       <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M9 18V6l10-2v12" /><circle cx="6" cy="18" r="3" /><circle cx="16" cy="16" r="3" />

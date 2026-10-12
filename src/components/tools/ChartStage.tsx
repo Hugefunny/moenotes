@@ -44,7 +44,7 @@ interface ViewerState {
 }
 
 const FRAME_CLASSES: Record<FullscreenMode, string> = {
-  off: "overflow-hidden rounded-2xl border-[1.5px] border-[var(--mn-border)] bg-black shadow-[var(--mn-shadow-stamp)]",
+  off: "overflow-hidden rounded-shape-lg border border-outline-variant bg-black shadow-elevation-1",
   native: "flex items-center justify-center bg-black",
   page: "fixed inset-0 z-[1000] m-0 flex items-center justify-center bg-black",
 };
@@ -266,7 +266,7 @@ export default function ChartStage({ locale, manifestUrl, onPlayer }: ChartStage
                 type="button"
                 onClick={() => setLocked(false)}
                 onFocus={revealUnlock}
-                className={`mn-focus absolute bottom-3 right-3 z-30 inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3.5 py-2 text-xs font-bold text-white backdrop-blur-sm transition-opacity duration-300 hover:opacity-100 ${unlockShown ? "opacity-100" : "opacity-40"}`}
+                className={`absolute bottom-3 right-3 z-30 inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3.5 py-2 text-label-medium text-white backdrop-blur-sm transition-opacity duration-300 hover:opacity-100 ${unlockShown ? "opacity-100" : "opacity-40"}`}
               >
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <rect x="4" y="11" width="16" height="10" rx="2" />
@@ -289,9 +289,9 @@ export default function ChartStage({ locale, manifestUrl, onPlayer }: ChartStage
               {status.total > 0 && (
                 <>
                   <div className="mt-3 h-1.5 w-48 overflow-hidden rounded-full bg-white/20">
-                    <div className="h-full rounded-full bg-[var(--mn-accent)] transition-[width]" style={{ width: `${Math.min(100, Math.round((status.loaded / status.total) * 100))}%` }} />
+                    <div className="h-full rounded-full bg-primary transition-[width]" style={{ width: `${Math.min(100, Math.round((status.loaded / status.total) * 100))}%` }} />
                   </div>
-                  <p className="mt-2 font-mono text-[10px] text-white/60">{formatBytes(status.loaded)} / {formatBytes(status.total)}</p>
+                  <p className="mt-2 font-mono text-label-small text-white/60">{formatBytes(status.loaded)} / {formatBytes(status.total)}</p>
                 </>
               )}
             </StageMessage>
@@ -299,21 +299,21 @@ export default function ChartStage({ locale, manifestUrl, onPlayer }: ChartStage
 
           {(status.kind === "error" || status.kind === "unsupported") && (
             <StageMessage dim>
-              <h3 className="font-[var(--mn-font-display)] text-lg text-white sm:text-xl">
+              <h3 className="font-[var(--md-ref-typeface-brand)] text-title-large text-white sm:text-headline-small">
                 {t(locale, status.kind === "unsupported" ? "chartPreview3d.unsupportedTitle" : "chartPreview3d.loadErrorTitle")}
               </h3>
-              <p className="mt-2 max-w-md text-xs font-medium leading-6 text-white/75 sm:text-sm">
+              <p className="mt-2 max-w-md text-body-small leading-6 text-white/75 sm:text-body-medium">
                 {t(locale, status.kind === "unsupported"
                   ? "chartPreview3d.unsupportedDescription"
                   : status.missing ? "chartPreview3d.missingDescription" : "chartPreview3d.loadErrorDescription")}
               </p>
               {status.kind === "error" && (
                 <>
-                  <p className="mt-2 max-w-md break-all font-mono text-[10px] text-white/45">{status.detail}</p>
+                  <p className="mt-2 max-w-md break-all font-mono text-label-small text-white/45">{status.detail}</p>
                   <button
                     type="button"
                     onClick={() => setAttempt((value) => value + 1)}
-                    className="mn-focus mn-stamp-press mt-4 rounded-full border border-white/30 bg-white/10 px-5 py-2 text-sm font-bold text-white hover:bg-white/20"
+                    className="md3-state mt-4 rounded-full border border-white/30 bg-white/10 px-5 py-2 text-label-large text-white hover:bg-white/20"
                   >
                     {t(locale, "chartPreview3d.retry")}
                   </button>

@@ -271,13 +271,13 @@ export default function StoryControls({ locale, player, surface, simple, fullscr
             togglePlay();
             refocus(event);
           }}
-          className="mn-focus group absolute inset-0 z-10 grid place-items-center bg-black/30"
+          className="group absolute inset-0 z-10 grid place-items-center bg-black/30"
         >
           <span className="flex flex-col items-center gap-3">
-            <span className="grid h-14 w-14 place-items-center rounded-full bg-[var(--mn-accent)] text-white shadow-[0_6px_24px_rgba(0,0,0,0.45)] transition group-hover:scale-105 @2xl:h-16 @2xl:w-16">
+            <span className="grid h-14 w-14 place-items-center rounded-full bg-primary text-white shadow-[0_6px_24px_rgba(0,0,0,0.45)] transition group-hover:scale-105 @2xl:h-16 @2xl:w-16">
               <PlayIcon className="h-7 w-7 translate-x-0.5" />
             </span>
-            <span className="rounded-full bg-black/55 px-3 py-1 text-xs font-bold text-white">{label("start")}</span>
+            <span className="rounded-full bg-black/55 px-3 py-1 text-label-medium text-white">{label("start")}</span>
           </span>
         </button>
       )}
@@ -285,14 +285,14 @@ export default function StoryControls({ locale, player, surface, simple, fullscr
       {state.ended && (
         <div className="absolute inset-0 z-10 grid place-items-center bg-black/60 px-6 text-center">
           <div className="min-w-0">
-            <p className="font-[var(--mn-font-display)] text-base text-white @2xl:text-xl">{label("ended")}</p>
+            <p className="font-[var(--md-ref-typeface-brand)] text-body-large text-white @2xl:text-headline-small">{label("ended")}</p>
             <div className="mt-3 flex flex-wrap justify-center gap-2 @2xl:mt-4">
               <button type="button" onClick={() => seekLine(0)} className={`${GLASS_PILL} bg-white/12 hover:bg-white/22`}>
                 <ReplayIcon className="h-4 w-4" />
                 {label("replay")}
               </button>
               {nextEpisode && (
-                <button type="button" onClick={onNextEpisode} className={`${GLASS_PILL} max-w-full bg-[var(--mn-accent)] hover:bg-[var(--mn-accent-deep)]`}>
+                <button type="button" onClick={onNextEpisode} className={`${GLASS_PILL} max-w-full bg-primary hover:bg-primary`}>
                   <NextLineIcon className="h-4 w-4 shrink-0" />
                   <span className="shrink-0">{label("nextEpisode")}</span>
                   <span className="min-w-0 truncate font-semibold opacity-80">{nextEpisode}</span>
@@ -305,10 +305,10 @@ export default function StoryControls({ locale, player, surface, simple, fullscr
 
       {panel === "skip" && (
         <div className="absolute inset-0 z-30 grid place-items-center bg-black/45 px-4" role="alertdialog" aria-label={label("skipConfirm")}>
-          <div className="rounded-2xl border border-white/15 bg-black/80 p-4 text-center text-white shadow-xl backdrop-blur-md">
-            <p className="text-sm font-bold">{label("skipConfirm")}</p>
+          <div className="rounded-shape-lg border border-white/15 bg-black/80 p-4 text-center text-white shadow-xl backdrop-blur-md">
+            <p className="text-label-large">{label("skipConfirm")}</p>
             <div className="mt-3 flex justify-center gap-2">
-              <button type="button" onClick={confirmSkip} autoFocus className={`${GLASS_PILL} bg-[var(--mn-accent)] hover:bg-[var(--mn-accent-deep)]`}>
+              <button type="button" onClick={confirmSkip} autoFocus className={`${GLASS_PILL} bg-primary hover:bg-primary`}>
                 <SkipIcon className="h-4 w-4" />
                 {label("skip")}
               </button>
@@ -340,7 +340,7 @@ export default function StoryControls({ locale, player, surface, simple, fullscr
           onClick={wake}
           aria-label={label("show")}
           title={label("show")}
-          className="mn-focus absolute right-2 top-2 z-20 grid h-9 w-9 place-items-center rounded-full bg-black/40 text-white/80 backdrop-blur-sm [@media(hover:hover)]:hidden"
+          className="absolute right-2 top-2 z-20 grid h-9 w-9 place-items-center rounded-full bg-black/40 text-white/80 backdrop-blur-sm [@media(hover:hover)]:hidden"
         >
           <ControlsIcon className="h-4 w-4" />
         </button>
@@ -380,7 +380,7 @@ export default function StoryControls({ locale, player, surface, simple, fullscr
             {video && (
               <div className="flex min-w-0 flex-1 items-center gap-2">
                 <VolumeCategoryIcon category="Movie" className="h-4 w-4 shrink-0 text-white/70" />
-                <span className="shrink-0 font-mono text-[10px] tabular-nums text-white/70">{formatTime(videoValue)} / {formatTime(video.duration)}</span>
+                <span className="shrink-0 font-mono text-label-small tabular-nums text-white/70">{formatTime(videoValue)} / {formatTime(video.duration)}</span>
                 <input
                   type="range"
                   min={0}
@@ -414,7 +414,7 @@ export default function StoryControls({ locale, player, surface, simple, fullscr
                 </BarButton>
                 <BarButton label={`${label("fastForward")} ${storySpeedLabel(state.speed)}`} pressed={state.speed !== 10} disabled={!state.live} onClick={(event) => { fastForward(); refocus(event); }}>
                   <FastForwardIcon />
-                  {state.speed !== 10 && <span className="font-mono text-[11px] font-bold tabular-nums">{storySpeedLabel(state.speed)}</span>}
+                  {state.speed !== 10 && <span className="font-mono text-label-small tabular-nums">{storySpeedLabel(state.speed)}</span>}
                 </BarButton>
               </>
             )}
@@ -422,7 +422,7 @@ export default function StoryControls({ locale, player, surface, simple, fullscr
               <SkipIcon />
             </BarButton>
             {state.lineCount > 0 && (
-              <span className="ml-1.5 hidden font-mono text-[11px] tabular-nums text-white/70 @md:inline">{lineValue + 1} / {state.lineCount}</span>
+              <span className="ml-1.5 hidden font-mono text-label-small tabular-nums text-white/70 @md:inline">{lineValue + 1} / {state.lineCount}</span>
             )}
             <span className="flex-1" />
             <BarButton label={label("settings")} pressed={panel === "settings"} onClick={() => changePanel(panel === "settings" ? "none" : "settings")}>
@@ -455,16 +455,16 @@ function SettingsPanel({ locale, simple, volumes, speed, onVolume, onSpeed, onCl
     <div
       role="dialog"
       aria-label={title}
-      className="absolute inset-0 z-30 overflow-y-auto overscroll-contain bg-black/85 p-3 text-white backdrop-blur-md @2xl:inset-auto @2xl:bottom-[4.75rem] @2xl:right-3 @2xl:max-h-[calc(100%-6rem)] @2xl:w-80 @2xl:rounded-2xl @2xl:border @2xl:border-white/15 @2xl:shadow-xl"
+      className="absolute inset-0 z-30 overflow-y-auto overscroll-contain bg-black/85 p-3 text-white backdrop-blur-md @2xl:inset-auto @2xl:bottom-[4.75rem] @2xl:right-3 @2xl:max-h-[calc(100%-6rem)] @2xl:w-80 @2xl:rounded-shape-lg @2xl:border @2xl:border-white/15 @2xl:shadow-xl"
     >
       <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-black">{title}</p>
-        <button type="button" onClick={onClose} aria-label={t(locale, "actions.close")} title={t(locale, "actions.close")} className="mn-focus grid h-7 w-7 place-items-center rounded-full text-white/75 hover:bg-white/15 hover:text-white">
+        <p className="text-label-large">{title}</p>
+        <button type="button" onClick={onClose} aria-label={t(locale, "actions.close")} title={t(locale, "actions.close")} className="grid h-7 w-7 place-items-center rounded-full text-white/75 hover:bg-white/15 hover:text-white">
           <CloseIcon className="h-4 w-4" />
         </button>
       </div>
 
-      <p className="mt-2 text-[10px] font-black uppercase tracking-wider text-white/55">{t(locale, "storyPlayer.volume.title")}</p>
+      <p className="mt-2 text-label-medium text-white/55">{t(locale, "storyPlayer.volume.title")}</p>
       <div className="mt-1.5 space-y-1.5">
         {STORY_VOLUME_CATEGORIES.map((category) => {
           const volume = volumes[category];
@@ -478,12 +478,12 @@ function SettingsPanel({ locale, simple, volumes, speed, onVolume, onSpeed, onCl
                 aria-pressed={volume.muted}
                 aria-label={toggle}
                 title={toggle}
-                className={`mn-focus grid h-8 w-8 shrink-0 place-items-center rounded-full transition ${volume.muted ? "bg-white/10 text-white/45" : "text-white/85 hover:bg-white/15"}`}
+                className={`grid h-8 w-8 shrink-0 place-items-center rounded-full transition ${volume.muted ? "bg-white/10 text-white/45" : "text-white/85 hover:bg-white/15"}`}
               >
                 {volume.muted ? <SpeakerIcon muted className="h-4 w-4" /> : <VolumeCategoryIcon category={category} className="h-4 w-4" />}
               </button>
               <label className="flex min-w-0 flex-1 items-center gap-2">
-                <span className="w-12 shrink-0 truncate text-xs font-bold">{name}</span>
+                <span className="w-12 shrink-0 truncate text-label-medium">{name}</span>
                 <input
                   type="range"
                   min={0}
@@ -494,7 +494,7 @@ function SettingsPanel({ locale, simple, volumes, speed, onVolume, onSpeed, onCl
                   className={RANGE}
                 />
               </label>
-              <span className="w-9 shrink-0 text-right font-mono text-[10px] tabular-nums text-white/60">{storyVolumeLevel(volume) === 0 ? 0 : Math.round(volume.level * 100)}%</span>
+              <span className="w-9 shrink-0 text-right font-mono text-label-small tabular-nums text-white/60">{storyVolumeLevel(volume) === 0 ? 0 : Math.round(volume.level * 100)}%</span>
             </div>
           );
         })}
@@ -502,7 +502,7 @@ function SettingsPanel({ locale, simple, volumes, speed, onVolume, onSpeed, onCl
 
       {!simple && (
         <>
-          <p className="mt-3 text-[10px] font-black uppercase tracking-wider text-white/55">{t(locale, "storyPlayer.controls.speed")}</p>
+          <p className="mt-3 text-label-medium text-white/55">{t(locale, "storyPlayer.controls.speed")}</p>
           <div role="radiogroup" aria-label={t(locale, "storyPlayer.controls.speed")} className="mt-1.5 grid grid-cols-4 gap-1.5">
             {STORY_SPEEDS.map((value) => (
               <button
@@ -511,13 +511,13 @@ function SettingsPanel({ locale, simple, volumes, speed, onVolume, onSpeed, onCl
                 role="radio"
                 aria-checked={speed === value}
                 onClick={() => onSpeed(value)}
-                className={`mn-focus rounded-full py-1.5 font-mono text-xs font-bold transition ${speed === value ? "bg-[var(--mn-accent)] text-white" : "bg-white/10 text-white/80 hover:bg-white/20"}`}
+                className={`rounded-full py-1.5 font-mono text-label-medium transition ${speed === value ? "bg-primary text-white" : "bg-white/10 text-white/80 hover:bg-white/20"}`}
               >
                 {storySpeedLabel(value)}
               </button>
             ))}
           </div>
-          <p className="mt-1.5 text-[10px] leading-4 text-white/50">{t(locale, "storyPlayer.controls.speedHint")}</p>
+          <p className="mt-1.5 text-label-small leading-4 text-white/50">{t(locale, "storyPlayer.controls.speedHint")}</p>
         </>
       )}
     </div>
@@ -540,17 +540,15 @@ function BarButton({ label, pressed, disabled = false, onClick, children }: {
       aria-pressed={pressed}
       disabled={disabled}
       onClick={onClick}
-      className={`mn-focus inline-flex h-8 min-w-8 shrink-0 items-center justify-center gap-1 rounded-full px-1.5 transition disabled:cursor-default disabled:opacity-35 @2xl:h-9 @2xl:min-w-9 ${
-        pressed ? "bg-[var(--mn-accent)] text-white" : "text-white/85 enabled:hover:bg-white/15 enabled:hover:text-white"
-      }`}
+      className={`inline-flex h-8 min-w-8 shrink-0 items-center justify-center gap-1 rounded-full px-1.5 transition disabled:cursor-default disabled:opacity-35 @2xl:h-9 @2xl:min-w-9 ${ pressed ? "bg-primary text-white" : "text-white/85 enabled:hover:bg-white/15 enabled:hover:text-white" }`}
     >
       {children}
     </button>
   );
 }
 
-const GLASS_PILL = "mn-focus inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold text-white transition @2xl:text-sm";
-const RANGE = "h-1.5 min-w-0 flex-1 cursor-pointer accent-[var(--mn-accent)] disabled:cursor-default disabled:opacity-40";
+const GLASS_PILL = " inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold text-white transition @2xl:text-sm";
+const RANGE = "h-1.5 min-w-0 flex-1 cursor-pointer accent-primary disabled:cursor-default disabled:opacity-40";
 
 /** The player's state for the controls; `refresh` after a call that emits no event (auto, speed). */
 function usePlayerState(player: StoryPlayer): [PlayerState, () => void] {

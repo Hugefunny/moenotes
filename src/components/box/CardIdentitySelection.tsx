@@ -35,7 +35,7 @@ export default function CardIdentitySelection({ locale, kind, catalog, value, on
         {allowUnknown && <button type="button" aria-pressed={selected === null} onClick={() => setSelected(null)}>{clearLabel ?? tr("unknown")}</button>}
       </div>
       {!filters.sorted.length && <p className="dw-muted">{tr("emptyCards")}</p>}
-      <ul className={`dw-card-identity-grid dw-card-identity-grid--${view}`}>{filters.sorted.map(choice => {
+      <ul className={`dw-card-identity-grid dw-card-identity-grid-- ${view}`}>{filters.sorted.map(choice => {
         const id = String(choice.card.id), disabled = disabledIds.includes(id);
         const selection = { selected: selected === id, disabled, label: `${tr("chooseCard")}: ${name(choice)} · ${choice.card.title}`,
           onSelect: () => setSelected(id) };

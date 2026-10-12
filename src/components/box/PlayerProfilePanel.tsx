@@ -51,7 +51,7 @@ function ProfileField({ field, labels, canEdit, busy, onChange, onPresenceChange
   const hasEditor = !!field.editor || !!onChange && (!!field.options || !!field.range);
   const hasPresenceEditor = editable && !!onPresenceChange;
   const levelUnavailable = field.presence?.value === "not-owned";
-  return <div className={`pp-field${field.needsReview ? " pp-field-review" : ""}`} data-field-key={field.key}>
+  return <div className={`pp-field ${field.needsReview ? " pp-field-review" : ""}`} data-field-key={field.key}>
     <div className="pp-field-heading"><label htmlFor={editable && hasEditor && !field.editor ? inputId : undefined}>{field.label}</label>
       {field.statusLabel && <small className="pp-source">{field.statusLabel}</small>}
     </div>
@@ -96,7 +96,7 @@ export default function PlayerProfilePanel({ server, currentCatalog, mode, busy,
       <div className="pp-section-tabs" role="tablist" aria-label={labels.title}>{available.map(value => <button type="button" role="tab" key={value}
         id={`${id}-tab-${value}`} aria-controls={`${id}-panel`} aria-selected={activeSection === value} tabIndex={activeSection === value ? 0 : -1}
         onClick={() => setSection(value)} onKeyDown={event => keyboardTab(event, index => setSection(available[index]!))}>{labels[value]}</button>)}</div>
-      <div id={`${id}-panel`} role="tabpanel" aria-labelledby={`${id}-tab-${activeSection}`} className={`pp-section pp-section-${activeSection}`}>
+      <div id={`${id}-panel`} role="tabpanel" aria-labelledby={`${id}-tab-${activeSection}`} className={`pp-section pp-section- ${activeSection}`}>
         {visibleGroups.length > 1 && <div className="pp-band-tabs" role="tablist" aria-label={labels[activeSection!]}>{visibleGroups.map(group => <button type="button" role="tab"
           key={group.id} aria-controls={`${id}-group`} id={`${id}-group-tab-${group.id}`} aria-selected={activeGroup?.id === group.id} tabIndex={activeGroup?.id === group.id ? 0 : -1}
           style={{ "--pp-band-color": group.color } as ProfileStyle} onClick={() => setSelectedGroups(previous => ({ ...previous, [activeSection!]: group.id }))}

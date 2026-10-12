@@ -257,10 +257,10 @@ export default function ScreenshotImport({ locale, server, source, sourceIssue, 
 
   return <>
     <Modal historyNavigation={false} isOpen={isOpen} onClose={close} title={tr("screenshotImport")} closeLabel={tr("close")} size="xl">
-      <section className={`dw-screenshot-import dw-dialog${draft?.cards.length ? " has-results" : ""}`}>
+      <section className={`dw-screenshot-import dw-dialog ${draft?.cards.length ? " has-results" : ""}`}>
         <div className="dw-import-intro"><strong>{tr("screenshotServerShort", { server: serverName })}</strong><p className="dw-small dw-muted">{tr("screenshotPrivacy")}</p></div>
         {!supported && <p className="dw-alert" role="alert">{tr(source ? "recognitionUnavailable" : "recognitionError.catalogBinding")}{sourceIssue && <span className="dw-recognition-error-detail">{sourceIssue}</span>}</p>}
-        <div className={`dw-screenshot-upload${dragging ? " is-dragging" : ""}`} onDragOver={event => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)}
+        <div className={`dw-screenshot-upload ${dragging ? " is-dragging" : ""}`} onDragOver={event => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)}
           onDrop={event => { event.preventDefault(); setDragging(false); enqueue(Array.from(event.dataTransfer.files)); }}>
           <input className="dw-hidden" ref={input} type="file" multiple accept="image/png,image/jpeg,image/webp" aria-label={tr("chooseScreenshots")}
             disabled={!supported || stale || saving} onChange={event => { enqueue(Array.from(event.target.files ?? [])); event.target.value = ""; }} />
@@ -272,7 +272,7 @@ export default function ScreenshotImport({ locale, server, source, sourceIssue, 
           <div className="dw-toolbar"><strong>{tr("batchProgress", { done: completed, total: rows.length })}</strong>{running && <button type="button" onClick={cancelRemaining}>{tr("cancelRemaining")}</button>}</div>
           <div className="dw-screenshot-queue-list">{rows.map((row, index) => {
             const image = images.current.get(row.key)!, failure = failures.current.get(row.key);
-            return <article className={`dw-screenshot-queue-item${row.key === selectedImage ? " is-selected" : ""}`} key={row.key} data-image-key={row.key} data-status={row.status}>
+            return <article className={`dw-screenshot-queue-item ${row.key === selectedImage ? " is-selected" : ""}`} key={row.key} data-image-key={row.key} data-status={row.status}>
               <button type="button" className="dw-screenshot-queue-select" aria-pressed={row.key === selectedImage} onClick={() => setSelectedImage(row.key)}>
                 <img src={image.url} alt="" /><span>{index + 1} · {row.name}</span>
               </button>
@@ -291,7 +291,7 @@ export default function ScreenshotImport({ locale, server, source, sourceIssue, 
           <summary>{tr("viewOriginal", { name: selectedInput.name })}</summary>
           <div className="dw-screenshot-preview" style={selectedRow?.width && selectedRow.height ? { aspectRatio: `${selectedRow.width} / ${selectedRow.height}` } : undefined}>
             <img src={selectedInput.url} alt={tr("screenshotPreview")} />
-            {selectedRow?.result && [...selectedRow.result.cards, ...selectedRow.result.unidentified].map((card, index) => { const frame = card.bbox; return <span className={`dw-screenshot-bbox${"id" in card ? "" : " is-unidentified"}`} key={index}
+            {selectedRow?.result && [...selectedRow.result.cards, ...selectedRow.result.unidentified].map((card, index) => { const frame = card.bbox; return <span className={`dw-screenshot-bbox ${"id" in card ? "" : " is-unidentified"}`} key={index}
               style={{ left: `${frame[0] / selectedRow.width! * 100}%`, top: `${frame[1] / selectedRow.height! * 100}%`, width: `${frame[2] / selectedRow.width! * 100}%`, height: `${frame[3] / selectedRow.height! * 100}%` }}>{index + 1}</span>; })}
           </div>
         </details>}
@@ -303,7 +303,7 @@ export default function ScreenshotImport({ locale, server, source, sourceIssue, 
           <div className="dw-recognition-cards">{draft.cards.map((card, index) => {
             const conflict = card.identity.status === "conflict" || CARD_FIELDS.some(field => card.fields[field].status === "conflict");
             const crop = card.identity.value === null ? tileCrops.get(card.key) : undefined, candidate = crop ? candidateName(card) : null;
-            return <article className={`dw-recognition-card${excluded.includes(card.key) ? " is-excluded" : ""}`} key={card.key} data-card-key={card.key} data-card-id={card.identity.value ?? ""} data-card-kind={card.kind}>
+            return <article className={`dw-recognition-card ${excluded.includes(card.key) ? " is-excluded" : ""}`} key={card.key} data-card-key={card.key} data-card-id={card.identity.value ?? ""} data-card-kind={card.kind}>
               <label className="dw-recognition-choice"><input type="checkbox" checked={!excluded.includes(card.key)} disabled={stale || saving} aria-label={tr("selectRecognizedCard", { n: index + 1 })}
                 onChange={event => setExcluded(previous => event.target.checked ? previous.filter(key => key !== card.key) : [...previous, card.key])} /><span>{index + 1}</span>{conflict && <span className="dw-tag dw-warning">{tr("conflict")}</span>}{crop && <span className="dw-tag dw-warning">{tr("unidentifiedCard")}</span>}</label>
               {crop ? <ScreenshotTile crop={crop} /> : <BoxArtwork card={card} catalog={catalog} locale={locale} />}
