@@ -92,9 +92,9 @@ function Updates({ locale, module, servers, availability, rewards, songs, cards,
             {rewards.map((entry) => <RewardRow key={entry.slug} entry={entry} locale={locale} now={now} />)}
           </ul>
         ) : (
-          <div className="mn-paper px-6 py-8 text-center">
-            <h3 className="font-[var(--mn-font-display)] text-lg text-[var(--mn-text)]">{t(locale, "home.noActivitiesTitle")}</h3>
-            <p className="mx-auto mt-2 max-w-xl text-sm leading-7 text-[var(--mn-text-muted)]">{t(locale, "home.noActivitiesDescription")}</p>
+          <div className="md3-surface px-6 py-8 text-center">
+            <h3 className="font-[var(--md-ref-typeface-brand)] text-title-large text-on-surface">{t(locale, "home.noActivitiesTitle")}</h3>
+            <p className="mx-auto mt-2 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "home.noActivitiesDescription")}</p>
           </div>
         )}
       </section>
@@ -123,14 +123,14 @@ function Updates({ locale, module, servers, availability, rewards, songs, cards,
   return (
     <section aria-labelledby="home-cards">
       <SectionHeading id="home-cards" title={t(locale, "home.latestCards")}>
-        <div className="mn-segmented flex gap-1 rounded-full border border-[var(--mn-glass-border)] bg-[var(--mn-surface-strong)] p-1" role="group" aria-label={t(locale, "home.cardKind")}>
+        <div className="md3-segmented" role="group" aria-label={t(locale, "home.cardKind")}>
           {(["member", "support"] as const).map((kind) => (
             <button
               key={kind}
               type="button"
               onClick={() => setCardKind(kind)}
               aria-pressed={cardKind === kind}
-              className={`mn-focus rounded-full px-3 py-1 text-xs font-bold transition ${cardKind === kind ? "bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]" : "text-[var(--mn-text-muted)] hover:bg-[var(--mn-cream-deep)]"}`}
+              className="md3-segment md3-state"
             >
               {t(locale, kind === "member" ? "nav.items.cards" : "nav.items.supportCards")}
             </button>
@@ -162,17 +162,17 @@ function RewardRow({ entry, locale, now }: { entry: RewardEntrySummary; locale: 
     <li className="min-w-0">
       <a
         href={localizePath(`${getRoutePathById("rewards")}/${entry.slug}`, locale)}
-        className="mn-list-card mn-list-card-row group flex min-w-0 items-center gap-3 border border-[var(--mn-glass-border)] bg-[var(--mn-paper)] p-3"
+        className="mn-list-card mn-list-card-row group flex min-w-0 items-center gap-3 border border-outline-variant bg-surface-container-low p-3"
       >
         <div className="w-28 shrink-0 sm:w-36">
           <BannerImage className="mn-list-caption" src={entry.bannerUrl} alt="" fallback={t(locale, `rewards.kinds.${entry.kind}`)} imageClassName={rewardBannerCrop(entry.kind)} />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[11px] font-bold text-[var(--mn-accent-deep)]">{t(locale, `rewards.kinds.${entry.kind}`)}</span>
+            <span className="text-label-small text-primary">{t(locale, `rewards.kinds.${entry.kind}`)}</span>
             <ScheduleBadge locale={locale} startAt={entry.startAt} endAt={entry.endAt} now={now} />
           </div>
-          <p className="mt-1.5 line-clamp-2 text-sm font-bold leading-5 text-[var(--mn-text)] group-hover:text-[var(--mn-accent-deep)]">{entry.title}</p>
+          <p className="mt-1.5 line-clamp-2 text-label-large leading-5 text-on-surface group-hover:text-primary">{entry.title}</p>
           {entry.highlights.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-2">
               {entry.highlights.slice(0, 4).map((reward) => <RewardChip key={`${reward.kind}:${reward.id}`} reward={reward} locale={locale} variant="icon" linked={false} />)}

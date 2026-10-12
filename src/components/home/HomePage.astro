@@ -88,9 +88,9 @@ const shortcuts = getNavigationGroups().flatMap((group) => {
           <li class="min-w-0">
             <a
               href={localizePath(route.path, locale)}
-              class="mn-focus mn-list-card-row group flex min-w-0 items-center gap-3 border border-[var(--mn-glass-border)] bg-[var(--mn-paper)] px-3 py-2.5 text-sm font-bold text-[var(--mn-text)] transition hover:border-[var(--mn-accent)] hover:text-[var(--mn-accent-deep)]"
+              class="md3-state flex min-h-14 min-w-0 items-center gap-3 rounded-shape-md bg-surface-container-low px-3 text-label-large text-on-surface"
             >
-              <span class="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]">
+              <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-secondary-container text-on-secondary-container">
                 <RouteGlyph icon={route.nav && route.nav.icon ? route.nav.icon : "sparkles"} routeId={route.id} className="h-4 w-4" />
               </span>
               <span class="truncate">{t(locale, route.labelKey)}</span>

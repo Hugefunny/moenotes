@@ -19,4 +19,14 @@ describe("material 3 token codemod", () => {
       .toBe(`.x { color: var(--md-sys-color-error); width: var(--mn-sidebar-offset); font-family: var(--md-ref-typeface-mono); }`);
     expect(migrateSource(`const c = "var(--mn-mint)";`, "markup")).toBe(`const c = "var(--md-sys-color-success)";`);
   });
+
+  test("moves typography onto the M3 type scale", () => {
+    expect(migrateSource(`<h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-on-surface-variant">`, "markup"))
+      .toBe(`<h3 className="mb-2 text-label-medium text-on-surface-variant">`);
+    expect(migrateSource(`<p className="text-sm font-black sm:text-base">`, "markup")).toBe(`<p className="text-label-large sm:text-title-medium">`);
+    expect(migrateSource(`<p className="text-sm leading-relaxed">`, "markup")).toBe(`<p className="text-body-medium">`);
+    expect(migrateSource("<a className={`flex text-xs font-bold ${on ? \"a\" : \"b\"}`}>", "markup")).toBe("<a className={`flex text-label-medium ${on ? \"a\" : \"b\"}`}>");
+    expect(migrateSource(`const tone = active ? "text-sm font-bold text-primary" : "text-sm";`, "markup")).toBe(`const tone = active ? "text-label-large text-primary" : "text-body-medium";`);
+    expect(migrateSource(`<span className="font-bold">`, "markup")).toBe(`<span className="font-bold">`);
+  });
 });

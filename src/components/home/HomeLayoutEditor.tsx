@@ -44,13 +44,13 @@ export default function HomeLayoutEditor({ locale }: Props) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="mn-focus inline-flex items-center gap-1.5 rounded-full border border-[var(--mn-glass-border)] bg-[var(--mn-paper)] px-3 py-1.5 text-xs font-bold text-[var(--mn-ink-soft)] hover:border-[var(--mn-accent)] hover:bg-[var(--mn-accent-soft)] hover:text-[var(--mn-accent-deep)]"
+        className="inline-flex items-center gap-1.5 rounded-full border border-outline-variant bg-surface-container-low px-3 py-1.5 text-label-medium text-on-surface-variant hover:border-primary hover:bg-secondary-container hover:text-primary"
       >
         <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" /><circle cx="16" cy="6" r="2" /><circle cx="10" cy="12" r="2" /><circle cx="18" cy="18" r="2" /></svg>
         {t(locale, "home.layout.customize")}
       </button>
       <Modal isOpen={open} onClose={() => setOpen(false)} title={t(locale, "home.layout.title")} closeLabel={t(locale, "actions.close")} size="sm">
-        <p className="mb-4 text-xs leading-5 text-[var(--mn-text-muted)]">{t(locale, "home.layout.description")}</p>
+        <p className="mb-4 text-body-small leading-5 text-on-surface-variant">{t(locale, "home.layout.description")}</p>
         <ol className="space-y-2">
           {layout.order.map((id, index) => (
             <ModuleRow
@@ -70,7 +70,7 @@ export default function HomeLayoutEditor({ locale }: Props) {
             type="button"
             disabled={isDefaultHomeLayout(layout)}
             onClick={() => update(defaultHomeLayout())}
-            className="mn-focus rounded-full border border-[var(--mn-border)] bg-[var(--mn-paper)] px-4 py-2 text-sm font-bold text-[var(--mn-text)] hover:bg-[var(--mn-cream-deep)] disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-full border border-outline-variant bg-surface-container-low px-4 py-2 text-label-large text-on-surface hover:bg-surface-container-highest disabled:cursor-not-allowed disabled:opacity-50"
           >
             {t(locale, "home.layout.reset")}
           </button>
@@ -90,12 +90,12 @@ function ModuleRow({ locale, id, hidden, first, last, onMove, onToggle }: {
   onToggle: () => void;
 }) {
   const name = t(locale, `home.layout.modules.${id}`);
-  const arrow = "mn-focus grid h-8 w-8 place-items-center rounded-full border border-[var(--mn-glass-border)] bg-[var(--mn-paper)] text-[var(--mn-ink-soft)] hover:border-[var(--mn-accent)] hover:text-[var(--mn-accent-deep)] disabled:opacity-30";
+  const arrow = " grid h-8 w-8 place-items-center rounded-full border border-outline-variant bg-surface-container-low text-on-surface-variant hover:border-primary hover:text-primary disabled:opacity-30";
   return (
-    <li className={`flex items-center gap-2 rounded-2xl border border-[var(--mn-glass-border)] px-3 py-2 ${hidden ? "bg-[var(--mn-cream-deep)]" : "bg-[var(--mn-surface-strong)]"}`}>
+    <li className={`flex items-center gap-2 rounded-shape-lg border border-outline-variant px-3 py-2 ${hidden ? "bg-surface-container-highest" : "bg-surface-container-high"}`}>
       <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-3">
-        <input type="checkbox" checked={!hidden} onChange={onToggle} className="h-4 w-4 shrink-0 accent-[var(--mn-accent-deep)]" />
-        <span className={`truncate text-sm font-bold ${hidden ? "text-[var(--mn-text-muted)] line-through" : "text-[var(--mn-text)]"}`}>{name}</span>
+        <input type="checkbox" checked={!hidden} onChange={onToggle} className="h-4 w-4 shrink-0 accent-primary" />
+        <span className={`truncate text-label-large ${hidden ? "text-on-surface-variant line-through" : "text-on-surface"}`}>{name}</span>
       </label>
       <button type="button" className={arrow} disabled={first} onClick={() => onMove(-1)} aria-label={t(locale, "home.layout.moveUp", { name })} title={t(locale, "home.layout.moveUp", { name })}>
         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6" /></svg>

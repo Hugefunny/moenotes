@@ -84,11 +84,11 @@ function Carousel({ locale, slides }: { locale: AppLocale; slides: HomeSlide[] }
   const title = active.title || kindLabel;
   const schedule = formatScheduleRange(active.startAt, active.endAt, locale, timeZone);
   const href = active.link ? homeLinkHref(active.link, locale) : null;
-  const banner = <BannerImage eager className="mn-list-caption border border-[var(--mn-glass-border)]" src={getImageAssetUrl(active.imagePath, locale)} alt={title} fallback={title} />;
+  const banner = <BannerImage eager className="mn-list-caption border border-outline-variant" src={getImageAssetUrl(active.imagePath, locale)} alt={title} fallback={title} />;
 
   return (
     <section
-      className="mn-paper p-3 sm:p-4"
+      className="md3-surface p-3 sm:p-4"
       aria-roledescription="carousel"
       aria-label={t(locale, "home.carousel")}
       onMouseEnter={() => setInteracting(true)}
@@ -103,28 +103,28 @@ function Carousel({ locale, slides }: { locale: AppLocale; slides: HomeSlide[] }
           aria-label={t(locale, "home.slidePosition", { index: activeIndex + 1, total: count })}
           aria-live={autoplay ? "off" : "polite"}
         >
-          {href ? <a href={href} className="mn-focus block" tabIndex={-1} aria-hidden="true">{banner}</a> : banner}
+          {href ? <a href={href} className="block" tabIndex={-1} aria-hidden="true">{banner}</a> : banner}
         </div>
 
         <div className="flex min-w-0 flex-col gap-3 lg:py-2">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center rounded-full border border-[var(--mn-glass-border)] bg-[var(--mn-surface)] px-2.5 py-1 text-[11px] font-bold leading-none text-[var(--mn-ink-soft)]">{kindLabel}</span>
+            <span className="inline-flex items-center rounded-full border border-outline-variant bg-surface-container px-2.5 py-1 text-label-small text-on-surface-variant">{kindLabel}</span>
             <ScheduleBadge locale={locale} startAt={active.startAt} endAt={active.endAt} now={now} />
           </div>
-          <h3 className="line-clamp-3 font-[var(--mn-font-display)] text-xl leading-snug text-[var(--mn-text)] sm:text-2xl">{title}</h3>
-          {schedule && <p className="text-xs font-medium tabular-nums text-[var(--mn-text-muted)]">{schedule}</p>}
+          <h3 className="line-clamp-3 font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-small">{title}</h3>
+          {schedule && <p className="text-body-small tabular-nums text-on-surface-variant">{schedule}</p>}
           {href && (
             <a
               href={href}
-              className="mn-focus mn-stamp-press inline-flex w-fit items-center gap-2 rounded-full border border-[var(--mn-border)] bg-[var(--mn-accent-deep)] px-5 py-2.5 text-sm font-bold text-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp)]"
+              className="md3-state inline-flex w-fit items-center gap-2 rounded-full border border-outline-variant bg-primary px-5 py-2.5 text-label-large text-on-primary shadow-elevation-1"
             >
               {t(locale, active.link?.routeId === "gacha" ? "home.viewGacha" : active.link?.routeId === "main-story" ? "home.viewStory" : active.link?.routeId === "exchange" ? "home.viewExchange" : "home.viewDetail")}
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m13 6 6 6-6 6" /></svg>
             </a>
           )}
           {count > 1 && (
-            <div className="mt-auto flex items-center justify-between gap-3 border-t border-[var(--mn-glass-border)] pt-3">
-              <span className="font-mono text-xs font-bold tabular-nums text-[var(--mn-text-muted)]">{String(activeIndex + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}</span>
+            <div className="mt-auto flex items-center justify-between gap-3 border-t border-outline-variant pt-3">
+              <span className="font-mono text-label-medium tabular-nums text-on-surface-variant">{String(activeIndex + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}</span>
               <div className="flex items-center gap-2">
                 <IconButton label={t(locale, "home.previous")} onClick={() => move(-1)}><path d="m15 6-6 6 6 6" /></IconButton>
                 {!reduceMotion && (
@@ -151,12 +151,12 @@ function Carousel({ locale, slides }: { locale: AppLocale; slides: HomeSlide[] }
                   onClick={() => setIndex(slideIndex)}
                   aria-label={t(locale, "home.showSlide", { title: slideTitle })}
                   aria-current={current ? "true" : undefined}
-                  className={`mn-focus mn-list-caption relative block w-28 overflow-hidden border transition sm:w-36 ${current ? "border-[var(--mn-accent)] opacity-100" : "border-[var(--mn-glass-border)] opacity-60 hover:opacity-100"}`}
+                  className={`mn-list-caption relative block w-28 overflow-hidden border transition sm:w-36 ${current ? "border-primary opacity-100" : "border-outline-variant opacity-60 hover:opacity-100"}`}
                 >
                   <BannerImage src={getImageAssetUrl(slide.imagePath, locale)} alt="" fallback={slideTitle} />
                   {current && (
-                    <span className="absolute inset-x-0 bottom-0 h-1 bg-[color-mix(in_srgb,var(--mn-paper)_60%,transparent)]" aria-hidden="true">
-                      <span key={`${slide.id}-${autoplay}`} className={`block h-full origin-left bg-[var(--mn-accent)] ${autoplay ? "mn-carousel-progress" : ""}`} />
+                    <span className="absolute inset-x-0 bottom-0 h-1 bg-surface-container-low/60" aria-hidden="true">
+                      <span key={`${slide.id}-${autoplay}`} className={`block h-full origin-left bg-primary ${autoplay ? "mn-carousel-progress" : ""}`} />
                     </span>
                   )}
                 </button>
@@ -177,7 +177,7 @@ function IconButton({ label, onClick, pressed, children }: { label: string; onCl
       aria-label={label}
       title={label}
       {...(pressed === undefined ? {} : { "aria-pressed": pressed })}
-      className="mn-focus mn-icon-button grid h-10 w-10 place-items-center border border-[var(--mn-glass-border)] bg-[var(--mn-paper)] text-[var(--mn-ink-soft)] hover:border-[var(--mn-accent)] hover:bg-[var(--mn-accent-soft)] hover:text-[var(--mn-accent-deep)]"
+      className="mn-icon-button grid h-10 w-10 place-items-center border border-outline-variant bg-surface-container-low text-on-surface-variant hover:border-primary hover:bg-secondary-container hover:text-primary"
     >
       <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
     </button>
@@ -186,10 +186,10 @@ function IconButton({ label, onClick, pressed, children }: { label: string; onCl
 
 function EmptyState({ locale }: { locale: AppLocale }) {
   return (
-    <section className="mn-paper p-8 text-center sm:p-12" aria-label={t(locale, "home.carousel")}>
-      <h3 className="font-[var(--mn-font-display)] text-xl text-[var(--mn-text)]">{t(locale, "home.noCurrentTitle")}</h3>
-      <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-7 text-[var(--mn-text-muted)]">{t(locale, "home.noCurrentDescription")}</p>
-      <a href={localizePath(getRoutePathById("gacha"), locale)} className="mn-focus mn-stamp-press mt-6 inline-flex rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-6 py-3 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]">
+    <section className="md3-surface p-8 text-center sm:p-12" aria-label={t(locale, "home.carousel")}>
+      <h3 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "home.noCurrentTitle")}</h3>
+      <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "home.noCurrentDescription")}</p>
+      <a href={localizePath(getRoutePathById("gacha"), locale)} className="md3-state mt-6 inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
         {t(locale, "home.viewAllGacha")}
       </a>
     </section>

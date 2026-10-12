@@ -116,7 +116,7 @@
     cursor: pointer; transition: background-color var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
   }
   .md3-segment:first-child { border-inline-start: 0; }
-  .md3-segment[aria-pressed="true"], .md3-segment[aria-checked="true"], .md3-segment[aria-selected="true"] { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
+  .md3-segment[aria-pressed="true"], .md3-segment[aria-checked="true"], .md3-segment[aria-selected="true"], .md3-segment[aria-current="page"] { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
   .md3-segment[aria-pressed="true"]::after { content: none; }
   .md3-segment:disabled { cursor: default; color: rgb(var(--md-sys-color-on-surface-rgb) / 0.38); }
   .md3-segment svg { width: 18px; height: 18px; flex-shrink: 0; }

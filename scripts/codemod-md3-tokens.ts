@@ -94,9 +94,15 @@ export function migrateSource(source: string, kind: "markup" | "css"): string {
     // Legacy classes: the stamp press becomes an M3 state layer; the focus helper is global now.
     out = out.replace(/(^|[\s"'`])mn-stamp-press(?:-lg)?(?=[\s"'`])/g, "$1md3-state");
     out = out.replace(/(^|[\s"'`])mn-focus(?=[\s"'`])/g, "$1");
+    // Legacy surfaces: section panels become the M3 tonal surface; the old segmented wrapper the M3 one.
+    out = out.replace(/(^|[\s"'`])(?:mn-paper|mn-glass|mn-system-section)(?=[\s"'`])/g, "$1md3-surface");
+    out = out.replace(/(^|[\s"'`])(?:mn-card|mn-sticker)(?=[\s"'`])/g, "$1md3-card-outlined");
+    out = out.replace(/(^|[\s"'`])mn-stripes-cream(?=[\s"'`])/g, "$1md3-transparency-grid");
+    out = out.replace(/(^|[\s"'`])mn-texture-orbit(?=[\s"'`])/g, "$1md3-placeholder");
     out = out.replace(/\bborder-\[1\.5px\]/g, "border");
     // Radii onto the M3 shape scale.
     out = out.replace(/\brounded-3xl\b/g, "rounded-shape-lg").replace(/\brounded-2xl\b/g, "rounded-shape-lg").replace(/\brounded-xl\b/g, "rounded-shape-md").replace(/\brounded-lg\b/g, "rounded-shape-sm").replace(/\brounded-md\b/g, "rounded-shape-sm");
+    out = migrateTypography(out);
     // Collapse doubled spaces left by removed classes inside class strings.
     out = out.replace(/(className|class)=(["'])([^"']*)\2/g, (_m, attr: string, quote: string, value: string) => `${attr}=${quote}${value.replace(/\s{2,}/g, " ").trim()}${quote}`);
   }
@@ -112,6 +118,74 @@ export function migrateSource(source: string, kind: "markup" | "css"): string {
 }
 
 const EXTENSIONS: Record<string, "markup" | "css"> = { ".tsx": "markup", ".ts": "markup", ".astro": "markup", ".css": "css" };
+
+/**
+ * Class-string typography onto the M3 type scale. Works on whole class lists (className="…" / class="…" and template
+ * literals' static parts), so it can see size, weight, case and tracking together:
+ * - uppercase / tracked small text (eyebrows, table heads) → label-medium/large, no forced case or tracking;
+ * - text-[10px]/[11px] → label-small; text-xs → body-small (label-medium when bold); text-sm → body-medium
+ *   (label-large when bold/black); text-base → body-large (title-medium when bold); text-lg → title-large;
+ *   text-xl/2xl → headline-small, text-3xl → headline-medium, text-4xl → headline-large;
+ * - font-black / font-bold / font-semibold go: the scale's weight applies. Responsive prefixes are kept.
+ */
+const SIZE_MAP: Record<string, [regular: string, strong: string]> = {
+  "text-[10px]": ["text-label-small", "text-label-small"],
+  "text-[11px]": ["text-label-small", "text-label-small"],
+  "text-xs": ["text-body-small", "text-label-medium"],
+  "text-sm": ["text-body-medium", "text-label-large"],
+  "text-base": ["text-body-large", "text-title-medium"],
+  "text-lg": ["text-title-large", "text-title-large"],
+  "text-xl": ["text-headline-small", "text-headline-small"],
+  "text-2xl": ["text-headline-small", "text-headline-small"],
+  "text-3xl": ["text-headline-medium", "text-headline-medium"],
+  "text-4xl": ["text-headline-large", "text-headline-large"],
+  "text-5xl": ["text-display-small", "text-display-small"],
+};
+const STRONG = new Set(["font-black", "font-bold", "font-semibold", "font-extrabold"]);
+const DROP = new Set(["font-black", "font-bold", "font-semibold", "font-extrabold", "font-medium", "uppercase", "tracking-wider", "tracking-wide", "tracking-widest", "tracking-tight", "tracking-tighter", "tracking-normal", "leading-none", "leading-tight", "leading-relaxed", "leading-snug"]);
+
+function migrateClassList(list: string): string {
+  const tokens = list.split(/(\s+)/);
+  const words = tokens.filter((token) => token.trim());
+  const base = (word: string) => word.split(":").at(-1) ?? word;
+  const strong = words.some((word) => STRONG.has(base(word)));
+  const label = words.some((word) => base(word) === "uppercase" || base(word).startsWith("tracking-["));
+  const hasSize = words.some((word) => SIZE_MAP[base(word)]);
+  if (!hasSize && !words.some((word) => DROP.has(base(word)))) return list;
+  return tokens
+    .map((token) => {
+      if (!token.trim()) return token;
+      const parts = token.split(":");
+      const utility = parts.pop()!;
+      const prefix = parts.length ? `${parts.join(":")}:` : "";
+      const size = SIZE_MAP[utility];
+      if (size) {
+        const next = label ? (utility === "text-sm" ? "text-label-large" : "text-label-medium") : size[strong ? 1 : 0];
+        return `${prefix}${next}`;
+      }
+      // Weight, case and tracking only drop where the size is set by the scale (else they still carry meaning).
+      if (hasSize && DROP.has(utility)) return "";
+      if (hasSize && utility.startsWith("tracking-[")) return "";
+      return token;
+    })
+    .join("")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+export function migrateTypography(source: string): string {
+  return source
+    .replace(/\b(className|class)=(["'])([^"']*)\2/g, (_m, attr: string, quote: string, value: string) => `${attr}=${quote}${migrateClassList(value)}${quote}`)
+    .replace(/\b(className|class)=\{`([^`]*)`\}/g, (_m, attr: string, value: string) => {
+      // Template literal: migrate the static runs between ${…} expressions; the expressions' own strings are handled
+      // by the plain-string pass below.
+      const migrated = value.replace(/(^|\})([^$]*?)(\$\{|$)/g, (_x, open: string, text: string, close: string) => `${open}${text.trim() ? ` ${migrateClassList(text)} ` : text}${close}`);
+      return `${attr}={\`${migrated.replace(/\s{2,}/g, " ").trim()}\`}`;
+    })
+    // Class strings inside expressions (ternaries, constants): only those that look like utility lists.
+    .replace(/(["'])((?:[a-z0-9:[\]\/._%-]+\s+)*[a-z0-9:[\]\/._%-]+)\1/g, (match, quote: string, value: string) =>
+      /\btext-(xs|sm|base|lg|[2-5]?xl|\[1[01]px\])\b/.test(value) ? `${quote}${migrateClassList(value)}${quote}` : match);
+}
 
 function walk(path: string, files: string[]): void {
   if (statSync(path).isDirectory()) {

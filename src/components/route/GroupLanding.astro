@@ -14,18 +14,18 @@ const { locale, group } = Astro.props;
 const children = getNavChildren(group);
 ---
 
-<section class="rounded-3xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] p-6 shadow-[var(--mn-shadow-stamp-lg)] sm:p-8">
+<section>
   {t(locale, "page.groupIntro") ? (
-    <p class="mb-6 max-w-3xl font-medium leading-8 text-[var(--mn-text-muted)]">{t(locale, "page.groupIntro")}</p>
+    <p class="mb-6 max-w-3xl text-body-large text-on-surface-variant">{t(locale, "page.groupIntro")}</p>
   ) : null}
-  <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
     {children.map((item) => (
-      <a href={localizePath(item.path, locale)} class="mn-list-card group relative rounded-2xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-surface-strong)] p-6 shadow-[var(--mn-shadow-stamp)] transition hover:-translate-y-1 hover:bg-[var(--mn-cream-deep)]">
-        <h2 class="text-lg font-black text-[var(--mn-text)] group-hover:text-[var(--mn-accent-deep)]">{t(locale, item.labelKey)}</h2>
-        <p class="mt-2 text-sm font-medium leading-7 text-[var(--mn-text-muted)]">{t(locale, item.seo.descriptionKey)}</p>
-        <span class="mt-5 inline-flex items-center gap-2 rounded-full border-2 border-[var(--mn-border)] bg-[var(--mn-accent-soft)] px-4 py-1.5 text-sm font-black text-[var(--mn-accent-deep)] shadow-[var(--mn-shadow-stamp-sm)]">
+      <a href={localizePath(item.path, locale)} class="md3-list-card group relative flex flex-col p-6">
+        <h2 class="text-title-large text-on-surface">{t(locale, item.labelKey)}</h2>
+        <p class="mt-2 flex-1 text-body-medium text-on-surface-variant">{t(locale, item.seo.descriptionKey)}</p>
+        <span class="mt-5 inline-flex h-10 w-fit items-center gap-2 rounded-full bg-secondary-container px-4 text-label-large text-on-secondary-container">
           {t(locale, "actions.open")}
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m13 6 6 6-6 6" /></svg>
+          <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m13 6 6 6-6 6" /></svg>
         </span>
       </a>
     ))}
