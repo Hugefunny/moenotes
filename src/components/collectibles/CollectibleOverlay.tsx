@@ -49,8 +49,8 @@ export interface CollectibleOverlayProps<T extends ServerFaceted<{ id: number }>
 
 type CopyState = "idle" | "copying" | "image" | "link" | "error";
 
-const actionButton = "mn-focus grid h-8 w-8 place-items-center rounded-full border-2 border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-text-muted)] shadow-[var(--mn-shadow-stamp-sm)] transition hover:text-[var(--mn-text)] disabled:opacity-50";
-const checkIcon = <svg className="h-4 w-4 text-[var(--mn-mint)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>;
+const actionButton = " grid h-8 w-8 place-items-center rounded-full border-2 border-outline-variant bg-surface-container-low text-on-surface-variant  transition hover:text-on-surface disabled:opacity-50";
+const checkIcon = <svg className="h-4 w-4 text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>;
 
 /**
  * Detail of a collectible (title, sticker, comic, background) over its list, opened from `?id=`: the artwork (opens
@@ -101,7 +101,7 @@ export default function CollectibleOverlay<T extends ServerFaceted<{ id: number 
       </button>
       <button type="button" onClick={handleCopy} disabled={copyState === "copying"} className={actionButton} aria-label={t(locale, "cards.assets.copyImage")} title={copyState === "image" || copyState === "link" || copyState === "error" ? t(locale, `cards.assets.copyStates.${copyState}`) : t(locale, "cards.assets.copyImage")}>
         {copyState === "copying" ? <SiriusIcon /> : copyState === "image" || copyState === "link" ? checkIcon : copyState === "error" ? (
-          <svg className="h-4 w-4 text-[var(--mn-rose)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+          <svg className="h-4 w-4 text-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
         ) : (
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
         )}
@@ -128,7 +128,7 @@ export default function CollectibleOverlay<T extends ServerFaceted<{ id: number 
                 type="button"
                 onClick={() => setZoomed(true)}
                 aria-label={t(locale, "lightbox.label")}
-                className={`mn-focus group block w-full cursor-zoom-in overflow-hidden rounded-2xl border-[1.5px] border-[var(--mn-border)] ${frame === "wide" ? "bg-[var(--mn-surface)] p-2" : "mn-stripes-cream bg-[var(--mn-cream-deep)] p-4"}`}
+                className={`group block w-full cursor-zoom-in overflow-hidden rounded-shape-lg border border-outline-variant ${frame === "wide" ? "bg-surface-container p-2" : "md3-transparency-grid bg-surface-container-highest p-4"}`}
               >
                 <img className={`mx-auto object-contain transition duration-300 group-hover:scale-[1.01] ${frame === "wide" ? "max-h-[60vh] w-full" : "max-h-[45vh] w-auto max-w-full"}`} src={imageUrl} alt={image?.alt ?? title} />
               </button>
@@ -136,28 +136,28 @@ export default function CollectibleOverlay<T extends ServerFaceted<{ id: number 
             <div className="flex flex-wrap items-center gap-2">
               <ServerAvailabilityBadge locale={locale} entity={entry} servers={servers} showLabel />
             </div>
-            {description ? <div className="whitespace-pre-line text-sm font-medium leading-7 text-[var(--mn-text-muted)]">{description}</div> : null}
+            {description ? <div className="whitespace-pre-line text-body-medium leading-7 text-on-surface-variant">{description}</div> : null}
             {characters.length > 0 ? (
               <div>
-                <p className="mb-1.5 text-xs font-black text-[var(--mn-text-muted)]">{t(locale, "nav.items.characters")}</p>
+                <p className="mb-1.5 text-label-medium text-on-surface-variant">{t(locale, "nav.items.characters")}</p>
                 <CharacterAvatarStack locale={locale} characters={characters} max={8} size="lg" showNames />
               </div>
             ) : null}
-            <dl className="divide-y divide-dashed divide-[var(--mn-border)]/60 text-sm">
+            <dl className="divide-y divide-dashed divide-outline-variant/60 text-body-medium">
               {facts.map((fact) => (
                 <div key={fact.label} className="flex justify-between gap-4 py-2.5">
-                  <dt className="shrink-0 font-semibold text-[var(--mn-text-muted)]">{fact.label}</dt>
+                  <dt className="shrink-0 font-semibold text-on-surface-variant">{fact.label}</dt>
                   <dd className="min-w-0 text-right font-semibold">{fact.value}</dd>
                 </div>
               ))}
               {releasedAt ? (
                 <div className="flex justify-between gap-4 py-2.5">
-                  <dt className="shrink-0 font-semibold text-[var(--mn-text-muted)]">{t(locale, "sorting.date")}</dt>
+                  <dt className="shrink-0 font-semibold text-on-surface-variant">{t(locale, "sorting.date")}</dt>
                   <dd className="text-right font-semibold tabular-nums">{releasedAt}</dd>
                 </div>
               ) : null}
               <div className="flex justify-between gap-4 py-2.5">
-                <dt className="font-semibold text-[var(--mn-text-muted)]">ID</dt>
+                <dt className="font-semibold text-on-surface-variant">ID</dt>
                 <dd className="font-mono">#{entry.id}</dd>
               </div>
             </dl>

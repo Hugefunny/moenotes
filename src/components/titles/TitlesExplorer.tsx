@@ -193,10 +193,10 @@ export default function TitlesExplorer({ locale, servers, initialTitles, bands, 
     <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer}>
       <section className="min-w-0" aria-live="polite">
         {filteredTitles.length === 0 ? (
-          <div className="mn-paper p-8 text-center sm:p-12">
-            <h2 className="font-[var(--mn-font-display)] text-2xl text-[var(--mn-text)]">{t(locale, "titles.emptyTitle")}</h2>
-            <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-7 text-[var(--mn-text-muted)]">{t(locale, "titles.emptyDescription")}</p>
-            <button type="button" onClick={resetFilters} className="mn-focus mn-stamp-press mt-6 rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-6 py-3 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]">
+          <div className="md3-surface p-8 text-center sm:p-12">
+            <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "titles.emptyTitle")}</h2>
+            <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "titles.emptyDescription")}</p>
+            <button type="button" onClick={resetFilters} className="md3-state mt-6 rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
               {t(locale, "titles.reset")}
             </button>
           </div>
@@ -210,16 +210,16 @@ export default function TitlesExplorer({ locale, servers, initialTitles, bands, 
                 aria-haspopup="dialog"
                 data-list-item-id={title.id}
                 aria-label={t(locale, "titles.openPreview", { name: title.name })}
-                className="mn-list-card group flex min-w-0 flex-col overflow-hidden border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] text-left shadow-[var(--mn-shadow-stamp)] transition hover:-translate-y-1 hover:shadow-[var(--mn-shadow-stamp-lg)]"
+                className="mn-list-card group flex min-w-0 flex-col overflow-hidden border border-outline-variant bg-surface-container-low text-left shadow-elevation-1 transition hover:shadow-elevation-1"
               >
-                <span className="mn-stripes-cream relative grid aspect-square place-items-center border-b border-[var(--mn-glass-border)] bg-[var(--mn-cream-deep)] p-3">
+                <span className="md3-transparency-grid relative grid aspect-square place-items-center border-b border-outline-variant bg-surface-container-highest p-3">
                   <img className="max-h-full max-w-full object-contain transition duration-300 group-hover:scale-105" src={title.imageUrl} alt="" loading="lazy" decoding="async" />
-                  <span className="absolute left-2 top-2 rounded-full border border-[var(--mn-glass-border)] bg-[var(--mn-paper)] px-2 py-0.5 text-[10px] font-bold text-[var(--mn-ink-soft)]">{t(locale, `titles.types.${title.type}`)}</span>
-                  {now !== null && isDegreeRetired(title, now) && <span className="absolute right-2 top-2 rounded-full border border-[var(--mn-rose)] bg-[var(--mn-paper)] px-2 py-0.5 text-[10px] font-bold text-[var(--mn-rose)]">{t(locale, "titles.retired")}</span>}
+                  <span className="absolute left-2 top-2 rounded-full border border-outline-variant bg-surface-container-low px-2 py-0.5 text-label-small text-on-surface-variant">{t(locale, `titles.types.${title.type}`)}</span>
+                  {now !== null && isDegreeRetired(title, now) && <span className="absolute right-2 top-2 rounded-full border border-error bg-surface-container-low px-2 py-0.5 text-label-small text-error">{t(locale, "titles.retired")}</span>}
                 </span>
                 <span className="flex flex-1 flex-col gap-1 p-3">
-                  <span className="line-clamp-2 text-sm font-black leading-5 text-[var(--mn-text)] group-hover:text-[var(--mn-accent-deep)]">{title.name}</span>
-                  {title.source && <span className="line-clamp-2 text-[11px] font-medium leading-4 text-[var(--mn-text-muted)]">{title.source}</span>}
+                  <span className="line-clamp-2 text-label-large leading-5 text-on-surface group-hover:text-primary">{title.name}</span>
+                  {title.source && <span className="line-clamp-2 text-label-small leading-4 text-on-surface-variant">{title.source}</span>}
                 </span>
               </button>
             ))}
@@ -236,24 +236,24 @@ export default function TitlesExplorer({ locale, servers, initialTitles, bands, 
           results={sortedTitles}
           toImage={toImage}
           onNavigate={overlay.open}
-          description={preview?.source ? <><span className="mr-2 font-black text-[var(--mn-text)]">{t(locale, "titles.source")}</span>{preview.source}</> : undefined}
+          description={preview?.source ? <><span className="mr-2 font-black text-on-surface">{t(locale, "titles.source")}</span>{preview.source}</> : undefined}
           characters={preview ? preview.characterIds.map((id, index) => ({ id, name: preview.characterNames[index] ?? "" })) : []}
           facts={preview ? [
             { label: t(locale, "titles.type"), value: t(locale, `titles.types.${preview.type}`) || `#${preview.type}` },
-            ...(now !== null && isDegreeRetired(preview, now) ? [{ label: t(locale, "titles.availability"), value: <span className="text-[var(--mn-rose)]">{t(locale, "titles.retired")}</span> }] : []),
+            ...(now !== null && isDegreeRetired(preview, now) ? [{ label: t(locale, "titles.availability"), value: <span className="text-error">{t(locale, "titles.retired")}</span> }] : []),
             ...(preview.sourceCardId ? [{
               label: t(locale, "titles.sourceCard"),
-              value: <a className="text-[var(--mn-accent-deep)] underline-offset-2 hover:underline" href={localizePath(entityLinkPath({ routeId: "cards", detailId: preview.sourceCardId }), locale)}>{t(locale, "titles.viewCard", { id: preview.sourceCardId })}</a>,
+              value: <a className="text-primary underline-offset-2 hover:underline" href={localizePath(entityLinkPath({ routeId: "cards", detailId: preview.sourceCardId }), locale)}>{t(locale, "titles.viewCard", { id: preview.sourceCardId })}</a>,
             }] : []),
           ] : []}
         >
           {preview && preview.unlocks.length > 0 ? (
-            <div className="rounded-xl border border-dashed border-[var(--mn-border)] p-3">
-              <p className="text-xs font-black text-[var(--mn-text-muted)]">{t(locale, "titles.unlock")}</p>
-              <ul className="mt-2 space-y-1 text-sm font-semibold">
+            <div className="rounded-shape-md border border-dashed border-outline-variant p-3">
+              <p className="text-label-medium text-on-surface-variant">{t(locale, "titles.unlock")}</p>
+              <ul className="mt-2 space-y-1 text-label-large">
                 {preview.unlocks.map((unlock) => (
                   <li key={`${unlock.characterId}-${unlock.rank}`}>
-                    <a className="text-[var(--mn-accent-deep)] underline-offset-2 hover:underline" href={localizePath(entityLinkPath({ routeId: "characters", detailId: unlock.characterId }), locale)}>
+                    <a className="text-primary underline-offset-2 hover:underline" href={localizePath(entityLinkPath({ routeId: "characters", detailId: unlock.characterId }), locale)}>
                       {t(locale, "titles.unlockCharacterRank", { name: unlock.characterName || `#${unlock.characterId}`, rank: unlock.rank })}
                     </a>
                   </li>

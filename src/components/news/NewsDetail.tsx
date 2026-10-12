@@ -94,16 +94,16 @@ export default function NewsDetail({ locale }: Props) {
 
   const listHref = `${localizePath(getRoutePathById("news"), locale)}${target ? `?${new URLSearchParams({ server: target.server })}` : ""}`;
   const back = (
-    <a href={listHref} className="mn-focus mn-stamp-press inline-flex rounded-full border border-[var(--mn-border)] bg-[var(--mn-paper)] px-5 py-2.5 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]">
+    <a href={listHref} className="md3-state inline-flex rounded-full border border-outline-variant bg-surface-container-low px-5 py-2.5 text-label-large text-on-surface shadow-elevation-1">
       {t(locale, "news.backToList")}
     </a>
   );
 
   if (invalid || (load.state === "error" && load.kind === "not_found")) {
     return (
-      <div className="mn-paper p-8 text-center sm:p-12" role="alert">
-        <h2 className="font-[var(--mn-font-display)] text-2xl text-[var(--mn-text)]">{t(locale, "news.notFound")}</h2>
-        <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-7 text-[var(--mn-text-muted)]">{t(locale, "news.notFoundHint")}</p>
+      <div className="md3-surface p-8 text-center sm:p-12" role="alert">
+        <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "news.notFound")}</h2>
+        <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "news.notFoundHint")}</p>
         <div className="mt-6 flex justify-center">{back}</div>
       </div>
     );
@@ -111,14 +111,14 @@ export default function NewsDetail({ locale }: Props) {
 
   if (load.state === "error") {
     return (
-      <div className="mn-paper p-8 text-center sm:p-12" role="alert">
-        <h2 className="font-[var(--mn-font-display)] text-2xl text-[var(--mn-text)]">{t(locale, `news.errors.${load.kind}`)}</h2>
-        <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-7 text-[var(--mn-text-muted)]">{t(locale, `news.errors.${load.kind}Hint`)}</p>
+      <div className="md3-surface p-8 text-center sm:p-12" role="alert">
+        <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, `news.errors.${load.kind}`)}</h2>
+        <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, `news.errors.${load.kind}Hint`)}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <button
             type="button"
             onClick={() => setAttempt((value) => value + 1)}
-            className="mn-focus mn-stamp-press rounded-full border border-[var(--mn-border)] bg-[var(--mn-accent-deep)] px-5 py-2.5 text-sm font-bold text-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp)]"
+            className="md3-state rounded-full border border-outline-variant bg-primary px-5 py-2.5 text-label-large text-on-primary shadow-elevation-1"
           >
             {t(locale, "news.retry")}
           </button>
@@ -130,7 +130,7 @@ export default function NewsDetail({ locale }: Props) {
 
   if (load.state === "loading" || !target) {
     return (
-      <SiriusLoader locale={locale} label={t(locale, "news.loading")} className="mn-paper min-h-72" />
+      <SiriusLoader locale={locale} label={t(locale, "news.loading")} className="md3-surface min-h-72" />
     );
   }
 
@@ -142,22 +142,22 @@ export default function NewsDetail({ locale }: Props) {
 
   return (
     <article className="space-y-5">
-      <header className="mn-paper space-y-3 p-5 sm:p-6">
+      <header className="md3-surface space-y-3 p-5 sm:p-6">
         <div className="flex flex-wrap items-center gap-2">
           <NewsCategoryBadge locale={locale} category={newsCategory(announcement.category)} />
-          <span className="flex items-center gap-1.5 rounded-full border border-[var(--mn-border)] px-2.5 py-0.5 text-[10px] font-black text-[var(--mn-text-muted)]">
+          <span className="flex items-center gap-1.5 rounded-full border border-outline-variant px-2.5 py-0.5 text-label-small text-on-surface-variant">
             <ServerFlag server={target.server} className="h-3.5 w-3.5" />
             {t(locale, `gameServer.names.${target.server}`)}
           </span>
-          {!listed && <span className="rounded-full border border-dashed border-[var(--mn-border)] bg-[var(--mn-cream-deep)] px-2.5 py-0.5 text-[10px] font-black text-[var(--mn-text-muted)]">{t(locale, "news.withdrawn")}</span>}
-          {olderVersion && <span className="rounded-full border border-dashed border-[var(--mn-border)] bg-[var(--mn-cream-deep)] px-2.5 py-0.5 text-[10px] font-black text-[var(--mn-text-muted)]">{t(locale, "news.olderVersion")}</span>}
+          {!listed && <span className="rounded-full border border-dashed border-outline-variant bg-surface-container-highest px-2.5 py-0.5 text-label-small text-on-surface-variant">{t(locale, "news.withdrawn")}</span>}
+          {olderVersion && <span className="rounded-full border border-dashed border-outline-variant bg-surface-container-highest px-2.5 py-0.5 text-label-small text-on-surface-variant">{t(locale, "news.olderVersion")}</span>}
         </div>
-        <h2 className="font-[var(--mn-font-display)] text-2xl leading-snug text-[var(--mn-text)] sm:text-3xl">{announcement.title}</h2>
-        <dl className="grid gap-x-6 gap-y-1 text-xs font-semibold text-[var(--mn-text-muted)] sm:grid-cols-[auto_1fr]">
+        <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-medium">{announcement.title}</h2>
+        <dl className="grid gap-x-6 gap-y-1 text-label-medium text-on-surface-variant sm:grid-cols-[auto_1fr]">
           {start !== null && (
             <>
               <dt>{t(locale, "news.period")}</dt>
-              <dd className="text-[var(--mn-text)]">
+              <dd className="text-on-surface">
                 {formatServerSchedule(start, end, target.server, locale)}
               </dd>
             </>
@@ -165,16 +165,16 @@ export default function NewsDetail({ locale }: Props) {
           {updatedAt !== null && (
             <>
               <dt>{t(locale, "news.lastUpdated")}</dt>
-              <dd className="text-[var(--mn-text)]">{formatServerTimeInZone(updatedAt, target.server, locale)}</dd>
+              <dd className="text-on-surface">{formatServerTimeInZone(updatedAt, target.server, locale)}</dd>
             </>
           )}
         </dl>
 
         {revisions.length > 1 && (
-          <label className="flex flex-wrap items-center gap-2 text-xs font-bold text-[var(--mn-text)]">
+          <label className="flex flex-wrap items-center gap-2 text-label-medium text-on-surface">
             <span>{t(locale, "news.history")}</span>
             <select
-              className="mn-focus rounded-full border border-[var(--mn-border)] bg-[var(--mn-paper)] px-3 py-1.5 text-xs font-semibold"
+              className="rounded-full border border-outline-variant bg-surface-container-low px-3 py-1.5 text-label-medium"
               value={revision ?? revisions[0]}
               onChange={(event) => pickRevision(event.target.value)}
             >
@@ -199,10 +199,10 @@ export default function NewsDetail({ locale }: Props) {
           sandbox=""
           srcDoc={announcementSrcdoc(announcement.body)}
           referrerPolicy="no-referrer"
-          className="block h-[70vh] min-h-[24rem] w-full rounded-2xl border border-[var(--mn-border)] bg-[#1b2133] shadow-[var(--mn-shadow-stamp)]"
+          className="block h-[70vh] min-h-[24rem] w-full rounded-shape-md border border-outline-variant bg-surface-container-highest"
         />
       ) : (
-        <p className="mn-paper p-6 text-center text-sm font-semibold text-[var(--mn-text-muted)]">{t(locale, "news.noBody")}</p>
+        <p className="md3-surface p-6 text-center text-label-large text-on-surface-variant">{t(locale, "news.noBody")}</p>
       )}
 
       <div className="flex justify-start">{back}</div>

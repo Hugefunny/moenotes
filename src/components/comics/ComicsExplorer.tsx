@@ -219,17 +219,17 @@ export default function ComicsExplorer({ locale, servers, initialComics, initial
                     saveCurrentState();
                     overlay.open(comic.id);
                   }}
-                  className="mn-list-card group flex flex-col min-w-0 overflow-hidden border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp)] transition hover:-translate-y-1 hover:shadow-[var(--mn-shadow-stamp-lg)] text-left"
+                  className="mn-list-card group flex flex-col min-w-0 overflow-hidden border border-outline-variant bg-surface-container-low shadow-elevation-1 transition hover:shadow-elevation-1 text-left"
                   data-list-item-id={comic.id}
                   aria-label={comic.name}
                 >
-                  <div className="aspect-[928/778] w-full flex items-center justify-center overflow-hidden bg-[var(--mn-surface)] border-b-[1.5px] border-[var(--mn-border)]">
+                  <div className="aspect-[928/778] w-full flex items-center justify-center overflow-hidden bg-surface-container border-b-[1.5px] border-outline-variant">
                     <img className="h-full w-full object-cover group-hover:scale-[1.02] transition duration-300" src={comic.imageUrl} alt={comic.name} loading="lazy" />
                   </div>
                   <div className="p-4 flex-1 flex flex-col justify-between">
                     <div>
-                      <h3 className="line-clamp-2 text-sm font-black leading-5 text-[var(--mn-text)]">{comic.name}</h3>
-                      <p className="mt-1.5 text-[10px] font-bold text-[var(--mn-text-muted)]">#{comic.id}</p>
+                      <h3 className="line-clamp-2 text-label-large leading-5 text-on-surface">{comic.name}</h3>
+                      <p className="mt-1.5 text-label-small text-on-surface-variant">#{comic.id}</p>
                     </div>
                   </div>
                 </button>
@@ -258,10 +258,10 @@ export default function ComicsExplorer({ locale, servers, initialComics, initial
 
 function EmptyState({ locale, onReset }: { locale: AppLocale; onReset: () => void }) {
   return (
-    <div className="mn-paper p-8 text-center sm:p-12">
-      <h3 className="font-[var(--mn-font-display)] text-2xl text-[var(--mn-text)]">{t(locale, "comics.emptyTitle")}</h3>
-      <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-7 text-[var(--mn-text-muted)]">{t(locale, "comics.emptyDescription")}</p>
-      <button type="button" onClick={onReset} className="mn-focus mn-stamp-press mt-6 rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-6 py-3 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]">
+    <div className="md3-surface p-8 text-center sm:p-12">
+      <h3 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "comics.emptyTitle")}</h3>
+      <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "comics.emptyDescription")}</p>
+      <button type="button" onClick={onReset} className="md3-state mt-6 rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
         {t(locale, "comics.reset")}
       </button>
     </div>

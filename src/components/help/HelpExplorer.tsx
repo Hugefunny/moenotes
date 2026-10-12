@@ -64,7 +64,7 @@ export default function HelpExplorer({ locale, servers, categories: allCategorie
 
   return (
     <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer}>
-      <div className="mn-segmented mb-5 flex w-fit flex-wrap gap-1 rounded-full border border-[var(--mn-glass-border)] bg-[var(--mn-surface-strong)] p-1" role="tablist" aria-label={t(locale, "help.tabsLabel")}>
+      <div className="md3-tabs" role="tablist" aria-label={t(locale, "help.tabsLabel")}>
         {TABS.map((value) => (
           <button
             key={value}
@@ -72,10 +72,10 @@ export default function HelpExplorer({ locale, servers, categories: allCategorie
             role="tab"
             aria-selected={tab === value}
             onClick={() => pickTab(value)}
-            className={`mn-focus rounded-full px-4 py-1.5 text-sm font-bold transition ${tab === value ? "bg-[var(--mn-accent-soft)] text-[var(--mn-text)]" : "text-[var(--mn-text-muted)] hover:bg-[var(--mn-cream-deep)] hover:text-[var(--mn-text)]"}`}
+            className="md3-tab md3-state"
           >
             {t(locale, `help.tabs.${value}`)}
-            <span className="ml-1.5 text-[11px] font-black tabular-nums opacity-70">{tabCount[value]}</span>
+            <span className="ml-1.5 text-label-small tabular-nums opacity-70">{tabCount[value]}</span>
           </button>
         ))}
       </div>
@@ -89,7 +89,7 @@ export default function HelpExplorer({ locale, servers, categories: allCategorie
               onChange={(event) => setQuery(event.target.value)}
               placeholder={t(locale, "help.searchPlaceholder")}
               aria-label={t(locale, "filter.search")}
-              className="mn-focus w-full rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-4 py-2 text-sm font-medium text-[var(--mn-text)] placeholder:text-[var(--mn-text-muted)]"
+              className="w-full rounded-full border border-outline-variant bg-surface-container-low px-4 py-2 text-body-medium text-on-surface placeholder:text-on-surface-variant"
             />
             {needle ? (
               searchHits.length === 0 ? <Empty text={t(locale, "help.noResults")} /> : <TopicList locale={locale} topics={searchHits} showCategory />
@@ -102,16 +102,16 @@ export default function HelpExplorer({ locale, servers, categories: allCategorie
                       type="button"
                       onClick={() => pickCategory(category.id)}
                       aria-current={category.id === activeCategory?.id ? "true" : undefined}
-                      className={`mn-focus shrink-0 rounded-2xl border px-3 py-2 text-left text-sm font-bold transition ${category.id === activeCategory?.id ? "border-[var(--mn-accent)] bg-[var(--mn-accent-soft)] text-[var(--mn-text)]" : "border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-text-muted)] hover:text-[var(--mn-text)]"}`}
+                      className={`shrink-0 rounded-shape-lg border px-3 py-2 text-left text-label-large transition ${category.id === activeCategory?.id ? "border-primary bg-secondary-container text-on-surface" : "border-outline-variant bg-surface-container-low text-on-surface-variant hover:text-on-surface"}`}
                     >
                       {category.title}
-                      <span className="ml-1.5 text-[11px] font-black tabular-nums opacity-70">{category.topicIds.length}</span>
+                      <span className="ml-1.5 text-label-small tabular-nums opacity-70">{category.topicIds.length}</span>
                     </button>
                   ))}
                 </nav>
                 {activeCategory ? (
                   <div className="min-w-0 space-y-4">
-                    <h2 className="text-xl font-black text-[var(--mn-text)]">{activeCategory.title}</h2>
+                    <h2 className="text-headline-small text-on-surface">{activeCategory.title}</h2>
                     <TopicList locale={locale} topics={activeCategory.topicIds.map((id) => topicMap.get(id)).filter((topic): topic is ServerFaceted<HelpTopicViewModel> => Boolean(topic))} />
                     <HelpCarousels locale={locale} carousels={activeCategory.carousels} />
                   </div>
@@ -124,9 +124,9 @@ export default function HelpExplorer({ locale, servers, categories: allCategorie
         tips.length === 0 ? <Empty text={t(locale, "help.empty")} /> : (
           <ul className="grid gap-3 sm:grid-cols-2">
             {tips.map((tip) => (
-              <li key={tip.id} className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-paper)] p-4 shadow-[var(--mn-shadow-stamp-sm)]">
-                <h3 className="text-sm font-black text-[var(--mn-text)]">{tip.title}</h3>
-                <HelpRichText value={tip.body} className="mt-1.5 text-sm leading-6 text-[var(--mn-text-muted)]" />
+              <li key={tip.id} className="rounded-shape-lg border border-outline-variant bg-surface-container-low p-4">
+                <h3 className="text-label-large text-on-surface">{tip.title}</h3>
+                <HelpRichText value={tip.body} className="mt-1.5 text-body-medium leading-6 text-on-surface-variant" />
               </li>
             ))}
           </ul>
@@ -134,12 +134,12 @@ export default function HelpExplorer({ locale, servers, categories: allCategorie
       ) : faq.length === 0 ? <Empty text={t(locale, "help.empty")} /> : (
         <div className="space-y-2">
           {faq.map((entry) => (
-            <details key={entry.id} className="group rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp-sm)]">
-              <summary className="mn-focus flex cursor-pointer list-none items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-black text-[var(--mn-text)]">
+            <details key={entry.id} className="group rounded-shape-lg border border-outline-variant bg-surface-container-low">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-shape-lg px-4 py-3 text-label-large text-on-surface">
                 <span>{entry.title}</span>
-                <svg className="h-4 w-4 shrink-0 text-[var(--mn-accent-deep)] transition group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+                <svg className="h-4 w-4 shrink-0 text-primary transition group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
               </summary>
-              <HelpRichText value={entry.body} className="border-t border-dashed border-[var(--mn-border)] px-4 py-3 text-sm leading-7 text-[var(--mn-text-muted)]" />
+              <HelpRichText value={entry.body} className="border-t border-dashed border-outline-variant px-4 py-3 text-body-medium leading-7 text-on-surface-variant" />
             </details>
           ))}
         </div>
@@ -153,10 +153,10 @@ function TopicList({ locale, topics, showCategory = false }: { locale: AppLocale
     <ul className="grid gap-2 sm:grid-cols-2">
       {topics.map((topic) => (
         <li key={topic.id}>
-          <a href={localizePath(helpTopicPath(topic.id), locale)} className="mn-list-card group flex h-full min-w-0 flex-col rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-paper)] p-3 shadow-[var(--mn-shadow-stamp-sm)] transition hover:-translate-y-0.5 hover:shadow-[var(--mn-shadow-stamp)]">
-            {showCategory && <span className="text-[11px] font-black text-[var(--mn-accent)]">{topic.categoryTitle}</span>}
-            <span className="text-sm font-black text-[var(--mn-text)] group-hover:text-[var(--mn-accent-deep)]">{topic.title}</span>
-            <span className="mt-1 line-clamp-2 text-xs font-medium leading-5 text-[var(--mn-text-muted)]">{topic.body.text}</span>
+          <a href={localizePath(helpTopicPath(topic.id), locale)} className="mn-list-card group flex h-full min-w-0 flex-col rounded-shape-lg border border-outline-variant bg-surface-container-low p-3 transition hover:shadow-elevation-1">
+            {showCategory && <span className="text-label-small text-primary">{topic.categoryTitle}</span>}
+            <span className="text-label-large text-on-surface group-hover:text-primary">{topic.title}</span>
+            <span className="mt-1 line-clamp-2 text-body-small leading-5 text-on-surface-variant">{topic.body.text}</span>
           </a>
         </li>
       ))}
@@ -165,5 +165,5 @@ function TopicList({ locale, topics, showCategory = false }: { locale: AppLocale
 }
 
 function Empty({ text }: { text: string }) {
-  return <div className="grid min-h-40 place-items-center rounded-3xl border border-dashed border-[var(--mn-border)] bg-[var(--mn-paper)] p-8 text-center text-sm font-bold text-[var(--mn-text-muted)]">{text}</div>;
+  return <div className="grid min-h-40 place-items-center rounded-shape-lg border border-dashed border-outline-variant bg-surface-container-low p-8 text-center text-label-large text-on-surface-variant">{text}</div>;
 }

@@ -84,7 +84,7 @@ export default function NewsExplorer({ locale }: Props) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <GameServerSwitch locale={locale} value={server} onChange={pickServer} />
         {load.state === "ready" && load.fetchedAt !== null && (
-          <span className="text-[11px] font-semibold text-[var(--mn-text-muted)]">
+          <span className="text-label-small text-on-surface-variant">
             {t(locale, "news.checkedAgo", { time: formatAge(load.fetchedAt, load.serverTime ?? load.fetchedAt, locale) })}
           </span>
         )}
@@ -98,11 +98,7 @@ export default function NewsExplorer({ locale }: Props) {
               type="button"
               onClick={() => setFilter(key)}
               aria-pressed={filter === key}
-              className={`mn-focus rounded-full border px-3 py-1 text-xs font-bold transition ${
-                filter === key
-                  ? "border-[var(--mn-accent)] bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]"
-                  : "border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-text-muted)] hover:text-[var(--mn-text)]"
-              }`}
+              className={`rounded-full border px-3 py-1 text-label-medium transition ${ filter === key ? "border-primary bg-secondary-container text-primary" : "border-outline-variant bg-surface-container-low text-on-surface-variant hover:text-on-surface" }`}
             >
               {t(locale, `news.category.${key}`)}
               <span className="ml-1.5 font-mono opacity-70">{key === "all" ? items.length : counts.get(key)}</span>
@@ -112,17 +108,17 @@ export default function NewsExplorer({ locale }: Props) {
       )}
 
       {load.state === "loading" && (
-        <SiriusLoader locale={locale} label={t(locale, "news.loading")} className="mn-paper min-h-72" />
+        <SiriusLoader locale={locale} label={t(locale, "news.loading")} className="md3-surface min-h-72" />
       )}
 
       {load.state === "error" && (
-        <div className="mn-paper p-8 text-center" role="alert">
-          <p className="font-[var(--mn-font-display)] text-xl text-[var(--mn-text)]">{t(locale, `news.errors.${load.kind}`)}</p>
-          <p className="mx-auto mt-2 max-w-lg text-sm leading-7 text-[var(--mn-text-muted)]">{t(locale, `news.errors.${load.kind}Hint`)}</p>
+        <div className="md3-surface p-8 text-center" role="alert">
+          <p className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, `news.errors.${load.kind}`)}</p>
+          <p className="mx-auto mt-2 max-w-lg text-body-medium leading-7 text-on-surface-variant">{t(locale, `news.errors.${load.kind}Hint`)}</p>
           <button
             type="button"
             onClick={() => setAttempt((value) => value + 1)}
-            className="mn-focus mn-stamp-press mt-5 rounded-full border border-[var(--mn-border)] bg-[var(--mn-accent-deep)] px-6 py-2.5 text-sm font-bold text-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp)]"
+            className="md3-state mt-5 rounded-full border border-outline-variant bg-primary px-6 py-2.5 text-label-large text-on-primary shadow-elevation-1"
           >
             {t(locale, "news.retry")}
           </button>
@@ -130,7 +126,7 @@ export default function NewsExplorer({ locale }: Props) {
       )}
 
       {load.state === "ready" && items.length === 0 && (
-        <div className="mn-paper p-8 text-center text-sm font-semibold text-[var(--mn-text-muted)]">{t(locale, "news.empty")}</div>
+        <div className="md3-surface p-8 text-center text-label-large text-on-surface-variant">{t(locale, "news.empty")}</div>
       )}
 
       {server && shown.length > 0 && (
@@ -157,10 +153,10 @@ function NewsListItem({ locale, server, item, href, updated }: { locale: AppLoca
   const end = parseGameSeconds(item.endAt);
   const [bannerFailed, setBannerFailed] = useState(false);
   return (
-    <a href={href} className="mn-paper mn-focus group flex gap-4 overflow-hidden p-3 transition hover:-translate-y-0.5 sm:p-4">
+    <a href={href} className="md3-surface group flex gap-4 overflow-hidden p-3 transition sm:p-4">
       {item.bannerUrl && !bannerFailed && (
         <img
-          className="hidden aspect-[2/1] w-44 shrink-0 rounded-xl border border-[var(--mn-border)] object-cover sm:block"
+          className="hidden aspect-[2/1] w-44 shrink-0 rounded-shape-md border border-outline-variant object-cover sm:block"
           src={item.bannerUrl}
           alt=""
           loading="lazy"
@@ -172,12 +168,12 @@ function NewsListItem({ locale, server, item, href, updated }: { locale: AppLoca
         <div className="flex flex-wrap items-center gap-2">
           <NewsCategoryBadge locale={locale} category={newsCategory(item.category)} />
           {updated && (
-            <span className="rounded-full bg-[var(--mn-pink-soft)] px-2 py-0.5 text-[10px] font-black text-[var(--mn-ink-soft)]">{t(locale, "news.updated")}</span>
+            <span className="rounded-full bg-category1-container px-2 py-0.5 text-label-small text-on-surface-variant">{t(locale, "news.updated")}</span>
           )}
         </div>
-        <p className="text-sm font-bold leading-6 text-[var(--mn-text)] group-hover:text-[var(--mn-accent-deep)] sm:text-base">{item.title}</p>
+        <p className="text-label-large leading-6 text-on-surface group-hover:text-primary sm:text-title-medium">{item.title}</p>
         {start !== null && (
-          <p className="text-[11px] font-semibold text-[var(--mn-text-muted)]">
+          <p className="text-label-small text-on-surface-variant">
             {formatServerSchedule(start, end, server, locale)}
           </p>
         )}

@@ -63,34 +63,34 @@ function StoryDetailView({ locale, advId, initialTitle, initialScript, initialCh
   const episodeLabel = story ? storyEpisodeLabel(locale, story) : "";
   const eyebrow = [story?.groupTitle || story?.bandName, episodeLabel].filter(Boolean).join(" · ");
 
-  const header = (controls: ReactNode) => <header className="mb-6 overflow-hidden rounded-3xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp)]">
+  const header = (controls: ReactNode) => <header className="mb-6 overflow-hidden rounded-shape-lg border border-outline-variant bg-surface-container-low shadow-elevation-1">
     <div className="flex flex-col sm:flex-row">
       {artworkUrl && !artworkFailed && (
         <img
           src={artworkUrl}
           alt=""
           onError={() => setArtworkFailed(true)}
-          className={`w-full shrink-0 border-b-[1.5px] border-[var(--mn-border)] bg-[var(--mn-cream-deep)] object-cover sm:w-72 sm:border-b-0 sm:border-r-[1.5px] ${isChapter ? "aspect-[4/3]" : "aspect-[49/16] sm:aspect-auto"}`}
+          className={`w-full shrink-0 border-b-[1.5px] border-outline-variant bg-surface-container-highest object-cover sm:w-72 sm:border-b-0 sm:border-r-[1.5px] ${isChapter ? "aspect-[4/3]" : "aspect-[49/16] sm:aspect-auto"}`}
         />
       )}
       <div className="flex min-w-0 flex-1 flex-col justify-center p-6">
-        <p className="text-xs font-black text-[var(--mn-accent)]">{eyebrow || `ADV ${advId}`}</p>
-        <h1 className="mt-2 text-2xl font-black text-[var(--mn-text)]">{initialTitle}</h1>
-        {story?.description && <p className="mt-3 whitespace-pre-line text-sm leading-6 text-[var(--mn-text-muted)]">{story.description}</p>}
+        <p className="text-label-medium text-primary">{eyebrow || `ADV ${advId}`}</p>
+        <h1 className="mt-2 text-headline-small text-on-surface">{initialTitle}</h1>
+        {story?.description && <p className="mt-3 whitespace-pre-line text-body-medium leading-6 text-on-surface-variant">{story.description}</p>}
         {story?.birthday && (
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <CharacterAvatarStack locale={locale} characters={[{ id: story.birthday.characterId, name: story.birthday.characterName }]} size="md" showNames />
-            {story.birthday.month > 0 && <span className="text-xs font-bold text-[var(--mn-accent)]">{t(locale, "story.ui.birthdayDate", { month: story.birthday.month, day: story.birthday.day })}</span>}
+            {story.birthday.month > 0 && <span className="text-label-medium text-primary">{t(locale, "story.ui.birthdayDate", { month: story.birthday.month, day: story.birthday.day })}</span>}
           </div>
         )}
-        {(eyebrow || playTime) && <p className="mt-3 text-[11px] font-bold tabular-nums text-[var(--mn-text-muted)]">{[eyebrow ? `ADV ${advId}` : "", playTime ? t(locale, "story.ui.playTimeValue", { time: playTime }) : ""].filter(Boolean).join(" · ")}</p>}
+        {(eyebrow || playTime) && <p className="mt-3 text-label-small tabular-nums text-on-surface-variant">{[eyebrow ? `ADV ${advId}` : "", playTime ? t(locale, "story.ui.playTimeValue", { time: playTime }) : ""].filter(Boolean).join(" · ")}</p>}
         {unlocks.length > 0 && (
           <div className="mt-3">
-            <p className="text-[11px] font-black text-[var(--mn-text-muted)]">{t(locale, "story.ui.unlockTitle")}</p>
+            <p className="text-label-small text-on-surface-variant">{t(locale, "story.ui.unlockTitle")}</p>
             <ul className="mt-1 flex flex-wrap gap-1.5">
               {unlocks.map((unlock) => (
-                <li key={unlock.key} className="rounded-full border border-[var(--mn-border)] bg-[var(--mn-surface)] px-2.5 py-0.5 text-[11px] font-bold text-[var(--mn-text)]">
-                  {unlock.advId ? <a className="hover:text-[var(--mn-accent-deep)] hover:underline" href={localizePath(storyPath(unlock.advId), locale)}>{unlock.text}</a> : unlock.text}
+                <li key={unlock.key} className="rounded-full border border-outline-variant bg-surface-container px-2.5 py-0.5 text-label-small text-on-surface">
+                  {unlock.advId ? <a className="hover:text-primary hover:underline" href={localizePath(storyPath(unlock.advId), locale)}>{unlock.text}</a> : unlock.text}
                 </li>
               ))}
             </ul>
@@ -98,7 +98,7 @@ function StoryDetailView({ locale, advId, initialTitle, initialScript, initialCh
         )}
         {rewards.length > 0 && (
           <div className="mt-3">
-            <p className="text-[11px] font-black text-[var(--mn-text-muted)]">{t(locale, "story.ui.rewardsTitle")}</p>
+            <p className="text-label-small text-on-surface-variant">{t(locale, "story.ui.rewardsTitle")}</p>
             <div className="mt-1.5 flex flex-wrap gap-2">
               {rewards.map((reward, index) => <RewardChip key={`${reward.kind}-${reward.id}-${index}`} reward={reward} locale={locale} variant="icon" />)}
             </div>
@@ -107,7 +107,7 @@ function StoryDetailView({ locale, advId, initialTitle, initialScript, initialCh
         <StoryPlayerLink locale={locale} advId={advId} />
       </div>
     </div>
-    {controls && <div className="border-t border-[var(--mn-border)] px-6 py-4">{controls}</div>}
+    {controls && <div className="border-t border-outline-variant px-6 py-4">{controls}</div>}
   </header>;
 
   return <div className="mx-auto max-w-4xl">
@@ -115,7 +115,7 @@ function StoryDetailView({ locale, advId, initialTitle, initialScript, initialCh
       ? <StoryScriptReader locale={locale} script={initialScript} characters={initialCharacters} texts={initialTexts} layer="page" renderHeader={header} />
       : <>
         {header(null)}
-        <div className="rounded-3xl border border-dashed border-[var(--mn-border)] bg-[var(--mn-paper)] p-10 text-center font-bold text-[var(--mn-text-muted)]">{t(locale, "story.ui.scriptUnavailable")}</div>
+        <div className="rounded-shape-lg border border-dashed border-outline-variant bg-surface-container-low p-10 text-center font-bold text-on-surface-variant">{t(locale, "story.ui.scriptUnavailable")}</div>
       </>}
 
     {(previous || next) && <nav className="mt-2 grid gap-3 sm:grid-cols-2">
@@ -131,15 +131,15 @@ function NeighborLink({ neighbor, locale, direction }: { neighbor: StoryNeighbor
   return <a
     href={localizePath(storyPath(neighbor.advId), locale)}
     rel={isNext ? "next" : "prev"}
-    className={`group flex min-w-0 items-center gap-3 rounded-2xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] p-4 shadow-[var(--mn-shadow-stamp-sm)] transition hover:-translate-y-0.5 hover:shadow-[var(--mn-shadow-stamp)] ${isNext ? "flex-row-reverse text-right sm:col-start-2" : ""}`}
+    className={`group flex min-w-0 items-center gap-3 rounded-shape-lg border border-outline-variant bg-surface-container-low p-4 transition hover:shadow-elevation-1 ${isNext ? "flex-row-reverse text-right sm:col-start-2" : ""}`}
   >
-    <svg className="h-5 w-5 shrink-0 fill-current text-[var(--mn-accent)]" viewBox="0 0 24 24" aria-hidden="true">
+    <svg className="h-5 w-5 shrink-0 fill-current text-primary" viewBox="0 0 24 24" aria-hidden="true">
       <path d={isNext ? "M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" : "M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"} />
     </svg>
     <span className="min-w-0">
-      <span className="block text-[11px] font-black text-[var(--mn-accent)]">{t(locale, isNext ? "story.ui.nextEpisode" : "story.ui.previousEpisode")}</span>
-      {detail && <span className="mt-0.5 block truncate text-[11px] font-bold text-[var(--mn-text-muted)]">{detail}</span>}
-      <span className="mt-0.5 block truncate text-sm font-black text-[var(--mn-text)] group-hover:text-[var(--mn-accent-deep)]">{neighbor.title}</span>
+      <span className="block text-label-small text-primary">{t(locale, isNext ? "story.ui.nextEpisode" : "story.ui.previousEpisode")}</span>
+      {detail && <span className="mt-0.5 block truncate text-label-small text-on-surface-variant">{detail}</span>}
+      <span className="mt-0.5 block truncate text-label-large text-on-surface group-hover:text-primary">{neighbor.title}</span>
     </span>
   </a>;
 }

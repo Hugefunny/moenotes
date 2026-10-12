@@ -23,7 +23,7 @@ export default function HelpDetail({ locale, servers, detail }: Props) {
   const [server, pickServer] = useContentServer(locale, servers);
   const shown = useMemo(() => (detail ? valueForServer(detail, server) : null), [detail, server]);
   if (!detail || !shown) {
-    return <div className="rounded-3xl border border-dashed border-[var(--mn-border)] bg-[var(--mn-paper)] p-10 text-center font-bold text-[var(--mn-text-muted)]">{t(locale, "help.empty")}</div>;
+    return <div className="rounded-shape-lg border border-dashed border-outline-variant bg-surface-container-low p-10 text-center font-bold text-on-surface-variant">{t(locale, "help.empty")}</div>;
   }
   const { topic, category, siblings } = shown;
   const index = siblings.findIndex((entry) => entry.id === topic.id);
@@ -34,14 +34,14 @@ export default function HelpDetail({ locale, servers, detail }: Props) {
   return (
     <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={detail.servers}>
       <article className="mx-auto max-w-3xl space-y-6">
-        <header className="rounded-3xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] p-6 shadow-[var(--mn-shadow-stamp)]">
-          <a href={categoryHref} className="text-xs font-black text-[var(--mn-accent)] hover:underline">{topic.categoryTitle}</a>
-          <h2 className="mt-2 text-2xl font-black text-[var(--mn-text)]">{topic.title}</h2>
-          <HelpRichText value={topic.body} className="mt-4 text-sm leading-7 text-[var(--mn-text)]" />
+        <header className="rounded-shape-lg border border-outline-variant bg-surface-container-low p-6 shadow-elevation-1">
+          <a href={categoryHref} className="text-label-medium text-primary hover:underline">{topic.categoryTitle}</a>
+          <h2 className="mt-2 text-headline-small text-on-surface">{topic.title}</h2>
+          <HelpRichText value={topic.body} className="mt-4 text-body-medium leading-7 text-on-surface" />
         </header>
         {category && category.carousels.length > 0 ? (
           <section>
-            <h3 className="mb-3 text-sm font-black text-[var(--mn-text-muted)]">{t(locale, "help.guides")}</h3>
+            <h3 className="mb-3 text-label-large text-on-surface-variant">{t(locale, "help.guides")}</h3>
             <HelpCarousels locale={locale} carousels={category.carousels} />
           </section>
         ) : null}

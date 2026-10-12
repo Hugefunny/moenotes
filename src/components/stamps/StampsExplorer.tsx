@@ -242,16 +242,16 @@ export default function StampsExplorer({ locale, servers, initialStamps, initial
                     saveCurrentState();
                     overlay.open(stamp.id);
                   }}
-                  className="mn-list-card group flex flex-col items-center justify-between min-w-0 p-4 sm:p-5 overflow-hidden border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp)] transition hover:-translate-y-1 hover:shadow-[var(--mn-shadow-stamp-lg)] text-center "
+                  className="mn-list-card group flex flex-col items-center justify-between min-w-0 p-4 sm:p-5 overflow-hidden border border-outline-variant bg-surface-container-low shadow-elevation-1 transition hover:shadow-elevation-1 text-center"
                   data-list-item-id={stamp.id}
                   aria-label={stamp.name}
                 >
-                  <div className="aspect-[256/220] w-full flex items-center justify-center overflow-hidden rounded-2xl bg-[var(--mn-surface)] p-2 sm:p-3">
+                  <div className="aspect-[256/220] w-full flex items-center justify-center overflow-hidden rounded-shape-lg bg-surface-container p-2 sm:p-3">
                     <img className="max-h-full max-w-full object-contain" src={stamp.imageUrl} alt={stamp.name} loading="lazy" />
                   </div>
                   <div className="mt-4 w-full">
-                    <p className="truncate text-sm font-black text-[var(--mn-text)]">{stamp.name}</p>
-                    <p className="mt-1 text-[11px] font-bold text-[var(--mn-text-muted)]">#{stamp.id}</p>
+                    <p className="truncate text-label-large text-on-surface">{stamp.name}</p>
+                    <p className="mt-1 text-label-small text-on-surface-variant">#{stamp.id}</p>
                   </div>
                 </button>
               ))}
@@ -279,10 +279,10 @@ export default function StampsExplorer({ locale, servers, initialStamps, initial
 
 function EmptyState({ locale, onReset }: { locale: AppLocale; onReset: () => void }) {
   return (
-    <div className="mn-paper p-8 text-center sm:p-12">
-      <h3 className="font-[var(--mn-font-display)] text-2xl text-[var(--mn-text)]">{t(locale, "stamps.emptyTitle")}</h3>
-      <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-7 text-[var(--mn-text-muted)]">{t(locale, "stamps.emptyDescription")}</p>
-      <button type="button" onClick={onReset} className="mn-focus mn-stamp-press mt-6 rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-6 py-3 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]">
+    <div className="md3-surface p-8 text-center sm:p-12">
+      <h3 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "stamps.emptyTitle")}</h3>
+      <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "stamps.emptyDescription")}</p>
+      <button type="button" onClick={onReset} className="md3-state mt-6 rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
         {t(locale, "stamps.reset")}
       </button>
     </div>

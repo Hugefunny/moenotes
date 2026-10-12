@@ -29,10 +29,10 @@ interface Props {
 /** A tab: one regular category (its MasterMission category id) or the limited groups. */
 type Tab = number | "limited";
 
-const tabClass = (active: boolean) => `mn-focus mn-stamp-press shrink-0 rounded-full border-[1.5px] px-4 py-2 text-xs font-bold transition sm:text-sm ${
+const tabClass = (active: boolean) => ` md3-state shrink-0 rounded-full border px-4 py-2 text-xs font-bold transition sm:text-sm ${
   active
-    ? "border-[var(--mn-accent-deep)] bg-[var(--mn-accent-deep)] text-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp)]"
-    : "border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-text)] hover:border-[var(--mn-accent-deep)]/50"
+    ? "border-primary bg-primary text-on-primary shadow-elevation-1"
+    : "border-outline-variant bg-surface-container-low text-on-surface hover:border-primary/50"
 }`;
 
 /**
@@ -96,12 +96,12 @@ export default function MissionsExplorer({ locale, servers, categories: initialC
         {categories.map((category) => (
           <button key={category.id} type="button" onClick={() => pick(category.id)} aria-pressed={activeTab === category.id} className={tabClass(activeTab === category.id)}>
             {t(locale, `missions.categories.${missionCategoryKey(category.id)}`)}
-            <span className="ml-1.5 font-mono text-[11px] opacity-70">{category.missions.length}</span>
+            <span className="ml-1.5 font-mono text-label-small opacity-70">{category.missions.length}</span>
           </button>
         ))}
         <button type="button" onClick={() => pick("limited")} aria-pressed={activeTab === "limited"} className={tabClass(activeTab === "limited")}>
           {t(locale, "missions.limited")}
-          <span className="ml-1.5 font-mono text-[11px] opacity-70">{groups.length}</span>
+          <span className="ml-1.5 font-mono text-label-small opacity-70">{groups.length}</span>
         </button>
       </nav>
 
@@ -111,7 +111,7 @@ export default function MissionsExplorer({ locale, servers, categories: initialC
         ) : active ? (
           <MissionList locale={locale} category={active} highlight={highlight} />
         ) : (
-          <p className="mn-paper p-8 text-center text-sm font-medium text-[var(--mn-text-muted)]">{t(locale, "missions.empty")}</p>
+          <p className="md3-surface p-8 text-center text-body-medium text-on-surface-variant">{t(locale, "missions.empty")}</p>
         )}
       </div>
     </ServerScope>
@@ -119,15 +119,15 @@ export default function MissionsExplorer({ locale, servers, categories: initialC
 }
 
 function MissionList({ locale, category, highlight }: { locale: AppLocale; category: MissionCategoryViewModel; highlight: string | null }) {
-  if (!category.missions.length) return <p className="mn-paper p-8 text-center text-sm font-medium text-[var(--mn-text-muted)]">{t(locale, "missions.empty")}</p>;
+  if (!category.missions.length) return <p className="md3-surface p-8 text-center text-body-medium text-on-surface-variant">{t(locale, "missions.empty")}</p>;
   return (
-    <div className="mn-paper overflow-hidden">
-      <div className="hidden grid-cols-[minmax(0,1fr)_6rem_minmax(0,16rem)] gap-6 border-b border-[var(--mn-border)] px-6 py-3 text-xs font-bold text-[var(--mn-text-muted)] md:grid">
+    <div className="md3-surface overflow-hidden">
+      <div className="hidden grid-cols-[minmax(0,1fr)_6rem_minmax(0,16rem)] gap-6 border-b border-outline-variant px-6 py-3 text-label-medium text-on-surface-variant md:grid">
         <span>{t(locale, "missions.columns.mission")}</span>
         <span className="text-right">{t(locale, "missions.columns.goal")}</span>
         <span>{t(locale, "missions.columns.rewards")}</span>
       </div>
-      <ol className="divide-y divide-dashed divide-[var(--mn-border)]/60">
+      <ol className="divide-y divide-dashed divide-outline-variant/60">
         {category.missions.map((mission) => <MissionRow key={mission.id} locale={locale} mission={mission} highlighted={highlight === `mission-${mission.id}`} />)}
       </ol>
     </div>
@@ -138,19 +138,19 @@ function MissionRow({ locale, mission, highlighted }: { locale: AppLocale; missi
   return (
     <li
       id={`mission-${mission.id}`}
-      className={`grid scroll-mt-28 gap-3 px-4 py-3.5 transition-colors sm:px-6 md:grid-cols-[minmax(0,1fr)_6rem_minmax(0,16rem)] md:items-center md:gap-6 ${highlighted ? "bg-[var(--mn-accent-soft)] ring-2 ring-inset ring-[var(--mn-accent)]" : ""}`}
+      className={`grid scroll-mt-28 gap-3 px-4 py-3.5 transition-colors sm:px-6 md:grid-cols-[minmax(0,1fr)_6rem_minmax(0,16rem)] md:items-center md:gap-6 ${highlighted ? "bg-secondary-container ring-2 ring-inset ring-primary" : ""}`}
       aria-current={highlighted ? "true" : undefined}
     >
       <div className="min-w-0">
-        <p className="whitespace-pre-line text-sm font-medium leading-6 text-[var(--mn-text)]">{mission.description}</p>
-        <span className="mt-0.5 block font-mono text-[11px] text-[var(--mn-text-muted)]">#{mission.id}</span>
+        <p className="whitespace-pre-line text-body-medium leading-6 text-on-surface">{mission.description}</p>
+        <span className="mt-0.5 block font-mono text-label-small text-on-surface-variant">#{mission.id}</span>
       </div>
-      <span className="font-mono text-sm font-black tabular-nums text-[var(--mn-accent-deep)] md:text-right">
-        <span className="mr-2 font-sans text-[11px] font-bold text-[var(--mn-text-muted)] md:hidden">{t(locale, "missions.columns.goal")}</span>
+      <span className="font-mono text-label-large tabular-nums text-primary md:text-right">
+        <span className="mr-2 font-sans text-label-small text-on-surface-variant md:hidden">{t(locale, "missions.columns.goal")}</span>
         {mission.goal.toLocaleString(locale)}
       </span>
       <div className="flex min-w-0 flex-col gap-2">
-        {mission.rewards.length ? mission.rewards.map((reward, index) => <RewardChip key={`${reward.kind}:${reward.id}:${index}`} reward={reward} locale={locale} />) : <span className="text-xs text-[var(--mn-text-muted)]">—</span>}
+        {mission.rewards.length ? mission.rewards.map((reward, index) => <RewardChip key={`${reward.kind}:${reward.id}:${index}`} reward={reward} locale={locale} />) : <span className="text-body-small text-on-surface-variant">—</span>}
       </div>
     </li>
   );
@@ -159,7 +159,7 @@ function MissionRow({ locale, mission, highlighted }: { locale: AppLocale; missi
 function LimitedGroups({ locale, groups, servers, highlight }: { locale: AppLocale; groups: ServerFaceted<LimitedMissionGroupSummary>[]; servers: GameServer[]; highlight: string | null }) {
   const now = useNow();
   const timeZone = useDisplayTimeZone();
-  if (!groups.length) return <p className="mn-paper p-8 text-center text-sm font-medium text-[var(--mn-text-muted)]">{t(locale, "missions.noLimited")}</p>;
+  if (!groups.length) return <p className="md3-surface p-8 text-center text-body-medium text-on-surface-variant">{t(locale, "missions.noLimited")}</p>;
   return (
     <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4">
       {groups.map((group) => {
@@ -168,19 +168,19 @@ function LimitedGroups({ locale, groups, servers, highlight }: { locale: AppLoca
           <li key={group.id} id={`limited-${group.id}`} className="min-w-0 scroll-mt-28">
             <a
               href={localizePath(entityLinkPath({ routeId: "rewards", detailId: group.slug }), locale)}
-              className={`mn-list-card group flex h-full min-w-0 flex-col overflow-hidden border-[1.5px] bg-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp)] transition hover:-translate-y-1 hover:shadow-[var(--mn-shadow-stamp-lg)] ${highlighted ? "border-[var(--mn-accent)] ring-2 ring-[var(--mn-accent)]" : "border-[var(--mn-border)]"}`}
+              className={`mn-list-card group flex h-full min-w-0 flex-col overflow-hidden border bg-surface-container-low shadow-elevation-1 transition hover:shadow-elevation-1 ${highlighted ? "border-primary ring-2 ring-primary" : "border-outline-variant"}`}
               aria-current={highlighted ? "true" : undefined}
             >
-              <div className="relative border-b border-[var(--mn-glass-border)]">
+              <div className="relative border-b border-outline-variant">
                 <BannerImage src={group.bannerUrl} alt="" fallback={group.title} />
                 <div className="absolute left-2 top-2 flex max-w-[calc(100%-1rem)] flex-wrap gap-1.5">
                   <ScheduleBadge locale={locale} startAt={group.startAt} endAt={group.endAt} now={now} />
                 </div>
               </div>
               <div className="flex flex-1 flex-col gap-1.5 p-3 sm:p-4">
-                <h3 className="line-clamp-2 text-sm font-black leading-5 text-[var(--mn-text)] group-hover:text-[var(--mn-accent-deep)]">{group.title}</h3>
-                <p className="truncate text-xs font-medium tabular-nums text-[var(--mn-text-muted)]">{formatScheduleRange(group.startAt, group.endAt, locale, timeZone) || t(locale, "rewards.alwaysOpen")}</p>
-                <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-xs font-medium text-[var(--mn-text-muted)]">
+                <h3 className="line-clamp-2 text-label-large leading-5 text-on-surface group-hover:text-primary">{group.title}</h3>
+                <p className="truncate text-body-small tabular-nums text-on-surface-variant">{formatScheduleRange(group.startAt, group.endAt, locale, timeZone) || t(locale, "rewards.alwaysOpen")}</p>
+                <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-body-small text-on-surface-variant">
                   <span>{t(locale, "rewards.missionCount", { count: group.missionCount })}</span>
                   <ScheduleCountdown locale={locale} startAt={group.startAt} endAt={group.endAt} now={now} />
                   <ServerAvailabilityBadge locale={locale} entity={group} servers={servers} />

@@ -43,10 +43,10 @@ export function HelpCarousels({ locale, carousels }: { locale: AppLocale; carous
   return (
     <div className="space-y-4">
       {carousels.map((carousel) => (
-        <section key={carousel.id} className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-paper)] p-3 shadow-[var(--mn-shadow-stamp-sm)]">
-          <h3 className="mb-2 text-sm font-black text-[var(--mn-text)]">
+        <section key={carousel.id} className="rounded-shape-lg border border-outline-variant bg-surface-container-low p-3">
+          <h3 className="mb-2 text-label-large text-on-surface">
             {carousel.title}
-            <span className="ml-2 text-[11px] font-bold text-[var(--mn-text-muted)]">{t(locale, "help.carouselPages", { count: carousel.imageUrls.length })}</span>
+            <span className="ml-2 text-label-small text-on-surface-variant">{t(locale, "help.carouselPages", { count: carousel.imageUrls.length })}</span>
           </h3>
           <div className="flex gap-2 overflow-x-auto pb-1">
             {carousel.imageUrls.map((url, page) => (
@@ -55,7 +55,7 @@ export function HelpCarousels({ locale, carousels }: { locale: AppLocale; carous
                 type="button"
                 onClick={() => setOpen({ carousel: carousel.id, page })}
                 aria-label={t(locale, "help.carouselPage", { title: carousel.title, page: page + 1 })}
-                className="mn-focus group shrink-0 cursor-zoom-in overflow-hidden rounded-xl border border-[var(--mn-border)] bg-[var(--mn-cream-deep)]"
+                className="group shrink-0 cursor-zoom-in overflow-hidden rounded-shape-md border border-outline-variant bg-surface-container-highest"
               >
                 <img src={assetUrl(url)} alt="" loading="lazy" decoding="async" className="h-28 w-auto object-contain transition group-hover:scale-[1.03] sm:h-36" />
               </button>

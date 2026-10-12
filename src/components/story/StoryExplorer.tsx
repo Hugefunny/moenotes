@@ -236,34 +236,34 @@ function ChapterGroups({ stories, locale, sort }: { stories: StoryViewModel[]; l
       .filter((run) => run.episodes.length > 0);
     const chapterAsset = chapter.chapterBanner || chapter.chapterImage;
     const chapterImageUrl = chapterAsset ? assetUrl(getAssetUrl({ path: `Story/${chapter.chapterBanner ? "Banner" : "Image"}/Chapter/${chapterAsset}.png`, type: "raw" })) : "";
-    return <section key={chapter.chapterId} className="mn-list-group overflow-hidden rounded-3xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp)]">
+    return <section key={chapter.chapterId} className="mn-list-group overflow-hidden rounded-shape-lg border border-outline-variant bg-surface-container-low shadow-elevation-1">
       <div className="flex flex-col">
         {chapterImageUrl && (
-          <div className="w-full aspect-[21/9] sm:aspect-[24/9] md:aspect-[3/1] bg-[var(--mn-cream-deep)] border-b-[1.5px] border-[var(--mn-border)] overflow-hidden">
+          <div className="w-full aspect-[21/9] sm:aspect-[24/9] md:aspect-[3/1] bg-surface-container-highest border-b-[1.5px] border-outline-variant overflow-hidden">
             <img src={chapterImageUrl} alt="" className="h-full w-full object-cover transition duration-300 hover:scale-[1.01]" />
           </div>
         )}
         <div className="flex flex-col justify-center p-6 sm:p-8">
-          <p className="text-xs font-black uppercase tracking-wider text-[var(--mn-accent)]">{chapter.bandName}</p>
-          <h2 className="mt-2 text-2xl font-black text-[var(--mn-text)]">{chapter.chapterName}</h2>
-          <p className="mt-4 whitespace-pre-line leading-7 text-[var(--mn-text-muted)]">{chapter.chapterDescription}</p>
-          <p className="mt-4 text-xs font-medium text-[var(--mn-text-muted)]">{chapter.characterNames.join(" · ")}</p>
+          <p className="text-label-medium text-primary">{chapter.bandName}</p>
+          <h2 className="mt-2 text-headline-small text-on-surface">{chapter.chapterName}</h2>
+          <p className="mt-4 whitespace-pre-line leading-7 text-on-surface-variant">{chapter.chapterDescription}</p>
+          <p className="mt-4 text-body-small text-on-surface-variant">{chapter.characterNames.join(" · ")}</p>
         </div>
       </div>
-      <div className="space-y-5 border-t-[1.5px] border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 sm:p-6">
+      <div className="space-y-5 border-t-[1.5px] border-outline-variant bg-surface-container p-4 sm:p-6">
         {runs.map((run) => <div key={run.kind}>
-          {run.kind !== "main" && <h3 className="mb-3 text-xs font-black uppercase tracking-wider text-[var(--mn-text-muted)]">{t(locale, run.kind === "another" ? "story.ui.anotherStories" : "story.ui.extraStories")}</h3>}
+          {run.kind !== "main" && <h3 className="mb-3 text-label-medium text-on-surface-variant">{t(locale, run.kind === "another" ? "story.ui.anotherStories" : "story.ui.extraStories")}</h3>}
           {/* Columns as wide as a banner and a title need, however narrow the content column is. */}
           <div className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(min(100%,17rem),1fr))]">
-            {run.episodes.map((episode) => <a key={episode.id} href={localizePath(storyPath(episode.advId), locale)} className="mn-list-card mn-list-card-row group flex min-w-0 items-center gap-4 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-paper)] p-3 shadow-[var(--mn-shadow-stamp-sm)] transition hover:-translate-y-0.5 hover:shadow-[var(--mn-shadow-stamp)]">
-              <img src={assetUrl(getAssetUrl({ path: `Story/Banner/Episode/${episode.assets.banner}.png`, type: "raw", locale }))} alt="" className="h-16 w-28 shrink-0 rounded-xl object-cover" loading="lazy" />
+            {run.episodes.map((episode) => <a key={episode.id} href={localizePath(storyPath(episode.advId), locale)} className="mn-list-card mn-list-card-row group flex min-w-0 items-center gap-4 rounded-shape-lg border border-outline-variant bg-surface-container-low p-3 transition hover:shadow-elevation-1">
+              <img src={assetUrl(getAssetUrl({ path: `Story/Banner/Episode/${episode.assets.banner}.png`, type: "raw", locale }))} alt="" className="h-16 w-28 shrink-0 rounded-shape-md object-cover" loading="lazy" />
               <div className="min-w-0">
-                <p className="text-[11px] font-black text-[var(--mn-accent)]">
+                <p className="text-label-small text-primary">
                   {storyEpisodeLabel(locale, episode)}
-                  {episode.episodeKind === "another" && episode.characterNames[0] && <span className="ml-1.5 font-bold text-[var(--mn-text-muted)]">{episode.characterNames[0]}</span>}
+                  {episode.episodeKind === "another" && episode.characterNames[0] && <span className="ml-1.5 font-bold text-on-surface-variant">{episode.characterNames[0]}</span>}
                 </p>
-                <h4 className="mt-1 line-clamp-2 text-sm font-black text-[var(--mn-text)]">{episode.title}</h4>
-                {episode.playTime ? <p className="mt-1 text-[11px] font-bold tabular-nums text-[var(--mn-text-muted)]">{formatPlayTime(episode.playTime)}</p> : null}
+                <h4 className="mt-1 line-clamp-2 text-label-large text-on-surface">{episode.title}</h4>
+                {episode.playTime ? <p className="mt-1 text-label-small tabular-nums text-on-surface-variant">{formatPlayTime(episode.playTime)}</p> : null}
               </div>
             </a>)}
           </div>
@@ -279,34 +279,34 @@ function StoryCard({ story, locale, onOpen }: { story: StoryViewModel; locale: A
   const image = hasCover ? (story.assets.banner || story.assets.image) : "";
   const imageUrl = image ? assetUrl(getAssetUrl({ path: `Story/Banner/${story.assets.banner ? "Episode" : "Chapter"}/${image}.png`, type: "raw", locale })) : "";
 
-  const className = "mn-list-card group block w-full overflow-hidden rounded-3xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] text-left shadow-[var(--mn-shadow-stamp)] transition hover:-translate-y-1 hover:shadow-[var(--mn-shadow-stamp-lg)]";
+  const className = "mn-list-card group block w-full overflow-hidden rounded-shape-lg border border-outline-variant bg-surface-container-low text-left shadow-elevation-1 transition hover:shadow-elevation-1";
   const content = <>
     {hasCover && (
-      <div className="aspect-[2/1] bg-[var(--mn-cream-deep)] border-b-[1.5px] border-[var(--mn-border)] overflow-hidden">
+      <div className="aspect-[2/1] bg-surface-container-highest border-b-[1.5px] border-outline-variant overflow-hidden">
         {imageUrl ? (
           <img src={imageUrl} alt="" className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]" loading="lazy" />
         ) : (
-          <div className="grid h-full place-items-center text-3xl text-[var(--mn-text-muted)]">◇</div>
+          <div className="grid h-full place-items-center text-headline-medium text-on-surface-variant">◇</div>
         )}
       </div>
     )}
     <div className="p-5">
       <div className="mb-3 flex items-center justify-between gap-2">
-        <span className="rounded-full bg-[color-mix(in_oklab,var(--mn-accent)_12%,transparent)] px-2.5 py-1 text-[11px] font-black text-[var(--mn-accent)]">
+        <span className="rounded-full bg-primary/12 px-2.5 py-1 text-label-small text-primary">
           {t(locale, storyCategoryKey(story.category))}
         </span>
-        <span className="text-[11px] font-bold tabular-nums text-[var(--mn-text-muted)]">{[formatPlayTime(story.playTime), `ADV ${story.advId}`].filter(Boolean).join(" · ")}</span>
+        <span className="text-label-small tabular-nums text-on-surface-variant">{[formatPlayTime(story.playTime), `ADV ${story.advId}`].filter(Boolean).join(" · ")}</span>
       </div>
-      <h3 className="line-clamp-2 font-black text-[var(--mn-text)] text-base leading-snug">
+      <h3 className="line-clamp-2 text-on-surface text-title-medium">
         {story.title}
       </h3>
       {story.birthday ? (
         <div className="mt-3 flex items-center gap-2">
           <CharacterAvatarStack locale={locale} characters={[{ id: story.birthday.characterId, name: story.birthday.characterName }]} size="md" showNames />
-          {story.birthday.month > 0 && <span className="text-[11px] font-bold text-[var(--mn-accent)]">{t(locale, "story.ui.birthdayDate", { month: story.birthday.month, day: story.birthday.day })}</span>}
+          {story.birthday.month > 0 && <span className="text-label-small text-primary">{t(locale, "story.ui.birthdayDate", { month: story.birthday.month, day: story.birthday.day })}</span>}
         </div>
       ) : (
-        <p className="mt-2 truncate text-xs font-medium text-[var(--mn-text-muted)]">
+        <p className="mt-2 truncate text-body-small text-on-surface-variant">
           {story.characterNames.join(" · ") || story.groupTitle}
         </p>
       )}
@@ -328,8 +328,8 @@ function StoryTable({ stories, locale, onOpen }: { stories: StoryViewModel[]; lo
       sortValue: (story) => story.title,
       render: (story) => (
         <span className="block min-w-[10rem] max-w-[22rem]">
-          <span className="block truncate font-bold text-[var(--mn-text)]">{story.title}</span>
-          <span className="block text-[11px] font-medium text-[var(--mn-text-muted)]">{[storyEpisodeLabel(locale, story), `ADV ${story.advId}`].filter(Boolean).join(" · ")}</span>
+          <span className="block truncate font-bold text-on-surface">{story.title}</span>
+          <span className="block text-label-small text-on-surface-variant">{[storyEpisodeLabel(locale, story), `ADV ${story.advId}`].filter(Boolean).join(" · ")}</span>
         </span>
       ),
     },
@@ -390,4 +390,4 @@ function StoryReader({ story, locale, characters, texts, onClose }: { story: Sto
   </Modal>;
 }
 
-function State({ text, action }: { text: string; action?: () => void }) { return <div className="grid min-h-64 place-items-center rounded-3xl border border-dashed border-[var(--mn-border)] bg-[var(--mn-paper)] p-8 text-center"><div><p className="font-bold text-[var(--mn-text-muted)]">{text}</p>{action && <button type="button" onClick={action} className="mt-4 rounded-full bg-[var(--mn-accent)] px-5 py-2 text-sm font-black text-white">Retry</button>}</div></div>; }
+function State({ text, action }: { text: string; action?: () => void }) { return <div className="grid min-h-64 place-items-center rounded-shape-lg border border-dashed border-outline-variant bg-surface-container-low p-8 text-center"><div><p className="font-bold text-on-surface-variant">{text}</p>{action && <button type="button" onClick={action} className="mt-4 rounded-full bg-primary px-5 py-2 text-label-large text-white">Retry</button>}</div></div>; }

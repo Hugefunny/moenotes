@@ -479,7 +479,7 @@ export default function StoryScriptReader({ locale, script: neutralScript, chara
           setIsAutoplayMode(true);
           playLine(activeLineIndex ?? 0);
         }}
-        className="flex items-center gap-2 rounded-full bg-[var(--mn-accent)] px-4 py-1.5 text-xs font-black text-white shadow-[var(--mn-shadow-stamp)] transition hover:-translate-y-0.5 active:translate-y-0"
+        className="flex items-center gap-2 rounded-full bg-primary px-4 py-1.5 text-label-medium text-white shadow-elevation-1 transition active:translate-y-0"
       >
         <svg className="h-3.5 w-3.5 fill-current translate-x-0.5" viewBox="0 0 24 24">
           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
@@ -492,7 +492,7 @@ export default function StoryScriptReader({ locale, script: neutralScript, chara
         type="button"
         aria-pressed={showBackgrounds}
         onClick={toggleBackgrounds}
-        className={`flex items-center gap-2 rounded-full border border-[var(--mn-border)] px-4 py-1.5 text-xs font-black shadow-[var(--mn-shadow-stamp-sm)] transition hover:-translate-y-0.5 active:translate-y-0 ${showBackgrounds ? "bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]" : "bg-[var(--mn-paper)] text-[var(--mn-text)]"}`}
+        className={`flex items-center gap-2 rounded-full border border-outline-variant px-4 py-1.5 text-label-medium transition active:translate-y-0 ${showBackgrounds ? "bg-secondary-container text-primary" : "bg-surface-container-low text-on-surface"}`}
       >
         <svg className="h-3.5 w-3.5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M20 4H4a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1zm-1 12.6-4.3-4.3a1 1 0 0 0-1.4 0L10 15.6l-1.3-1.3a1 1 0 0 0-1.4 0L5 16.6V6h14v10.6zM8.5 10.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
@@ -531,7 +531,7 @@ export default function StoryScriptReader({ locale, script: neutralScript, chara
 
     {renderHeader
       ? renderHeader(controls || null)
-      : controls && <div className="mb-4 flex items-center justify-between border-b border-[var(--mn-border)] pb-4">{controls}</div>}
+      : controls && <div className="mb-4 flex items-center justify-between border-b border-outline-variant pb-4">{controls}</div>}
 
     <div className="space-y-3">{blocks.map((block, blockIndex) => {
       switch (block.kind) {
@@ -570,11 +570,11 @@ export default function StoryScriptReader({ locale, script: neutralScript, chara
 
     {/* Floating Player Dock */}
     {isAutoplayMode && activeLineIndex !== null && (
-      <div className={`fixed bottom-6 left-1/2 ${layer === "modal" ? "z-[60]" : "z-[33]"} w-[92%] max-w-[480px] -translate-x-1/2 overflow-hidden rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-paper)]/95 shadow-[var(--mn-shadow-stamp)] backdrop-blur-md transition-all duration-300`}>
+      <div className={`fixed bottom-6 left-1/2 ${layer === "modal" ? "z-[60]" : "z-[33]"} w-[92%] max-w-[480px] -translate-x-1/2 overflow-hidden rounded-shape-lg bg-surface-container-high shadow-elevation-3 transition-all duration-300`}>
         {/* Progress Bar at top edge of the pill */}
-        <div className="h-1 w-full bg-[var(--mn-border)]">
+        <div className="h-1 w-full bg-outline-variant">
           <div
-            className="h-full bg-[var(--mn-accent)] transition-all duration-300"
+            className="h-full bg-primary transition-all duration-300"
             style={{
               width: `${((activeLineIndex + 1) / script.lines.length) * 100}%`
             }}
@@ -590,7 +590,7 @@ export default function StoryScriptReader({ locale, script: neutralScript, chara
               type="button"
               disabled={activeLineIndex === 0}
               onClick={() => activeLineIndex > 0 && playLine(activeLineIndex - 1)}
-              className="text-[var(--mn-text-muted)] hover:text-[var(--mn-text)] disabled:opacity-30 transition p-1"
+              className="text-on-surface-variant hover:text-on-surface disabled:opacity-30 transition p-1"
               aria-label="Previous line"
             >
               <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
@@ -602,7 +602,7 @@ export default function StoryScriptReader({ locale, script: neutralScript, chara
             <button
               type="button"
               onClick={handleTogglePlayState}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--mn-accent)] text-white shadow-[var(--mn-shadow-stamp-sm)] transition hover:scale-105 active:scale-95"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-white transition hover:scale-105"
               aria-label={isPlaying ? "Pause autoplay" : "Start autoplay"}
             >
               {isPlaying ? (
@@ -621,7 +621,7 @@ export default function StoryScriptReader({ locale, script: neutralScript, chara
               type="button"
               disabled={activeLineIndex === script.lines.length - 1}
               onClick={() => activeLineIndex < script.lines.length - 1 && playLine(activeLineIndex + 1)}
-              className="text-[var(--mn-text-muted)] hover:text-[var(--mn-text)] disabled:opacity-30 transition p-1"
+              className="text-on-surface-variant hover:text-on-surface disabled:opacity-30 transition p-1"
               aria-label="Next line"
             >
               <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
@@ -632,10 +632,10 @@ export default function StoryScriptReader({ locale, script: neutralScript, chara
 
           {/* Middle dialogue status info */}
           <div className="flex flex-col items-center justify-center text-center">
-            <span className="text-[9px] font-black tracking-widest text-[var(--mn-accent)] uppercase">
+            <span className="text-label-medium text-primary">
               {isPlaying ? t(locale, "story.ui.playing") : t(locale, "story.ui.paused")}
             </span>
-            <span className="mt-0.5 text-xs font-black text-[var(--mn-text)]">
+            <span className="mt-0.5 text-label-medium text-on-surface">
               {t(locale, "story.ui.line", { current: activeLineIndex + 1, total: script.lines.length })}
             </span>
           </div>
@@ -653,7 +653,7 @@ export default function StoryScriptReader({ locale, script: neutralScript, chara
                   return 1;
                 });
               }}
-              className="rounded-full border border-[var(--mn-border)] bg-[var(--mn-paper)] px-2.5 py-0.5 text-[11px] font-black text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp-sm)] transition hover:-translate-y-0.5 active:translate-y-0 hover:bg-[color-mix(in_oklab,var(--mn-accent)_6%,transparent)] hover:border-[var(--mn-accent)]/30"
+              className="rounded-full border border-outline-variant bg-surface-container-low px-2.5 py-0.5 text-label-small text-on-surface transition active:translate-y-0 hover:bg-primary/6 hover:border-primary/30"
             >
               {playbackRate}x
             </button>
@@ -671,7 +671,7 @@ export default function StoryScriptReader({ locale, script: neutralScript, chara
                   audioRef.current.src = "";
                 }
               }}
-              className="text-[var(--mn-text-muted)] hover:text-[var(--mn-text)] transition p-1"
+              className="text-on-surface-variant hover:text-on-surface transition p-1"
               aria-label="Close player"
             >
               <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
@@ -721,18 +721,14 @@ function LineCard({ index, line, characterId, isActive, isPlaying, locale, onTog
   return <article
     id={`story-line-${index}`}
     onClick={onToggle}
-    className={`rounded-2xl border p-4 cursor-pointer transition-all duration-300 shadow-[var(--mn-shadow-stamp-sm)] ${
-      isActive
-        ? "border-[var(--mn-accent)] bg-[color-mix(in_oklab,var(--mn-accent)_4%,transparent)] shadow-[var(--mn-shadow-stamp)] ring-1 ring-[var(--mn-accent)]/20 scale-[1.01] group-data-[immersive]/story:bg-[color-mix(in_oklab,var(--mn-paper)_88%,transparent)]"
-        : "border-[var(--mn-border)] bg-[var(--mn-paper)] hover:bg-[color-mix(in_oklab,var(--mn-accent)_1.5%,transparent)] group-data-[immersive]/story:bg-[color-mix(in_oklab,var(--mn-paper)_72%,transparent)]"
-    } group-data-[immersive]/story:backdrop-blur-sm`}
+    className={`rounded-shape-md border p-4 cursor-pointer transition-colors ${ isActive ? "border-transparent bg-secondary-container group-data-[immersive]/story:bg-secondary-container/90" : "md3-state border-outline-variant bg-surface-container-low group-data-[immersive]/story:bg-surface-container-low/72" } group-data-[immersive]/story:backdrop-blur-sm`}
   >
     <div className="mb-1.5 flex items-center justify-between gap-3">
       <div className="flex items-center gap-2">
         {characterId && (
-          <img src={assetUrl(getCharacterFaceIconUrl(characterId))} alt={line.speaker} className={`h-6 w-6 rounded-full border bg-[var(--mn-cream-deep)] object-cover transition-all ${isActive ? "border-[var(--mn-accent)] scale-110" : "border-[var(--mn-border)]"}`} />
+          <img src={assetUrl(getCharacterFaceIconUrl(characterId))} alt={line.speaker} className={`h-6 w-6 rounded-full border bg-surface-container-highest object-cover transition-all ${isActive ? "border-primary scale-110" : "border-outline-variant"}`} />
         )}
-        <strong className={`text-sm transition-colors duration-300 ${isActive ? "text-[var(--mn-accent)] font-black" : "text-[var(--mn-text-muted)] font-bold"}`}>
+        <strong className={`text-body-medium transition-colors duration-300 ${isActive ? "text-primary font-black" : "text-on-surface-variant font-bold"}`}>
           {speakerLabel(line, locale) || t(locale, "story.ui.narration")}
         </strong>
       </div>
@@ -743,7 +739,7 @@ function LineCard({ index, line, characterId, isActive, isPlaying, locale, onTog
         />
       )}
     </div>
-    <p className={`whitespace-pre-wrap leading-7 transition-all duration-300 ${isActive ? "text-[var(--mn-text)] font-semibold" : "text-[var(--mn-text)]"}`}><RichText line={line} /></p>
+    <p className={`whitespace-pre-wrap leading-7 transition-all duration-300 ${isActive ? "text-on-surface font-semibold" : "text-on-surface"}`}><RichText line={line} /></p>
   </article>;
 }
 
@@ -788,7 +784,7 @@ function SceneBackground({ url, label, expanded, line, isActive }: { url: string
   const [failed, onError, ref] = useImageFailed(url);
   const id = line === undefined ? undefined : `story-line-${line}`;
   if (!failed && (expanded || opened)) {
-    return <figure id={id} className={`relative overflow-hidden rounded-2xl border-[1.5px] bg-[var(--mn-cream-deep)] shadow-[var(--mn-shadow-stamp-sm)] ${isActive ? "border-[var(--mn-accent)] ring-1 ring-[var(--mn-accent)]/30" : "border-[var(--mn-border)]"}`}>
+    return <figure id={id} className={`relative overflow-hidden rounded-shape-lg border bg-surface-container-highest ${isActive ? "border-primary ring-1 ring-primary/30" : "border-outline-variant"}`}>
       <img
         ref={ref}
         src={url}
@@ -799,7 +795,7 @@ function SceneBackground({ url, label, expanded, line, isActive }: { url: string
         onClick={expanded ? undefined : () => setOpened(false)}
         className={`aspect-[3/1] w-full object-cover ${expanded ? "" : "cursor-zoom-out"}`}
       />
-      <figcaption className="absolute bottom-3 left-3 rounded-full border border-[var(--mn-border)] bg-[var(--mn-paper)]/90 px-3 py-1 text-xs font-black text-[var(--mn-text)] backdrop-blur-sm">{label}</figcaption>
+      <figcaption className="absolute bottom-3 left-3 rounded-shape-sm bg-inverse-surface/80 px-3 py-1 text-label-medium text-inverse-on-surface">{label}</figcaption>
     </figure>;
   }
   return <button
@@ -807,16 +803,16 @@ function SceneBackground({ url, label, expanded, line, isActive }: { url: string
     type="button"
     disabled={failed}
     onClick={() => setOpened(true)}
-    className="group flex w-full items-center gap-3 py-1 text-xs font-bold text-[var(--mn-text-muted)] disabled:cursor-default"
+    className="group flex w-full items-center gap-3 py-1 text-label-medium text-on-surface-variant disabled:cursor-default"
   >
-    <span className="h-px flex-1 bg-[color-mix(in_oklab,var(--mn-border)_22%,transparent)]" aria-hidden="true" />
-    <span className={`flex items-center gap-1.5 rounded-full border bg-[var(--mn-paper)] px-3 py-1 transition group-enabled:group-hover:border-[var(--mn-accent)] group-enabled:group-hover:text-[var(--mn-accent-deep)] ${isActive ? "border-[var(--mn-accent)] text-[var(--mn-accent-deep)]" : "border-[color-mix(in_oklab,var(--mn-border)_30%,transparent)]"}`}>
+    <span className="h-px flex-1 bg-outline-variant/22" aria-hidden="true" />
+    <span className={`flex items-center gap-1.5 rounded-full border bg-surface-container-low px-3 py-1 transition group-enabled:group-hover:border-primary group-enabled:group-hover:text-primary ${isActive ? "border-primary text-primary" : "border-outline-variant/30"}`}>
       <svg className="h-3 w-3 shrink-0 fill-current" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M20 4H4a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1zm-1 12.6-4.3-4.3a1 1 0 0 0-1.4 0L10 15.6l-1.3-1.3a1 1 0 0 0-1.4 0L5 16.6V6h14v10.6zM8.5 10.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
       </svg>
       {label}
     </span>
-    <span className="h-px flex-1 bg-[color-mix(in_oklab,var(--mn-border)_22%,transparent)]" aria-hidden="true" />
+    <span className="h-px flex-1 bg-outline-variant/22" aria-hidden="true" />
   </button>;
 }
 
@@ -825,7 +821,7 @@ function TelopLine({ index, line, isActive, onToggle }: LineViewProps) {
   return <p
     id={`story-line-${index}`}
     onClick={onToggle}
-    className={`mx-auto w-fit max-w-full cursor-pointer whitespace-pre-wrap rounded-full border px-4 py-1.5 text-center text-sm font-bold transition-colors duration-300 ${isActive ? "border-[var(--mn-accent)] bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]" : "border-[color-mix(in_oklab,var(--mn-border)_30%,transparent)] bg-[var(--mn-paper)] text-[var(--mn-ink-soft)]"}`}
+    className={`mx-auto w-fit max-w-full cursor-pointer whitespace-pre-wrap rounded-full border px-4 py-1.5 text-center text-label-large transition-colors duration-300 ${isActive ? "border-primary bg-secondary-container text-primary" : "border-outline-variant/30 bg-surface-container-low text-on-surface-variant"}`}
   >
     <RichText line={line} />
   </p>;
@@ -834,9 +830,9 @@ function TelopLine({ index, line, isActive, onToggle }: LineViewProps) {
 function SceneStill({ url, caption }: { url: string; caption: string | undefined }) {
   const [failed, onError, ref] = useImageFailed(url);
   if (failed) return null;
-  return <figure className="overflow-hidden rounded-2xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp)]">
-    <img ref={ref} src={url} alt={caption ?? ""} width={1920} height={1080} loading="lazy" decoding="async" onError={onError} className="h-auto w-full bg-[var(--mn-cream-deep)]" />
-    {caption && <figcaption className="whitespace-pre-line border-t border-[var(--mn-border)] px-4 py-3 text-sm leading-6 text-[var(--mn-ink-soft)]">{caption}</figcaption>}
+  return <figure className="overflow-hidden rounded-shape-lg border border-outline-variant bg-surface-container-low shadow-elevation-1">
+    <img ref={ref} src={url} alt={caption ?? ""} width={1920} height={1080} loading="lazy" decoding="async" onError={onError} className="h-auto w-full bg-surface-container-highest" />
+    {caption && <figcaption className="whitespace-pre-line border-t border-outline-variant px-4 py-3 text-body-medium leading-6 text-on-surface-variant">{caption}</figcaption>}
   </figure>;
 }
 
@@ -894,16 +890,16 @@ function ClipBlock({ video, lineIndices, lineProps, locale, events }: {
     if (trackUrl && trackRef.current) trackRef.current.track.mode = "showing";
   }, [trackUrl]);
 
-  return <section className="overflow-hidden rounded-2xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp)]">
-    <header className="flex min-w-0 items-center gap-2 border-b border-[var(--mn-border)] px-4 py-2.5">
-      <svg className="h-4 w-4 shrink-0 fill-current text-[var(--mn-accent)]" viewBox="0 0 24 24" aria-hidden="true">
+  return <section className="overflow-hidden rounded-shape-lg border border-outline-variant bg-surface-container-low shadow-elevation-1">
+    <header className="flex min-w-0 items-center gap-2 border-b border-outline-variant px-4 py-2.5">
+      <svg className="h-4 w-4 shrink-0 fill-current text-primary" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4z" />
       </svg>
-      <span className="shrink-0 text-xs font-black text-[var(--mn-accent-deep)]">{t(locale, "story.ui.clip")}</span>
-      {video.note && <span lang="ja" className="truncate text-xs font-medium text-[var(--mn-text-muted)]">{video.note}</span>}
+      <span className="shrink-0 text-label-medium text-primary">{t(locale, "story.ui.clip")}</span>
+      {video.note && <span lang="ja" className="truncate text-body-small text-on-surface-variant">{video.note}</span>}
     </header>
     {failed ? (
-      <p className="grid place-items-center bg-[var(--mn-cream-deep)] p-8 text-center text-sm font-bold text-[var(--mn-text-muted)]" style={{ aspectRatio: `${video.width} / ${video.height}` }}>
+      <p className="grid place-items-center bg-surface-container-highest p-8 text-center text-label-large text-on-surface-variant" style={{ aspectRatio: `${video.width} / ${video.height}` }}>
         {t(locale, "story.ui.clipUnavailable")}
       </p>
     ) : (
@@ -937,7 +933,7 @@ function ClipBlock({ video, lineIndices, lineProps, locale, events }: {
         type="button"
         aria-expanded={listOpen}
         onClick={() => setListOpen((open) => !open)}
-        className="flex w-full items-center justify-center gap-1.5 border-t border-[var(--mn-border)] px-4 py-2 text-xs font-bold text-[var(--mn-text-muted)] transition hover:text-[var(--mn-accent-deep)]"
+        className="flex w-full items-center justify-center gap-1.5 border-t border-outline-variant px-4 py-2 text-label-medium text-on-surface-variant transition hover:text-primary"
       >
         {listOpen ? t(locale, "story.ui.hideSubtitleList") : t(locale, "story.ui.showSubtitleList", { count: items.length })}
         <svg className={`h-3.5 w-3.5 fill-current transition-transform ${listOpen ? "rotate-180" : ""}`} viewBox="0 0 24 24" aria-hidden="true">
@@ -945,7 +941,7 @@ function ClipBlock({ video, lineIndices, lineProps, locale, events }: {
         </svg>
       </button>
     )}
-    {items.length > 0 && (listOpen || failed) && <ol className="divide-y divide-[color-mix(in_oklab,var(--mn-border)_15%,transparent)] border-t border-[var(--mn-border)]">
+    {items.length > 0 && (listOpen || failed) && <ol className="divide-y divide-outline-variant/15 border-t border-outline-variant">
       {items.map((item, position) => <ClipLine key={item.index} {...item} onScreen={onScreen === position} />)}
     </ol>}
   </section>;
@@ -956,25 +952,25 @@ function ClipLine({ index, line, characterId, isActive, onScreen, onToggle }: Li
   return <li
     id={`story-line-${index}`}
     onClick={onToggle}
-    className={`flex cursor-pointer items-start gap-3 px-4 py-2.5 transition-colors duration-300 ${isActive || onScreen ? "bg-[color-mix(in_oklab,var(--mn-accent)_8%,transparent)]" : "hover:bg-[color-mix(in_oklab,var(--mn-accent)_3%,transparent)]"}`}
+    className={`flex cursor-pointer items-start gap-3 px-4 py-2.5 transition-colors duration-300 ${isActive || onScreen ? "bg-primary/8" : "hover:bg-primary/3"}`}
   >
     {characterId
-      ? <img src={assetUrl(getCharacterFaceIconUrl(characterId))} alt="" className="mt-0.5 h-6 w-6 shrink-0 rounded-full border border-[var(--mn-border)] bg-[var(--mn-cream-deep)] object-cover" />
+      ? <img src={assetUrl(getCharacterFaceIconUrl(characterId))} alt="" className="mt-0.5 h-6 w-6 shrink-0 rounded-full border border-outline-variant bg-surface-container-highest object-cover" />
       : <span className="h-6 w-6 shrink-0" aria-hidden="true" />}
-    <p className="min-w-0 text-sm leading-6">
-      {line.speaker && <strong className={`mr-2 font-black ${isActive ? "text-[var(--mn-accent)]" : "text-[var(--mn-text-muted)]"}`}>{line.speaker}</strong>}
-      <span className={`whitespace-pre-wrap ${isActive ? "font-semibold text-[var(--mn-text)]" : "text-[var(--mn-text)]"}`}><RichText line={line} /></span>
+    <p className="min-w-0 text-body-medium leading-6">
+      {line.speaker && <strong className={`mr-2 font-black ${isActive ? "text-primary" : "text-on-surface-variant"}`}>{line.speaker}</strong>}
+      <span className={`whitespace-pre-wrap ${isActive ? "font-semibold text-on-surface" : "text-on-surface"}`}><RichText line={line} /></span>
     </p>
   </li>;
 }
 
 function ChatBlock({ title, locale, children }: { title: string; locale: AppLocale; children: ReactNode }) {
-  return <section className="mx-auto w-full max-w-lg overflow-hidden rounded-3xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-surface-strong)] shadow-[var(--mn-shadow-stamp)]">
-    <header className="flex items-center gap-2 border-b border-[var(--mn-border)] bg-[var(--mn-paper)] px-4 py-2.5">
-      <svg className="h-4 w-4 shrink-0 fill-current text-[var(--mn-accent)]" viewBox="0 0 24 24" aria-hidden="true">
+  return <section className="mx-auto w-full max-w-lg overflow-hidden rounded-shape-lg border border-outline-variant bg-surface-container-high shadow-elevation-1">
+    <header className="flex items-center gap-2 border-b border-outline-variant bg-surface-container-low px-4 py-2.5">
+      <svg className="h-4 w-4 shrink-0 fill-current text-primary" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M4 4h16a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H8l-4 4V5a1 1 0 0 1 1-1z" />
       </svg>
-      <span className="truncate text-sm font-black text-[var(--mn-text)]">{title || t(locale, "story.ui.chat")}</span>
+      <span className="truncate text-label-large text-on-surface">{title || t(locale, "story.ui.chat")}</span>
     </header>
     <ol className="space-y-3 p-4">{children}</ol>
   </section>;
@@ -987,8 +983,8 @@ function ChatBubble({ index, line, characterId, isActive, onToggle }: LineViewPr
   return <li id={`story-line-${index}`} onClick={onToggle} className={`flex cursor-pointer items-end gap-2 ${outgoing ? "flex-row-reverse" : ""}`}>
     <ChatAvatar url={avatar} name={line.speaker} />
     <div className={`flex min-w-0 max-w-[80%] flex-col ${outgoing ? "items-end" : "items-start"}`}>
-      {!outgoing && line.speaker && <span className="mb-1 px-1 text-[11px] font-bold text-[var(--mn-text-muted)]">{line.speaker}</span>}
-      <p className={`whitespace-pre-wrap rounded-2xl border px-3.5 py-2 text-sm leading-6 text-[var(--mn-text)] transition-all duration-300 ${outgoing ? "rounded-br-md bg-[var(--mn-accent-soft)]" : "rounded-bl-md bg-[var(--mn-paper)]"} ${isActive ? "border-[var(--mn-accent)] ring-1 ring-[var(--mn-accent)]/30" : "border-[var(--mn-border)]"}`}>
+      {!outgoing && line.speaker && <span className="mb-1 px-1 text-label-small text-on-surface-variant">{line.speaker}</span>}
+      <p className={`whitespace-pre-wrap rounded-shape-lg border px-3.5 py-2 text-body-medium leading-6 text-on-surface transition-all duration-300 ${outgoing ? "rounded-br-md bg-secondary-container" : "rounded-bl-md bg-surface-container-low"} ${isActive ? "border-primary ring-1 ring-primary/30" : "border-outline-variant"}`}>
         <RichText line={line} />
       </p>
     </div>
@@ -997,9 +993,9 @@ function ChatBubble({ index, line, characterId, isActive, onToggle }: LineViewPr
 
 function ChatAvatar({ url, name }: { url: string | undefined; name: string }) {
   const [failed, onError, ref] = useImageFailed(url ?? "");
-  const className = "h-8 w-8 shrink-0 rounded-full border border-[var(--mn-border)] bg-[var(--mn-cream-deep)]";
+  const className = "h-8 w-8 shrink-0 rounded-full border border-outline-variant bg-surface-container-highest";
   if (url && !failed) return <img ref={ref} src={url} alt="" loading="lazy" onError={onError} className={`${className} object-cover`} />;
-  return <span className={`${className} grid place-items-center text-xs font-black text-[var(--mn-text-muted)]`} aria-hidden="true">{Array.from(name)[0] ?? ""}</span>;
+  return <span className={`${className} grid place-items-center text-label-medium text-on-surface-variant`} aria-hidden="true">{Array.from(name)[0] ?? ""}</span>;
 }
 
 function VoicePlayButton({ isPlaying, onClick }: { isPlaying: boolean; onClick: () => void }) {
@@ -1010,7 +1006,7 @@ function VoicePlayButton({ isPlaying, onClick }: { isPlaying: boolean; onClick: 
         e.stopPropagation();
         onClick();
       }}
-      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-accent)] shadow-[var(--mn-shadow-stamp-sm)] transition hover:-translate-y-0.5 hover:bg-[color-mix(in_oklab,var(--mn-accent)_6%,transparent)] active:translate-y-0"
+      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-outline-variant bg-surface-container-low text-primary transition hover:bg-primary/6 active:translate-y-0"
       aria-label={isPlaying ? "Pause voice" : "Play voice"}
     >
       {isPlaying ? (

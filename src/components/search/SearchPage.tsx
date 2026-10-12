@@ -58,7 +58,7 @@ export default function SearchPage({ locale }: Props) {
         onChange={(event) => setQuery(event.currentTarget.value)}
         placeholder={t(locale, "search.placeholder")}
         aria-label={t(locale, "search.placeholder")}
-        className="w-full rounded-2xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-surface-strong)] px-5 py-3.5 text-lg font-bold text-[var(--mn-text)] outline-none placeholder:text-[var(--mn-text-muted)]"
+        className="w-full rounded-shape-lg border border-outline-variant bg-surface-container-high px-5 py-3.5 text-title-large text-on-surface outline-none placeholder:text-on-surface-variant"
       />
 
       {q && presentKinds.length > 0 ? (
@@ -67,7 +67,7 @@ export default function SearchPage({ locale }: Props) {
             type="button"
             onClick={() => setKind("all")}
             aria-pressed={activeKind === "all"}
-            className={`rounded-full border-2 px-4 py-1.5 text-sm font-bold ${activeKind === "all" ? "border-[var(--mn-border)] bg-[var(--mn-cream-deep)]" : "border-transparent text-[var(--mn-text-muted)]"}`}
+            className={`rounded-full border-2 px-4 py-1.5 text-label-large ${activeKind === "all" ? "border-outline-variant bg-surface-container-highest" : "border-transparent text-on-surface-variant"}`}
           >
             {t(locale, "search.kinds.all")}
           </button>
@@ -77,7 +77,7 @@ export default function SearchPage({ locale }: Props) {
               type="button"
               onClick={() => setKind(kind)}
               aria-pressed={activeKind === kind}
-              className={`rounded-full border-2 px-4 py-1.5 text-sm font-bold ${activeKind === kind ? "border-[var(--mn-border)] bg-[var(--mn-cream-deep)]" : "border-transparent text-[var(--mn-text-muted)]"}`}
+              className={`rounded-full border-2 px-4 py-1.5 text-label-large ${activeKind === kind ? "border-outline-variant bg-surface-container-highest" : "border-transparent text-on-surface-variant"}`}
             >
               {t(locale, KIND_LABEL_KEY[kind])}
             </button>
@@ -86,21 +86,21 @@ export default function SearchPage({ locale }: Props) {
       ) : null}
 
       {empty ? (
-        <p className="px-4 py-12 text-center text-sm font-bold text-[var(--mn-text-muted)]">{t(locale, "search.noResults")}</p>
+        <p className="px-4 py-12 text-center text-label-large text-on-surface-variant">{t(locale, "search.noResults")}</p>
       ) : (
         <div className="mt-6 space-y-8">
           {showStatic ? (
             <section>
-              <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">{t(locale, "search.kinds.page")}</h2>
+              <h2 className="mb-3 text-label-medium text-on-surface-variant">{t(locale, "search.kinds.page")}</h2>
               <ul className="space-y-1.5">
                 {matchedStatic.map((item) => (
                   <li key={item.id}>
                     <a
                       href={item.localizedPath}
-                      className="mn-command-option block rounded-2xl border-2 border-transparent px-5 py-3 text-sm hover:border-[var(--mn-border)] hover:bg-[var(--mn-cream-deep)]"
+                      className="md3-state block min-h-14 rounded-full px-4 py-3 text-body-large text-on-surface"
                     >
-                      <span className="font-black text-[var(--mn-text)]">{t(locale, item.labelKey)}</span>
-                      <span className="ml-3 text-xs font-bold text-[var(--mn-text-muted)]">{stripLocaleFromPathname(item.path)}</span>
+                      <span className="font-black text-on-surface">{t(locale, item.labelKey)}</span>
+                      <span className="ml-3 text-label-medium text-on-surface-variant">{stripLocaleFromPathname(item.path)}</span>
                     </a>
                   </li>
                 ))}
@@ -110,15 +110,15 @@ export default function SearchPage({ locale }: Props) {
 
           {visibleGroups.map(({ kind, results }) => (
             <section key={kind}>
-              <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">{t(locale, KIND_LABEL_KEY[kind])}</h2>
+              <h2 className="mb-3 text-label-medium text-on-surface-variant">{t(locale, KIND_LABEL_KEY[kind])}</h2>
               <ul className="space-y-1.5">
                 {results.map((result) => (
                   <li key={result.key}>
                     <a
                       href={result.href}
-                      className="mn-command-option block rounded-2xl border-2 border-transparent px-5 py-3 text-sm hover:border-[var(--mn-border)] hover:bg-[var(--mn-cream-deep)]"
+                      className="md3-state block min-h-14 rounded-full px-4 py-3 text-body-large text-on-surface"
                     >
-                      <span className="font-black text-[var(--mn-text)]">{result.title}</span>
+                      <span className="font-black text-on-surface">{result.title}</span>
                     </a>
                   </li>
                 ))}

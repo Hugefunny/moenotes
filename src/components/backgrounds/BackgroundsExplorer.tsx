@@ -127,10 +127,10 @@ export default function BackgroundsExplorer({ locale, servers, initialBackground
     <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer}>
       <section className="min-w-0" aria-live="polite">
         {filteredBackgrounds.length === 0 ? (
-          <div className="mn-paper p-8 text-center sm:p-12">
-            <h2 className="font-[var(--mn-font-display)] text-2xl text-[var(--mn-text)]">{t(locale, "backgrounds.emptyTitle")}</h2>
-            <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-7 text-[var(--mn-text-muted)]">{t(locale, "backgrounds.emptyDescription")}</p>
-            <button type="button" onClick={resetFilters} className="mn-focus mn-stamp-press mt-6 rounded-full border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-6 py-3 text-sm font-bold text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)]">
+          <div className="md3-surface p-8 text-center sm:p-12">
+            <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "backgrounds.emptyTitle")}</h2>
+            <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "backgrounds.emptyDescription")}</p>
+            <button type="button" onClick={resetFilters} className="md3-state mt-6 rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
               {t(locale, "backgrounds.reset")}
             </button>
           </div>
@@ -144,14 +144,14 @@ export default function BackgroundsExplorer({ locale, servers, initialBackground
                 aria-haspopup="dialog"
                 data-list-item-id={background.id}
                 aria-label={t(locale, "backgrounds.openPreview", { name: background.name })}
-                className="mn-list-card group flex min-w-0 flex-col overflow-hidden border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] text-left shadow-[var(--mn-shadow-stamp)] transition hover:-translate-y-1 hover:shadow-[var(--mn-shadow-stamp-lg)]"
+                className="mn-list-card group flex min-w-0 flex-col overflow-hidden border border-outline-variant bg-surface-container-low text-left shadow-elevation-1 transition hover:shadow-elevation-1"
               >
-                <span className="relative block aspect-video overflow-hidden border-b border-[var(--mn-glass-border)] bg-[var(--mn-cream-deep)]">
+                <span className="relative block aspect-video overflow-hidden border-b border-outline-variant bg-surface-container-highest">
                   <img className="h-full w-full object-cover transition duration-300 group-hover:scale-105" src={background.thumbnailUrl} alt="" loading="lazy" decoding="async" />
                 </span>
                 <span className="flex items-center justify-between gap-3 p-3">
-                  <span className="min-w-0 truncate text-sm font-black text-[var(--mn-text)] group-hover:text-[var(--mn-accent-deep)]">{background.name}</span>
-                  <span className="shrink-0 rounded-full border border-[var(--mn-glass-border)] px-2 py-0.5 text-[10px] font-bold text-[var(--mn-text-muted)]">{t(locale, `backgrounds.types.${background.type}`)}</span>
+                  <span className="min-w-0 truncate text-label-large text-on-surface group-hover:text-primary">{background.name}</span>
+                  <span className="shrink-0 rounded-full border border-outline-variant px-2 py-0.5 text-label-small text-on-surface-variant">{t(locale, `backgrounds.types.${background.type}`)}</span>
                 </span>
               </button>
             ))}
@@ -173,7 +173,7 @@ export default function BackgroundsExplorer({ locale, servers, initialBackground
           facts={preview ? [{ label: t(locale, "backgrounds.type"), value: t(locale, `backgrounds.types.${preview.type}`) || `#${preview.type}` }] : []}
         >
           {preview ? (
-            <a href={preview.imageUrl} target="_blank" rel="noopener noreferrer" className="mn-focus inline-flex rounded-full border border-[var(--mn-glass-border)] bg-[var(--mn-paper)] px-3 py-1.5 text-xs font-bold text-[var(--mn-accent-deep)] hover:bg-[var(--mn-accent-soft)]">
+            <a href={preview.imageUrl} target="_blank" rel="noopener noreferrer" className="inline-flex rounded-full border border-outline-variant bg-surface-container-low px-3 py-1.5 text-label-medium text-primary hover:bg-secondary-container">
               {t(locale, "backgrounds.openOriginal")}
             </a>
           ) : null}

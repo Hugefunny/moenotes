@@ -20,11 +20,11 @@ interface Props {
 }
 
 const toneByStatus: Record<RealLiveStatus, string> = {
-  ongoing: "border-[color-mix(in_srgb,var(--mn-accent)_45%,transparent)] bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]",
-  ready: "border-[color-mix(in_srgb,var(--mn-mint)_80%,transparent)] bg-[var(--mn-mint-soft)] text-[var(--mn-mint-deep)]",
-  upcoming: "border-[color-mix(in_srgb,var(--mn-pink)_70%,transparent)] bg-[var(--mn-pink-soft)] text-[var(--mn-ink-soft)]",
-  permanent: "border-[var(--mn-glass-border)] bg-[var(--mn-cream-deep)] text-[var(--mn-text-muted)]",
-  ended: "border-[var(--mn-glass-border)] bg-[var(--mn-cream-deep)] text-[var(--mn-text-muted)]",
+  ongoing: "border-primary/45 bg-secondary-container text-primary",
+  ready: "border-success/80 bg-success-container text-on-success-container",
+  upcoming: "border-category1/70 bg-category1-container text-on-surface-variant",
+  permanent: "border-outline-variant bg-surface-container-highest text-on-surface-variant",
+  ended: "border-outline-variant bg-surface-container-highest text-on-surface-variant",
 };
 
 /** The bands' real-world lives the game schedules, earliest first. */
@@ -35,7 +35,7 @@ export default function RealLivesView({ locale, servers, lives: initialLives }: 
   return (
     <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer}>
       {lives.length === 0 ? (
-        <p className="mn-paper p-8 text-center text-sm font-medium text-[var(--mn-text-muted)]">{t(locale, "realLives.empty")}</p>
+        <p className="md3-surface p-8 text-center text-body-medium text-on-surface-variant">{t(locale, "realLives.empty")}</p>
       ) : (
         <>
           <ol className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
@@ -43,10 +43,10 @@ export default function RealLivesView({ locale, servers, lives: initialLives }: 
               const status = now === null ? null : realLiveStatus(live, now);
               const names = live.bands.map((band) => band.name).filter(Boolean).join(" / ");
               return (
-                <li key={live.id} className="mn-paper flex min-w-0 flex-col gap-4 p-5" aria-label={names || `#${live.id}`}>
+                <li key={live.id} className="md3-surface flex min-w-0 flex-col gap-4 p-5" aria-label={names || `#${live.id}`}>
                   <div className="flex flex-wrap items-center gap-2">
                     {status && (
-                      <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold leading-none ${toneByStatus[status]}`}>
+                      <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-label-small ${toneByStatus[status]}`}>
                         <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
                         {t(locale, status === "ready" ? "realLives.ready" : `schedule.${status}`)}
                       </span>
@@ -61,20 +61,20 @@ export default function RealLivesView({ locale, servers, lives: initialLives }: 
                       </span>
                     ))}
                   </div>
-                  {names && <h2 className="font-[var(--mn-font-display)] text-lg leading-tight text-[var(--mn-text)]">{names}</h2>}
-                  <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5 text-sm">
-                    <dt className="font-semibold text-[var(--mn-text-muted)]">{t(locale, "realLives.readyAt")}</dt>
-                    <dd className="tabular-nums text-[var(--mn-text)]">{formatMasterDate(live.readyAt, locale, true, timeZone) || "—"}</dd>
-                    <dt className="font-semibold text-[var(--mn-text-muted)]">{t(locale, "realLives.startAt")}</dt>
-                    <dd className="tabular-nums font-bold text-[var(--mn-text)]">{formatMasterDate(live.startAt, locale, true, timeZone) || "—"}</dd>
-                    <dt className="font-semibold text-[var(--mn-text-muted)]">{t(locale, "realLives.endAt")}</dt>
-                    <dd className="tabular-nums text-[var(--mn-text)]">{formatMasterDate(live.endAt, locale, true, timeZone) || "—"}</dd>
+                  {names && <h2 className="font-[var(--md-ref-typeface-brand)] text-title-large text-on-surface">{names}</h2>}
+                  <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5 text-body-medium">
+                    <dt className="font-semibold text-on-surface-variant">{t(locale, "realLives.readyAt")}</dt>
+                    <dd className="tabular-nums text-on-surface">{formatMasterDate(live.readyAt, locale, true, timeZone) || "—"}</dd>
+                    <dt className="font-semibold text-on-surface-variant">{t(locale, "realLives.startAt")}</dt>
+                    <dd className="tabular-nums font-bold text-on-surface">{formatMasterDate(live.startAt, locale, true, timeZone) || "—"}</dd>
+                    <dt className="font-semibold text-on-surface-variant">{t(locale, "realLives.endAt")}</dt>
+                    <dd className="tabular-nums text-on-surface">{formatMasterDate(live.endAt, locale, true, timeZone) || "—"}</dd>
                   </dl>
                 </li>
               );
             })}
           </ol>
-          <TimesNote locale={locale} value={lives[0]?.startAt ?? ""} timeZone={timeZone} className="mt-4 text-xs text-[var(--mn-text-muted)]" />
+          <TimesNote locale={locale} value={lives[0]?.startAt ?? ""} timeZone={timeZone} className="mt-4 text-body-small text-on-surface-variant" />
         </>
       )}
     </ServerScope>
