@@ -1,4 +1,5 @@
 import { ACCENT_PALETTE_STORAGE_KEY, DEFAULT_ACCENT, SETTINGS_STORAGE_KEY } from "@/config/settings";
+import { storageKeys } from "@/config/storage";
 import { HOME_LAYOUT_STORAGE_KEY, HOME_LAYOUT_STYLE_ID, HOME_MODULES } from "@/lib/home/layout";
 import { colorDeclarations, MD3_ROLES, roleChannelVariable, roleCssVariable, type Md3Colors } from "@/lib/md3/roles";
 import { ACCENT_CACHE_VERSION, accentCache, type AccentCache } from "@/lib/settings/accent";
@@ -78,6 +79,13 @@ export function buildThemeBootstrapScript(): string {
   root.dataset.themePreference = colorScheme;
   root.style.colorScheme = resolved;
   root.dataset.density = settings.density === 'compact' ? 'compact' : 'comfortable';
+  try {
+    // The navigation drawer's state (src/lib/sidebar/sidebar-store.ts), so the content starts at its final offset.
+    if (sessionStorage.getItem(${JSON.stringify(storageKeys.sidebarOpen)}) === 'false') {
+      root.dataset.sidebar = 'closed';
+      root.style.setProperty('--mn-sidebar-offset', '0rem');
+    }
+  } catch(e) {}
   try {
     var accent = typeof settings.accentColor === 'string' ? settings.accentColor.toUpperCase() : '';
     var cached = JSON.parse(localStorage.getItem(${JSON.stringify(ACCENT_PALETTE_STORAGE_KEY)}) || 'null');

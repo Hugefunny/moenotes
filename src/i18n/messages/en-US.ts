@@ -828,6 +828,11 @@ export const enUS = {
     commandPlaceholder: "Search pages or features...",
     noCommandResults: "No results found",
     shortcuts: "Shortcuts",
+    breadcrumb: "Breadcrumb",
+    navigation: "Main navigation",
+    breadcrumbSelectPage: "Choose a page",
+    searchPlaceholder: "Search Moenotes",
+    scrollToTop: "Back to top",
   },
   search: {
     placeholder: "Search cards, songs, characters, stories…",

@@ -84,7 +84,7 @@
 .dc-run .dc-notice { margin-top: 0; }
 .dc-run .dc-primary-action { margin-top: 0; padding-top: 0; border-top: 0; }
 .dc-panel { min-width: 0; padding: 18px; border: 1px solid var(--dc-line); border-radius: 14px; background: var(--mn-paper); }
-.dc-team, .dc-questions { scroll-margin-top: calc(var(--mn-header-bottom, 5rem) + 12px); }
+.dc-team, .dc-questions { scroll-margin-top: calc(var(--md-app-bar-height, 64px) + 12px); }
 .dc-section-heading { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 13px; min-width: 0; }
 .dc-section-heading > h2 { min-width: 0; }
 .dc-goals { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr)); gap: 6px; }

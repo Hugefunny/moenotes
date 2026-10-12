@@ -498,7 +498,7 @@ function DesignSystemPage({ locale, bands }: Props) {
           <ThemeControls locale={locale} bands={bands} />
         </div>
       </header>
-      <nav className="sticky top-[var(--mn-header-bottom,5rem)] z-20 -mx-1 bg-surface md:top-24" aria-label={t(locale, "designSystem.title")}>
+      <nav className="sticky top-[var(--md-app-bar-height,64px)] z-20 -mx-1 bg-surface" aria-label={t(locale, "designSystem.title")}>
         <Tabs value={section} onChange={(_, value: SectionId) => jump(value)} variant="scrollable" allowScrollButtonsMobile>
           {SECTIONS.map((id) => <Tab key={id} value={id} label={t(locale, k(`sections.${id}`))} />)}
         </Tabs>

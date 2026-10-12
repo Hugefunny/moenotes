@@ -865,6 +865,11 @@ export const zhTW = {
     commandPlaceholder: "搜索頁面或功能...",
     noCommandResults: "沒有找到結果",
     shortcuts: "快捷鍵",
+    breadcrumb: "麵包屑導覽",
+    navigation: "主導覽",
+    breadcrumbSelectPage: "選擇頁面",
+    searchPlaceholder: "搜尋 Moenotes",
+    scrollToTop: "回到頂端",
   },
   search: {
     placeholder: "搜尋卡牌、歌曲、角色、劇情…",

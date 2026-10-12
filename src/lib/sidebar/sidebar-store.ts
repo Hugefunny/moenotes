@@ -3,7 +3,7 @@
  *
  * This consolidates state management that was previously scattered across:
  * - apply-theme.ts bootstrap script
- * - HeaderActions.tsx setDesktopSidebar()
+ * - the top app bar's navigation button (TopAppBar.tsx)
  * - Sidebar.tsx multiple useEffects
  * - Custom events moenotes:sidebar-state / moenotes:toggle-desktop-sidebar
  */
@@ -64,7 +64,8 @@ function persistSidebarState(open: boolean): void {
 export function applySidebarToDocument(open: boolean): void {
   const root = document.documentElement;
   root.dataset.sidebar = open ? "open" : "closed";
-  root.style.setProperty("--mn-sidebar-offset", open ? "18rem" : "2rem");
+  // The docked navigation drawer is 17rem wide (src/components/shell/Sidebar.tsx); folded away it takes no room.
+  root.style.setProperty("--mn-sidebar-offset", open ? "17rem" : "0rem");
 }
 
 function emitSidebarStateChanged(open: boolean): void {
@@ -74,6 +75,7 @@ function emitSidebarStateChanged(open: boolean): void {
 
 // Auto-initialize on first import in browser
 if (typeof window !== "undefined" && !initialized) {
+  initSidebarState();
   // Handle toggle event from keyboard shortcuts
   window.addEventListener("moenotes:toggle-desktop-sidebar", () => {
     toggleSidebar();

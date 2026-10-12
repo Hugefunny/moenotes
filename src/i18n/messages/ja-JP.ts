@@ -863,6 +863,11 @@ export const jaJP = {
     commandPlaceholder: "ページ、機能、データを検索...",
     noCommandResults: "結果がありません",
     shortcuts: "ショートカット",
+    breadcrumb: "パンくずリスト",
+    navigation: "メインナビゲーション",
+    breadcrumbSelectPage: "ページを選択",
+    searchPlaceholder: "Moenotes を検索",
+    scrollToTop: "トップへ戻る",
   },
   search: {
     placeholder: "カード・楽曲・キャラ・ストーリーを検索…",

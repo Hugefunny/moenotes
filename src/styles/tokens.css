@@ -6,6 +6,10 @@
   --mn-layout-max-width: 120rem;
   --mn-filter-drawer-w: 20rem;
   --mn-filter-offset: 0rem;
+  /* Width the docked navigation drawer takes (0 when folded; src/lib/sidebar/sidebar-store.ts). */
+  --mn-sidebar-offset: 17rem;
+  /* Height of the top app bar (M3 small top app bar: 64dp). */
+  --md-app-bar-height: 64px;
 
   /* ── Neutrals ── */
   --mn-bg: var(--md-sys-color-surface);

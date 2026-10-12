@@ -166,7 +166,7 @@ export default function FilterDrawer({ locale, pathname }: FilterDrawerProps) {
             transition={{ type: "spring", damping: 28, stiffness: 260 }}
             className={`mn-overlay-panel fixed ${
               isModal
-                ? "left-3 right-3 sm:left-4 sm:right-auto sm:w-80 top-[var(--mn-header-bottom,5rem)] h-[calc(100dvh-var(--mn-header-bottom,5rem)-1rem)] z-45"
+                ? "left-3 right-3 sm:left-4 sm:right-auto sm:w-80 top-[calc(var(--md-app-bar-height,64px)+0.5rem)] h-[calc(100dvh-var(--md-app-bar-height,64px)-0.5rem-1rem)] z-45"
                 : "top-24 h-[calc(100vh-7.5rem)] w-80 z-30"
             } flex flex-col overflow-hidden rounded-[1.75rem] border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp-lg)] transform-gpu`}
           >

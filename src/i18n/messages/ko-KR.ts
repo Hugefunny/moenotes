@@ -817,6 +817,11 @@ export const koKR = {
     commandPlaceholder: "페이지나 기능을 검색...",
     noCommandResults: "결과가 없습니다",
     shortcuts: "단축키",
+    breadcrumb: "탐색 경로",
+    navigation: "주 내비게이션",
+    breadcrumbSelectPage: "페이지 선택",
+    searchPlaceholder: "Moenotes 검색",
+    scrollToTop: "맨 위로",
   },
   search: {
     placeholder: "카드, 곡, 캐릭터, 스토리 검색…",

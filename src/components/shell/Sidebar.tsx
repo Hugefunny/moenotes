@@ -1,20 +1,25 @@
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import ButtonBase from "@mui/material/ButtonBase";
+import Collapse from "@mui/material/Collapse";
+import Divider from "@mui/material/Divider";
+import Drawer from "@mui/material/Drawer";
+import IconButton from "@mui/material/IconButton";
 import BrandLogo from "@/components/shared/BrandLogo";
+import { Icon } from "@/components/shared/icons";
 import RouteGlyph from "@/components/shared/RouteGlyph";
-import { useEffect, useMemo, useRef, useState, Fragment, type KeyboardEvent, type ReactNode } from "react";
+import { withMd3 } from "@/components/md3/Md3Provider";
 import SidebarAccount from "@/components/shell/SidebarAccount";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { AppLocale } from "@/config/locales";
-import { localizePath, stripLocaleFromPathname, normalizePathname } from "@/i18n/routing";
 import { t } from "@/i18n";
-import { lockBodyScroll, unlockBodyScroll } from "@/lib/overlay/body-scroll-lock";
+import { localizePath, normalizePathname, stripLocaleFromPathname } from "@/i18n/routing";
 import { useOverlay } from "@/lib/overlay/use-overlay";
+import { getNavChildren, getNavigationGroups, isCurrentRoute } from "@/lib/route/registry";
 import { useSidebarState } from "@/lib/sidebar/use-sidebar-state";
-import { getNavigationGroups, getNavChildren, isCurrentRoute } from "@/lib/route/registry";
+import { safeGetLocalStorage, safeGetSessionStorage, safeSetLocalStorage, safeSetSessionStorage } from "@/lib/storage/safe-storage";
 import type { AppRoute, RouteIcon } from "@/types/route";
-import { safeGetLocalStorage, safeSetLocalStorage, safeGetSessionStorage, safeSetSessionStorage } from "@/lib/storage/safe-storage";
 
 const groupStorageKey = "moenotes:nav-groups";
-const mobileFocusableSelector = "a[href], button:not([disabled]), [tabindex]:not([tabindex='-1'])";
+const scrollStorageKey = "moenotes:sidebar-scroll";
 
 interface SidebarProps {
   locale: AppLocale;
@@ -22,320 +27,191 @@ interface SidebarProps {
   activePath?: string | undefined;
 }
 
-export default function Sidebar({ locale, pathname, activePath }: SidebarProps) {
+/**
+ * Material 3 navigation drawer. From `md` up it is a standard drawer docked beside the content (the top app bar's
+ * navigation button folds it away); below `md` it is a modal drawer over a scrim. Groups expand in place, the current
+ * page carries the active indicator (secondary-container), and the account pane sits at the foot.
+ */
+function Sidebar({ locale, pathname, activePath }: SidebarProps) {
   const [desktopOpen] = useSidebarState();
-  const reducedMotion = useReducedMotion();
-  const [mounted, setMounted] = useState(false);
+  const [ready, setReady] = useState(false);
   const { isOpen: mobileOpen, close: closeMobile } = useOverlay("mobile-sidebar");
-  const mobilePanelRef = useRef<HTMLElement>(null);
-  const mobileRestoreFocusRef = useRef<HTMLElement | null>(null);
   const groups = useMemo(() => getNavigationGroups(), []);
 
-  // Mark mounted after initial render (for animation)
   useEffect(() => {
-    const raf = requestAnimationFrame(() => {
-      setMounted(true);
-    });
+    const raf = requestAnimationFrame(() => setReady(true));
     return () => cancelAnimationFrame(raf);
   }, []);
-
-  useEffect(() => {
-    if (!mobileOpen) {
-      unlockBodyScroll("mobile-sidebar");
-      return;
-    }
-    mobileRestoreFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    lockBodyScroll("mobile-sidebar");
-    const raf = requestAnimationFrame(() => {
-      const firstFocusable = mobilePanelRef.current?.querySelector<HTMLElement>(mobileFocusableSelector);
-      (firstFocusable ?? mobilePanelRef.current)?.focus({ preventScroll: true });
-    });
-    return () => {
-      cancelAnimationFrame(raf);
-      unlockBodyScroll("mobile-sidebar");
-      const restoreTarget = mobileRestoreFocusRef.current;
-      if (restoreTarget && document.contains(restoreTarget)) {
-        requestAnimationFrame(() => restoreTarget.focus({ preventScroll: true }));
-      }
-    };
-  }, [mobileOpen]);
-
-  const handleMobileKeyDown = (event: KeyboardEvent<HTMLElement>) => {
-    if (event.nativeEvent.isComposing) return;
-    if (event.key === "Escape") {
-      event.preventDefault();
-      closeMobile();
-      return;
-    }
-    if (event.key === "Tab") trapMobileFocus(event.nativeEvent, mobilePanelRef.current);
-  };
 
   return (
     <>
       <aside
-        className="mn-desktop-sidebar fixed top-24 z-30 hidden h-[calc(100vh-7.5rem)] w-64 shrink-0 md:block"
+        className="mn-desktop-sidebar fixed bottom-0 top-[var(--md-app-bar-height,64px)] z-30 hidden w-[17rem] md:block"
         data-open={desktopOpen}
-        data-ready={mounted}
+        data-ready={ready}
         inert={!desktopOpen}
         aria-hidden={!desktopOpen}
-        style={{ left: "calc(max(1.0rem, (100vw - var(--mn-layout-max-width, 120rem)) / 2 + 1.0rem))" }}
+        style={{ left: "max(0px, (100vw - var(--mn-layout-max-width, 120rem)) / 2)" }}
       >
-        <SidebarFrame footer={<SidebarAccount locale={locale} pathname={pathname} />}>
-          <SidebarNav locale={locale} pathname={pathname} activePath={activePath} groups={groups} />
-        </SidebarFrame>
+        <div className="flex h-full flex-col">
+          <DrawerNav locale={locale} pathname={pathname} activePath={activePath} groups={groups} />
+          <SidebarAccount locale={locale} pathname={pathname} />
+        </div>
       </aside>
 
-      <AnimatePresence>
-        {mobileOpen && (
-          <div className="fixed inset-0 z-[35] md:hidden" role="dialog" aria-modal="true">
-            <motion.button
-              className="absolute inset-0 h-full w-full mn-overlay-backdrop"
-              aria-label={t(locale, "actions.close")}
-              onClick={closeMobile}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-            />
-            <motion.aside
-              ref={mobilePanelRef}
-              className="mn-overlay-panel absolute left-4 flex w-[min(20rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-3xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp-lg)]"
-              tabIndex={-1}
-              aria-label={t(locale, "shell.openSidebar")}
-              onKeyDown={handleMobileKeyDown}
-              style={{
-                top: "var(--mn-header-bottom, 80px)",
-                height: "calc(100dvh - var(--mn-header-bottom, 80px) - 16px)"
-              }}
-              initial={{ x: reducedMotion ? 0 : -24, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: reducedMotion ? 0 : -24, opacity: 0 }}
-              transition={{ duration: reducedMotion ? 0.16 : 0.26, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <SidebarNav locale={locale} pathname={pathname} activePath={activePath} groups={groups} onNavigate={closeMobile} />
-              <SidebarAccount locale={locale} pathname={pathname} />
-            </motion.aside>
-          </div>
-        )}
-      </AnimatePresence>
+      <Drawer
+        open={mobileOpen}
+        onClose={closeMobile}
+        anchor="left"
+        className="md:hidden"
+        slotProps={{ paper: { sx: { width: "min(22.5rem, calc(100vw - 56px))" }, "aria-label": t(locale, "shell.navigation") } }}
+        ModalProps={{ keepMounted: false }}
+      >
+        <div className="flex items-center justify-between px-4 pb-2 pt-3">
+          <a href={localizePath("/", locale)} onClick={closeMobile} className="md3-state rounded-full px-2 py-1 text-on-surface" aria-label={t(locale, "nav.home")}>
+            <BrandLogo className="mn-brand-shell" />
+          </a>
+          <IconButton aria-label={t(locale, "shell.closeSidebar")} onClick={closeMobile}>
+            <Icon name="close" />
+          </IconButton>
+        </div>
+        <DrawerNav locale={locale} pathname={pathname} activePath={activePath} groups={groups} onNavigate={closeMobile} />
+        <SidebarAccount locale={locale} pathname={pathname} />
+      </Drawer>
     </>
   );
 }
 
-function SidebarFrame({ children, footer }: { children: ReactNode; footer?: ReactNode }) {
-  return (
-    <div className="mn-sidebar-frame flex h-full flex-col overflow-hidden rounded-[1.75rem] border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp-lg)]">
-      {children}
-      {footer}
-    </div>
-  );
-}
-
-function SidebarNav({ locale, pathname, activePath, groups, onNavigate }: { locale: AppLocale; pathname: string; activePath?: string | undefined; groups: AppRoute[]; onNavigate?: () => void }) {
+function DrawerNav({ locale, pathname, activePath, groups, onNavigate }: { locale: AppLocale; pathname: string; activePath?: string | undefined; groups: AppRoute[]; onNavigate?: () => void }) {
   const scrollRef = useRef<HTMLElement>(null);
-  const activeGroupIds = useMemo(() => groups.filter((group) => isCurrentRoute(activePath || pathname, group.path)).map((group) => group.id), [groups, pathname, activePath]);
+  const current = activePath || pathname;
+  const activeGroupIds = useMemo(() => groups.filter((group) => isCurrentRoute(current, group.path)).map((group) => group.id), [groups, current]);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
-  // 保存滚动位置到 safe-storage — i18n-allow-hardcoded
+  // Keep the drawer's scroll position across page loads.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-
+    const saved = Number.parseInt(safeGetSessionStorage(scrollStorageKey) ?? "", 10);
+    if (Number.isFinite(saved)) requestAnimationFrame(() => { if (scrollRef.current) scrollRef.current.scrollTop = saved; });
     let ticking = false;
-    const handleScroll = () => {
+    const onScroll = () => {
       if (ticking) return;
       ticking = true;
       requestAnimationFrame(() => {
-        if (scrollRef.current) {
-          safeSetSessionStorage("moenotes:sidebar-scroll", String(scrollRef.current.scrollTop));
-        }
+        if (scrollRef.current) safeSetSessionStorage(scrollStorageKey, String(scrollRef.current.scrollTop));
         ticking = false;
       });
     };
-
-    el.addEventListener("scroll", handleScroll, { passive: true });
-    return () => el.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // 恢复滚动位置 — i18n-allow-hardcoded
-  useEffect(() => {
-    const saved = safeGetSessionStorage("moenotes:sidebar-scroll");
-    if (saved !== null && scrollRef.current) {
-      const scrollTop = parseInt(saved, 10);
-      if (!isNaN(scrollTop)) {
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            if (scrollRef.current) {
-              scrollRef.current.scrollTop = scrollTop;
-            }
-          });
-        });
-      }
-    }
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
-    const raw = safeGetLocalStorage(groupStorageKey);
-    if (raw) {
-      try {
-        const saved = JSON.parse(raw);
-        if (saved && typeof saved === "object") setCollapsed(saved);
-      } catch {
-        setCollapsed({});
-      }
+    try {
+      const saved: unknown = JSON.parse(safeGetLocalStorage(groupStorageKey) ?? "null");
+      if (saved && typeof saved === "object") setCollapsed(saved as Record<string, boolean>);
+    } catch {
+      setCollapsed({});
     }
   }, []);
 
   const toggleGroup = (id: string) => {
-    setCollapsed((current) => {
-      const next = { ...current, [id]: !current[id] };
+    setCollapsed((state) => {
+      const next = { ...state, [id]: !state[id] };
       safeSetLocalStorage(groupStorageKey, JSON.stringify(next));
       return next;
     });
   };
 
+  const home = stripLocaleFromPathname(current) === "/";
   return (
-    <nav ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto p-3.5" aria-label="Primary">
-      <div className="mn-nav-layer relative mb-3 overflow-hidden rounded-[1.35rem] border border-[color-mix(in_oklab,var(--mn-border)_18%,transparent)] bg-[var(--mn-cream-deep)] px-4 py-3.5">
-        <SidebarDoodle />
-        <div className="relative">
-          <BrandLogo className="mn-brand-sidebar" />
-
-        </div>
-      </div>
-      <div className="space-y-2">
-        {/* Home link */}
-        <a
-          href={localizePath("/", locale)}
-          aria-current={pathname === "/" ? "page" : undefined}
-          onClick={onNavigate}
-          className={`mn-nav-layer group flex items-center gap-3 rounded-2xl border px-3 py-2.5 text-[14px] font-black transition-colors ${
-            pathname === "/"
-              ? "border-[color-mix(in_oklab,var(--mn-accent)_35%,transparent)] bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]"
-              : "border-transparent text-[var(--mn-text)] hover:border-[color-mix(in_oklab,var(--mn-border)_12%,transparent)] hover:bg-[var(--mn-cream-deep)]"
-          }`}
-        >
-          <NavIcon icon="home" active={pathname === "/"} />
-          <span>{t(locale, "nav.home")}</span>
-          {pathname === "/" && <ActiveStar />}
-        </a>
-        <div className="mx-3 border-t border-dashed border-[var(--mn-border)] opacity-20" />
-        {groups.map((group, idx) => (
-          <Fragment key={group.id}>
-            {idx > 0 && <div className="mx-3 border-t border-dashed border-[var(--mn-border)] opacity-20" />}
-            <NavGroup
-              group={group}
-              locale={locale}
-              pathname={pathname}
-              activePath={activePath}
-              collapsed={Boolean(collapsed[group.id]) && !activeGroupIds.includes(group.id)}
-              onToggle={() => toggleGroup(group.id)}
-              {...(onNavigate ? { onNavigate } : {})}
-            />
-          </Fragment>
-        ))}
-      </div>
+    <nav ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-3 pb-3" aria-label={t(locale, "shell.navigation")}>
+      <NavItem href={localizePath("/", locale)} active={home} onNavigate={onNavigate} icon={<RouteGlyph icon="home" className="h-6 w-6" />}>
+        {t(locale, "nav.home")}
+      </NavItem>
+      {groups.map((group) => (
+        <NavGroup
+          key={group.id}
+          group={group}
+          locale={locale}
+          current={current}
+          collapsed={Boolean(collapsed[group.id]) && !activeGroupIds.includes(group.id)}
+          onToggle={() => toggleGroup(group.id)}
+          onNavigate={onNavigate}
+        />
+      ))}
     </nav>
   );
 }
 
-function trapMobileFocus(event: globalThis.KeyboardEvent, panel: HTMLElement | null): void {
-  if (!panel) return;
-  const focusable = Array.from(panel.querySelectorAll<HTMLElement>(mobileFocusableSelector));
-  if (focusable.length === 0) return;
-  const first = focusable[0];
-  const last = focusable[focusable.length - 1];
-  if (!first || !last) return;
-  if (event.shiftKey && document.activeElement === first) {
-    event.preventDefault();
-    last.focus({ preventScroll: true });
-  } else if (!event.shiftKey && document.activeElement === last) {
-    event.preventDefault();
-    first.focus({ preventScroll: true });
-  }
-}
-
-function NavGroup({ group, locale, pathname, activePath, collapsed, onToggle, onNavigate }: { group: AppRoute; locale: AppLocale; pathname: string; activePath?: string | undefined; collapsed: boolean; onToggle: () => void; onNavigate?: () => void }) {
+function NavGroup({ group, locale, current, collapsed, onToggle, onNavigate }: { group: AppRoute; locale: AppLocale; current: string; collapsed: boolean; onToggle: () => void; onNavigate?: (() => void) | undefined }) {
   const children = getNavChildren(group);
-  const groupActive = isCurrentRoute(activePath || pathname, group.path);
-  const current = stripLocaleFromPathname(activePath || pathname);
-  const target = normalizePathname(group.path);
-  const isHeaderActive = current === target;
-  const hasChildren = children.length > 0;
+  const headerActive = stripLocaleFromPathname(current) === normalizePathname(group.path);
+  const listId = `nav-group-${group.id}`;
   return (
-    <div className="space-y-1.5">
-      <div
-        data-current={isHeaderActive ? "page" : undefined}
-        className={`mn-nav-row flex items-center justify-between rounded-2xl border border-transparent py-1 pl-2.5 pr-1 transition-colors ${
-          isHeaderActive
-            ? ""
-            : "text-[var(--mn-text)] hover:border-[color-mix(in_oklab,var(--mn-border)_12%,transparent)] hover:bg-[var(--mn-cream-deep)]"
-        }`}
-      >
-        <a
+    <div className="pt-1">
+      <Divider className="!my-2 !mx-4" />
+      <div className="relative">
+        <NavItem
           href={localizePath(group.path, locale)}
-          aria-current={isHeaderActive ? "page" : undefined}
-          onClick={onNavigate}
-          className="flex min-w-0 flex-1 items-center gap-3 rounded-xl py-1.5 text-[14px] font-black transition-colors"
+          active={headerActive}
+          onNavigate={onNavigate}
+          icon={<RouteGlyph icon={(group.nav && group.nav.icon ? group.nav.icon : "sparkles") as RouteIcon} routeId={group.id} className="h-6 w-6" />}
+          trailingSpace={children.length > 0}
         >
-          <NavIcon icon={group.nav && group.nav.icon ? group.nav.icon : "sparkles"} routeId={group.id} active={groupActive} />
-          <span className="truncate">{t(locale, group.labelKey)}</span>
-          {isHeaderActive && <ActiveStar />}
-        </a>
-        {hasChildren && (
-          <button
-            type="button"
-            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors ${
-              groupActive
-                ? "text-[var(--mn-accent-deep)] hover:bg-[var(--mn-accent-soft)]"
-                : "text-[var(--mn-text-muted)] hover:bg-[var(--mn-cream-deep)] hover:text-[var(--mn-text)]"
-            }`}
+          {t(locale, group.labelKey)}
+        </NavItem>
+        {children.length > 0 && (
+          <IconButton
+            size="small"
+            className="!absolute right-2 top-1/2 -translate-y-1/2"
             aria-expanded={!collapsed}
+            aria-controls={listId}
             aria-label={t(locale, group.labelKey)}
             onClick={onToggle}
           >
-            <svg className={`h-4 w-4 transition-transform ${collapsed ? "-rotate-90" : "rotate-0"}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
-          </button>
+            <Icon name="chevronDown" className={`h-5 w-5 transition-transform duration-200 ${collapsed ? "-rotate-90" : ""}`} />
+          </IconButton>
         )}
       </div>
-      {hasChildren && !collapsed && (
-        <div className="relative ml-[1.15rem] space-y-0.5 border-l border-dashed border-[color-mix(in_oklab,var(--mn-border)_22%,transparent)] pl-3">
-          {children.map((item) => {
-            const active = isCurrentRoute(activePath || pathname, item.path);
-            return (
-              <Fragment key={item.id}>
-                <a
-                  href={localizePath(item.path, locale)}
-                  aria-current={active ? "page" : undefined}
-                  onClick={onNavigate}
-                  className={`flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13px] font-medium transition-colors ${
-                    active
-                      ? "bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)] font-semibold"
-                      : "text-[var(--mn-text-muted)] hover:bg-[var(--mn-cream-deep)] hover:text-[var(--mn-text)]"
-                  }`}
-                >
-                  <NavIcon icon={item.nav && item.nav.icon ? item.nav.icon : "sparkles"} routeId={item.id} active={active} small />
-                  <span className="truncate">{t(locale, item.labelKey)}</span>
-                  {active && <ActiveStar />}
-                </a>
-              </Fragment>
-            );
-          })}
-        </div>
+      {children.length > 0 && (
+        <Collapse in={!collapsed} timeout="auto">
+          <div id={listId} className="pb-1">
+            {children.map((item) => (
+              <NavItem
+                key={item.id}
+                href={localizePath(item.path, locale)}
+                active={isCurrentRoute(current, item.path)}
+                onNavigate={onNavigate}
+                nested
+                icon={<RouteGlyph icon={(item.nav && item.nav.icon ? item.nav.icon : "sparkles") as RouteIcon} routeId={item.id} className="h-5 w-5" />}
+              >
+                {t(locale, item.labelKey)}
+              </NavItem>
+            ))}
+          </div>
+        </Collapse>
       )}
     </div>
   );
 }
 
-function NavIcon({ icon, routeId, active = false, small = false }: { icon: RouteIcon; routeId?: string; active?: boolean; small?: boolean }) {
-  return <span className={`${small ? "h-6 w-6" : "h-8 w-8"} flex shrink-0 items-center justify-center rounded-xl ${active ? "bg-[var(--mn-paper)] text-[var(--mn-accent-deep)] shadow-[var(--mn-shadow-stamp-sm)]" : "bg-[color-mix(in_oklab,var(--mn-cream-deep)_70%,transparent)] text-[var(--mn-text-muted)]"}`}><RouteGlyph icon={icon} routeId={routeId} className={small ? "h-3.5 w-3.5" : "h-4.5 w-4.5"} /></span>;
+/** One drawer destination: 56dp (48dp nested) pill, active indicator in secondary-container. */
+function NavItem({ href, active, onNavigate, icon, nested = false, trailingSpace = false, children }: { href: string; active: boolean; onNavigate?: (() => void) | undefined; icon: ReactNode; nested?: boolean; trailingSpace?: boolean; children: ReactNode }) {
+  return (
+    <a
+      href={href}
+      onClick={onNavigate}
+      aria-current={active ? "page" : undefined}
+      className={`md3-state mn-nav-layer flex items-center gap-3 rounded-full ${nested ? "h-12 pl-10 pr-4 text-body-medium" : "h-14 px-4 text-label-large"} ${trailingSpace ? "pr-12" : ""} ${
+        active ? "bg-secondary-container text-on-secondary-container" : "text-on-surface-variant hover:text-on-surface"
+      }`}
+    >
+      <span className="flex shrink-0 items-center">{icon}</span>
+      <span className="min-w-0 truncate">{children}</span>
+    </a>
+  );
 }
 
-/** Marks the current page. */
-function ActiveStar() {
-  return <svg className="ml-auto h-3 w-3 shrink-0 text-[var(--mn-accent-deep)]" viewBox="0 0 12 12" aria-hidden="true"><path fill="currentColor" d="M6 0 7.44 4.56 12 6 7.44 7.44 6 12 4.56 7.44 0 6 4.56 4.56z" /></svg>;
-}
-
-function SidebarDoodle() {
-  return <svg className="absolute -right-2 -top-3 h-24 w-24 text-[var(--mn-accent)] opacity-40" viewBox="0 0 96 96" fill="none" aria-hidden="true"><ellipse cx="48" cy="48" rx="40" ry="16" transform="rotate(-35 48 48)" stroke="currentColor"/><circle cx="48" cy="48" r="28" stroke="currentColor" strokeDasharray="2 6"/><path d="m48 22 5 21 21 5-21 5-5 21-5-21-21-5 21-5z" fill="currentColor"/><circle cx="78" cy="27" r="3" fill="currentColor"/></svg>;
-}
+export default withMd3(Sidebar);

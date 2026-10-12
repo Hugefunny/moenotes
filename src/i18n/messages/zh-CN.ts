@@ -866,6 +866,11 @@ export const zhCN = {
     commandPlaceholder: "搜索页面或功能...",
     noCommandResults: "没有找到结果",
     shortcuts: "快捷键",
+    breadcrumb: "面包屑导航",
+    navigation: "主导航",
+    breadcrumbSelectPage: "选择页面",
+    searchPlaceholder: "搜索 Moenotes",
+    scrollToTop: "回到顶部",
   },
   search: {
     placeholder: "搜索卡牌、歌曲、角色、剧情…",
