@@ -87,6 +87,16 @@ Keep locale lists derived from `SUPPORTED_LOCALES` wherever possible so Agent ed
 - Putting large content translations (full story scripts, asset dumps) into UI message files.
 - Locale `if/else` trees for UI placeholders (comics/stamps names, etc.) — use message keys with `{id}` / `{name}` instead.
 
+## UI: Material Design 3
+
+The UI follows Material Design 3; `VISUAL_DESIGN.md` is the rulebook and `/tools/design-system` the live gallery.
+
+- Colors are M3 roles only: Tailwind `bg-surface-container-low`, `text-on-surface-variant`, `bg-primary text-on-primary`, … or `var(--md-sys-color-*)`. The retired `--mn-*` color/shadow/font tokens and old classes (`mn-paper`, `mn-stamp*`, `mn-segmented`, …) fail `bun run lint:arch`.
+- Typography uses the M3 scale utilities (`text-title-medium`, `text-body-large`, …); no forced uppercase or 600+ weights.
+- Interactive controls and overlays in React islands are MUI components, imported by path (`@mui/material/Button`, never the barrel or `@mui/icons-material`); wrap each island's root with `withMd3()` from `src/components/md3/Md3Provider.tsx`. Dense lists and static Astro markup use the CSS primitives in `src/styles/md3/primitives.css` (`md3-surface`, `md3-state`, `md3-list-card`, `md3-filter-chip`, `md3-segmented`, …).
+- `src/styles/md3/colors.css` is generated (`bun scripts/generate-md3-tokens.ts`); a test keeps it in sync. Band seeds go through `src/lib/md3/scheme.ts`.
+- Icons stay the site's own line SVGs (`RouteGlyph`, `src/components/shared/icons.tsx`).
+
 ## Checks before finishing a task
 
 ```bash

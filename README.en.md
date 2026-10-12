@@ -10,13 +10,13 @@ Built as a static site, it provides browsing, filtering, and inspection of game 
 
 - Game Data Viewer: Browse character profiles, card illustrations, skill stats, event stories, and music charts.
 - Multi-language Architecture: Localized UI with automatic fallback across Chinese, English, Japanese, and Korean masterdata.
-- Notebook-inspired Aesthetics: Clean, paper-like UI design focused on readability and browsing comfort.
+- Material Design 3: MUI components on M3 tokens, with dynamic color seeded by the chosen band color and matching light/dark themes (see VISUAL_DESIGN.md).
 - Static First: Fast initial page loads powered by static site pre-rendering (SSG).
 
 ## Tech Stack
 
 - Site Framework: Astro
-- UI Components: React 19
+- UI Components: React 19, MUI (Material 3 theme)
 - Styling: Tailwind CSS v4
 - Language: TypeScript
 - Package Manager & Runtime: Bun

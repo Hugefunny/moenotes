@@ -10,13 +10,13 @@ MoeNotes 是由 [StarMoe](https://github.com/StarMoe-org) 团队为 BanG Dream! 
 
 - 游戏数据检索：支持角色档案、卡面立绘、数值属性、活动剧情与歌曲谱面等资料查阅。
 - 多语言架构：内置多语言界面切换，支持中、英、日、韩等语言的 masterdata 数据自动回退。
-- 轻量手帐质感：采用手帐风格视觉设计，兼顾可读性与浏览体验。
+- Material Design 3：MUI 组件 + MD3 令牌，乐队颜色可作为动态取色种子，浅色/深色一致（规范见 VISUAL_DESIGN.md）。
 - 静态优先：基于静态站点生成（SSG）与预渲染，首屏加载迅速。
 
 ## 技术栈
 
 - 站点框架：Astro
-- 交互组件：React 19
+- 交互组件：React 19、MUI（Material 3 主题）
 - 样式库：Tailwind CSS v4
 - 开发语言：TypeScript
 - 包管理器与运行环境：Bun
