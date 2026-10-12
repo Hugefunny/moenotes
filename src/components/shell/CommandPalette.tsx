@@ -1,21 +1,22 @@
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import Dialog from "@mui/material/Dialog";
+import IconButton from "@mui/material/IconButton";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { Icon } from "@/components/shared/icons";
+import { withMd3 } from "@/components/md3/Md3Provider";
 import type { AppLocale } from "@/config/locales";
 import { localizePath } from "@/i18n/routing";
 import { t } from "@/i18n";
-import { lockBodyScroll, unlockBodyScroll } from "@/lib/overlay/body-scroll-lock";
 import { useOverlay } from "@/lib/overlay/use-overlay";
+import { useOverlayLayer } from "@/lib/overlay/use-overlay-layer";
 import { buildStaticSearchIndex } from "@/lib/search/static-index";
 import { searchContent } from "@/lib/search/client";
 import { CONTENT_KIND_ORDER, KIND_LABEL_KEY } from "@/lib/search/kinds";
 import { getRoutePathById } from "@/lib/route/registry";
-import { useSpringAnimation } from "@/lib/animation/use-animation";
 
 interface CommandPaletteProps {
   locale: AppLocale;
 }
-
-const focusableSelector = "input, a[href], button:not([disabled]), [tabindex]:not([tabindex='-1'])";
 
 /** One flat list row: a static page or a content entity, both ready to navigate to. */
 interface PaletteRow {
@@ -26,25 +27,25 @@ interface PaletteRow {
   href: `/${string}`;
 }
 
-export default function CommandPalette({ locale }: CommandPaletteProps) {
+/**
+ * Search everything (Ctrl/⌘ K): a Material 3 search view in a dialog, full screen on phones. The input is a combobox
+ * driving a grouped listbox; arrows move, Enter opens, Escape closes.
+ */
+function CommandPalette({ locale }: CommandPaletteProps) {
   const { isOpen, close } = useOverlay("command");
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const [content, setContent] = useState<PaletteRow[]>([]);
   const reactId = useId();
-  const lockKey = `command-${reactId}`;
-  const titleId = `${lockKey}-title`;
+  const baseId = `command-${reactId}`;
+  const titleId = `${baseId}-title`;
   const inputRef = useRef<HTMLInputElement>(null);
   const activeOptionRef = useRef<HTMLAnchorElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const restoreFocusRef = useRef<HTMLElement | null>(null);
+  const fullScreen = useMediaQuery("(max-width: 599.95px)");
+  const isTop = useOverlayLayer(baseId, isOpen, close, false);
+
   const staticRows = useMemo<PaletteRow[]>(() =>
-    buildStaticSearchIndex().map((item) => ({
-      id: item.id,
-      kind: "page",
-      label: t(locale, item.labelKey),
-      href: localizePath(item.path, locale),
-    })), [locale]);
+    buildStaticSearchIndex().map((item) => ({ id: item.id, kind: "page", label: t(locale, item.labelKey), href: localizePath(item.path, locale) })), [locale]);
 
   const q = query.trim().toLocaleLowerCase();
 
@@ -77,38 +78,16 @@ export default function CommandPalette({ locale }: CommandPaletteProps) {
 
   const flat = useMemo(() => groups.flatMap((group) => group.rows), [groups]);
 
-  const { modalTransition, isDisabled } = useSpringAnimation();
-
   useEffect(() => {
     setActiveIndex(flat.length > 0 ? 0 : -1);
   }, [flat]);
 
   useEffect(() => {
     if (!isOpen || activeIndex < 0) return;
-    const raf = requestAnimationFrame(() => {
-      activeOptionRef.current?.scrollIntoView({ block: "nearest" });
-    });
+    const raf = requestAnimationFrame(() => activeOptionRef.current?.scrollIntoView({ block: "nearest" }));
     return () => cancelAnimationFrame(raf);
   }, [activeIndex, flat, isOpen]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    restoreFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    lockBodyScroll(lockKey);
-    const raf = requestAnimationFrame(() => inputRef.current?.focus({ preventScroll: true }));
-    return () => {
-      cancelAnimationFrame(raf);
-      unlockBodyScroll(lockKey);
-      const restoreTarget = restoreFocusRef.current;
-      if (restoreTarget && document.contains(restoreTarget)) {
-        requestAnimationFrame(() => restoreTarget.focus({ preventScroll: true }));
-      }
-    };
-  }, [isOpen, lockKey]);
-
-  const panelInitial = isDisabled ? {} : { opacity: 0, scale: 0.95, y: 10 };
-  const panelAnimate = { opacity: 1, scale: 1, y: 0 };
-  const panelExit = isDisabled ? {} : { opacity: 0, scale: 0.95, y: 10 };
   const activeItem = activeIndex >= 0 ? flat[activeIndex] : undefined;
   const searchPagePath = localizePath(getRoutePathById("search"), locale);
 
@@ -125,7 +104,7 @@ export default function CommandPalette({ locale }: CommandPaletteProps) {
     window.location.href = activeItem.href;
   };
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.nativeEvent.isComposing) return;
     if (event.key === "ArrowDown") {
       event.preventDefault();
@@ -136,130 +115,95 @@ export default function CommandPalette({ locale }: CommandPaletteProps) {
     } else if (event.key === "Enter") {
       event.preventDefault();
       navigateActive();
-    } else if (event.key === "Escape") {
-      event.preventDefault();
-      close();
-    } else if (event.key === "Tab") {
-      trapFocus(event.nativeEvent, panelRef.current);
     }
   };
 
   let rowOffset = 0;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex justify-center items-start px-4 pt-[12vh]">
-          <motion.div
-            className="absolute inset-0 mn-overlay-backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            onClick={close}
-          />
-
-          <motion.div
-            ref={panelRef}
-            className="mn-overlay-panel relative z-10 w-full max-w-2xl overflow-hidden rounded-3xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp-lg)]"
-            initial={panelInitial}
-            animate={panelAnimate}
-            exit={panelExit}
-            transition={modalTransition}
-            onClick={(event) => event.stopPropagation()}
-            onKeyDown={handleKeyDown}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={titleId}
-          >
-            <h2 id={titleId} className="sr-only">{t(locale, "shell.openCommandPalette")}</h2>
-            <input
-              ref={inputRef}
-              value={query}
-              onChange={(event) => setQuery(event.currentTarget.value)}
-              placeholder={t(locale, "shell.commandPlaceholder")}
-              aria-label={t(locale, "shell.commandPlaceholder")}
-              className="w-full border-b-[1.5px] border-[var(--mn-border)] bg-[var(--mn-surface-strong)] px-6 py-4 text-lg font-bold text-[var(--mn-text)] outline-none placeholder:text-[var(--mn-text-muted)]"
-              role="combobox"
-              aria-autocomplete="list"
-              aria-expanded="true"
-              aria-controls={`${lockKey}-listbox`}
-              aria-activedescendant={activeItem ? `${lockKey}-option-${activeItem.id}` : undefined}
-            />
-            <div id={`${lockKey}-listbox`} className="max-h-[50vh] overflow-y-auto p-2" role="listbox">
-              {flat.length === 0 ? (
-                q ? (
-                  <a
-                    href={`${searchPagePath}?q=${encodeURIComponent(query.trim())}`}
-                    className="mn-command-option block rounded-full border-2 border-transparent px-5 py-3 text-sm text-[var(--mn-text)]"
-                    onClick={close}
-                  >
-                    {t(locale, "search.viewAllResults")}
-                  </a>
-                ) : (
-                  <p className="px-4 py-8 text-center text-sm font-bold text-[var(--mn-text-muted)]">
-                    {t(locale, "shell.noCommandResults")}
-                  </p>
-                )
-              ) : (
-                groups.map((group) => {
-                  const start = rowOffset;
-                  rowOffset += group.rows.length;
+    <Dialog
+      open={isOpen}
+      onClose={(_, reason) => {
+        if (reason === "escapeKeyDown" && !isTop()) return;
+        close();
+      }}
+      fullWidth
+      maxWidth="sm"
+      fullScreen={fullScreen}
+      aria-labelledby={titleId}
+      slotProps={{
+        paper: { sx: { alignSelf: { sm: "flex-start" }, mt: { sm: "12vh" }, maxHeight: { sm: "70vh" } } },
+        transition: { onEntered: () => inputRef.current?.focus({ preventScroll: true }) },
+      }}
+    >
+      <h2 id={titleId} className="sr-only">{t(locale, "shell.openCommandPalette")}</h2>
+      <div className="flex h-14 shrink-0 items-center gap-1 border-b border-outline-variant pl-4 pr-2 sm:h-16">
+        <Icon name="search" className="h-6 w-6 shrink-0 text-on-surface-variant" />
+        <input
+          ref={inputRef}
+          autoFocus
+          value={query}
+          onChange={(event) => setQuery(event.currentTarget.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={t(locale, "shell.commandPlaceholder")}
+          aria-label={t(locale, "shell.commandPlaceholder")}
+          className="h-full min-w-0 flex-1 bg-transparent px-3 text-body-large text-on-surface outline-none placeholder:text-on-surface-variant"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded="true"
+          aria-controls={`${baseId}-listbox`}
+          aria-activedescendant={activeItem ? `${baseId}-option-${activeItem.id}` : undefined}
+        />
+        <IconButton aria-label={t(locale, "actions.close")} onClick={close}>
+          <Icon name="close" />
+        </IconButton>
+      </div>
+      <div id={`${baseId}-listbox`} className="min-h-0 flex-1 overflow-y-auto py-2" role="listbox" aria-label={t(locale, "shell.commandPlaceholder")}>
+        {flat.length === 0 ? (
+          q ? (
+            <a href={`${searchPagePath}?q=${encodeURIComponent(query.trim())}`} className="md3-state mx-2 flex h-14 items-center gap-4 rounded-full px-4 text-label-large text-primary" onClick={close}>
+              <Icon name="arrowForward" />
+              {t(locale, "search.viewAllResults")}
+            </a>
+          ) : (
+            <p className="px-6 py-10 text-center text-body-medium text-on-surface-variant">{t(locale, "shell.noCommandResults")}</p>
+          )
+        ) : (
+          groups.map((group) => {
+            const start = rowOffset;
+            rowOffset += group.rows.length;
+            return (
+              <div key={group.kind} role="group" aria-label={group.labelKey ? t(locale, group.labelKey) : undefined}>
+                {group.labelKey ? <p className="px-6 pb-1 pt-3 text-title-small text-on-surface-variant">{t(locale, group.labelKey)}</p> : null}
+                {group.rows.map((item, index) => {
+                  const flatIndex = start + index;
+                  const active = flatIndex === activeIndex;
                   return (
-                    <div key={group.kind}>
-                      {group.labelKey ? (
-                        <p className="px-5 pb-1 pt-3 text-xs font-bold uppercase tracking-wider text-[var(--mn-text-muted)] first:pt-1">
-                          {t(locale, group.labelKey)}
-                        </p>
-                      ) : null}
-                      {group.rows.map((item, index) => {
-                        const flatIndex = start + index;
-                        const active = flatIndex === activeIndex;
-                        return (
-                          <a
-                            ref={active ? activeOptionRef : undefined}
-                            id={`${lockKey}-option-${item.id}`}
-                            key={item.id}
-                            href={item.href}
-                            role="option"
-                            aria-selected={active}
-                            className={`mn-command-option block rounded-full border-2 px-5 py-3 text-sm text-[var(--mn-text)] hover:border-[var(--mn-border)] hover:bg-[var(--mn-cream-deep)] hover:shadow-[var(--mn-shadow-stamp-sm)] ${active ? "border-[var(--mn-border)] bg-[var(--mn-cream-deep)] shadow-[var(--mn-shadow-stamp-sm)]" : "border-transparent"}`}
-                            onMouseEnter={() => setActiveIndex(flatIndex)}
-                            onClick={close}
-                          >
-                            <span className="font-black">{item.label}</span>
-                            <span className="ml-3 text-xs font-bold text-[var(--mn-text-muted)]">{item.href}</span>
-                          </a>
-                        );
-                      })}
-                    </div>
+                    <a
+                      ref={active ? activeOptionRef : undefined}
+                      id={`${baseId}-option-${item.id}`}
+                      key={item.id}
+                      href={item.href}
+                      role="option"
+                      aria-selected={active}
+                      className={`mn-command-option md3-state mx-2 flex min-h-14 items-center gap-4 rounded-full px-4 py-2 ${active ? "bg-secondary-container text-on-secondary-container" : "text-on-surface"}`}
+                      onMouseEnter={() => setActiveIndex(flatIndex)}
+                      onClick={close}
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-body-large">{item.label}</span>
+                        <span className={`block truncate text-body-small ${active ? "text-on-secondary-container" : "text-on-surface-variant"}`}>{item.href}</span>
+                      </span>
+                    </a>
                   );
-                })
-              )}
-            </div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
+                })}
+              </div>
+            );
+          })
+        )}
+      </div>
+    </Dialog>
   );
 }
 
-function getFocusableElements(container: HTMLElement): HTMLElement[] {
-  return Array.from(container.querySelectorAll<HTMLElement>(focusableSelector));
-}
-
-function trapFocus(event: globalThis.KeyboardEvent, panel: HTMLElement | null): void {
-  if (!panel) return;
-  const focusable = getFocusableElements(panel);
-  if (focusable.length === 0) return;
-  const first = focusable[0];
-  const last = focusable[focusable.length - 1];
-  if (!first || !last) return;
-  if (event.shiftKey && document.activeElement === first) {
-    event.preventDefault();
-    last.focus({ preventScroll: true });
-  } else if (!event.shiftKey && document.activeElement === last) {
-    event.preventDefault();
-    first.focus({ preventScroll: true });
-  }
-}
+export default withMd3(CommandPalette);

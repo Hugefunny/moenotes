@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { renderToString } from "react-dom/server";
 import Sidebar from "../src/components/shell/Sidebar";
+import CommandPalette from "../src/components/shell/CommandPalette";
+import KeyboardShortcutsHelp from "../src/components/shell/KeyboardShortcutsHelp";
+import SettingsDrawer from "../src/components/shell/SettingsDrawer";
 import TopAppBar from "../src/components/shell/TopAppBar";
 import { buildHeaderCrumbs } from "../src/lib/route/header-crumbs";
 
@@ -33,5 +36,16 @@ describe("material 3 shell", () => {
     expect(current.length).toBe(1);
     expect(current[0]).toContain("bg-secondary-container");
     expect(html).toContain('aria-label="Main navigation"');
+  });
+
+  test("closed overlays (settings, command palette, shortcuts) render nothing on the server", () => {
+    for (const element of [
+      <SettingsDrawer locale="en-US" pathname="/cards" bands={[]} />,
+      <CommandPalette locale="en-US" />,
+      <KeyboardShortcutsHelp locale="en-US" />,
+    ]) {
+      expect(() => renderToString(element)).not.toThrow();
+      expect(renderToString(element)).not.toContain('role="dialog"');
+    }
   });
 });

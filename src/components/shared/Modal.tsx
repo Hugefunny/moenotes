@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
-import { createPortal } from "react-dom";
-import { AnimatePresence, motion } from "framer-motion";
-import { lockBodyScroll, unlockBodyScroll } from "@/lib/overlay/body-scroll-lock";
-import { isTopOverlayLayer, pushOverlayLayer, removeOverlayLayer } from "@/lib/overlay/layer-stack";
-import { useSpringAnimation } from "@/lib/animation/use-animation";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import Dialog from "@mui/material/Dialog";
+import IconButton from "@mui/material/IconButton";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { Icon } from "@/components/shared/icons";
+import { Md3Provider } from "@/components/md3/Md3Provider";
+import { useOverlayLayer } from "@/lib/overlay/use-overlay-layer";
 
 export interface ModalProps {
   isOpen: boolean;
@@ -17,12 +18,7 @@ export interface ModalProps {
   historyNavigation?: boolean;
 }
 
-const sizeClasses: Record<string, string> = {
-  sm: "max-w-sm",
-  md: "max-w-lg",
-  lg: "max-w-2xl",
-  xl: "max-w-5xl",
-};
+const maxWidths = { sm: "xs", md: "sm", lg: "md", xl: "lg" } as const;
 
 const focusableSelector = [
   "a[href]",
@@ -33,6 +29,11 @@ const focusableSelector = [
   "[tabindex]:not([tabindex='-1'])",
 ].join(",");
 
+/**
+ * Material 3 dialog (MUI Dialog: extra-large shape, surface-container-high, scrim). Below `sm` it fills the screen
+ * (M3 full-screen dialog). Escape, focus trapping, scroll locking and focus restoring come from MUI; on top of that the
+ * dialog takes a history entry (Back closes it) and joins the overlay layer stack, so only the top layer reacts.
+ */
 export default function Modal({
   isOpen,
   onClose,
@@ -43,146 +44,71 @@ export default function Modal({
   headerActions,
   historyNavigation = true,
 }: ModalProps) {
+  return (
+    <Md3Provider>
+      <ModalDialog isOpen={isOpen} onClose={onClose} title={title} closeLabel={closeLabel} size={size} headerActions={headerActions} historyNavigation={historyNavigation}>
+        {children}
+      </ModalDialog>
+    </Md3Provider>
+  );
+}
+
+function ModalDialog({ isOpen, onClose, title, closeLabel = "Close", size = "md", children, headerActions, historyNavigation = true }: ModalProps) {
   const [mounted, setMounted] = useState(false);
   const reactId = useId();
   const modalKey = `modal-${reactId}`;
   const titleId = `${modalKey}-title`;
-  const panelRef = useRef<HTMLDivElement>(null);
-  const restoreFocusRef = useRef<HTMLElement | null>(null);
-  const { modalTransition, isDisabled } = useSpringAnimation();
-
-  const onCloseRef = useRef(onClose);
-  useEffect(() => {
-    onCloseRef.current = onClose;
-  }, [onClose]);
-  const stableOnClose = useCallback(() => onCloseRef.current(), []);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const fullScreen = useMediaQuery("(max-width: 599.95px)");
+  const isTop = useOverlayLayer(modalKey, isOpen, onClose, historyNavigation);
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => setMounted(true));
     return () => cancelAnimationFrame(raf);
   }, []);
 
+  // Initial focus: the first control of the content (MUI would focus the dialog itself).
   useEffect(() => {
     if (!isOpen) return;
-    lockBodyScroll(modalKey);
-    pushOverlayLayer(modalKey);
-    restoreFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-
-    let didPushHistory = false;
-    let rafId: number | null = null;
-
-    const isTopModal = () => isTopOverlayLayer(modalKey);
-    const focusInitialElement = () => {
-      const panel = panelRef.current;
-      if (!panel || !isTopModal()) return;
-      const firstFocusable = getFocusableElements(panel)[0];
-      (firstFocusable ?? panel).focus({ preventScroll: true });
-    };
-
-    const handlePopState = () => {
-      if (isTopModal()) stableOnClose();
-    };
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (!isTopModal() || event.isComposing) return;
-      if (event.key === "Escape") {
-        event.preventDefault();
-        stableOnClose();
-        return;
-      }
-      if (event.key === "Tab") trapFocus(event, panelRef.current);
-    };
-
-    const hasModalState = window.history.state?.modal;
-    if (historyNavigation && !hasModalState) {
-      window.history.pushState({ modal: true }, "");
-      didPushHistory = true;
-    }
-    rafId = requestAnimationFrame(() => {
-      window.addEventListener("popstate", handlePopState);
-      focusInitialElement();
+    const raf = requestAnimationFrame(() => {
+      const content = contentRef.current;
+      if (content && isTop()) (getFocusableElements(content)[0] ?? content).focus({ preventScroll: true });
     });
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      if (rafId !== null) cancelAnimationFrame(rafId);
-      removeOverlayLayer(modalKey);
-      unlockBodyScroll(modalKey);
-      window.removeEventListener("popstate", handlePopState);
-      document.removeEventListener("keydown", handleKeyDown);
-      if (didPushHistory && window.history.state?.modal) {
-        window.history.back();
-      }
-      const restoreTarget = restoreFocusRef.current;
-      if (restoreTarget && document.contains(restoreTarget)) {
-        requestAnimationFrame(() => restoreTarget.focus({ preventScroll: true }));
-      }
-    };
-  }, [isOpen, modalKey, stableOnClose, historyNavigation]);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   if (!mounted) return null;
 
-  const panelInitial = isDisabled ? {} : { opacity: 0, scale: 0.95, y: 10 };
-  const panelAnimate = { opacity: 1, scale: 1, y: 0 };
-  const panelExit = isDisabled ? {} : { opacity: 0, scale: 0.95, y: 10 };
-
-  return createPortal(
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-[200] isolate flex items-center justify-center p-4 sm:p-6">
-          <motion.div
-            className="absolute inset-0 mn-overlay-backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            onClick={stableOnClose}
-          />
-
-          <motion.div
-            ref={panelRef}
-            className={`mn-overlay-panel relative w-full ${sizeClasses[size]} max-h-[calc(100vh-2rem)] sm:max-h-[85vh] flex flex-col overflow-hidden rounded-3xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] shadow-[var(--mn-shadow-stamp-lg)]`}
-            initial={panelInitial}
-            animate={panelAnimate}
-            exit={panelExit}
-            transition={modalTransition}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={title ? titleId : undefined}
-            aria-label={title ? undefined : closeLabel}
-            tabIndex={-1}
-            onKeyDown={(event: ReactKeyboardEvent<HTMLDivElement>) => {
-              if (event.key === "Tab") trapFocus(event.nativeEvent, panelRef.current);
-            }}
-          >
-            <div className="mn-overlay-heading flex shrink-0 items-center justify-between border-b-[1.5px] border-[var(--mn-border)] bg-gradient-to-r from-[color-mix(in_oklab,var(--mn-accent)_8%,transparent)] to-transparent px-5 py-3.5">
-              <h2 id={titleId} className="flex items-center gap-2 font-[var(--mn-font-display)] text-base tracking-tight text-[var(--mn-text)]">
-                <svg className="mn-overlay-symbol" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m12 2 2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z" stroke="currentColor" strokeWidth="1.2"/></svg>
-                {title}
-              </h2>
-              <div className="flex items-center gap-1.5">
-                {headerActions}
-                <button
-                  type="button"
-                  onClick={stableOnClose}
-                  className="grid h-8 w-8 place-items-center rounded-full border-2 border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-text-muted)] shadow-[var(--mn-shadow-stamp-sm)] transition hover:bg-[var(--mn-cream-deep)] hover:text-[var(--mn-text)]"
-                  aria-label={closeLabel}
-                >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden="true">
-                    <path d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            <div className="mn-overlay-body flex-1 overflow-y-auto p-5">
-              {children}
-            </div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>,
-    document.body,
+  return (
+    <Dialog
+      open={isOpen}
+      onClose={(_, reason) => {
+        // Escape only closes the top layer (a Lightbox over this dialog closes first).
+        if (reason === "escapeKeyDown" && !isTop()) return;
+        onClose();
+      }}
+      fullWidth
+      maxWidth={maxWidths[size]}
+      fullScreen={fullScreen}
+      aria-labelledby={title ? titleId : undefined}
+      aria-label={title ? undefined : closeLabel}
+      className="mn-modal"
+      slotProps={{ paper: { className: "mn-overlay-panel" } }}
+    >
+      <div className="flex shrink-0 items-center gap-2 py-3 pl-6 pr-3">
+        <h2 id={titleId} className="min-w-0 flex-1 truncate font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">
+          {title}
+        </h2>
+        {headerActions}
+        <IconButton onClick={onClose} aria-label={closeLabel}>
+          <Icon name="close" />
+        </IconButton>
+      </div>
+      <div ref={contentRef} tabIndex={-1} className="mn-overlay-body min-h-0 flex-1 overflow-y-auto px-6 pb-6 outline-none">
+        {children}
+      </div>
+    </Dialog>
   );
 }
 
@@ -199,11 +125,9 @@ export function trapFocus(event: KeyboardEvent, panel: HTMLElement | null): void
     panel.focus({ preventScroll: true });
     return;
   }
-
   const first = focusable[0];
   const last = focusable[focusable.length - 1];
   if (!first || !last) return;
-
   if (event.shiftKey && document.activeElement === first) {
     event.preventDefault();
     last.focus({ preventScroll: true });
