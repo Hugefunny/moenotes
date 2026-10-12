@@ -17,10 +17,10 @@ export interface ScheduleCountdownProps {
 }
 
 const toneByStatus: Record<CountdownParts["status"], string> = {
-  ongoing: "text-[var(--mn-accent-deep)]",
-  upcoming: "text-[var(--mn-ink-soft)]",
-  permanent: "text-[var(--mn-mint-deep)]",
-  ended: "text-[var(--mn-text-muted)]",
+  ongoing: "text-primary",
+  upcoming: "text-on-surface-variant",
+  permanent: "text-on-success-container",
+  ended: "text-on-surface-variant",
 };
 
 /** "Starts in 3d" / "5h left" / "Ended" for one schedule. */
@@ -45,7 +45,7 @@ export default function ScheduleCountdown({ locale, startAt, endAt, now: givenNo
   const edge = parts.target === "start" ? startAt : parts.target === "end" ? endAt : parts.status === "ended" ? endAt : null;
   const title = edge ? formatMasterDate(edge, locale, true, timeZone) : undefined;
   return (
-    <span className={`inline-flex items-center gap-1 whitespace-nowrap text-xs font-bold tabular-nums ${toneByStatus[parts.status]} ${className}`} title={title}>
+    <span className={`inline-flex items-center gap-1 whitespace-nowrap text-label-medium tabular-nums ${toneByStatus[parts.status]} ${className}`} title={title}>
       <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true">
         <circle cx="12" cy="12" r="9" />
         <path d="M12 7v5l3 2" />

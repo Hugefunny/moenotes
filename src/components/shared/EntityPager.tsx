@@ -27,8 +27,8 @@ export default function EntityPager({ locale, previous, next, listRouteId, retur
     setBackHref(safeReturnPath(readQueryParam(returnParam)) ?? listHref);
   }, [returnParam, listHref]);
 
-  const card = "mn-focus group flex min-w-0 items-center gap-2 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-paper)] px-3 py-2.5 shadow-[var(--mn-shadow-stamp-sm)] transition hover:-translate-y-0.5 hover:border-[var(--mn-accent)] hover:shadow-[var(--mn-shadow-stamp)]";
-  const arrow = "h-4 w-4 shrink-0 text-[var(--mn-accent-deep)] transition group-hover:scale-110";
+  const card = "md3-state flex min-h-14 min-w-0 items-center gap-3 rounded-shape-md border border-outline-variant px-4 py-2 transition-colors";
+  const arrow = "h-6 w-6 shrink-0 text-on-surface-variant";
 
   return (
     <nav aria-label={t(locale, "detailNav.label")} className={`grid grid-cols-[1fr_auto_1fr] items-stretch gap-2 sm:gap-3 ${className}`}>
@@ -36,21 +36,21 @@ export default function EntityPager({ locale, previous, next, listRouteId, retur
         <a href={localizePath(previous.href, locale)} rel="prev" className={card}>
           <svg className={arrow} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
           <span className="min-w-0">
-            <span className="block text-[10px] font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">{t(locale, "detailNav.previous")}</span>
-            <span className="block truncate text-sm font-bold text-[var(--mn-text)]">{previous.title}</span>
+            <span className="block text-label-medium text-on-surface-variant">{t(locale, "detailNav.previous")}</span>
+            <span className="block truncate text-title-small text-on-surface">{previous.title}</span>
           </span>
         </a>
       ) : <span aria-hidden="true" />}
       <a href={backHref} className={`${card} justify-center px-3 sm:px-4`} title={t(locale, "detailNav.backToList")}>
         <svg className={arrow} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10" /></svg>
-        <span className="hidden whitespace-nowrap text-sm font-bold text-[var(--mn-text)] sm:inline">{t(locale, "detailNav.backToList")}</span>
+        <span className="hidden whitespace-nowrap text-label-large text-on-surface sm:inline">{t(locale, "detailNav.backToList")}</span>
         <span className="sr-only sm:hidden">{t(locale, "detailNav.backToList")}</span>
       </a>
       {next ? (
         <a href={localizePath(next.href, locale)} rel="next" className={`${card} justify-end text-right`}>
           <span className="min-w-0">
-            <span className="block text-[10px] font-bold uppercase tracking-wider text-[var(--mn-text-muted)]">{t(locale, "detailNav.next")}</span>
-            <span className="block truncate text-sm font-bold text-[var(--mn-text)]">{next.title}</span>
+            <span className="block text-label-medium text-on-surface-variant">{t(locale, "detailNav.next")}</span>
+            <span className="block truncate text-title-small text-on-surface">{next.title}</span>
           </span>
           <svg className={arrow} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
         </a>

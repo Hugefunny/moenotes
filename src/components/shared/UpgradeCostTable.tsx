@@ -65,7 +65,7 @@ export default function UpgradeCostTable({
   const visible = useMemo(() => steps.filter((step) => step.costs.length > 0), [steps]);
   const rows = useMemo(() => (cumulative && showTotal ? cumulativeUpgradeSteps(visible) : visible), [cumulative, showTotal, visible]);
   if (visible.length === 0) {
-    return <p className="text-sm font-medium text-[var(--mn-text-muted)]">{emptyText ?? t(locale, "designSystem.upgrade.empty")}</p>;
+    return <p className="text-body-medium text-on-surface-variant">{emptyText ?? t(locale, "designSystem.upgrade.empty")}</p>;
   }
   const toggle = cumulative ? (
         <div className="mb-2 flex justify-end">
@@ -73,24 +73,24 @@ export default function UpgradeCostTable({
             type="button"
             aria-pressed={showTotal}
             onClick={() => setShowTotal((value) => !value)}
-            className={`mn-focus rounded-full border border-[var(--mn-border)] px-3 py-1 text-xs font-bold transition ${showTotal ? "bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]" : "bg-[var(--mn-paper)] text-[var(--mn-text-muted)] hover:bg-[var(--mn-cream-deep)]"}`}
+            className="md3-filter-chip md3-state"
           >
             {t(locale, "designSystem.upgrade.cumulative")}
           </button>
         </div>
       ) : null;
   const table = (
-      <table className="w-full text-sm">
+      <table className="w-full text-body-medium">
         <thead>
-          <tr className="text-left text-xs font-bold uppercase tracking-wide text-[var(--mn-text-muted)]/80">
+          <tr className="text-left text-title-small text-on-surface-variant">
             <th scope="col" className="py-2 pr-3">{stepHeader ?? t(locale, "designSystem.upgrade.step")}</th>
             <th scope="col" className="py-2">{costHeader ?? t(locale, "designSystem.upgrade.cost")}</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-[var(--mn-border)]/40">
+        <tbody className="divide-y divide-outline-variant">
           {rows.map((step) => (
             <tr key={`${step.from}-${step.to}`}>
-              <th scope="row" className="py-2 pr-3 align-top whitespace-nowrap font-bold text-[var(--mn-text)]">
+              <th scope="row" className="py-2 pr-3 align-top whitespace-nowrap text-title-small text-on-surface">
                 {formatStep(step)}
               </th>
               <td className="py-2">
@@ -99,15 +99,15 @@ export default function UpgradeCostTable({
                     const body = (
                       <>
                         {cost.imageUrl ? <img src={cost.imageUrl} alt="" loading="lazy" className="h-6 w-6 object-contain" /> : null}
-                        <span className="font-medium text-[var(--mn-text)]">{cost.name}</span>
-                        <span className="font-black tabular-nums text-[var(--mn-text)]">×{cost.count.toLocaleString(locale)}</span>
+                        <span className="font-medium text-on-surface">{cost.name}</span>
+                        <span className="tabular-nums text-on-surface-variant">×{cost.count.toLocaleString(locale)}</span>
                       </>
                     );
-                    const chip = "flex items-center gap-1.5 rounded-lg border border-[var(--mn-border)]/60 bg-[var(--mn-cream-deep)]/40 px-2 py-1";
+                    const chip = "flex min-h-8 items-center gap-2 rounded-shape-sm border border-outline-variant px-2";
                     return (
                       <li key={cost.id ?? cost.name} className={cost.href ? undefined : chip} title={cost.name}>
                         {cost.href ? (
-                          <a href={localizePath(cost.href, locale)} className={`mn-focus ${chip} transition hover:border-[var(--mn-accent)] hover:bg-[var(--mn-accent-soft)]`}>{body}</a>
+                          <a href={localizePath(cost.href, locale)} className={`${chip} md3-state`}>{body}</a>
                         ) : body}
                       </li>
                     );

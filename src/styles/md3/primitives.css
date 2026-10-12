@@ -106,6 +106,33 @@
   .md3-switch--on { border-color: var(--md-sys-color-primary); background: var(--md-sys-color-primary); }
   .md3-switch--on .md3-switch__thumb { width: 24px; height: 24px; transform: translateX(16px); background: var(--md-sys-color-on-primary); color: var(--md-sys-color-on-primary-container); }
 
+  /* ── Segmented buttons (M3): outlined full-shape group; the selected segment fills with secondary-container and
+        leads with a check. Use with aria-pressed buttons inside role="group". ── */
+  .md3-segmented { display: inline-flex; flex-wrap: wrap; max-width: 100%; border: 1px solid var(--md-sys-color-outline); border-radius: var(--md-sys-shape-corner-full); overflow: hidden; }
+  .md3-segment {
+    display: inline-flex; flex: 1 0 auto; align-items: center; justify-content: center; gap: 8px; min-width: 48px; min-height: 40px; padding: 0 12px;
+    border: 0; border-inline-start: 1px solid var(--md-sys-color-outline); background: transparent; color: var(--md-sys-color-on-surface);
+    font: inherit; font-size: var(--md-sys-typescale-label-large-size); line-height: var(--md-sys-typescale-label-large-line-height); font-weight: 500; letter-spacing: var(--md-sys-typescale-label-large-tracking);
+    cursor: pointer; transition: background-color var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+  }
+  .md3-segment:first-child { border-inline-start: 0; }
+  .md3-segment[aria-pressed="true"], .md3-segment[aria-checked="true"], .md3-segment[aria-selected="true"] { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
+  .md3-segment[aria-pressed="true"]::after { content: none; }
+  .md3-segment:disabled { cursor: default; color: rgb(var(--md-sys-color-on-surface-rgb) / 0.38); }
+  .md3-segment svg { width: 18px; height: 18px; flex-shrink: 0; }
+  html[data-density="compact"] .md3-segment { min-height: 32px; padding: 0 10px; }
+
+  /* ── Range input styled as an M3 slider (single thumb). Set --md3-range-progress for the active track. ── */
+  .md3-range { height: 20px; margin: 0; background: transparent; cursor: pointer; -webkit-appearance: none; appearance: none; }
+  .md3-range::-webkit-slider-runnable-track { height: 4px; border-radius: 999px; background: linear-gradient(to right, var(--md-sys-color-primary) var(--md3-range-progress, 0%), var(--md-sys-color-secondary-container) var(--md3-range-progress, 0%)); }
+  .md3-range::-moz-range-track { height: 4px; border-radius: 999px; background: var(--md-sys-color-secondary-container); }
+  .md3-range::-moz-range-progress { height: 4px; border-radius: 999px; background: var(--md-sys-color-primary); }
+  .md3-range::-webkit-slider-thumb { width: 20px; height: 20px; margin-top: -8px; border: 0; border-radius: 50%; background: var(--md-sys-color-primary); -webkit-appearance: none; appearance: none; }
+  .md3-range::-moz-range-thumb { width: 20px; height: 20px; border: 0; border-radius: 50%; background: var(--md-sys-color-primary); }
+  .md3-range:focus-visible { outline: none; }
+  .md3-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 8px rgb(var(--md-sys-color-primary-rgb) / 0.12); }
+  .md3-range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 8px rgb(var(--md-sys-color-primary-rgb) / 0.12); }
+
   /* ── Legacy surface classes, resolved to M3 until their pages are rewritten ── */
   .mn-paper, .mn-glass, .mn-system-section {
     position: relative;

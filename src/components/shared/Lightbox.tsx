@@ -229,13 +229,14 @@ export default function Lightbox({ locale, images, index, open, onClose, onIndex
 
   if (!mounted || !open || !image) return null;
 
-  const controlButton = "mn-focus grid h-10 w-10 place-items-center rounded-full border border-white/25 bg-black/45 text-white backdrop-blur transition hover:bg-black/65 disabled:cursor-default disabled:opacity-35";
+  // M3 standard icon buttons on the dark stage (a state layer in white).
+  const controlButton = "md3-state grid h-12 w-12 place-items-center rounded-full bg-black/40 text-white disabled:cursor-default disabled:text-white/35";
   const zoomed = view.scale > 1;
 
   return createPortal(
     <div
       ref={panelRef}
-      className="fixed inset-0 z-[210] flex flex-col bg-black/90 text-white"
+      className="fixed inset-0 z-[1310] flex flex-col bg-black/90 text-white"
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
@@ -243,7 +244,7 @@ export default function Lightbox({ locale, images, index, open, onClose, onIndex
     >
       <h2 id={titleId} className="sr-only">{image.alt || t(locale, "lightbox.label")}</h2>
       <div className="relative z-10 flex shrink-0 items-center justify-between gap-2 p-3 sm:p-4">
-        <span className="rounded-full bg-black/45 px-3 py-1 font-mono text-xs font-bold tabular-nums" aria-live="polite">
+        <span className="rounded-full bg-black/40 px-3 py-1 text-label-large tabular-nums" aria-live="polite">
           {count > 1 ? t(locale, "lightbox.counter", { current: current + 1, total: count }) : ""}
         </span>
         <div className="flex items-center gap-2">
@@ -283,8 +284,8 @@ export default function Lightbox({ locale, images, index, open, onClose, onIndex
           if (!onImage) close();
         }}
       >
-        {!loaded && !failed ? <span className="absolute inset-0 grid place-items-center text-sm font-bold text-white/70">{t(locale, "lightbox.loading")}</span> : null}
-        {failed ? <span className="absolute inset-0 grid place-items-center text-sm font-bold text-white/70">{t(locale, "lightbox.failed")}</span> : null}
+        {!loaded && !failed ? <span className="absolute inset-0 grid place-items-center text-body-medium text-white/70">{t(locale, "lightbox.loading")}</span> : null}
+        {failed ? <span className="absolute inset-0 grid place-items-center text-body-medium text-white/70">{t(locale, "lightbox.failed")}</span> : null}
         <img
           key={image.src}
           ref={imageRef}
@@ -309,7 +310,7 @@ export default function Lightbox({ locale, images, index, open, onClose, onIndex
       </div>
 
       {image.caption ? (
-        <div className="relative z-10 shrink-0 px-4 pb-4 pt-2 text-center text-sm font-medium leading-relaxed text-white/85">{image.caption}</div>
+        <div className="relative z-10 shrink-0 px-4 pb-4 pt-2 text-center text-body-medium text-white/85">{image.caption}</div>
       ) : null}
     </div>,
     document.body,

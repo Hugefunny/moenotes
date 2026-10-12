@@ -14,7 +14,7 @@ interface Props {
 /** Picks the game server; `value` is null until the browser has read the stored choice. */
 export default function GameServerSwitch({ locale, value, onChange, servers = GAME_SERVERS }: Props) {
   return (
-    <div className="mn-segmented flex w-fit gap-1 rounded-full border border-[var(--mn-glass-border)] bg-[var(--mn-surface-strong)] p-1" role="group" aria-label={t(locale, "gameServer.label")}>
+    <div className="md3-segmented w-fit" role="group" aria-label={t(locale, "gameServer.label")}>
       {servers.map((server) => (
         <button
           key={server}
@@ -23,7 +23,7 @@ export default function GameServerSwitch({ locale, value, onChange, servers = GA
           aria-pressed={server === value}
           title={t(locale, `gameServer.names.${server}`)}
           aria-label={t(locale, `gameServer.names.${server}`)}
-          className={`mn-focus flex items-center rounded-full px-2.5 py-1.5 transition ${server === value ? "bg-[var(--mn-accent-soft)]" : "opacity-60 hover:bg-[var(--mn-cream-deep)] hover:opacity-100"}`}
+          className={`md3-segment md3-state ${server === value ? "" : "[&>img]:opacity-60"}`}
         >
           {/* The flag alone marks the server; the name is in the title and the accessible label. */}
           <ServerFlag server={server} />

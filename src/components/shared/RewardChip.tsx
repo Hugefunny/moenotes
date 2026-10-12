@@ -35,11 +35,11 @@ function RewardIcon({ reward, size }: { reward: RewardViewModel; size: string })
   const [failed, setFailed] = useState(false);
   const assetUrl = useAssetUrl();
   return (
-    <span className={`relative grid shrink-0 place-items-center overflow-hidden rounded-xl border border-[var(--mn-glass-border)] bg-[var(--mn-surface)] ${size}`}>
+    <span className={`relative grid shrink-0 place-items-center overflow-hidden rounded-shape-md border border-outline-variant bg-surface-container ${size}`}>
       {reward.imageUrl && !failed ? (
         <img className={`h-full w-full ${coverKinds.has(reward.kind) ? "object-cover" : "object-contain p-0.5"}`} src={assetUrl(reward.imageUrl)} alt="" loading="lazy" onError={() => setFailed(true)} />
       ) : (
-        <span className="text-[10px] font-bold text-[var(--mn-text-muted)]">#{reward.id}</span>
+        <span className="text-[10px] font-bold text-on-surface-variant">#{reward.id}</span>
       )}
     </span>
   );
@@ -51,13 +51,13 @@ export default function RewardChip({ reward, locale, variant = "row", linked = t
   const exactCount = reward.count > 1 ? t(locale, "rewards.count", { count: reward.count.toLocaleString(locale) }) : "";
   const label = `${name} ${exactCount}`.trim();
   const href = linked ? rewardHref(reward, locale) : null;
-  const className = "mn-focus group inline-flex min-w-0 items-center gap-2 rounded-xl text-left";
+  const className = " group inline-flex min-w-0 items-center gap-2 rounded-shape-md text-left";
 
   if (variant === "icon") {
     const content = (
       <>
         <RewardIcon reward={reward} size="h-11 w-11" />
-        {count && <span className="absolute -bottom-1 -right-1 rounded-full border border-[var(--mn-paper)] bg-[var(--mn-accent-deep)] px-1.5 py-px font-mono text-[10px] font-bold leading-4 text-[var(--mn-paper)]">{count}</span>}
+        {count && <span className="absolute -bottom-1 -right-1 rounded-full bg-primary px-1.5 text-label-small tabular-nums text-on-primary">{count}</span>}
       </>
     );
     return href
@@ -69,9 +69,9 @@ export default function RewardChip({ reward, locale, variant = "row", linked = t
     <>
       <RewardIcon reward={reward} size="h-10 w-10" />
       <span className="min-w-0">
-        <span className={`block truncate text-sm font-bold text-[var(--mn-text)] ${href ? "group-hover:text-[var(--mn-accent-deep)]" : ""}`}>{name}</span>
-        <span className="block text-[11px] font-medium text-[var(--mn-text-muted)]">
-          {t(locale, `rewards.resourceKinds.${reward.kind}`)}{count && <span className="ml-1.5 font-mono font-bold text-[var(--mn-accent-deep)]" title={exactCount}>{count}</span>}
+        <span className={`block truncate text-title-small text-on-surface ${href ? "group-hover:text-primary group-hover:underline" : ""}`}>{name}</span>
+        <span className="block text-body-small text-on-surface-variant">
+          {t(locale, `rewards.resourceKinds.${reward.kind}`)}{count && <span className="ml-1.5 tabular-nums text-on-surface" title={exactCount}>{count}</span>}
         </span>
       </span>
     </>

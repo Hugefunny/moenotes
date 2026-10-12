@@ -52,13 +52,13 @@ export default function AudioPlayButton({ locale, track, size = "md", showLabel 
       aria-label={showLabel ? undefined : name}
       aria-pressed={active}
       title={name}
-      className={`mn-focus mn-stamp-press inline-flex shrink-0 items-center justify-center gap-2 rounded-full border-[1.5px] font-bold shadow-[var(--mn-shadow-stamp-sm)] transition ${
+      className={`md3-state inline-flex shrink-0 items-center justify-center gap-2 rounded-full transition-colors ${
         status === "error"
-          ? "border-[var(--mn-rose)] bg-[var(--mn-paper)] text-[var(--mn-rose)]"
+          ? "bg-error-container text-on-error-container"
           : active
-            ? "border-[var(--mn-accent-deep)] bg-[var(--mn-accent)] text-white"
-            : "border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-accent-deep)] hover:bg-[var(--mn-accent-soft)]"
-      } ${showLabel ? "h-9 px-4 text-sm" : sizeClass[size]} ${className}`}
+            ? "bg-primary text-on-primary"
+            : "bg-secondary-container text-on-secondary-container"
+      } ${showLabel ? "h-10 px-4 text-label-large" : sizeClass[size]} ${className}`}
     >
       {icon}
       {showLabel ? <span>{label}</span> : null}

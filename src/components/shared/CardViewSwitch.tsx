@@ -3,7 +3,7 @@ import { t } from "@/i18n";
 import CollectionViewSwitch from "@/components/shared/CollectionViewSwitch";
 import { CARD_VIEWS, type CardView } from "@/lib/cards/use-card-view";
 
-/** Card list display switch, in the server switch's segmented style (CollectionViewSwitch with the card pages' copy). */
+/** Card list display switch: M3 segmented buttons (CollectionViewSwitch with the card pages' copy). */
 export default function CardViewSwitch({ locale, value, onChange }: { locale: AppLocale; value: CardView; onChange: (view: CardView) => void }) {
   return (
     <CollectionViewSwitch

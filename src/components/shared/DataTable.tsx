@@ -1,6 +1,7 @@
 import { useMemo, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import type { AppLocale } from "@/config/locales";
 import { t } from "@/i18n";
+import { Icon } from "@/components/shared/icons";
 
 export interface DataTableColumn<T> {
   /** Unique column id; also the sort key reported by `onSortChange`. */
@@ -139,7 +140,7 @@ export default function DataTable<T>({
     onSortChange?.(next);
   };
   const cellPad = dense ? "px-2.5 py-1.5" : "px-3 py-2.5";
-  const stickyCell = "sticky left-0 z-[1] bg-[var(--mn-paper)] shadow-[1px_0_0_var(--mn-border)]";
+  const stickyCell = "sticky left-0 z-[1] bg-surface-container-low shadow-[1px_0_0_var(--md-sys-color-outline-variant)]";
 
   const openRow = (row: T, event: MouseEvent<HTMLTableRowElement>) => {
     onRowClick?.(row, event);
@@ -154,10 +155,10 @@ export default function DataTable<T>({
 
   return (
     <div
-      className={`mn-data-table relative w-full overflow-x-auto rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-paper)] ${maxHeight !== undefined ? "overflow-y-auto" : ""} ${className}`}
+      className={`mn-data-table relative w-full overflow-x-auto rounded-shape-lg border border-outline-variant bg-surface-container-low ${maxHeight !== undefined ? "overflow-y-auto" : ""} ${className}`}
       style={maxHeight !== undefined ? { maxHeight } : undefined}
     >
-      <table className="w-full border-separate border-spacing-0 text-sm">
+      <table className="w-full border-separate border-spacing-0 text-body-medium">
         {caption ? <caption className="sr-only">{caption}</caption> : null}
         <thead>
           <tr>
@@ -171,19 +172,17 @@ export default function DataTable<T>({
                   scope="col"
                   aria-sort={ariaSort}
                   style={{ ...sizeStyle(column.width), top: stickyTop }}
-                  className={`sticky z-[2] whitespace-nowrap border-b border-[var(--mn-border)] bg-[var(--mn-surface-strong)] ${cellPad} text-xs font-bold uppercase tracking-wide text-[var(--mn-text-muted)] ${alignClass[align]} ${column.sticky ? "left-0 z-[3] shadow-[1px_0_0_var(--mn-border)]" : ""}`}
+                  className={`sticky z-[2] whitespace-nowrap border-b border-outline-variant bg-surface-container-high ${cellPad} text-title-small text-on-surface-variant ${alignClass[align]} ${column.sticky ? "left-0 z-[3] shadow-[1px_0_0_var(--md-sys-color-outline-variant)]" : ""}`}
                 >
                   {column.sortValue ? (
                     <button
                       type="button"
                       onClick={() => changeSort(column)}
-                      className={`mn-focus inline-flex items-center gap-1 rounded-md uppercase transition hover:text-[var(--mn-text)] ${active ? "text-[var(--mn-accent-deep)]" : ""} ${align === "right" ? "flex-row-reverse" : ""}`}
+                      className={`md3-state group/sort -mx-2 inline-flex min-h-8 items-center gap-1 rounded-full px-2 ${active ? "text-on-surface" : ""} ${align === "right" ? "flex-row-reverse" : ""}`}
                       aria-label={active && typeof column.header === "string" && ascending && descending ? `${column.header}: ${sort!.direction === "asc" ? ascending : descending}` : undefined}
                     >
                       <span>{column.header}</span>
-                      <span aria-hidden="true" className={`text-sm leading-none ${active ? "" : "opacity-30"}`}>
-                        {active ? (sort!.direction === "asc" ? "↑" : "↓") : "↕"}
-                      </span>
+                      <Icon name="arrowUp" className={`h-[18px] w-[18px] transition-transform ${active ? "" : "opacity-0 group-hover/sort:opacity-40"} ${active && sort!.direction === "desc" ? "rotate-180" : ""}`} />
                     </button>
                   ) : column.header}
                 </th>
@@ -212,10 +211,10 @@ export default function DataTable<T>({
                       key={column.key}
                       scope={columnIndex === 0 ? "row" : undefined}
                       style={sizeStyle(column.width)}
-                      className={`border-b border-[var(--mn-border)]/50 ${cellPad} align-middle font-medium text-[var(--mn-text)] transition-colors group-last:border-b-0 ${clickable ? "group-hover:bg-[var(--mn-cream-deep)]" : ""} ${alignClass[align]} ${column.numeric ? "font-mono tabular-nums whitespace-nowrap" : ""} ${column.sticky ? stickyCell : ""} ${column.className ?? ""}`}
+                      className={`border-b border-outline-variant/50 ${cellPad} align-middle text-on-surface transition-colors group-last:border-b-0 ${clickable ? "group-hover:bg-on-surface/8" : ""} ${alignClass[align]} ${column.numeric ? "font-mono tabular-nums whitespace-nowrap" : ""} ${column.sticky ? stickyCell : ""} ${column.className ?? ""}`}
                     >
                       {linked ? (
-                        <a href={href} className="mn-focus rounded-sm hover:text-[var(--mn-accent-deep)]">
+                        <a href={href} className="rounded-sm hover:text-primary">
                           {content}
                         </a>
                       ) : content}

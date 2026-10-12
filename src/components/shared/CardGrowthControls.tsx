@@ -20,9 +20,9 @@ export function LevelControl({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between gap-3 text-sm font-semibold">
-        <span id={labelId} className="text-[var(--mn-text-muted)]">{t(locale, "cards.growth.level")}</span>
-        <span className="font-mono text-[var(--mn-text)]">{t(locale, "cards.growth.levelValue", { level, limit })}</span>
+      <div className="flex items-center justify-between gap-3">
+        <span id={labelId} className="text-title-small text-on-surface-variant">{t(locale, "cards.growth.level")}</span>
+        <span className="text-label-large tabular-nums text-on-surface">{t(locale, "cards.growth.levelValue", { level, limit })}</span>
       </div>
       <div className="flex items-center gap-2.5">
         <RoundButton label={t(locale, "cards.growth.decrease")} disabled={level <= 1} onClick={() => update(level - 1)}>
@@ -35,10 +35,8 @@ export function LevelControl({
           value={level}
           onChange={(event) => update(Number(event.target.value))}
           aria-labelledby={labelId}
-          className="mn-focus h-1.5 min-w-0 flex-1 cursor-pointer appearance-none rounded-lg accent-[var(--mn-accent)]"
-          style={{
-            background: `linear-gradient(to right, var(--mn-accent) 0%, var(--mn-accent) ${progress}%, var(--mn-cream-deep) ${progress}%, var(--mn-cream-deep) 100%)`,
-          }}
+          className="md3-range min-w-0 flex-1"
+          style={{ "--md3-range-progress": `${progress}%` } as React.CSSProperties}
         />
         <RoundButton label={t(locale, "cards.growth.increase")} disabled={level >= limit} onClick={() => update(level + 1)}>
           <path strokeLinecap="round" d="M12 5v14M5 12h14" />
@@ -47,7 +45,7 @@ export function LevelControl({
           type="button"
           disabled={level >= limit}
           onClick={() => update(limit)}
-          className="mn-focus shrink-0 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-paper)] px-3 py-1 text-xs font-bold text-[var(--mn-accent-deep)] shadow-[var(--mn-shadow-stamp-sm)] transition hover:bg-[var(--mn-accent-soft)] disabled:cursor-default disabled:opacity-40 disabled:hover:bg-[var(--mn-paper)]"
+          className="md3-state h-10 shrink-0 rounded-full px-3 text-label-large text-primary disabled:text-on-surface/40"
         >
           {t(locale, "cards.growth.max")}
         </button>

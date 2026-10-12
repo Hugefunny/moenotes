@@ -34,7 +34,7 @@ export function levelIndex(options: readonly number[], value: number): number {
   return best;
 }
 
-/** A tier switch over a list of values: segmented buttons, or step buttons with a slider. */
+/** A tier switch over a list of values: M3 segmented buttons, or step buttons around an M3 slider. */
 export default function LevelSwitch(props: LevelSwitchProps) {
   return props.variant === "slider" ? <SliderSwitch {...props} /> : <SegmentedSwitch {...props} />;
 }
@@ -42,20 +42,10 @@ export default function LevelSwitch(props: LevelSwitchProps) {
 function SegmentedSwitch({ label, value, options, formatOption = String, onChange }: LevelSwitchProps) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-      <span className="text-sm font-semibold text-[var(--mn-text-muted)]">{label}</span>
-      <div role="group" aria-label={label} className="mn-level-switch flex flex-wrap gap-1 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-strong)] p-1 shadow-[var(--mn-shadow-stamp-sm)]">
+      <span className="text-title-small text-on-surface-variant">{label}</span>
+      <div role="group" aria-label={label} className="mn-level-switch md3-segmented">
         {options.map((option, index) => (
-          <button
-            key={option}
-            type="button"
-            onClick={() => onChange(option)}
-            aria-pressed={value === option}
-            className={`mn-focus min-w-9 rounded-xl px-2.5 py-1 font-mono text-xs font-medium transition ${
-              value === option
-                ? "bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]"
-                : "text-[var(--mn-text-muted)] hover:bg-[var(--mn-cream-deep)]"
-            }`}
-          >
+          <button key={option} type="button" onClick={() => onChange(option)} aria-pressed={value === option} className="md3-segment md3-state tabular-nums">
             {formatOption(option, index)}
           </button>
         ))}
@@ -75,14 +65,14 @@ function SliderSwitch({ label, value, options, formatOption = String, formatValu
   };
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between gap-3 text-sm font-semibold">
-        <span id={labelId} className="text-[var(--mn-text-muted)]">{label}</span>
-        <span className="font-mono text-[var(--mn-text)]">{formatValue ? formatValue(value, index) : formatOption(options[index] ?? value, index)}</span>
+    <div className="space-y-2">
+      <div className="flex items-center justify-between gap-3">
+        <span id={labelId} className="text-title-small text-on-surface-variant">{label}</span>
+        <span className="text-label-large tabular-nums text-on-surface">{formatValue ? formatValue(value, index) : formatOption(options[index] ?? value, index)}</span>
       </div>
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-2">
         <RoundButton label={decreaseLabel ?? ""} disabled={index <= 0} onClick={() => pick(index - 1)}>
-          <path strokeLinecap="round" d="M5 12h14" />
+          <path d="M5 12h14" />
         </RoundButton>
         <input
           type="range"
@@ -93,21 +83,14 @@ function SliderSwitch({ label, value, options, formatOption = String, formatValu
           onChange={(event) => pick(Number(event.target.value))}
           aria-labelledby={labelId}
           aria-valuetext={formatOption(options[index] ?? value, index)}
-          className="mn-focus h-1.5 min-w-0 flex-1 cursor-pointer appearance-none rounded-lg accent-[var(--mn-accent)]"
-          style={{
-            background: `linear-gradient(to right, var(--mn-accent) 0%, var(--mn-accent) ${progress}%, var(--mn-cream-deep) ${progress}%, var(--mn-cream-deep) 100%)`,
-          }}
+          className="md3-range min-w-0 flex-1"
+          style={{ "--md3-range-progress": `${progress}%` } as React.CSSProperties}
         />
         <RoundButton label={increaseLabel ?? ""} disabled={index >= last} onClick={() => pick(index + 1)}>
-          <path strokeLinecap="round" d="M12 5v14M5 12h14" />
+          <path d="M12 5v14M5 12h14" />
         </RoundButton>
         {maxLabel ? (
-          <button
-            type="button"
-            disabled={index >= last}
-            onClick={() => pick(last)}
-            className="mn-focus shrink-0 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-paper)] px-3 py-1 text-xs font-bold text-[var(--mn-accent-deep)] shadow-[var(--mn-shadow-stamp-sm)] transition hover:bg-[var(--mn-accent-soft)] disabled:cursor-default disabled:opacity-40 disabled:hover:bg-[var(--mn-paper)]"
-          >
+          <button type="button" disabled={index >= last} onClick={() => pick(last)} className="md3-state h-10 shrink-0 rounded-full px-3 text-label-large text-primary disabled:text-on-surface/40">
             {maxLabel}
           </button>
         ) : null}
@@ -116,16 +99,18 @@ function SliderSwitch({ label, value, options, formatOption = String, formatValu
   );
 }
 
+/** M3 tonal icon button (40dp) for step controls. */
 export function RoundButton({ label, disabled, onClick, children }: { label: string; disabled: boolean; onClick: () => void; children: ReactNode }) {
   return (
     <button
       type="button"
       aria-label={label}
+      title={label}
       disabled={disabled}
       onClick={onClick}
-      className="mn-focus grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-text-muted)] shadow-[var(--mn-shadow-stamp-sm)] transition hover:text-[var(--mn-text)] disabled:cursor-default disabled:opacity-40"
+      className="md3-state grid h-10 w-10 shrink-0 place-items-center rounded-full bg-secondary-container text-on-secondary-container disabled:bg-on-surface/10 disabled:text-on-surface/40"
     >
-      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true">
         {children}
       </svg>
     </button>

@@ -27,10 +27,10 @@ export interface CollectionViewSwitchProps<V extends CollectionView> {
   compact?: boolean;
 }
 
-/** Segmented view switch in the server switch's style; pair with {@link useCollectionView}. */
+/** View switch as M3 segmented buttons; pair with {@link useCollectionView}. */
 export default function CollectionViewSwitch<V extends CollectionView>({ locale, views, value, onChange, label, labels, compact = false }: CollectionViewSwitchProps<V>) {
   return (
-    <div className="mn-segmented flex w-fit gap-1 rounded-full border border-[var(--mn-glass-border)] bg-[var(--mn-surface-strong)] p-1" role="group" aria-label={label ?? t(locale, "collectionView.label")}>
+    <div className="md3-segmented w-fit" role="group" aria-label={label ?? t(locale, "collectionView.label")}>
       {views.map((view) => {
         const text = labels?.[view] ?? t(locale, `collectionView.${view}`);
         return (
@@ -41,9 +41,9 @@ export default function CollectionViewSwitch<V extends CollectionView>({ locale,
             aria-pressed={view === value}
             aria-label={compact ? text : undefined}
             title={compact ? text : undefined}
-            className={`mn-focus flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition ${view === value ? "bg-[var(--mn-accent-soft)] text-[var(--mn-text)]" : "text-[var(--mn-text-muted)] hover:bg-[var(--mn-cream-deep)] hover:text-[var(--mn-text)]"}`}
+            className="md3-segment md3-state"
           >
-            <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">{ICONS[view]}</svg>
+            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">{ICONS[view]}</svg>
             {compact ? <span className="hidden sm:inline">{text}</span> : text}
           </button>
         );
