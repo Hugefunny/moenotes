@@ -8,7 +8,7 @@ export default function AccountAvatar({ url, name, className }: { url: string | 
   const [failed, setFailed] = useState(false);
   useEffect(() => setFailed(false), [url]);
   return (
-    <span className={`${className} grid shrink-0 place-items-center overflow-hidden border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-cream-deep)] font-black text-[var(--mn-text)]`}>
+    <span className={`${className} grid shrink-0 place-items-center overflow-hidden border border-outline-variant bg-surface-container-highest font-black text-on-surface`}>
       {url && !failed ? (
         <img src={url} alt="" className="h-full w-full object-cover" referrerPolicy="no-referrer" onError={() => setFailed(true)} />
       ) : (

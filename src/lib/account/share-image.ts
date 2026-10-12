@@ -4,6 +4,8 @@
  * could not be exported; the asset host sends `Access-Control-Allow-Origin: *` and the logo is same-origin.
  */
 
+import { MD3_DEFAULT_SEED, md3Colors } from "@/lib/md3/scheme";
+
 export const SHARE_WIDTH = 1080;
 export const SHARE_HEIGHT = 1440;
 
@@ -28,17 +30,19 @@ export interface ShareImageContent {
   profileCardUrl: string | null;
 }
 
-// The site's light tokens (src/styles/tokens.css): the image looks the same whatever theme the page is in.
+// The default Material 3 light scheme (src/lib/md3/scheme.ts): the image looks the same whatever theme or band
+// color the page is in.
+const scheme = md3Colors(MD3_DEFAULT_SEED, false);
 const colors = {
-  bg: "#EEF2FA",
-  bgDeep: "#DCE5F5",
-  paper: "rgba(247, 250, 255, 0.94)",
-  text: "#202E4C",
-  muted: "#596B87",
-  border: "#C5D1E6",
-  cream: "#E3EAF7",
-  accent: "#395EA8",
-  accentSoft: "#E1EAFB",
+  bg: scheme.surface!,
+  bgDeep: scheme.surfaceContainerHigh!,
+  paper: `${scheme.surfaceContainerLow!}f0`,
+  text: scheme.onSurface!,
+  muted: scheme.onSurfaceVariant!,
+  border: scheme.outlineVariant!,
+  cream: scheme.surfaceContainerHighest!,
+  accent: scheme.primary!,
+  accentSoft: scheme.secondaryContainer!,
 };
 
 function loadImage(url: string): Promise<HTMLImageElement> {

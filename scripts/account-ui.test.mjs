@@ -57,22 +57,23 @@ test('creation uses every dynamically returned permission and region with no sel
 
 test('account UI reuses real system sections, action cards and native archive consent', () => {
   const styles = source('ui-styles.ts');
-  assert.match(styles, /accountSection = "mn-system-section/);
-  assert.doesNotMatch(styles, /rounded-full/);
+  // Material 3: the shared tonal surface, M3 common buttons and outlined text fields.
+  assert.match(styles, /accountSection = "md3-surface/);
+  assert.match(styles, /accountInput = "md3-text-field/);
   for (const name of ['OpenPlatformPanel.tsx', 'AccountPanel.tsx']) {
     assert.match(source(name), /accountSection as panel/);
   }
   const platform = source('OpenPlatform.tsx');
   const grants = source('SaveAuthorizations.tsx');
-  assert.match(platform, /mn-list-card mn-card/);
-  assert.match(grants, /mn-list-card mn-card/);
+  assert.match(platform, /mn-list-card md3-card-outlined/);
+  assert.match(grants, /mn-list-card md3-card-outlined/);
   assert.match(grants, /type="checkbox" disabled=\{busy\} checked=\{checked\}/);
   assert.match(grants, /disabled=\{busy \|\| !selected.length\}/);
   assert.match(grants, /setSelected\(\[\]\)/);
-  assert.doesNotMatch(platform.match(/<form[\s\S]*?<\/form>/)[0], /mn-list-card|mn-card|mn-sticker/);
+  assert.doesNotMatch(platform.match(/<form[\s\S]*?<\/form>/)[0], /mn-list-card|md3-card-outlined/);
   const page = source('OpenPlatformPage.astro');
-  assert.match(page, /mn-system-section/);
-  assert.match(page, /mn-list-card mn-sticker/);
+  assert.match(page, /md3-surface/);
+  assert.match(page, /mn-list-card md3-card-outlined/);
   assert.equal((page.match(/<a\s/g) || []).length, 1);
   assert.match(page, /href=\{openPlatformDocsUrl\}/);
   const site = readFileSync(new URL('../src/config/site.ts', import.meta.url), 'utf8');

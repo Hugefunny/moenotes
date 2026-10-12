@@ -108,8 +108,8 @@ export default function GameAccounts({ locale, panel, stampButton, cards }: Prop
 
   const header = (
     <>
-      <h2 className="text-sm font-black text-[var(--mn-text)]">{t(locale, "account.games.title")}</h2>
-      <p className="mt-1 text-xs text-[var(--mn-text-muted)]">{t(locale, "account.games.hint")}</p>
+      <h2 className="text-label-large text-on-surface">{t(locale, "account.games.title")}</h2>
+      <p className="mt-1 text-body-small text-on-surface-variant">{t(locale, "account.games.hint")}</p>
     </>
   );
 
@@ -117,7 +117,7 @@ export default function GameAccounts({ locale, panel, stampButton, cards }: Prop
     return (
       <div className={panel}>
         {header}
-        <div className="mt-4 text-sm text-[var(--mn-text-muted)]">{loadFailed ? t(locale, "account.games.loadFailed") : <SiriusLoader locale={locale} compact label={t(locale, "account.loading")} />}</div>
+        <div className="mt-4 text-body-medium text-on-surface-variant">{loadFailed ? t(locale, "account.games.loadFailed") : <SiriusLoader locale={locale} compact label={t(locale, "account.loading")} />}</div>
       </div>
     );
   }
@@ -129,7 +129,7 @@ export default function GameAccounts({ locale, panel, stampButton, cards }: Prop
       {header}
 
       {state.accounts.length > 0 && (
-        <ul className="mt-4 divide-y divide-dashed divide-[var(--mn-border)]/60">
+        <ul className="mt-4 divide-y divide-dashed divide-outline-variant/60">
           {state.accounts.map((account) => {
             const key = keyOf(account);
             return (
@@ -170,9 +170,9 @@ export default function GameAccounts({ locale, panel, stampButton, cards }: Prop
       )}
 
       {!state.available ? (
-        <p className="mt-4 text-sm text-[var(--mn-text-muted)]">{t(locale, "account.games.unavailable")}</p>
+        <p className="mt-4 text-body-medium text-on-surface-variant">{t(locale, "account.games.unavailable")}</p>
       ) : state.accounts.length >= MAX_ACCOUNTS ? (
-        <p className="mt-4 text-xs text-[var(--mn-text-muted)]">{t(locale, "account.games.errors.tooManyAccounts")}</p>
+        <p className="mt-4 text-body-small text-on-surface-variant">{t(locale, "account.games.errors.tooManyAccounts")}</p>
       ) : (
         <AddForm
           locale={locale}
@@ -199,13 +199,7 @@ function NoticeLine({ notice }: { notice: Notice }) {
   return (
     <p
       role={notice.tone === "error" ? "alert" : "status"}
-      className={`mt-3 text-xs ${
-        notice.tone === "error"
-          ? "text-[var(--mn-danger,#ba1b1b)]"
-          : notice.tone === "success"
-            ? "font-bold text-[var(--mn-accent-deep)]"
-            : "text-[var(--mn-text-muted)]"
-      }`}
+      className={`mt-3 text-body-small ${ notice.tone === "error" ? "text-error" : notice.tone === "success" ? "font-bold text-primary" : "text-on-surface-variant" }`}
     >
       {notice.text}
     </p>
@@ -245,20 +239,20 @@ function AccountRow(props: RowProps) {
   return (
     <li className="py-3 first:pt-0 last:pb-0">
       <div className="flex flex-wrap items-center gap-3">
-        <span className="rounded-full border border-[var(--mn-border)] bg-[var(--mn-cream-deep)] px-2 py-0.5 text-[11px] font-black text-[var(--mn-text)]">
+        <span className="rounded-full border border-outline-variant bg-surface-container-highest px-2 py-0.5 text-label-small text-on-surface">
           {serverLabel(locale, account.server)}
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 items-center gap-2">
-            <p className="truncate text-sm font-bold text-[var(--mn-text)]">{account.name || t(locale, "account.games.unnamed")}</p>
+            <p className="truncate text-label-large text-on-surface">{account.name || t(locale, "account.games.unnamed")}</p>
             <StatusPill locale={locale} verified={account.verified} />
           </div>
-          <p className="text-xs text-[var(--mn-text-muted)]">{meta}</p>
+          <p className="text-body-small text-on-surface-variant">{meta}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {confirming ? (
             <>
-              <button type="button" disabled={busy} onClick={onRemove} className={`${stampButton} text-[var(--mn-danger,#ba1b1b)] disabled:opacity-60`}>
+              <button type="button" disabled={busy} onClick={onRemove} className={`${stampButton} text-error disabled:opacity-60`}>
                 {t(locale, "account.games.removeConfirm")}
               </button>
               <button type="button" onClick={() => setConfirming(false)} className={stampButton}>
@@ -345,18 +339,18 @@ function ProfilePanel({
   }
 
   return (
-    <div className="mt-3 space-y-4 rounded-2xl border-[1.5px] border-[var(--mn-border)] p-4">
+    <div className="mt-3 space-y-4 rounded-shape-lg border border-outline-variant p-4">
       {snapshot ? (
         <PlayerProfileCard locale={locale} snapshot={snapshot} cards={cards} own />
       ) : (
         !error && <SiriusLoader locale={locale} compact label={t(locale, "account.profile.loading")} />
       )}
       {error && (
-        <p role="alert" className="text-xs text-[var(--mn-danger,#ba1b1b)]">
+        <p role="alert" className="text-body-small text-error">
           {error}
         </p>
       )}
-      <div className="flex flex-wrap items-center gap-3 border-t border-dashed border-[var(--mn-border)] pt-3">
+      <div className="flex flex-wrap items-center gap-3 border-t border-dashed border-outline-variant pt-3">
         <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-3">
           <input
             type="checkbox"
@@ -364,11 +358,11 @@ function ProfilePanel({
             checked={account.public}
             disabled={busy}
             onChange={(event) => onPublic(event.target.checked)}
-            className="mn-focus mt-0.5 h-4 w-4 shrink-0 accent-[var(--mn-accent-deep)]"
+            className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
           />
           <span className="min-w-0">
-            <span className="block text-sm font-bold text-[var(--mn-text)]">{t(locale, "account.profile.public")}</span>
-            <span className="block text-xs text-[var(--mn-text-muted)]">
+            <span className="block text-label-large text-on-surface">{t(locale, "account.profile.public")}</span>
+            <span className="block text-body-small text-on-surface-variant">
               {t(locale, account.public ? "account.profile.publicOn" : "account.profile.publicOff")}
             </span>
           </span>
@@ -402,7 +396,7 @@ function PublicLink({ locale, account, stampButton }: { locale: AppLocale; accou
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <code className="min-w-0 flex-1 select-all truncate rounded-xl border border-[var(--mn-border)] bg-[var(--mn-cream-deep)] px-3 py-2 font-mono text-xs text-[var(--mn-text)]">
+      <code className="min-w-0 flex-1 select-all truncate rounded-shape-md border border-outline-variant bg-surface-container-highest px-3 py-2 font-mono text-body-small text-on-surface">
         {url}
       </code>
       <button type="button" onClick={() => void copy()} className={stampButton}>
@@ -418,11 +412,7 @@ function PublicLink({ locale, account, stampButton }: { locale: AppLocale; accou
 function StatusPill({ locale, verified }: { locale: AppLocale; verified: boolean }) {
   return (
     <span
-      className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-black ${
-        verified
-          ? "border-[color-mix(in_oklab,var(--mn-accent)_40%,transparent)] bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]"
-          : "border-dashed border-[var(--mn-border)] text-[var(--mn-text-muted)]"
-      }`}
+      className={`shrink-0 rounded-full border px-2 py-0.5 text-label-small ${ verified ? "border-primary/40 bg-secondary-container text-primary" : "border-dashed border-outline-variant text-on-surface-variant" }`}
     >
       {t(locale, verified ? "account.games.verified" : "account.games.unverified")}
     </span>
@@ -457,8 +447,8 @@ function VerifyPanel({
   }
 
   return (
-    <div className="mt-3 space-y-3 rounded-2xl border-[1.5px] border-[color-mix(in_oklab,var(--mn-accent)_40%,transparent)] bg-[color-mix(in_oklab,var(--mn-accent-soft)_40%,transparent)] p-4">
-      <ol className="list-decimal space-y-1 pl-5 text-xs text-[var(--mn-text-muted)]">
+    <div className="mt-3 space-y-3 rounded-shape-lg border border-primary/40 bg-secondary-container/40 p-4">
+      <ol className="list-decimal space-y-1 pl-5 text-body-small text-on-surface-variant">
         <li>{t(locale, "account.games.stepRename")}</li>
         <li>{t(locale, "account.games.stepVerify")}</li>
         <li>{t(locale, "account.games.stepRestore")}</li>
@@ -466,7 +456,7 @@ function VerifyPanel({
       <div className="flex flex-wrap items-center gap-2">
         <code
           aria-label={t(locale, "account.games.codeLabel")}
-          className="select-all rounded-xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-4 py-2 font-mono text-xl font-black tracking-[0.2em] text-[var(--mn-text)]"
+          className="select-all rounded-shape-md border border-outline-variant bg-surface-container-low px-4 py-2 font-mono text-label-medium text-on-surface"
         >
           {code}
         </code>
@@ -477,7 +467,7 @@ function VerifyPanel({
           {t(locale, "account.games.refreshCode")}
         </button>
       </div>
-      <p className="text-xs text-[var(--mn-text-muted)]">{t(locale, "account.games.refreshHint")}</p>
+      <p className="text-body-small text-on-surface-variant">{t(locale, "account.games.refreshHint")}</p>
       <button type="button" disabled={busy} onClick={onVerify} className={`${stampButton} disabled:opacity-60`}>
         {busy && <SiriusIcon className="mr-2 h-4 w-4" />}{t(locale, busy ? "account.games.checking" : "account.games.verify")}
       </button>
@@ -510,10 +500,10 @@ function AddForm({
   }
 
   return (
-    <form onSubmit={submit} className="mt-4 space-y-3 rounded-2xl border-[1.5px] border-dashed border-[var(--mn-border)] p-4">
-      <p className="text-sm font-black text-[var(--mn-text)]">{t(locale, hasAccounts ? "account.games.addAnother" : "account.games.add")}</p>
+    <form onSubmit={submit} className="mt-4 space-y-3 rounded-shape-lg border border-dashed border-outline-variant p-4">
+      <p className="text-label-large text-on-surface">{t(locale, hasAccounts ? "account.games.addAnother" : "account.games.add")}</p>
       <fieldset>
-        <legend className="mb-2 text-xs font-bold text-[var(--mn-text-muted)]">{t(locale, "account.games.server")}</legend>
+        <legend className="mb-2 text-label-medium text-on-surface-variant">{t(locale, "account.games.server")}</legend>
         <div className="flex flex-wrap gap-2">
           {GAME_SERVERS.map((option) => (
             <button
@@ -521,11 +511,7 @@ function AddForm({
               type="button"
               aria-pressed={server === option}
               onClick={() => setServer(option)}
-              className={`mn-focus rounded-xl border-[1.5px] px-3 py-1.5 text-xs font-bold transition-colors ${
-                server === option
-                  ? "border-[color-mix(in_oklab,var(--mn-accent)_45%,transparent)] bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]"
-                  : "border-[var(--mn-border)] text-[var(--mn-text-muted)] hover:bg-[var(--mn-cream-deep)]"
-              }`}
+              className={`rounded-shape-md border px-3 py-1.5 text-label-medium transition-colors ${ server === option ? "border-primary/45 bg-secondary-container text-primary" : "border-outline-variant text-on-surface-variant hover:bg-surface-container-highest" }`}
             >
               {serverLabel(locale, option)}
             </button>
@@ -533,7 +519,7 @@ function AddForm({
         </div>
       </fieldset>
       <div>
-        <label htmlFor="game-profile-id" className="mb-2 block text-xs font-bold text-[var(--mn-text-muted)]">
+        <label htmlFor="game-profile-id" className="mb-2 block text-label-medium text-on-surface-variant">
           {t(locale, "account.games.profileId")}
         </label>
         <div className="flex flex-wrap gap-2">
@@ -546,13 +532,13 @@ function AddForm({
             onChange={(event) => setProfileId(event.target.value)}
             aria-invalid={showInvalid}
             aria-describedby="game-profile-id-hint"
-            className="min-w-0 flex-1 rounded-xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-surface)] px-4 py-2 font-mono text-sm text-[var(--mn-text)] focus:border-[var(--mn-accent-deep)] focus:bg-[var(--mn-paper)] focus:outline-none"
+            className="min-w-0 flex-1 rounded-shape-md border border-outline-variant bg-surface-container px-4 py-2 font-mono text-body-medium text-on-surface focus:border-primary focus:bg-surface-container-low focus:outline-none"
           />
           <button type="submit" disabled={busy || !valid} className={`${stampButton} disabled:opacity-60`}>
             {busy && <SiriusIcon className="mr-2 h-4 w-4" />}{t(locale, busy ? "account.games.checking" : "account.games.addButton")}
           </button>
         </div>
-        <p id="game-profile-id-hint" className={`mt-2 text-xs ${showInvalid ? "text-[var(--mn-danger,#ba1b1b)]" : "text-[var(--mn-text-muted)]"}`}>
+        <p id="game-profile-id-hint" className={`mt-2 text-body-small ${showInvalid ? "text-error" : "text-on-surface-variant"}`}>
           {t(locale, showInvalid ? "account.games.errors.invalidAccount" : server === "jp" ? "account.games.profileIdHintJp" : "account.games.profileIdHint")}
         </p>
       </div>

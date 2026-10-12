@@ -33,7 +33,7 @@ interface Props {
 
 import { accountSection as panel } from "./ui-styles";
 const stampButton =
-  "mn-focus mn-stamp-press inline-flex h-10 items-center rounded-xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-4 text-sm font-black text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)] hover:bg-[var(--mn-cream-deep)]";
+  " md3-state inline-flex h-10 items-center rounded-shape-md border border-outline-variant bg-surface-container-low px-4 text-sm font-black text-on-surface shadow-elevation-1 hover:bg-surface-container-highest";
 
 export default function AccountPanel({ locale, bands, cards }: Props) {
   const account = useAccount();
@@ -55,7 +55,7 @@ export default function AccountPanel({ locale, bands, cards }: Props) {
   if (account.status === "unavailable") {
     return (
       <div className={panel}>
-        <p className="text-sm text-[var(--mn-text-muted)]">{t(locale, "account.unavailable")}</p>
+        <p className="text-body-medium text-on-surface-variant">{t(locale, "account.unavailable")}</p>
       </div>
     );
   }
@@ -63,7 +63,7 @@ export default function AccountPanel({ locale, bands, cards }: Props) {
   if (!user) {
     return (
       <div className={`${panel} text-center`}>
-        <p className="mb-4 text-sm text-[var(--mn-text-muted)]">{t(locale, "account.signedOutHint")}</p>
+        <p className="mb-4 text-body-medium text-on-surface-variant">{t(locale, "account.signedOutHint")}</p>
         <a href={accountLoginUrl(locale, returnPath)} className={stampButton}>
           {t(locale, "account.signIn")}
         </a>
@@ -77,11 +77,11 @@ export default function AccountPanel({ locale, bands, cards }: Props) {
     <div className="space-y-7">
       <SectionHeading title={t(locale, "account.overviewTitle")} />
       <div className={`${panel} flex flex-wrap items-center gap-4`}>
-        <AccountAvatar url={accountAvatarUrl(user)} name={displayName} className="h-16 w-16 rounded-2xl text-xl" />
+        <AccountAvatar url={accountAvatarUrl(user)} name={displayName} className="h-16 w-16 rounded-shape-lg text-headline-small" />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-lg font-black text-[var(--mn-text)]">{displayName}</p>
-          {user.username && <p className="truncate text-sm text-[var(--mn-text-muted)]">@{user.username}</p>}
-          <p className="mt-1 text-xs text-[var(--mn-text-muted)]">{t(locale, "account.passport")}</p>
+          <p className="truncate text-title-large text-on-surface">{displayName}</p>
+          {user.username && <p className="truncate text-body-medium text-on-surface-variant">@{user.username}</p>}
+          <p className="mt-1 text-body-small text-on-surface-variant">{t(locale, "account.passport")}</p>
         </div>
         <button type="button" onClick={() => setPickerOpen(true)} className={stampButton}>
           {t(locale, "account.changeAvatar")}
@@ -135,14 +135,14 @@ function PassportSecurity({ locale }: { locale: AppLocale }) {
 
   return (
     <div className={panel}>
-      <h2 className="text-sm font-black text-[var(--mn-text)]">{t(locale, "account.securityTitle")}</h2>
-      <p className="mt-1 text-xs text-[var(--mn-text-muted)]">{t(locale, "account.securityHint")}</p>
-      <div className="mt-4 divide-y divide-dashed divide-[var(--mn-border)]/60">
+      <h2 className="text-label-large text-on-surface">{t(locale, "account.securityTitle")}</h2>
+      <p className="mt-1 text-body-small text-on-surface-variant">{t(locale, "account.securityHint")}</p>
+      <div className="mt-4 divide-y divide-dashed divide-outline-variant/60">
         {securityTasks.map((task) => (
           <div key={task.page} className={row}>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold text-[var(--mn-text)]">{t(locale, task.title)}</p>
-              <p className="text-xs text-[var(--mn-text-muted)]">{t(locale, task.hint)}</p>
+              <p className="text-label-large text-on-surface">{t(locale, task.title)}</p>
+              <p className="text-body-small text-on-surface-variant">{t(locale, task.hint)}</p>
             </div>
             <a href={passportAccountUrl(task.page, locale, returnTo)} className={stampButton}>
               {t(locale, "account.change")}
@@ -151,8 +151,8 @@ function PassportSecurity({ locale }: { locale: AppLocale }) {
         ))}
         <div className={row}>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-bold text-[var(--mn-text)]">{t(locale, "account.securityCenter")}</p>
-            <p className="text-xs text-[var(--mn-text-muted)]">{t(locale, "account.securityCenterHint")}</p>
+            <p className="text-label-large text-on-surface">{t(locale, "account.securityCenter")}</p>
+            <p className="text-body-small text-on-surface-variant">{t(locale, "account.securityCenterHint")}</p>
           </div>
           <a href={passportAccountUrl("security", locale, returnTo)} target="_blank" rel="noopener" className={stampButton}>
             {t(locale, "account.open")}
@@ -197,26 +197,22 @@ function AvatarPicker({ locale, bands, user, displayName, open, onClose, onSaved
   }
 
   const tile = (active: boolean) =>
-    `mn-focus relative aspect-square overflow-hidden rounded-2xl border-[1.5px] transition-transform hover:scale-[1.04] disabled:opacity-60 ${
-      active ? "border-[var(--mn-accent)] ring-2 ring-[var(--mn-accent)]/40" : "border-[var(--mn-border)]"
+    ` relative aspect-square overflow-hidden rounded-shape-lg border transition-transform hover:scale-[1.04] disabled:opacity-60 ${
+      active ? "border-primary ring-2 ring-primary/40" : "border-outline-variant"
     }`;
 
   return (
     <Modal isOpen={open} onClose={onClose} title={t(locale, "account.changeAvatar")} closeLabel={t(locale, "actions.close")} size="lg">
-      <p className="mb-4 text-xs text-[var(--mn-text-muted)]">{t(locale, "account.avatarHint")}</p>
+      <p className="mb-4 text-body-small text-on-surface-variant">{t(locale, "account.avatarHint")}</p>
 
       <button
         type="button"
         onClick={() => void choose(null)}
         disabled={saving}
         aria-pressed={selectedId === null}
-        className={`mn-focus mb-5 flex items-center gap-2 rounded-xl border-[1.5px] py-1.5 pl-1.5 pr-3 text-xs font-bold transition-colors disabled:opacity-60 ${
-          selectedId === null
-            ? "border-[color-mix(in_oklab,var(--mn-accent)_45%,transparent)] bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]"
-            : "border-[var(--mn-border)] text-[var(--mn-text-muted)] hover:bg-[var(--mn-cream-deep)]"
-        }`}
+        className={`mb-5 flex items-center gap-2 rounded-shape-md border py-1.5 pl-1.5 pr-3 text-label-medium transition-colors disabled:opacity-60 ${ selectedId === null ? "border-primary/45 bg-secondary-container text-primary" : "border-outline-variant text-on-surface-variant hover:bg-surface-container-highest" }`}
       >
-        <AccountAvatar url={user.picture} name={displayName} className="h-8 w-8 rounded-lg text-xs" />
+        <AccountAvatar url={user.picture} name={displayName} className="h-8 w-8 rounded-shape-sm text-body-small" />
         {t(locale, "account.avatarDefault")}
       </button>
 
@@ -225,7 +221,7 @@ function AvatarPicker({ locale, bands, user, displayName, open, onClose, onSaved
           <div key={band.id}>
             <div className="mb-2 flex items-center gap-2">
               <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: band.color }} aria-hidden="true" />
-              <span className="text-xs font-black uppercase tracking-wider text-[var(--mn-text-muted)]">{band.name}</span>
+              <span className="text-label-medium text-on-surface-variant">{band.name}</span>
             </div>
             <div className="grid grid-cols-5 gap-2 sm:grid-cols-7">
               {band.characters.map((character) => (
@@ -247,7 +243,7 @@ function AvatarPicker({ locale, bands, user, displayName, open, onClose, onSaved
       </div>
 
       {saving && <SiriusLoader locale={locale} compact label={t(locale, "account.saving")} />}
-      {failed && <p className="mt-4 text-xs text-[var(--mn-danger,#ba1b1b)]">{t(locale, "account.saveFailed")}</p>}
+      {failed && <p className="mt-4 text-body-small text-error">{t(locale, "account.saveFailed")}</p>}
     </Modal>
   );
 }

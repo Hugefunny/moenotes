@@ -41,7 +41,7 @@ export default function PlayerProfileCard({ locale, snapshot, cards, own = false
         {card && (
           <a
             href={cardPattern ? localizePath(buildDynamicPath(cardPattern, { id: String(card.id) }), locale) : undefined}
-            className="mn-focus block w-24 shrink-0 overflow-hidden rounded-xl border-[1.5px] border-[var(--mn-border)] shadow-[var(--mn-shadow-stamp)]"
+            className="block w-24 shrink-0 overflow-hidden rounded-shape-md border border-outline-variant shadow-elevation-1"
             title={t(locale, "account.profile.favoriteCard", { title: card.title, character: card.characterName })}
           >
             {/* The favorite card is one of the player's server's cards, so it shows from that server's catalog. */}
@@ -59,24 +59,24 @@ export default function PlayerProfileCard({ locale, snapshot, cards, own = false
           </a>
         )}
         <div className="min-w-0 flex-1">
-          <p className="truncate text-xl font-black text-[var(--mn-text)]">{name}</p>
-          <p className="mt-0.5 text-xs text-[var(--mn-text-muted)]">
+          <p className="truncate text-headline-small text-on-surface">{name}</p>
+          <p className="mt-0.5 text-body-small text-on-surface-variant">
             {t(locale, `account.games.servers.${snapshot.server}`)} · ID {snapshot.profileId}
           </p>
           <dl className="mt-3 grid grid-cols-2 gap-2">
             {stats.map((stat) => (
-              <div key={stat.label} className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-cream-deep)] px-3 py-2">
-                <dt className="text-[11px] font-bold text-[var(--mn-text-muted)]">{stat.label}</dt>
-                <dd className="text-base font-black text-[var(--mn-text)]">{stat.value}</dd>
+              <div key={stat.label} className="rounded-shape-md border border-outline-variant bg-surface-container-highest px-3 py-2">
+                <dt className="text-label-small text-on-surface-variant">{stat.label}</dt>
+                <dd className="text-title-medium text-on-surface">{stat.value}</dd>
               </div>
             ))}
           </dl>
           {card && (
-            <p className="mt-2 truncate text-xs text-[var(--mn-text-muted)]">
+            <p className="mt-2 truncate text-body-small text-on-surface-variant">
               {t(locale, "account.profile.favoriteCard", { title: card.title, character: card.characterName })}
             </p>
           )}
-          <p className="mt-1 text-[11px] text-[var(--mn-text-muted)]">
+          <p className="mt-1 text-label-small text-on-surface-variant">
             {t(locale, "account.profile.fetchedAt", {
               time: new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(snapshot.fetchedAt)),
             })}
@@ -86,7 +86,7 @@ export default function PlayerProfileCard({ locale, snapshot, cards, own = false
 
       {snapshot.profileCard && cardImages.length > 0 && (
         <div>
-          <p className="mb-2 text-xs font-bold text-[var(--mn-text-muted)]">
+          <p className="mb-2 text-label-medium text-on-surface-variant">
             {snapshot.profileCard.name
               ? t(locale, "account.profile.profileCardNamed", { name: snapshot.profileCard.name })
               : t(locale, "account.profile.profileCard")}
@@ -99,7 +99,7 @@ export default function PlayerProfileCard({ locale, snapshot, cards, own = false
                 src={playerCardPath(snapshot.server, snapshot.profileId, index, own)}
                 alt={t(locale, "account.profile.profileCardAlt", { name, index: index + 1 })}
                 loading="lazy"
-                className="aspect-[1224/688] w-full rounded-xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-cream-deep)] object-cover"
+                className="aspect-[1224/688] w-full rounded-shape-md border border-outline-variant bg-surface-container-highest object-cover"
               />
             ))}
           </div>

@@ -26,9 +26,9 @@ type PageState =
   | { status: "not-found" }
   | { status: "unavailable" };
 
-const panel = "rounded-3xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] p-5 shadow-[var(--mn-shadow-stamp)] sm:p-6";
+const panel = "rounded-shape-lg border border-outline-variant bg-surface-container-low p-5 shadow-elevation-1 sm:p-6";
 const stampButton =
-  "mn-focus mn-stamp-press inline-flex h-10 items-center rounded-xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-paper)] px-4 text-sm font-black text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)] hover:bg-[var(--mn-cream-deep)]";
+  " md3-state inline-flex h-10 items-center rounded-shape-md border border-outline-variant bg-surface-container-low px-4 text-sm font-black text-on-surface shadow-elevation-1 hover:bg-surface-container-highest";
 
 /** A public player page, /u/{server}/{profileId}. Every player shares this page; it reads the player from the URL. */
 export default function PlayerPageView({ locale, cards }: Props) {
@@ -67,7 +67,7 @@ export default function PlayerPageView({ locale, cards }: Props) {
           <>
             <PlayerProfileCard locale={locale} snapshot={state.snapshot} cards={cardMap} />
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-              <p className="inline-flex items-center gap-1.5 rounded-full border border-[color-mix(in_oklab,var(--mn-accent)_40%,transparent)] bg-[var(--mn-accent-soft)] px-2.5 py-1 text-[11px] font-black text-[var(--mn-accent-deep)]">
+              <p className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-secondary-container px-2.5 py-1 text-label-small text-primary">
                 {t(locale, "player.verified")}
               </p>
               <ShareImageButton locale={locale} snapshot={state.snapshot} cards={cardMap} isPublic stampButton={stampButton} />
@@ -76,7 +76,7 @@ export default function PlayerPageView({ locale, cards }: Props) {
         ) : state.status === "loading" ? (
           <SiriusLoader locale={locale} label={t(locale, "player.loading")} />
         ) : (
-          <p className="text-sm text-[var(--mn-text-muted)]">
+          <p className="text-body-medium text-on-surface-variant">
             {t(
               locale,
               state.status === "invalid"
@@ -90,7 +90,7 @@ export default function PlayerPageView({ locale, cards }: Props) {
       </div>
 
       <div className={`${panel} flex flex-wrap items-center gap-4`}>
-        <p className="min-w-0 flex-1 text-sm text-[var(--mn-text-muted)]">{t(locale, "player.cta")}</p>
+        <p className="min-w-0 flex-1 text-body-medium text-on-surface-variant">{t(locale, "player.cta")}</p>
         <a href={accountHref} className={stampButton}>
           {t(locale, "player.ctaButton")}
         </a>

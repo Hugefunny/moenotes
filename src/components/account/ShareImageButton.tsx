@@ -102,7 +102,7 @@ export default function ShareImageButton({ locale, snapshot, cards, isPublic, ow
       <Modal isOpen={open} onClose={() => setOpen(false)} title={t(locale, "account.share.title")} closeLabel={t(locale, "actions.close")} size="md">
         <div className="space-y-4">
           <div
-            className="mx-auto w-full max-w-sm overflow-hidden rounded-2xl border-[1.5px] border-[var(--mn-border)] bg-[var(--mn-cream-deep)]"
+            className="mx-auto w-full max-w-sm overflow-hidden rounded-shape-lg border border-outline-variant bg-surface-container-highest"
             style={{ aspectRatio: `${SHARE_WIDTH} / ${SHARE_HEIGHT}` }}
           >
             {status === "ready" && preview ? (
@@ -110,12 +110,12 @@ export default function ShareImageButton({ locale, snapshot, cards, isPublic, ow
             ) : status !== "failed" ? (
               <SiriusLoader locale={locale} label={t(locale, "account.share.rendering")} className="h-full" />
             ) : (
-              <p className="grid h-full place-items-center p-6 text-center text-sm text-[var(--mn-text-muted)]">
+              <p className="grid h-full place-items-center p-6 text-center text-body-medium text-on-surface-variant">
                 {t(locale, "account.share.failed")}
               </p>
             )}
           </div>
-          <p className="text-center text-xs text-[var(--mn-text-muted)]">{t(locale, "account.share.hint")}</p>
+          <p className="text-center text-body-small text-on-surface-variant">{t(locale, "account.share.hint")}</p>
           {status === "ready" && preview && (
             <div className="flex flex-wrap justify-center gap-2">
               <a href={preview} download={fileName} className={stampButton}>
