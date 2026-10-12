@@ -7,13 +7,11 @@ interface Props {
   children?: ReactNode;
 }
 
-/** Section title matching the route heading: star, title, orbit track. */
+/** Section title (M3 title-large), with optional trailing controls. */
 export default function SectionHeading({ id, title, children }: Props) {
   return (
-    <div className="mn-section-heading">
-      <svg className="mn-section-heading-star" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m12 2 2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z" stroke="currentColor" strokeWidth="1.4" /></svg>
+    <div className="md3-section-heading">
       <h2 id={id}>{title}</h2>
-      <span className="mn-section-heading-track" aria-hidden="true" />
       {children && <div className="flex shrink-0 items-center gap-2">{children}</div>}
     </div>
   );
@@ -28,10 +26,10 @@ export function SectionLink({ href, label }: LinkProps) {
   return (
     <a
       href={href}
-      className="mn-focus inline-flex items-center gap-1 rounded-full border border-[var(--mn-glass-border)] bg-[var(--mn-paper)] px-3 py-1.5 text-xs font-bold text-[var(--mn-accent-deep)] hover:border-[var(--mn-accent)] hover:bg-[var(--mn-accent-soft)]"
+      className="md3-state inline-flex min-h-10 items-center gap-2 rounded-full px-3 text-label-large text-primary"
     >
       {label}
-      <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m13 6 6 6-6 6" /></svg>
+      <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m13 6 6 6-6 6" /></svg>
     </a>
   );
 }

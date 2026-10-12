@@ -108,7 +108,8 @@ describe("cache categories", () => {
   });
 
   test("every category has a color token, a label and a hint in the core locales", async () => {
-    const css = `${await Bun.file("src/styles/tokens.css").text()}\n${await Bun.file("src/styles/themes.css").text()}`;
+    // One value per theme: light in :root, dark under html[data-theme="dark"].
+    const css = await Bun.file("src/styles/tokens.css").text();
     for (const category of CACHE_CATEGORIES) expect(css.match(new RegExp(`--mn-cache-${category}:`, "g"))?.length).toBe(2);
     const { enUS } = await import("../src/i18n/messages/en-US");
     for (const category of CACHE_CATEGORIES) {

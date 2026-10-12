@@ -60,10 +60,10 @@ export default function ScrollToTop() {
           {...stampTapProps}
           onClick={scrollToTop}
           data-scroll-to-top=""
-          className="fixed bottom-8 right-8 z-30 grid h-11 w-11 place-items-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-paper)] text-[var(--mn-text)] shadow-[var(--mn-shadow-stamp)] transition-colors hover:bg-[var(--mn-cream-deep)] hover:shadow-[var(--mn-shadow-stamp-sm)]"
+          className="mn-scroll-top md3-state fixed bottom-6 right-6 z-30 grid h-14 w-14 place-items-center rounded-shape-lg bg-primary-container text-on-primary-container shadow-elevation-3 transition-shadow hover:shadow-elevation-4"
           aria-label="Scroll to top"
         >
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M18 15l-6-6-6 6" />
           </svg>
         </motion.button>

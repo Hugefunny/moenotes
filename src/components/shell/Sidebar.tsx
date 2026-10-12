@@ -195,7 +195,7 @@ function SidebarNav({ locale, pathname, activePath, groups, onNavigate }: { loca
   };
 
   return (
-    <nav ref={scrollRef} className="mn-orbit-nav min-h-0 flex-1 overflow-y-auto p-3.5" aria-label="Primary">
+    <nav ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto p-3.5" aria-label="Primary">
       <div className="mn-nav-layer relative mb-3 overflow-hidden rounded-[1.35rem] border border-[color-mix(in_oklab,var(--mn-border)_18%,transparent)] bg-[var(--mn-cream-deep)] px-4 py-3.5">
         <SidebarDoodle />
         <div className="relative">

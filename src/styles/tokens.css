@@ -1,65 +1,63 @@
+/* Legacy bridge: the pre-Material-3 `--mn-*` tokens, now aliases of Material 3 roles (src/styles/md3/colors.css).
+   Every page not yet rewritten for Material 3 takes the M3 colors, shapes and elevation through these names.
+   Do not use them in new code; this file goes once the last caller has moved to `--md-sys-*` / the Tailwind M3
+   utilities (bg-surface-container, text-on-surface-variant, …). */
 :root {
   --mn-layout-max-width: 120rem;
   --mn-filter-drawer-w: 20rem;
   --mn-filter-offset: 0rem;
 
   /* ── Neutrals ── */
-  --mn-bg: #EEF2FA;
-  --mn-surface: rgba(247, 250, 255, 0.92);
-  --mn-surface-strong: rgba(247, 250, 255, 0.97);
-  --mn-glass: rgba(247, 250, 255, 0.64);
-  --mn-glass-border: rgba(163, 183, 219, 0.52);
-  --mn-glass-highlight: rgba(255, 255, 255, 0.85);
-  --mn-glass-shadow: 0 12px 36px rgba(48, 72, 122, 0.09);
-  --mn-text: #202E4C;
-  --mn-ink-soft: #3D506F;
-  --mn-text-muted: #596B87;
-  --mn-border: #C5D1E6;
-  --mn-cream-deep: #E3EAF7;
-  --mn-paper: #F7FAFF;
+  --mn-bg: var(--md-sys-color-surface);
+  --mn-paper: var(--md-sys-color-surface-container-low);
+  --mn-surface: var(--md-sys-color-surface-container);
+  --mn-surface-strong: var(--md-sys-color-surface-container-high);
+  --mn-glass: var(--md-sys-color-surface-container-low);
+  --mn-glass-border: var(--md-sys-color-outline-variant);
+  --mn-text: var(--md-sys-color-on-surface);
+  --mn-ink-soft: var(--md-sys-color-on-surface-variant);
+  --mn-text-muted: var(--md-sys-color-on-surface-variant);
+  --mn-border: var(--md-sys-color-outline-variant);
+  --mn-cream-deep: var(--md-sys-color-surface-container-highest);
 
-  /* ── Accent / Sirius blue ── */
-  --mn-accent: #5475BC;
-  --mn-accent-deep: #395EA8;
-  --mn-accent-soft: #E1EAFB;
+  /* ── Accent → primary / secondary container ── */
+  --mn-accent: var(--md-sys-color-primary);
+  --mn-accent-deep: var(--md-sys-color-primary);
+  --mn-accent-soft: var(--md-sys-color-secondary-container);
 
-  /* ── Pink / Sakura ── */
-  --mn-pink: #C3B8EC;
-  --mn-pink-soft: #EEE9FA;
+  /* ── Category hues (harmonized extended colors) ── */
+  --mn-pink: var(--md-sys-color-category1);
+  --mn-pink-soft: var(--md-sys-color-category1-container);
+  --mn-cyan: var(--md-sys-color-category2);
+  --mn-amber: var(--md-sys-color-category3);
+  --mn-peach: var(--md-sys-color-category3-container);
+  --mn-yellow: var(--md-sys-color-warning-container);
+  --mn-mint: var(--md-sys-color-success);
+  --mn-mint-deep: var(--md-sys-color-on-success-container);
+  --mn-mint-soft: var(--md-sys-color-success-container);
+  --mn-rose: var(--md-sys-color-error);
+  --mn-danger: var(--md-sys-color-error);
 
-  /* ── Cyan ── */
-  --mn-cyan: #A0DDEA;
-
-  /* ── Amber / Mustard ── */
-  --mn-amber: #EAD0A6;
-  --mn-peach: #F8D3B8;
-
-  /* ── Yellow ── */
-  --mn-yellow: #F7E9AD;
-
-  /* ── Mint / Moss ── */
-  --mn-mint: #B9D5B1;
-  --mn-mint-deep: #3F5740;
-  --mn-mint-soft: #E4EBDD;
-
-  /* ── Rose ── */
-  --mn-rose: #B85C6B;
-
-  /* ── Decorative (theme-aware) ── */
-  --mn-dot-ink: rgba(39, 62, 112, 0.06);
-
-  /* ── Cache categories (settings' Data tab): one fixed hue each, a validated categorical order ── */
+  /* ── Cache categories (settings' Data tab): fixed categorical hues, deliberately not seed-derived ── */
   --mn-cache-live2d: #2a78d6;
   --mn-cache-images: #eb6834;
   --mn-cache-audio: #1baf7a;
   --mn-cache-chart: #eda100;
   --mn-cache-data: #e87ba4;
 
-  /* ── Shadows ── */
-  --mn-shadow: 0 4px 20px -2px rgba(39, 62, 112, 0.05), 0 2px 6px -1px rgba(39, 62, 112, 0.03);
-  --mn-shadow-stamp: 0 4px 12px -2px rgba(39, 62, 112, 0.06), 0 2px 4px -1px rgba(39, 62, 112, 0.04);
-  --mn-shadow-stamp-sm: 0 2px 6px -1px rgba(39, 62, 112, 0.04), 0 1px 2px -1px rgba(39, 62, 112, 0.02);
-  --mn-shadow-stamp-lg: 0 12px 32px -4px rgba(39, 62, 112, 0.08), 0 4px 12px -2px rgba(39, 62, 112, 0.04);
+  /* ── Elevation ── */
+  --mn-shadow: var(--md-sys-elevation-level0);
+  --mn-shadow-stamp-sm: var(--md-sys-elevation-level0);
+  --mn-shadow-stamp: var(--md-sys-elevation-level1);
+  --mn-shadow-stamp-lg: var(--md-sys-elevation-level1);
+  --mn-glass-highlight: transparent;
+  --mn-glass-shadow: var(--md-sys-elevation-level0);
+
+  /* ── Sirius "orbit" accents (selected rows, current tabs) → M3 selected state ── */
+  --mn-orbit-night: var(--md-sys-color-secondary-container);
+  --mn-orbit-light: var(--md-sys-color-on-secondary-container);
+  --mn-orbit-edge: transparent;
+  --mn-orbit-heading: none;
 
   /* ── Fonts ── */
   --mn-font-display-common: "Inter", ui-sans-serif, system-ui, sans-serif;
@@ -69,12 +67,13 @@
   --mn-font-display: var(--mn-font-display-sc);
   --mn-font-body: var(--mn-font-body-sc);
   --mn-font-hand: var(--mn-font-body);
-  --mn-font-note: "SFMono-Regular", Consolas, monospace;
+  --mn-font-note: var(--md-ref-typeface-mono);
 }
 
-html[data-locale="zh-CN"] {
-  --mn-font-display: var(--mn-font-display-sc);
-  --mn-font-body: var(--mn-font-body-sc);
-  --mn-font-hand: var(--mn-font-body);
-  --mn-font-note: "SFMono-Regular", Consolas, monospace;
+html[data-theme="dark"] {
+  --mn-cache-live2d: #3987e5;
+  --mn-cache-images: #d95926;
+  --mn-cache-audio: #199e70;
+  --mn-cache-chart: #c98500;
+  --mn-cache-data: #d55181;
 }
