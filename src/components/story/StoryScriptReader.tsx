@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import Fade from "@mui/material/Fade";
 import type { AppLocale } from "@/config/locales";
 import { t } from "@/i18n";
 import type { ParsedStoryScript, StoryLine, StoryVideo } from "@/lib/story/parser";
@@ -762,18 +762,21 @@ function useImageFailed(url: string) {
 
 /** The page behind the reader while autoplaying: the scene's background, faded under the page color. */
 function ImmersiveBackdrop({ active, url }: { active: boolean; url: string | undefined }) {
-  const reducedMotion = useReducedMotion();
-  const fade = { duration: reducedMotion ? 0 : 0.8 };
-  return <AnimatePresence>
-    {active && (
-      <motion.div key="backdrop" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={fade}>
-        <AnimatePresence initial={false}>
-          {url && <motion.img key={url} src={url} alt="" className="absolute inset-0 h-full w-full scale-105 object-cover blur-[2px]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={fade} />}
-        </AnimatePresence>
-        <div className="absolute inset-0 bg-[color-mix(in_oklab,var(--mn-bg)_58%,transparent)]" />
-      </motion.div>
-    )}
-  </AnimatePresence>;
+  // Keep the previous scene under the new one while it fades in.
+  const [scenes, setScenes] = useState<string[]>([]);
+  useEffect(() => {
+    if (url) setScenes((current) => (current.at(-1) === url ? current : [...current.slice(-1), url]));
+  }, [url]);
+  return <Fade in={active} timeout={800} mountOnEnter unmountOnExit>
+    <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
+      {scenes.map((scene) => (
+        <Fade key={scene} in appear timeout={800}>
+          <img src={scene} alt="" className="absolute inset-0 h-full w-full scale-105 object-cover blur-[2px]" />
+        </Fade>
+      ))}
+      <div className="absolute inset-0 bg-surface/60" />
+    </div>
+  </Fade>;
 }
 
 /**
