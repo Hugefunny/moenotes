@@ -2702,7 +2702,7 @@ export const enUS = {
     count: "{filtered} / {total}",
     openQuickFilter: "Open filter",
     drawerHintTitle: "Filters moved to the side",
-    drawerHintBody: "Tap the tab on the left to reveal or fold this starry filter drawer anytime.",
+    drawerHintBody: "Use the Filter button to open or fold the filters anytime.",
     drawerHintDismiss: "Got it",
     dateRange: "Date range", dateFrom: "From", dateTo: "To", dateClear: "Clear",
   },

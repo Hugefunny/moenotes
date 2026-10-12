@@ -119,7 +119,8 @@ function syncDocumentFilterState() {
 
   const root = document.documentElement;
   root.dataset.filterDrawer = isDockedOpen ? "open" : "closed";
-  root.style.setProperty("--mn-filter-offset", isDockedOpen ? "20.75rem" : "0rem");
+  // The docked filter sheet is 20rem wide (src/components/shell/filter-drawer/FilterDrawer.tsx).
+  root.style.setProperty("--mn-filter-offset", isDockedOpen ? "20rem" : "0rem");
 }
 
 export function registerFilters(title: string, content: ReactNode) {

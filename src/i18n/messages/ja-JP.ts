@@ -2737,7 +2737,7 @@ export const jaJP = {
     count: "{filtered} / {total}",
     openQuickFilter: "フィルターを開く",
     drawerHintTitle: "フィルターがサイドに移動しました",
-    drawerHintBody: "左のタブをそっとタップすれば、いつでもこの星屑のフィルターを引き出したり収めたりできます。",
+    drawerHintBody: "「フィルター」ボタンでいつでもフィルターを開いたり閉じたりできます。",
     drawerHintDismiss: "了解",
     dateRange: "期間", dateFrom: "開始", dateTo: "終了", dateClear: "クリア",
   },

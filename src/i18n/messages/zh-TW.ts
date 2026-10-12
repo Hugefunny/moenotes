@@ -2745,7 +2745,7 @@ export const zhTW = {
     count: "{filtered} / {total}",
     openQuickFilter: "開啟篩選器",
     drawerHintTitle: "篩選器已移至側邊",
-    drawerHintBody: "輕觸左側標籤，便可隨時喚出或收攏這片星芒篩選器。",
+    drawerHintBody: "隨時點選「篩選」按鈕，即可開啟或收合篩選面板。",
     drawerHintDismiss: "知道了",
     dateRange: "日期範圍", dateFrom: "開始", dateTo: "結束", dateClear: "清除",
   },

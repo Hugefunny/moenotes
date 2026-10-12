@@ -2691,7 +2691,7 @@ export const koKR = {
     count: "{filtered} / {total}",
     openQuickFilter: "필터 열기",
     drawerHintTitle: "필터가 사이드로 이동했습니다",
-    drawerHintBody: "왼쪽 탭을 살짝 터치하면 언제든 이 별빛 필터를 열거나 접을 수 있습니다.",
+    drawerHintBody: "필터 버튼으로 언제든 필터를 열거나 접을 수 있습니다.",
     drawerHintDismiss: "확인",
     dateRange: "기간", dateFrom: "시작", dateTo: "종료", dateClear: "지우기",
   },

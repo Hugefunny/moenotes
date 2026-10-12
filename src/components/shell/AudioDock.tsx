@@ -1,4 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import IconButton from "@mui/material/IconButton";
+import Slider from "@mui/material/Slider";
+import Tooltip from "@mui/material/Tooltip";
+import { withMd3 } from "@/components/md3/Md3Provider";
 import type { AppLocale } from "@/config/locales";
 import { storageKeys } from "@/config/storage";
 import { t } from "@/i18n";
@@ -53,10 +57,10 @@ function formatTime(seconds: number): string {
 }
 
 /**
- * The site-wide mini player: shown while the audio player has a track, fixed to the bottom of the page. It keeps the
- * queue, track and position across page loads (without playing on its own) and answers the system's media keys.
+ * The site-wide mini player: an M3 surface fixed to the bottom while the audio player has a track. It keeps the queue,
+ * track and position across page loads (without playing on its own) and answers the system's media keys.
  */
-export default function AudioDock({ locale }: Props) {
+function AudioDock({ locale }: Props) {
   const state = useAudioPlayer();
   const [showQueue, setShowQueue] = useState(false);
   const [dragTime, setDragTime] = useState<number | null>(null);
@@ -141,70 +145,78 @@ export default function AudioDock({ locale }: Props) {
     safeRemoveLocalStorage(STORAGE_KEY);
     setShowQueue(false);
   };
+  const commitSeek = () => {
+    if (dragTime !== null) {
+      seek(dragTime);
+      setDragTime(null);
+    }
+  };
 
   return (
     <section
       aria-label={t(locale, "audio.dock.label")}
-      className="mn-audio-dock fixed inset-x-2 bottom-2 z-40 mx-auto max-w-3xl rounded-2xl border border-[var(--mn-glass-border)] bg-[var(--mn-surface-strong)] shadow-[var(--mn-shadow-stamp-lg)] backdrop-blur md:left-[calc(var(--mn-sidebar-offset,18rem)+1rem)]"
+      className="mn-audio-dock fixed inset-x-2 bottom-2 z-40 mx-auto max-w-3xl overflow-hidden rounded-shape-lg bg-surface-container-high text-on-surface shadow-elevation-3 md:left-[calc(var(--mn-sidebar-offset,17rem)+1rem)]"
     >
       {showQueue && (
-        <div className="max-h-[40vh] overflow-y-auto border-b border-[var(--mn-glass-border)] p-2">
-          <h2 className="px-2 pb-1 text-xs font-black text-[var(--mn-text-muted)]">{t(locale, "audio.dock.queue")}</h2>
+        <div className="max-h-[40vh] overflow-y-auto border-b border-outline-variant py-2">
+          <h2 className="px-4 pb-1 text-title-small text-on-surface-variant">{t(locale, "audio.dock.queue")}</h2>
           {state.queue.length === 0 ? (
-            <p className="px-2 py-3 text-xs text-[var(--mn-text-muted)]">{t(locale, "audio.dock.queueEmpty")}</p>
+            <p className="px-4 py-3 text-body-medium text-on-surface-variant">{t(locale, "audio.dock.queueEmpty")}</p>
           ) : (
             <ol>
-              {state.queue.map((entry, index) => (
-                <li key={`${entry.id}-${index}`} className={`flex items-center gap-2 rounded-xl px-2 py-1 ${index === state.queueIndex ? "bg-[var(--mn-accent-soft)]" : ""}`}>
-                  <button type="button" onClick={() => play(entry)} className="mn-focus flex min-w-0 flex-1 items-center gap-2 text-left">
-                    {entry.artwork ? <img src={entry.artwork} alt="" loading="lazy" className="h-8 w-8 shrink-0 rounded-md object-cover" /> : <span className="h-8 w-8 shrink-0 rounded-md bg-[var(--mn-cream-deep)]" />}
-                    <span className="min-w-0">
-                      <span className={`block truncate text-xs font-bold ${index === state.queueIndex ? "text-[var(--mn-accent-deep)]" : "text-[var(--mn-text)]"}`}>{entry.title}</span>
-                      {entry.subtitle && <span className="block truncate text-[11px] text-[var(--mn-text-muted)]">{entry.subtitle}</span>}
-                    </span>
-                  </button>
-                  <DockButton label={t(locale, "audio.dock.remove", { title: entry.title })} onClick={() => removeFromQueue(index)} small><path d="M6 6l12 12M18 6 6 18" /></DockButton>
-                </li>
-              ))}
+              {state.queue.map((entry, index) => {
+                const current = index === state.queueIndex;
+                return (
+                  <li key={`${entry.id}-${index}`} className={`flex items-center gap-2 pr-2 ${current ? "bg-secondary-container text-on-secondary-container" : ""}`}>
+                    <button type="button" onClick={() => play(entry)} aria-current={current ? "true" : undefined} className="md3-state flex min-h-14 min-w-0 flex-1 items-center gap-3 px-4 text-left">
+                      {entry.artwork ? <img src={entry.artwork} alt="" loading="lazy" className="h-10 w-10 shrink-0 rounded-shape-sm object-cover" /> : <span className="h-10 w-10 shrink-0 rounded-shape-sm bg-surface-container-highest" />}
+                      <span className="min-w-0">
+                        <span className="block truncate text-body-large">{entry.title}</span>
+                        {entry.subtitle && <span className={`block truncate text-body-small ${current ? "" : "text-on-surface-variant"}`}>{entry.subtitle}</span>}
+                      </span>
+                    </button>
+                    <DockButton label={t(locale, "audio.dock.remove", { title: entry.title })} onClick={() => removeFromQueue(index)} small><path d="M6 6l12 12M18 6 6 18" /></DockButton>
+                  </li>
+                );
+              })}
             </ol>
           )}
         </div>
       )}
-      <div className="flex items-center gap-2 p-2">
-        {track.artwork ? <img src={track.artwork} alt="" className="h-11 w-11 shrink-0 rounded-lg object-cover" /> : <span className="h-11 w-11 shrink-0 rounded-lg bg-[var(--mn-cream-deep)]" />}
+      <div className="flex items-center gap-2 p-2 pl-3">
+        {track.artwork ? <img src={track.artwork} alt="" className="h-12 w-12 shrink-0 rounded-shape-sm object-cover" /> : <span className="h-12 w-12 shrink-0 rounded-shape-sm bg-surface-container-highest" />}
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-bold text-[var(--mn-text)]">{track.title}</p>
-          {track.subtitle && <p className="truncate text-[11px] text-[var(--mn-text-muted)]">{track.subtitle}</p>}
-          <div className="mt-0.5 flex items-center gap-2 text-[10px] tabular-nums text-[var(--mn-text-muted)]">
+          <p className="truncate text-title-small">{track.title}</p>
+          {track.subtitle && <p className="truncate text-body-small text-on-surface-variant">{track.subtitle}</p>}
+          <div className="flex items-center gap-3 text-label-small tabular-nums text-on-surface-variant">
             <span>{formatTime(time)}</span>
-            <input
-              type="range"
+            <Slider
+              size="small"
               min={0}
               max={duration || 1}
               step={0.1}
               value={Math.min(time, duration || 1)}
               disabled={!duration}
               aria-label={t(locale, "audio.dock.seek")}
-              onChange={(event) => setDragTime(Number(event.target.value))}
-              onPointerUp={() => { if (dragTime !== null) { seek(dragTime); setDragTime(null); } }}
-              onKeyUp={() => { if (dragTime !== null) { seek(dragTime); setDragTime(null); } }}
-              className="h-1 min-w-0 flex-1 accent-[var(--mn-accent-deep)]"
+              onChange={(_, value) => setDragTime(value as number)}
+              onChangeCommitted={commitSeek}
+              className="!py-2"
             />
             <span>{formatTime(duration)}</span>
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-0.5">
-          <DockButton label={t(locale, "audio.previous")} onClick={previous} className="hidden sm:grid"><path d="M7 6v12M18 6l-8 6 8 6z" /></DockButton>
+        <div className="flex shrink-0 items-center">
+          <DockButton label={t(locale, "audio.previous")} onClick={previous} className="max-sm:!hidden"><path d="M7 6v12M18 6l-8 6 8 6z" /></DockButton>
           <DockButton label={t(locale, playing ? "audio.pause" : "audio.play")} onClick={() => (playing ? pause() : play())} primary>
             {playing ? <path d="M9 6v12M15 6v12" /> : <path d="M8 5.5v13l10-6.5z" />}
           </DockButton>
           <DockButton label={t(locale, "audio.next")} onClick={next}><path d="M17 6v12M6 6l8 6-8 6z" /></DockButton>
-          <DockButton label={modeLabel} onClick={() => setMode(nextMode)} pressed={state.mode !== "sequential"} className="hidden sm:grid">
+          <DockButton label={modeLabel} onClick={() => setMode(nextMode)} pressed={state.mode !== "sequential"} className="max-sm:!hidden">
             <ModeIcon mode={state.mode} />
           </DockButton>
-          <label className="hidden items-center md:flex" title={t(locale, "audio.dock.volume")}>
-            <input type="range" min={0} max={1} step={0.05} value={state.volume} onChange={(event) => setVolume(Number(event.target.value))} aria-label={t(locale, "audio.dock.volume")} className="h-1 w-20 accent-[var(--mn-accent-deep)]" />
-          </label>
+          <div className="hidden w-24 items-center px-2 md:flex">
+            <Slider size="small" min={0} max={1} step={0.05} value={state.volume} onChange={(_, value) => setVolume(value as number)} aria-label={t(locale, "audio.dock.volume")} />
+          </div>
           <DockButton label={t(locale, showQueue ? "audio.dock.collapse" : "audio.dock.expand")} onClick={() => setShowQueue((value) => !value)} pressed={showQueue}><path d="M4 6h16M4 12h16M4 18h10" /></DockButton>
           <DockButton label={t(locale, "audio.dock.close")} onClick={close}><path d="M6 6l12 12M18 6 6 18" /></DockButton>
         </div>
@@ -220,18 +232,22 @@ function ModeIcon({ mode }: { mode: PlaybackMode }) {
   return <path d="M4 7h12M4 12h12M4 17h8M18 14v6l3-3" />;
 }
 
+/** M3 icon button: standard, filled (play/pause) or toggle (`pressed`). */
 function DockButton({ label, onClick, children, primary = false, small = false, pressed, className = "" }: { label: string; onClick: () => void; children: ReactNode; primary?: boolean; small?: boolean; pressed?: boolean; className?: string }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      title={label}
-      {...(pressed === undefined ? {} : { "aria-pressed": pressed })}
-      className={`mn-focus grid shrink-0 place-items-center rounded-full transition ${small ? "h-7 w-7" : "h-9 w-9"} ${primary ? "bg-[var(--mn-accent-deep)] text-[var(--mn-paper)] hover:brightness-110" : pressed ? "bg-[var(--mn-accent-soft)] text-[var(--mn-accent-deep)]" : "text-[var(--mn-ink-soft)] hover:bg-[var(--mn-cream-deep)]"} ${className}`}
-    >
-      <svg className={small ? "h-3.5 w-3.5" : "h-4 w-4"} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
-    </button>
+    <Tooltip title={label}>
+      <IconButton
+        onClick={onClick}
+        aria-label={label}
+        size={small ? "small" : "medium"}
+        className={className}
+        data-variant={primary ? "filled" : pressed ? "tonal" : undefined}
+        {...(pressed === undefined ? {} : { "aria-pressed": pressed })}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
+      </IconButton>
+    </Tooltip>
   );
 }
 
+export default withMd3(AudioDock);

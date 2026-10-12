@@ -1,4 +1,5 @@
 import { Component, type ReactNode, type ErrorInfo } from "react";
+import { withMd3 } from "@/components/md3/Md3Provider";
 import type { AppLocale } from "@/config/locales";
 import FilterDrawer from "./FilterDrawer";
 import FilterTabHandle from "./FilterTabHandle";
@@ -34,7 +35,7 @@ class FilterErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySta
   }
 }
 
-export default function FilterDrawerHost({ locale, pathname }: FilterDrawerHostProps) {
+function FilterDrawerHost({ locale, pathname }: FilterDrawerHostProps) {
   return (
     <FilterErrorBoundary>
       <FilterDrawer locale={locale} pathname={pathname} />
@@ -43,3 +44,5 @@ export default function FilterDrawerHost({ locale, pathname }: FilterDrawerHostP
     </FilterErrorBoundary>
   );
 }
+
+export default withMd3(FilterDrawerHost);
