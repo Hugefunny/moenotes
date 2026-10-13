@@ -853,7 +853,6 @@ export const jaJP = {
       birthdayStory: "誕生日ストーリー",
       help: "ヘルプ",
       songMeta: "譜面一覧",
-      playlists: "プレイリスト",
       calendar: "カレンダー",
       catalog: "カタログ",
       license: "ライセンス",
@@ -1737,13 +1736,6 @@ export const jaJP = {
         normal: "1 行 1 譜面です。長さ・BPM・NPS・効率は譜面データファイルの値で、見出しをクリックすると並べ替えられます。",
         gekisou: "激奏モードでは、スキルなしの理論最高プレイでのジャスト数区間のジャスト可能率と数、ラック区間の平均ラックポイントを加えます。",
       },
-    },
-    playlists: {
-      audioKind: "音声",
-      otherBand: "その他の楽曲",
-      songCount: "{count} 曲",
-      duration: "合計 {duration}",
-      durationPartial: "判明分 {duration}",
     },
     audio: {
       title: "楽曲音源",
@@ -2954,10 +2946,6 @@ export const jaJP = {
     songMeta: {
       title: "譜面一覧",
       description: "BanG Dream! Our Notes の全譜面を一つの表に。レベル、長さ、BPM、ノーツ数、密度、そして激奏モードの各指標を比較できます。",
-    },
-    playlists: {
-      title: "プレイリスト",
-      description: "バンドごとにまとめた BanG Dream! Our Notes のプレイリスト。ゲーム内と同じ曲順で、試聴を続けて再生できます。",
     },
     calendar: {
       title: "カレンダー",

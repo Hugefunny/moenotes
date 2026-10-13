@@ -813,7 +813,7 @@ export const koKR = {
   nav: {
     home: "홈",
     groups: { database: "데이터베이스", music: "음악", events: "이벤트", story: "스토리", tools: "도구", community: "소개" },
-    items: { characters: "캐릭터", cards: "카드", supportCards: "서포트 카드", music: "음악 목록", eventList: "이벤트 목록", gacha: "뽑기", rewards: "미션·보상", titles: "칭호", backgrounds: "배경", stamps: "스티커", comics: "만화", items: "아이템", bandItems: "밴드 장비", mainStory: "메인 스토리", eventStory: "이벤트 스토리", friendshipStory: "인연 스토리", otherStory: "기타 스토리", liveResultStory: "라이브 종료 대화", homeStory: "홈 스토리", tutorialStory: "튜토리얼 스토리", assetViewer: "에셋 뷰어", exchange: "교환소", designSystem: "디자인 시스템", chartPreview: "채보 미리보기", live2dViewer: "Live2D 뷰어", storyPlayer: "스토리 플레이어", guessMusic: "곡 맞히기", news: "공지사항", eventTracker: "이벤트 트래커", musicRanking: "곡 랭킹", chartData: "곡 메타", search: "검색", shop: "상점", missions: "미션", tgwCard: "T.G.W CARD", realLives: "리얼 라이브", birthdayStory: "생일 스토리", help: "도움말", songMeta: "채보 일람", playlists: "플레이리스트", calendar: "캘린더", catalog: "카탈로그", license: "라이선스", terms: "이용 약관", privacy: "개인정보", },
+    items: { characters: "캐릭터", cards: "카드", supportCards: "서포트 카드", music: "음악 목록", eventList: "이벤트 목록", gacha: "뽑기", rewards: "미션·보상", titles: "칭호", backgrounds: "배경", stamps: "스티커", comics: "만화", items: "아이템", bandItems: "밴드 장비", mainStory: "메인 스토리", eventStory: "이벤트 스토리", friendshipStory: "인연 스토리", otherStory: "기타 스토리", liveResultStory: "라이브 종료 대화", homeStory: "홈 스토리", tutorialStory: "튜토리얼 스토리", assetViewer: "에셋 뷰어", exchange: "교환소", designSystem: "디자인 시스템", chartPreview: "채보 미리보기", live2dViewer: "Live2D 뷰어", storyPlayer: "스토리 플레이어", guessMusic: "곡 맞히기", news: "공지사항", eventTracker: "이벤트 트래커", musicRanking: "곡 랭킹", chartData: "곡 메타", search: "검색", shop: "상점", missions: "미션", tgwCard: "T.G.W CARD", realLives: "리얼 라이브", birthdayStory: "생일 스토리", help: "도움말", songMeta: "채보 일람", calendar: "캘린더", catalog: "카탈로그", license: "라이선스", terms: "이용 약관", privacy: "개인정보", },
   },
   shell: {
     openSidebar: "사이드바 열기",
@@ -1691,13 +1691,6 @@ export const koKR = {
         normal: "채보 하나당 한 줄입니다. 길이, BPM, NPS, 효율은 채보 데이터 파일의 값이며 머리글을 눌러 정렬할 수 있습니다.",
         gekisou: "격주 모드는 스킬 없는 최고 플레이 기준 저스트 수 구간의 저스트 가능 비율과 수, 럭 구간의 평균 럭 포인트를 더합니다.",
       },
-    },
-    playlists: {
-      audioKind: "오디오",
-      otherBand: "기타 곡",
-      songCount: "{count}곡",
-      duration: "총 {duration}",
-      durationPartial: "확인된 {duration}",
     },
     audio: {
       title: "곡 음원",
@@ -2908,10 +2901,6 @@ export const koKR = {
     songMeta: {
       title: "채보 일람",
       description: "BanG Dream! Our Notes의 모든 채보를 한 표로: 레벨, 길이, BPM, 노트 수, 밀도, 그리고 격주 모드의 각종 지표를 비교하세요.",
-    },
-    playlists: {
-      title: "플레이리스트",
-      description: "밴드별로 정리한 BanG Dream! Our Notes 플레이리스트. 게임과 같은 곡 순서로 미리듣기를 이어서 재생할 수 있습니다.",
     },
     calendar: {
       title: "이벤트 캘린더",

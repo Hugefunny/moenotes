@@ -856,7 +856,6 @@ export const zhCN = {
       birthdayStory: "生日剧情",
       help: "帮助",
       songMeta: "谱面一览",
-      playlists: "歌单",
       calendar: "日历",
       catalog: "目录",
       license: "许可",
@@ -1746,13 +1745,6 @@ export const zhCN = {
         normal: "每张谱面一行。时长、BPM、NPS 与效率来自谱面数据文件，点击表头即可排序。",
         gekisou: "激奏模式额外列出无技能最佳演奏下 Just 数任务段的可 Just 比例与数量，以及幸运任务段的平均幸运点数。",
       },
-    },
-    playlists: {
-      audioKind: "音频",
-      otherBand: "其他歌曲",
-      songCount: "{count} 首",
-      duration: "共 {duration}",
-      durationPartial: "已知 {duration}",
     },
     audio: {
       title: "歌曲音频",
@@ -2963,10 +2955,6 @@ export const zhCN = {
     songMeta: {
       title: "谱面一览",
       description: "把 BanG Dream! Our Notes 的全部谱面放进一张表：等级、时长、BPM、物量、密度，以及激奏模式下的各项指标。",
-    },
-    playlists: {
-      title: "乐队歌单",
-      description: "按乐队整理的 BanG Dream! Our Notes 歌单，曲目顺序与游戏内一致，可以直接试听并一键连续播放整张歌单。",
     },
     calendar: {
       title: "活动日历",

@@ -855,7 +855,6 @@ export const zhTW = {
       birthdayStory: "生日劇情",
       help: "說明",
       songMeta: "譜面一覽",
-      playlists: "歌單",
       calendar: "行事曆",
       catalog: "目錄",
       license: "授權",
@@ -1745,13 +1744,6 @@ export const zhTW = {
         normal: "每張譜面一列。時長、BPM、NPS 與效率來自譜面資料檔，點擊表頭即可排序。",
         gekisou: "激奏模式額外列出無技能最佳演奏下 Just 數任務段的可 Just 比例與數量，以及幸運任務段的平均幸運點數。",
       },
-    },
-    playlists: {
-      audioKind: "音訊",
-      otherBand: "其他歌曲",
-      songCount: "{count} 首",
-      duration: "共 {duration}",
-      durationPartial: "已知 {duration}",
     },
     audio: {
       title: "歌曲音訊",
@@ -2962,10 +2954,6 @@ export const zhTW = {
     songMeta: {
       title: "譜面一覽",
       description: "把 BanG Dream! Our Notes 的全部譜面放進一張表：等級、時長、BPM、物量、密度，以及激奏模式下的各項指標。",
-    },
-    playlists: {
-      title: "樂團歌單",
-      description: "按樂團整理的 BanG Dream! Our Notes 歌單，曲目順序與遊戲內一致，可以直接試聽並一鍵連續播放整張歌單。",
     },
     calendar: {
       title: "活動行事曆",

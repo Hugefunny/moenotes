@@ -148,7 +148,7 @@ function NavGroup({ group, locale, current, collapsed, onToggle, onNavigate }: {
   const children = getNavChildren(group);
 const headerActive = stripLocaleFromPathname(current) === normalizePathname(group.path);
 const listId = `nav-group-${group.id}`;
-// Paths nest (`/music` holds `/music/playlists` and song details), so only the longest matching item is current.
+// Paths nest (`/music` holds `/music/guess` and song details), so only the longest matching item is current.
 const activeItemId = children.filter((item) => isCurrentRoute(current, item.path))
   .sort((a, b) => b.path.length - a.path.length)[0]?.id;
   return (

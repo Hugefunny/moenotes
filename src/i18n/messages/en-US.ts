@@ -823,7 +823,7 @@ export const enUS = {
   nav: {
     home: "Home",
     groups: { database: "Database", music: "Music", events: "Events", story: "Story", tools: "Tools", community: "About" },
-    items: { characters: "Characters", cards: "Cards", supportCards: "Support Cards", music: "Music List", eventList: "Event List", gacha: "Gacha", rewards: "Missions & Rewards", titles: "Titles", backgrounds: "Backgrounds", stamps: "Stickers", comics: "Comics", items: "Items", bandItems: "Band Gear", mainStory: "Main Story", eventStory: "Event Story", friendshipStory: "Bond Stories", otherStory: "Other Stories", liveResultStory: "Post-live Talks", homeStory: "Home Stories", tutorialStory: "Tutorial Stories", assetViewer: "Asset Viewer", designSystem: "Design System", chartPreview: "Chart Previewer", exchange: "Exchange Shop", live2dViewer: "Live2D Viewer", storyPlayer: "Story Player", guessMusic: "Guess the Song", news: "News", eventTracker: "Event Tracker", musicRanking: "Song Rankings", chartData: "Song Meta", search: "Search", shop: "Shop", missions: "Missions", tgwCard: "T.G.W CARD", realLives: "Real Lives", birthdayStory: "Birthday Stories", help: "Help", songMeta: "Chart Table", playlists: "Playlists", calendar: "Calendar", catalog: "Catalog", license: "License", terms: "Terms of Use", privacy: "Privacy", },
+    items: { characters: "Characters", cards: "Cards", supportCards: "Support Cards", music: "Music List", eventList: "Event List", gacha: "Gacha", rewards: "Missions & Rewards", titles: "Titles", backgrounds: "Backgrounds", stamps: "Stickers", comics: "Comics", items: "Items", bandItems: "Band Gear", mainStory: "Main Story", eventStory: "Event Story", friendshipStory: "Bond Stories", otherStory: "Other Stories", liveResultStory: "Post-live Talks", homeStory: "Home Stories", tutorialStory: "Tutorial Stories", assetViewer: "Asset Viewer", designSystem: "Design System", chartPreview: "Chart Previewer", exchange: "Exchange Shop", live2dViewer: "Live2D Viewer", storyPlayer: "Story Player", guessMusic: "Guess the Song", news: "News", eventTracker: "Event Tracker", musicRanking: "Song Rankings", chartData: "Song Meta", search: "Search", shop: "Shop", missions: "Missions", tgwCard: "T.G.W CARD", realLives: "Real Lives", birthdayStory: "Birthday Stories", help: "Help", songMeta: "Chart Table", calendar: "Calendar", catalog: "Catalog", license: "License", terms: "Terms of Use", privacy: "Privacy", },
 
   },
   shell: {
@@ -1702,13 +1702,6 @@ export const enUS = {
         normal: "One row per chart. Length, BPM, NPS and efficiency come from the chart data file; click a header to sort.",
         gekisou: "Gekisou adds the Just share and count of the Just-count ranges and the mean luck points of the Luck ranges on the best play without skills.",
       },
-    },
-    playlists: {
-      audioKind: "Audio",
-      otherBand: "Other songs",
-      songCount: "{count} songs",
-      duration: "{duration} in total",
-      durationPartial: "{duration} known",
     },
     audio: {
       title: "Song audio",
@@ -2919,10 +2912,6 @@ export const enUS = {
     songMeta: {
       title: "Chart Table",
       description: "Every BanG Dream! Our Notes chart in one table: level, length, BPM, notes, density and gekisou metrics.",
-    },
-    playlists: {
-      title: "Playlists",
-      description: "Each band's BanG Dream! Our Notes songs as a playlist in the game's own order, with previews to play through.",
     },
     calendar: {
       title: "Calendar",

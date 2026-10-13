@@ -16,7 +16,6 @@ import { buildComboTiers, buildExpRewards } from "../src/lib/music/live-rewards"
 import { buildMetricsIndex, chartMetrics, formatBpm, formatDuration, lookupMetrics } from "../src/lib/music/metrics";
 import { songTitle } from "../src/lib/music/title-preference";
 import { songMetaRows } from "../src/lib/music/song-meta";
-import { musicPlaylists, playlistDuration } from "../src/lib/music/playlists";
 import type { DataSong, MusicData } from "../src/lib/chart-data/types";
 import type { RewardViewModel } from "../src/lib/rewards/resources";
 
@@ -201,7 +200,7 @@ describe("song titles", () => {
   });
 });
 
-describe("song meta rows and playlists", () => {
+describe("song meta rows", () => {
   const chart = (difficulty: "easy" | "expert", scoreId: number, displayLevel: number) => ({ difficulty, scoreId, level: displayLevel, displayLevel, notesCount: 100, chartKey: "" });
   const make = (id: number, bandIds: number[], sortOrder: number, musicType = 1) =>
     ({ id, title: `S${id}`, bandId: bandIds[0] ?? 0, bandIds, bandName: bandIds.length ? `B${bandIds[0]}` : "", sortOrder, musicType,
@@ -217,13 +216,5 @@ describe("song meta rows and playlists", () => {
     expect(rows[0]!.metrics).toBeNull();
     expect(songMetaRows(songs, index, { difficulties: [], bands: [0], types: [] }).map((row) => row.chart.scoreId)).toEqual([40, 43]);
     expect(songMetaRows(songs, index, { difficulties: [], bands: [], types: [2] })).toHaveLength(2);
-  });
-
-  test("playlists group by band in game order, bandless songs last", () => {
-    const lists = musicPlaylists(songs);
-    expect(lists.map((list) => list.bandId)).toEqual([1, 2, 0]);
-    expect(lists[0]!.songs.map((song) => song.id)).toEqual([2, 1]);
-    expect(playlistDuration(songs, (song) => (song.id === 4 ? null : 60_000))).toEqual({ totalMs: 180_000, known: 3 });
-    expect(musicPlaylists([])).toEqual([]);
   });
 });

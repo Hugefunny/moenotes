@@ -337,22 +337,6 @@ export const routeRegistry = [
         ],
       },
       {
-        // Each band's songs as a playlist, in the game's own order.
-        id: "playlists",
-        path: "/music/playlists",
-        labelKey: "nav.items.playlists",
-        component: "playlists",
-        seo: {
-          titleKey: "seo.playlists.title",
-          descriptionKey: "seo.playlists.description",
-          keywords: ["BanG Dream! Our Notes playlists", "Our Notes band songs", "song previews", "band discography", "play all songs"],
-          sitemap: { priority: 0.5, changefreq: "weekly" },
-        },
-        nav: { order: 14, icon: "music" },
-        searchable: true,
-        keywords: ["playlists", "bands", "play all", "songs"],
-      },
-      {
         // Chart rankings, figures and their guide over nnnotes' music-data.json, loaded in the browser.
         id: "chart-data",
         path: "/tools/chart-data",

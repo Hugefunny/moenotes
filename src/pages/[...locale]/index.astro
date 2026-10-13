@@ -52,7 +52,6 @@ import RealLivesPage from "@/components/real-lives/RealLivesPage.astro";
 import BirthdayStoryPage from "@/components/story/BirthdayStoryPage.astro";
 import HelpPage from "@/components/help/HelpPage.astro";
 import HelpDetailPage from "@/components/help/HelpDetailPage.astro";
-import PlaylistsPage from "@/components/music/PlaylistsPage.astro";
 import CalendarPage from "@/components/calendar/CalendarPage.astro";
 import LegalPage, { type LegalDocument } from "@/components/legal/LegalPage.astro";
 import GroupLanding from "@/components/route/GroupLanding.astro";
@@ -199,8 +198,6 @@ const component = match.item.component ?? "page";
     <HelpPage locale={locale} />
   ) : component === "help-detail" ? (
     <HelpDetailPage locale={locale} helpId={Number(match.params.id)} />
-  ) : component === "playlists" ? (
-    <PlaylistsPage locale={locale} />
   ) : component === "calendar" ? (
     <CalendarPage locale={locale} />
   ) : component === "legal" ? (
