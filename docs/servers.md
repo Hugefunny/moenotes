@@ -15,7 +15,7 @@ its own build: more entities, its own schedules, Japanese-only MasterText and ti
 once the asset service has exported a release of its region (`versions/current_version.json` `regions`) and the
 metadata service serves its tables. A server whose assets are still being unpacked is therefore left out rather than
 shown with missing files; the export's completion changes the deploy server's build key, and the next build adds the
-server. A region's first release does not hold back builds of the others (`server/upstream.ts`).
+server. A region's first release does not hold back builds of the others (`server/internal/upstream`).
 
 `MOENOTES_SERVERS=tw,jp` replaces the check, e.g. to try a server before its export finishes or with a local
 MasterData checkout.

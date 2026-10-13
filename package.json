@@ -8,10 +8,10 @@
     "dev:fresh": "node scripts/clean-dev-cache.mjs && astro dev --force",
     "build": "astro check && astro build",
     "preview": "astro preview",
-    "start": "bun server/main.ts",
+    "start": "cd server && go run ./cmd/moenotes serve",
     "check": "astro check",
     "check:search-seo": "bun run scripts/check-search-seo.ts",
-    "lint": "bun run lint:i18n && bun run lint:i18n-routing && bun run lint:routes && bun run lint:arch && bun run lint:text && bun run lint:emoji",
+    "lint": "bun run lint:i18n && bun run lint:i18n-routing && bun run lint:routes && bun run lint:arch && bun run lint:text && bun run lint:emoji && bun run lint:server-config",
     "lint:i18n": "node scripts/check-i18n-keys.mjs",
     "lint:i18n-routing": "node scripts/check-i18n-routing.mjs",
     "lint:routes": "node scripts/check-route-registry.mjs",
@@ -22,7 +22,9 @@
     "fonts:inspect": "python scripts/subset-nowar-font.py --inspect",
     "sync:chart-renderer": "node scripts/sync-chart-renderer.mjs",
     "release": "bun scripts/release.mjs",
-    "prepare": "git config core.hooksPath .githooks 2>/dev/null || true"
+    "prepare": "git config core.hooksPath .githooks 2>/dev/null || true",
+    "lint:server-config": "bun scripts/generate-runtime-config.ts --check",
+    "gen:server-config": "bun scripts/generate-runtime-config.ts"
   },
   "dependencies": {
     "@astrojs/react": "7.0.0",

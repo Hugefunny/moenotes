@@ -1,0 +1,41 @@
+name: Image
+
+# Builds the deploy image (which runs `moenotes self-check`) whenever the image or the server changes, so a broken
+# Dockerfile is caught before the hosting platform builds it. Nothing is pushed.
+on:
+  pull_request:
+    paths:
+      - Dockerfile
+      - .dockerignore
+      - server/**
+      - .github/workflows/image.yml
+  push:
+    branches: [main]
+    paths:
+      - Dockerfile
+      - .dockerignore
+      - server/**
+      - .github/workflows/image.yml
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Build the image
+        run: docker build --build-arg MOENOTES_REVISION=${{ github.sha }} -t moenotes:ci .
+      - name: Start it and check the endpoints
+        run: |
+          docker run -d --name moenotes -p 8080:80 moenotes:ci
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8080/healthz && break; sleep 1; done
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/readyz)" = 503
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/)" = 503
+          curl -fsS http://127.0.0.1:8080/_moenotes/status | tee /dev/stderr | grep -q '"buildMode":"github"'
+          docker logs moenotes
+          docker exec moenotes test -s /app/source-digest
+          docker image inspect moenotes:ci --format '{{.Size}}' | awk '{ printf "image size: %.1f MB\n", $1 / 1e6 }'

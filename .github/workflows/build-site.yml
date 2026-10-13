@@ -70,6 +70,15 @@ jobs:
         env:
           SITE_BUILD_MODE: inspect
           GH_TOKEN: ${{ github.token }}
+      - uses: actions/setup-go@v7
+        if: steps.inspect.outputs.reuse != 'true'
+        with:
+          go-version-file: server/go.mod
+          cache-dependency-path: server/go.sum
+      - name: Build the Go packer
+        if: steps.inspect.outputs.reuse != 'true'
+        working-directory: server
+        run: CGO_ENABLED=0 go build -trimpath -o ../.site-release/bin/moenotes ./cmd/moenotes
       - name: Restore public fetch responses (approximately 1 GiB)
         if: steps.inspect.outputs.reuse != 'true'
         id: fetch-cache
@@ -83,7 +92,7 @@ jobs:
       - name: Install locked dependencies
         if: steps.inspect.outputs.reuse != 'true'
         run: bun install --frozen-lockfile
-      - name: Build and verify pinned site (no GitHub token)
+      - name: Build, verify and pack pinned site (no GitHub token)
         if: steps.inspect.outputs.reuse != 'true'
         run: bun scripts/build-site-release.ts
         env:
@@ -110,9 +119,8 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: site-release
-          path: |
-            .site-release/site.tar.gz
-            .site-release/site-manifest.json
+          # site.tar.zst.NNN parts and site-manifest.json (schema 2).
+          path: .site-release/parts/
           include-hidden-files: true
           compression-level: 0
           if-no-files-found: error
@@ -137,7 +145,7 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           name: site-release
-          path: .site-release
+          path: .site-release/parts
       - name: Upload draft assets, verify, then publish prerelease
         run: bun scripts/build-site-release.ts
         env:

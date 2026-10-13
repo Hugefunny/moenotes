@@ -9,8 +9,8 @@ contract, its configuration and the passport app settings.
 This repository only holds the site's side:
 
 ```text
-browser ── bdon.moe ── server/main.ts ── static build
-                   └── /api/*  ──server/api-proxy.ts──  starmoe-api ── passport.star.moe
+browser ── bdon.moe ── moenotes serve (server/, Go) ── static build
+                   └── /api/*  ──server/internal/web/proxy.go──  starmoe-api ── passport.star.moe
 ```
 
 - **Proxy.** The deploy server forwards `/api/*` to `MOENOTES_API_INTERNAL`, so pages call the API same-origin:
@@ -48,9 +48,10 @@ browser ── bdon.moe ── server/main.ts ── static build
 - **Public player pages.** `/u/{server}/{profileId}` (under a locale prefix too) shows a public profile. A static
   build has no page per player, so the route `/u` builds one shell per locale and `PlayerPageView.tsx` reads the
   player from the URL. `src/config/players.ts` holds the path rules; it uses relative imports only, because
-  `server/static.ts` (deploy) and `astro.config.mjs` (dev) import it to serve that shell for every player path.
+  `astro.config.mjs` (dev) imports it. The Go deploy server reads the same rules from
+  `server/internal/siteconfig/site.json`, generated from it (`bun run gen:server-config`, checked by `bun run lint`).
   Unknown, unverified and private accounts all show the same "not found".
-- **Link previews.** Crawlers don't run scripts, so `server/player-meta.ts` writes the player's name and level into
+- **Link previews.** Crawlers don't run scripts, so the deploy server (`server/internal/web/proxy.go`) writes the player's name and level into
   the shell's `<title>`, description and `og:*`/`twitter:*` tags, read from `/api/players/…` (1.5 s timeout, 5 minute
   cache, 30 seconds for misses). Any failure serves the plain shell. `og:image` stays the site default.
 - **Share image.** `src/lib/account/share-image.ts` draws a 1080 × 1440 PNG on a canvas in the browser: the favorite

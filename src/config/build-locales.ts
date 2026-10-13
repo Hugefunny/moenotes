@@ -3,12 +3,9 @@ import { SUPPORTED_LOCALES } from "./locales";
 import { buildEnv } from "./build-env";
 
 /**
- * Which locales a single `astro build` renders. MoeNotes builds locale pages in two groups so the five core
- * locales go live first and the remaining locales follow in a background batch (see
- * `.narrafork/plans/plan-nested-conjuring-rain.md`).
- *
- * The build server sets `MOENOTES_BUILD_LOCALES` per batch; local `astro build`/`astro dev` leave it unset and
- * render every locale, exactly as before. This module reads the variable through `buildEnv` (project boundary:
+ * Which locales a single `astro build` renders. The GitHub Actions site build sets `MOENOTES_BUILD_LOCALES=all`;
+ * a local `astro build` can set `core`, `rest` or a list to render fewer locales while developing, and
+ * `astro dev` leaves it unset to render every locale. This module reads the variable through `buildEnv` (project boundary:
  * no direct `process.env` outside `./build-env.ts`).
  */
 
