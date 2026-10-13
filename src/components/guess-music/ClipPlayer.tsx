@@ -157,7 +157,7 @@ export default function ClipPlayer({ locale, clip, nextClip, autoPlay, onStarted
         <button
           ref={buttonRef}
           type="button"
-          className={`mn-focus gm-play${playing ? " is-playing" : ""}${status === "blocked" ? " is-waiting" : ""}`}
+          className={`gm-play md3-state${playing ? " is-playing" : ""}${status === "blocked" ? " is-waiting" : ""}`}
           onClick={handlePlay}
           disabled={status === "error"}
           aria-label={tr(status === "ended" || playing ? "replay" : "play")}

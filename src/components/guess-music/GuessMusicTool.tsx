@@ -1,4 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
+import { withMd3 } from "@/components/md3/Md3Provider";
 import type { AppLocale } from "@/config/locales";
 import type { GameServer } from "@/config/servers";
 import { t } from "@/i18n";
@@ -15,8 +18,8 @@ export interface GuessMusicToolProps {
   servers: GameServer[];
 }
 
-type Tab = "daily" | "free";
-const TABS: Array<{ id: Tab; icon: "calendar" | "tune" }> = [
+type GuessTab = "daily" | "free";
+const TABS: Array<{ id: GuessTab; icon: "calendar" | "tune" }> = [
   { id: "daily", icon: "calendar" },
   { id: "free", icon: "tune" },
 ];
@@ -25,10 +28,10 @@ const TABS: Array<{ id: Tab; icon: "calendar" | "tune" }> = [
  * Guess the song: the daily challenge (questions, clips and leaderboards from starmoe-api) and free play (all in the
  * browser). `?tab=free`, or a free-play share link, opens free play; the daily challenge is the default.
  */
-export default function GuessMusicTool({ locale, songs, servers }: GuessMusicToolProps) {
+function GuessMusicTool({ locale, songs, servers }: GuessMusicToolProps) {
   const tr = (key: string) => t(locale, `guessMusic.${key}`);
   // The static HTML knows no address: it shows the default tab, and the address picks once mounted.
-  const [tab, setTab] = useState<Tab>("daily");
+  const [tab, setTab] = useState<GuessTab>("daily");
   // A run or a game is on screen: the tabs hide, so nothing keeps playing behind another tab.
   const [playing, setPlaying] = useState(false);
 
@@ -37,7 +40,7 @@ export default function GuessMusicTool({ locale, songs, servers }: GuessMusicToo
     if (params.get("tab") === "free" || hasSettingsParams(params)) setTab("free");
   }, []);
 
-  const choose = useCallback((next: Tab) => {
+  const choose = useCallback((next: GuessTab) => {
     setTab(next);
     const url = new URL(window.location.href);
     if (next === "free") url.searchParams.set("tab", "free");
@@ -51,14 +54,11 @@ export default function GuessMusicTool({ locale, songs, servers }: GuessMusicToo
   return (
     <div className="gm-root">
       {!playing && (
-        <div className="mn-segmented gm-segmented gm-tabs" role="tablist" aria-label={tr("tabs.label")}>
+        <Tabs value={tab} onChange={(_, next: GuessTab) => choose(next)} variant="fullWidth" aria-label={tr("tabs.label")}>
           {TABS.map(({ id, icon }) => (
-            <button key={id} type="button" role="tab" id={`gm-tab-${id}`} aria-selected={tab === id} aria-controls="gm-tab-panel" className="mn-focus" onClick={() => choose(id)}>
-              <GuessIcon name={icon} size={16} />
-              {tr(`tabs.${id}`)}
-            </button>
+            <Tab key={id} value={id} id={`gm-tab-${id}`} aria-controls="gm-tab-panel" icon={<GuessIcon name={icon} size={20} />} iconPosition="start" label={tr(`tabs.${id}`)} />
           ))}
-        </div>
+        </Tabs>
       )}
       <div id="gm-tab-panel" role="tabpanel" aria-labelledby={`gm-tab-${tab}`} className="gm-stack" style={{ gap: 16 }}>
         {tab === "daily" ? (
@@ -70,3 +70,5 @@ export default function GuessMusicTool({ locale, songs, servers }: GuessMusicToo
     </div>
   );
 }
+
+export default withMd3(GuessMusicTool);

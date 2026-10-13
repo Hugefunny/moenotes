@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import Button from "@mui/material/Button";
 import type { AppLocale } from "@/config/locales";
 import { t } from "@/i18n";
 import { localizePath } from "@/i18n/routing";
@@ -46,7 +47,7 @@ export default function RoundReveal({ locale, library, result, isLast, onNext }:
         {correct && (
           <span className="gm-num">
             {tr("reveal.points", { score: result.score })}
-            {result.comboMultiplier > 1 && <span className="gm-muted" style={{ marginLeft: 8 }}>{tr("reveal.combo", { multiplier: formatMultiplier(result.comboMultiplier) })}</span>}
+            {result.comboMultiplier > 1 && <span className="gm-reveal-combo">{tr("reveal.combo", { multiplier: formatMultiplier(result.comboMultiplier) })}</span>}
           </span>
         )}
       </div>
@@ -54,7 +55,7 @@ export default function RoundReveal({ locale, library, result, isLast, onNext }:
         {song && <img className="gm-reveal-jacket" src={song.jacketUrl} alt={song.title} width={144} height={144} />}
         <div style={{ minWidth: 0, flex: 1 }}>
           <h2 className="gm-reveal-title">{entry?.title ?? song?.title}</h2>
-          {entry?.subtitle && <p className="gm-muted" style={{ fontSize: 14 }}>{entry.subtitle}</p>}
+          {entry?.subtitle && <p className="gm-reveal-subtitle">{entry.subtitle}</p>}
           <dl className="gm-facts">
             {song?.bandName && (
               <>
@@ -80,14 +81,12 @@ export default function RoundReveal({ locale, library, result, isLast, onNext }:
         </div>
       </div>
       <div className="gm-reveal-actions">
-        <a className="mn-focus gm-button gm-button-quiet" href={localizePath(entityLinkPath({ routeId: "music", detailId: result.musicId }), locale)} target="_blank" rel="noopener">
-          <GuessIcon name="external" size={18} />
+        <Button variant="text" href={localizePath(entityLinkPath({ routeId: "music", detailId: result.musicId }), locale)} target="_blank" rel="noopener" startIcon={<GuessIcon name="external" />}>
           {tr("reveal.songDetail")}
-        </a>
-        <button ref={nextRef} type="button" className="mn-focus gm-button gm-button-primary" onClick={onNext}>
+        </Button>
+        <Button ref={nextRef} onClick={onNext} endIcon={<GuessIcon name="next" />}>
           {tr(isLast ? "reveal.showResults" : "reveal.next")}
-          <GuessIcon name="next" size={18} />
-        </button>
+        </Button>
       </div>
     </section>
   );

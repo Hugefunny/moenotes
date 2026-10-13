@@ -205,7 +205,7 @@ export default function DailyClipPlayer({ locale, src, clipSeconds, failed, load
         <button
           ref={buttonRef}
           type="button"
-          className={`mn-focus gm-play${playing ? " is-playing" : ""}${blocked ? " is-waiting" : ""}`}
+          className={`gm-play md3-state${playing ? " is-playing" : ""}${blocked ? " is-waiting" : ""}`}
           onClick={onButton}
           aria-label={tr(failed ? "player.retry" : playing || position > 0 ? "player.replay" : "player.play")}
         >

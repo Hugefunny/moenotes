@@ -1,4 +1,9 @@
 import { useEffect, useState } from "react";
+import Button from "@mui/material/Button";
+import MenuItem from "@mui/material/MenuItem";
+import TextField from "@mui/material/TextField";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import AccountAvatar from "@/components/account/AccountAvatar";
 import type { AppLocale } from "@/config/locales";
 import { playerPagePath } from "@/config/players";
@@ -78,36 +83,36 @@ export default function DailyLeaderboard({ locale, api, today, tiers, tier, onTi
         {data && <span className="gm-muted gm-num">{tr("daily.board.players", { count: data.totalPlayers })}</span>}
       </div>
       <div className="gm-between" style={{ alignItems: "flex-end" }}>
-        <div className="mn-segmented gm-segmented" role="group" aria-label={tr("results.difficulty")}>
+        <ToggleButtonGroup exclusive size="small" value={tier} onChange={(_, next: DailyTierId | null) => next && onTierChange(next)} aria-label={tr("results.difficulty")} className="gm-segmented">
           {tiers.map((id) => (
-            <button key={id} type="button" className="mn-focus" aria-pressed={id === tier} onClick={() => onTierChange(id)}>
+            <ToggleButton key={id} value={id}>
+              {id === tier && <GuessIcon name="check" size={18} />}
               {tr(`daily.tiers.${id}`)}
-            </button>
+            </ToggleButton>
           ))}
-        </div>
-        <select className="mn-focus gm-select gm-num" value={date} onChange={(event) => setDate(event.target.value)} aria-label={tr("daily.board.date")}>
+        </ToggleButtonGroup>
+        <TextField select size="small" value={date} onChange={(event) => setDate(event.target.value)} slotProps={{ htmlInput: { "aria-label": tr("daily.board.date") } }} className="gm-num">
           {recentDates(today).map((day) => (
-            <option key={day} value={day}>
+            <MenuItem key={day} value={day}>
               {day === today ? tr("daily.board.today", { date: day }) : day}
-            </option>
+            </MenuItem>
           ))}
-        </select>
+        </TextField>
       </div>
 
       {failed ? (
         <div className="gm-state" style={{ padding: "12px 0" }} role="alert">
           <p className="gm-state-text">{tr("daily.board.failed")}</p>
-          <button type="button" className="mn-focus gm-button" onClick={() => setAttempt((n) => n + 1)}>
-            <GuessIcon name="refresh" size={18} />
+          <Button variant="outlined" onClick={() => setAttempt((n) => n + 1)} startIcon={<GuessIcon name="refresh" />}>
             {tr("daily.retry")}
-          </button>
+          </Button>
         </div>
       ) : !data ? (
         <div className="gm-state" style={{ padding: "12px 0" }}>
           <span className="gm-spinner" role="img" aria-label={tr("daily.board.loading")} />
         </div>
       ) : !data.entries.length ? (
-        <p className="gm-muted" style={{ padding: "12px 0", textAlign: "center", fontSize: 13 }}>
+        <p className="gm-muted gm-board-empty">
           {tr(date !== today ? "daily.board.emptyPast" : canRank ? "daily.board.emptyToday" : "daily.board.emptyTodayNeutral", { tier: tierName })}
         </p>
       ) : (
@@ -134,14 +139,14 @@ function BoardRow({ locale, entry }: { locale: AppLocale; entry: DailyLeaderboar
   return (
     <li className={`gm-board-row${entry.me ? " is-me" : ""}${entry.rank <= 3 ? ` is-top is-top-${entry.rank}` : ""}`}>
       <span className="gm-board-rank gm-num">{entry.rank}</span>
-      <AccountAvatar url={avatarOf(entry.player)} name={entry.player.name} className="h-9 w-9 rounded-full text-sm" />
+      <AccountAvatar url={avatarOf(entry.player)} name={entry.player.name} className="h-9 w-9 rounded-full text-label-large" />
       <div className="gm-board-who">
         <span className="gm-board-name">
           {entry.player.name}
           {entry.me && <span className="gm-chip gm-board-you">{tr("daily.board.me")}</span>}
         </span>
         {game && isGameServer(game.server) && (
-          <a className="mn-focus gm-board-game" href={localizePath(playerPagePath(game.server, game.profileId), locale)} title={tr("daily.board.gameAccount")}>
+          <a className="gm-board-game" href={localizePath(playerPagePath(game.server, game.profileId), locale)} title={tr("daily.board.gameAccount")}>
             <GuessIcon name="game" size={14} />
             <span>{game.name || game.profileId}</span>
           </a>

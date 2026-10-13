@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Button from "@mui/material/Button";
 import type { AppLocale } from "@/config/locales";
 import { t } from "@/i18n";
 import { isSameSong, matchesTypedAnswer } from "@/lib/guess-music/answer";
@@ -151,14 +152,13 @@ export default function FreePlayGame({ locale, state, dispatch, library, practic
                 {state.score}
                 <small>{tr("hud.pointsUnit")}</small>
               </div>
-              <div className="gm-hud-potential gm-num" style={potential > 0 ? undefined : { color: "var(--mn-text-muted)" }}>
+              <div className={`gm-hud-potential gm-num${potential > 0 ? "" : " is-empty"}`}>
                 {revealed ? " " : tr("hud.potential", { score: potential })}
               </div>
             </div>
-            <button type="button" className="mn-focus gm-button gm-button-quiet" style={{ minHeight: 32, padding: "4px 8px" }} onClick={onQuit}>
-              <GuessIcon name="close" size={16} />
+            <Button variant="text" size="small" onClick={onQuit} startIcon={<GuessIcon name="close" />}>
               {tr("hud.quit")}
-            </button>
+            </Button>
           </div>
         </div>
         <div className="gm-stack" style={{ gap: 6 }}>

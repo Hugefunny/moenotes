@@ -62,8 +62,8 @@
 .dc-objective-options input:checked + span { color: #fff; border-color: var(--dc-accent); background: var(--dc-accent); }
 .dc-objective-options label:hover input:not(:disabled) + span { border-color: var(--dc-accent); }
 .dc-objective-options input:focus-visible + span { outline: 3px solid var(--dc-accent); outline-offset: 3px; }
-.dc-objective-options input:disabled + span { color: var(--mn-text-muted); border-style: dashed; cursor: not-allowed; }
-.dc-objective-options input:disabled:checked + span { color: var(--mn-text); background: var(--dc-tint); }
+.dc-objective-options input:disabled + span { color: var(--md-sys-color-on-surface-variant); border-style: dashed; cursor: not-allowed; }
+.dc-objective-options input:disabled:checked + span { color: var(--md-sys-color-on-surface); background: var(--dc-tint); }
 .dc-composer .dc-objective p { font-size: 12px; line-height: 1.55; }
 
 .dc-collection {
@@ -294,8 +294,8 @@
 
 .dr-result { display: grid; gap: 14px; min-width: 0; }
 .dr-objective { display: grid; gap: 3px; min-width: 0; font-size: 12px; line-height: 1.55; }
-.dr-objective strong { color: var(--mn-accent-deep); }
-.dr-objective span { color: var(--mn-text-muted); }
+.dr-objective strong { color: var(--md-sys-color-primary); }
+.dr-objective span { color: var(--md-sys-color-on-surface-variant); }
 .dr-status { display: grid; gap: 8px; min-width: 0; }
 .dr-phase, .dr-proven, .dr-unproven { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-width: 0; }
 .dr-phase small, .dr-proven small { color: var(--md-sys-color-on-surface-variant); font-size: 11px; }

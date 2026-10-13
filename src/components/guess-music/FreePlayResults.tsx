@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Button from "@mui/material/Button";
 import type { AppLocale } from "@/config/locales";
 import type { GameServer } from "@/config/servers";
 import { t } from "@/i18n";
@@ -44,7 +45,7 @@ export default function FreePlayResults({ locale, state, settings, preset, serve
     <div className="gm-stack" style={{ gap: 16 }}>
       <section className="gm-panel gm-final">
         <h2 className="gm-panel-title">{tr("results.title")}</h2>
-        <p className="gm-muted" style={{ marginTop: 12, fontSize: 14 }}>{tr("results.finalScore")}</p>
+        <p className="gm-muted gm-final-label">{tr("results.finalScore")}</p>
         <div className="gm-final-score">{state.score}</div>
         <div className="gm-row" style={{ justifyContent: "center", marginTop: 8 }}>
           <span className="gm-chip">{tr("results.correctCount", { correct: correctCount(state.results), total: state.rounds.length })}</span>
@@ -58,23 +59,19 @@ export default function FreePlayResults({ locale, state, settings, preset, serve
             </div>
           ))}
         </dl>
-        <div className="gm-row" style={{ justifyContent: "center", marginTop: 20 }}>
-          <button type="button" className="mn-focus gm-button" onClick={onCopyLink}>
-            <GuessIcon name="share" size={18} />
+        <div className="gm-row gm-actions">
+          <Button variant="outlined" onClick={onCopyLink} startIcon={<GuessIcon name="share" />}>
             {tr("results.copyLink")}
-          </button>
-          <button type="button" className="mn-focus gm-button" onClick={onReplay}>
-            <GuessIcon name="replay" size={18} />
+          </Button>
+          <Button variant="outlined" onClick={onReplay} startIcon={<GuessIcon name="replay" />}>
             {tr("results.replaySeed")}
-          </button>
-          <button type="button" className="mn-focus gm-button" onClick={onBackToSetup}>
-            <GuessIcon name="tune" size={18} />
+          </Button>
+          <Button variant="outlined" onClick={onBackToSetup} startIcon={<GuessIcon name="tune" />}>
             {tr("results.backToSetup")}
-          </button>
-          <button type="button" className="mn-focus gm-button gm-button-primary" onClick={onNewGame}>
-            <GuessIcon name="refresh" size={18} />
+          </Button>
+          <Button onClick={onNewGame} startIcon={<GuessIcon name="refresh" />}>
             {tr("results.playAgain")}
-          </button>
+          </Button>
         </div>
       </section>
 
@@ -85,7 +82,7 @@ export default function FreePlayResults({ locale, state, settings, preset, serve
           const correct = result.outcome === "correct";
           return (
             <li key={result.index}>
-              <a className="mn-focus gm-result" href={localizePath(entityLinkPath({ routeId: "music", detailId: result.musicId }), locale)}>
+              <a className="gm-result md3-state" href={localizePath(entityLinkPath({ routeId: "music", detailId: result.musicId }), locale)}>
                 <img className="gm-jacket" src={song?.jacketUrl} alt="" loading="lazy" width={56} height={56} />
                 <div style={{ minWidth: 0, flex: 1 }}>
                   <div className="gm-result-meta">

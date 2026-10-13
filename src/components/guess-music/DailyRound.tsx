@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Button from "@mui/material/Button";
 import type { AppLocale } from "@/config/locales";
 import { t } from "@/i18n";
 import {
@@ -382,14 +383,13 @@ export default function DailyRound({ locale, api, tier, run, library, onRunChang
                 {run.totalScore}
                 <small>{tr("hud.pointsUnit")}</small>
               </div>
-              <div className="gm-hud-potential gm-num" style={potential > 0 ? undefined : { color: "var(--mn-text-muted)" }}>
+              <div className={`gm-hud-potential gm-num${potential > 0 ? "" : " is-empty"}`}>
                 {potential > 0 ? tr("hud.potential", { score: potential }) : " "}
               </div>
             </div>
-            <button type="button" className="mn-focus gm-button gm-button-quiet" style={{ minHeight: 32, padding: "4px 8px" }} onClick={onExit}>
-              <GuessIcon name="back" size={16} />
+            <Button variant="text" size="small" onClick={onExit} startIcon={<GuessIcon name="back" />}>
               {tr("daily.round.back")}
-            </button>
+            </Button>
           </div>
         </div>
         <ol className="gm-dots" aria-hidden="true">
@@ -417,11 +417,10 @@ export default function DailyRound({ locale, api, tier, run, library, onRunChang
           <GuessIcon name="warning" size={28} className="gm-bad" />
           <p className="gm-state-text">{errorText(errorKind)}</p>
           <div className="gm-row" style={{ justifyContent: "center" }}>
-            <button type="button" className="mn-focus gm-button" onClick={onExit}>{tr("daily.round.back")}</button>
-            <button type="button" className="mn-focus gm-button gm-button-primary" onClick={() => setStartAttempt((n) => n + 1)}>
-              <GuessIcon name="refresh" size={18} />
+            <Button variant="outlined" onClick={onExit}>{tr("daily.round.back")}</Button>
+            <Button onClick={() => setStartAttempt((n) => n + 1)} startIcon={<GuessIcon name="refresh" />}>
               {tr("daily.retry")}
-            </button>
+            </Button>
           </div>
         </section>
       ) : (
@@ -453,10 +452,9 @@ export default function DailyRound({ locale, api, tier, run, library, onRunChang
                   <span>{tr("daily.round.answerLater")}</span>
                 </div>
                 <div className="gm-reveal-actions" style={{ paddingTop: 16 }}>
-                  <button type="button" className="mn-focus gm-button gm-button-primary" onClick={next}>
+                  <Button onClick={next} endIcon={<GuessIcon name="next" />}>
                     {tr(isLast ? "reveal.showResults" : "reveal.next")}
-                    <GuessIcon name="next" size={18} />
-                  </button>
+                  </Button>
                 </div>
               </section>
             )

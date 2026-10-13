@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Button from "@mui/material/Button";
 import type { AppLocale } from "@/config/locales";
 import { t } from "@/i18n";
 import { localizePath } from "@/i18n/routing";
@@ -60,8 +61,8 @@ export default function DailyResults({ locale, result, library, alreadyPlayed, o
     <div className="gm-stack" style={{ gap: 16 }}>
       <section className="gm-panel gm-final">
         <h2 className="gm-panel-title">{tr(alreadyPlayed ? "daily.results.alreadyPlayedTitle" : result.ranked ? "results.title" : "daily.results.practiceTitle")}</h2>
-        {alreadyPlayed && <p className="gm-muted" style={{ marginTop: 8, fontSize: 13 }}>{tr("daily.results.alreadyPlayed")}</p>}
-        <p className="gm-muted" style={{ marginTop: 12, fontSize: 14 }}>{tr("results.finalScore")}</p>
+        {alreadyPlayed && <p className="gm-muted" style={{ marginTop: 8 }}>{tr("daily.results.alreadyPlayed")}</p>}
+        <p className="gm-muted gm-final-label">{tr("results.finalScore")}</p>
         <div className="gm-final-score">{result.totalScore}</div>
         <div className="gm-row" style={{ justifyContent: "center", marginTop: 8 }}>
           <span className="gm-chip">{tr("results.correctCount", { correct: result.correctCount, total })}</span>
@@ -81,20 +82,17 @@ export default function DailyResults({ locale, result, library, alreadyPlayed, o
           ))}
         </dl>
         {!result.ranked && <p className="gm-hint" style={{ marginTop: 12 }}>{tr("daily.results.practiceNote")}</p>}
-        <div className="gm-row" style={{ justifyContent: "center", marginTop: 20 }}>
-          <button type="button" className="mn-focus gm-button" onClick={copyResult}>
-            <GuessIcon name="copy" size={18} />
+        <div className="gm-row gm-actions">
+          <Button variant="outlined" onClick={copyResult} startIcon={<GuessIcon name="copy" />}>
             {tr("daily.results.copy")}
-          </button>
-          <button type="button" className="mn-focus gm-button" onClick={onBack}>
-            <GuessIcon name="back" size={18} />
+          </Button>
+          <Button variant="outlined" onClick={onBack} startIcon={<GuessIcon name="back" />}>
             {tr("daily.results.back")}
-          </button>
+          </Button>
           {onPlayAgain && (
-            <button type="button" className="mn-focus gm-button gm-button-primary" onClick={onPlayAgain}>
-              <GuessIcon name="refresh" size={18} />
+            <Button onClick={onPlayAgain} startIcon={<GuessIcon name="refresh" />}>
               {tr("daily.results.playAgain")}
-            </button>
+            </Button>
           )}
         </div>
       </section>
@@ -132,7 +130,7 @@ export default function DailyResults({ locale, result, library, alreadyPlayed, o
           return (
             <li key={round.round}>
               {id !== undefined ? (
-                <a className="mn-focus gm-result" href={localizePath(entityLinkPath({ routeId: "music", detailId: id }), locale)}>{body}</a>
+                <a className="gm-result md3-state" href={localizePath(entityLinkPath({ routeId: "music", detailId: id }), locale)}>{body}</a>
               ) : (
                 <div className="gm-result">{body}</div>
               )}

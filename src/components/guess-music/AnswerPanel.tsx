@@ -1,4 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import Button from "@mui/material/Button";
 import type { AppLocale } from "@/config/locales";
 import { t } from "@/i18n";
 import { normalizeAnswer, resolveTypedAnswer, searchSongs, type SongSuggestion } from "@/lib/guess-music/answer";
@@ -49,11 +50,11 @@ function WrongGuessList({ locale, guesses }: { locale: AppLocale; guesses: reado
   return (
     <div className="gm-field">
       <span className="gm-hint">{t(locale, "guessMusic.answer.wrongGuesses")}</span>
-      <ul className="gm-row" style={{ margin: 0, padding: 0, listStyle: "none" }}>
+      <ul className="gm-row gm-plain-list">
         {guesses.map((guess) => (
-          <li key={guess.key} className="gm-chip gm-chip-wrong" style={{ maxWidth: "100%" }}>
+          <li key={guess.key} className="gm-chip gm-chip-wrong">
             <GuessIcon name="close" size={14} />
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{guess.label}</span>
+            <span className="gm-ellipsis">{guess.label}</span>
           </li>
         ))}
       </ul>
@@ -105,7 +106,7 @@ function ChoiceGrid({ library, optionIds, wrongGuesses, enabled, onGuess }: Answ
       {optionIds.map((id, index) => {
         const wrong = wrongIds.has(id);
         return (
-          <button key={id} type="button" onClick={() => choose(id)} disabled={!enabled || wrong} className={`mn-focus gm-option${wrong ? " is-wrong" : ""}`} style={!enabled && !wrong ? { opacity: 0.6 } : undefined}>
+          <button key={id} type="button" onClick={() => choose(id)} disabled={!enabled || wrong} className={`gm-option md3-state${wrong ? " is-wrong" : ""}`}>
             <span aria-hidden="true" className="gm-option-key">{wrong ? <GuessIcon name="close" size={16} /> : (index + 1) % 10}</span>
             <SongTitles library={library} musicId={id} />
           </button>
@@ -166,7 +167,7 @@ function SuggestBox({ locale, library, wrongGuesses, enabled, onGuess }: AnswerP
     <div className="gm-stack" style={{ gap: 12 }}>
       <input
         ref={inputRef}
-        className="gm-input"
+        className="gm-input md3-text-field"
         type="text"
         value={query}
         onChange={(event) => {
@@ -270,7 +271,7 @@ function TypeBox({ locale, library, typed = "text", wrongGuesses, enabled, onGue
       >
         <input
           ref={inputRef}
-          className="gm-input"
+          className="gm-input md3-text-field"
           type="text"
           value={text}
           onChange={(event) => {
@@ -286,13 +287,12 @@ function TypeBox({ locale, library, typed = "text", wrongGuesses, enabled, onGue
           spellCheck={false}
           enterKeyHint="send"
         />
-        <button type="submit" className="mn-focus gm-button gm-button-primary" disabled={!enabled || !normalizeAnswer(text)}>
-          <GuessIcon name="check" size={18} />
+        <Button type="submit" disabled={!enabled || !normalizeAnswer(text)} startIcon={<GuessIcon name="check" />} sx={{ flexShrink: 0 }}>
           {tr("submit")}
-        </button>
+        </Button>
       </form>
       {refusal ? (
-        <p className="gm-hint" role="status" style={{ color: "var(--mn-text)" }}>{refusal}</p>
+        <p className="gm-hint gm-hint-strong" role="status">{refusal}</p>
       ) : (
         <p className="gm-hint">{tr(typed === "song" ? "typeSongHint" : "typeHint")}</p>
       )}
@@ -307,10 +307,9 @@ export default function AnswerPanel(props: AnswerPanelProps) {
     <section className="gm-panel gm-stack" style={{ gap: 12 }} aria-label={t(props.locale, "guessMusic.answer.label")}>
       {props.mode === "choice" ? <ChoiceGrid {...props} /> : props.mode === "suggest" ? <SuggestBox {...props} /> : <TypeBox {...props} />}
       <div className="gm-row" style={{ justifyContent: "flex-end" }}>
-        <button type="button" className="mn-focus gm-button gm-button-quiet" onClick={props.onGiveUp} disabled={!props.canGiveUp}>
-          <GuessIcon name="flag" size={18} />
+        <Button variant="text" onClick={props.onGiveUp} disabled={!props.canGiveUp} startIcon={<GuessIcon name="flag" />}>
           {t(props.locale, "guessMusic.answer.giveUp")}
-        </button>
+        </Button>
       </div>
     </section>
   );

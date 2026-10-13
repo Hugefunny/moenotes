@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import Button from "@mui/material/Button";
 import { accountLoginUrl } from "@/config/account";
 import type { AppLocale } from "@/config/locales";
 import { isGameServer, type GameServer } from "@/config/servers";
@@ -293,14 +294,12 @@ export default function DailyChallenge({ locale, songs, onPlayingChange, onPlayF
         text={errorText(kind)}
         actions={
           <>
-            <button type="button" className="mn-focus gm-button" onClick={onPlayFree}>
-              <GuessIcon name="tune" size={18} />
+            <Button variant="outlined" onClick={onPlayFree} startIcon={<GuessIcon name="tune" />}>
               {tr("daily.playFree")}
-            </button>
-            <button type="button" className="mn-focus gm-button gm-button-primary" onClick={retryInfo}>
-              <GuessIcon name="refresh" size={18} />
+            </Button>
+            <Button onClick={retryInfo} startIcon={<GuessIcon name="refresh" />}>
               {tr("daily.retry")}
-            </button>
+            </Button>
           </>
         }
       />
@@ -335,10 +334,9 @@ export default function DailyChallenge({ locale, songs, onPlayingChange, onPlayF
         title={tr("daily.errors.finishFailed")}
         text={errorText(finishError)}
         actions={
-          <button type="button" className="mn-focus gm-button gm-button-primary" onClick={() => void finish(view.run)}>
-            <GuessIcon name="refresh" size={18} />
+          <Button onClick={() => void finish(view.run)} startIcon={<GuessIcon name="refresh" />}>
             {tr("daily.retry")}
-          </button>
+          </Button>
         }
       />
     );
@@ -433,7 +431,7 @@ function InfoCard({ locale, info, ranked, playerName, onReset }: { locale: AppLo
           {tr("daily.info.resetIn", { time: formatCountdown(left) })}
         </span>
       </div>
-      <p className="gm-muted" style={{ fontSize: 13 }}>{tr("daily.info.summary", { tiers: info.tiers.length, rounds: first?.rounds ?? 20 })}</p>
+      <p className="gm-muted">{tr("daily.info.summary", { tiers: info.tiers.length, rounds: first?.rounds ?? 20 })}</p>
       <ul className="gm-rules">
         <li>{tr("daily.info.rules.time", { seconds: first?.timeLimitSeconds ?? 45 })}</li>
         <li>{tr("daily.info.rules.attempts", { strikes: MAX_STRIKES })}</li>
@@ -460,10 +458,9 @@ function InfoCard({ locale, info, ranked, playerName, onReset }: { locale: AppLo
         <div className="gm-account">
           <span>{ranked === "ready" ? (playerName ? tr("daily.info.signedIn", { name: playerName }) : tr("daily.info.signedInAnonymous")) : ranked === "login" ? tr("daily.info.signedOut") : tr("daily.info.rankedOff")}</span>
           {ranked === "login" && (
-            <button type="button" className="mn-focus gm-button gm-button-primary" onClick={() => signIn(locale)}>
-              <GuessIcon name="login" size={18} />
+            <Button onClick={() => signIn(locale)} startIcon={<GuessIcon name="login" />}>
               {tr("daily.info.signIn")}
-            </button>
+            </Button>
           )}
         </div>
       )}
@@ -528,24 +525,21 @@ function TierCard({ locale, tier, ranked, status, practiceRound, pending, busy, 
         <>
           {ranked === "ready" && <p className="gm-tier-status">{statusLine}</p>}
           <div className="gm-tier-actions">
-            <button
-              type="button"
-              className={`mn-focus gm-button ${ranked === "unavailable" ? "" : "gm-button-primary"}`}
+            <Button
+              variant={ranked === "unavailable" ? "outlined" : "filled"}
               disabled={busy || ranked === "loading" || ranked === "unavailable"}
               onClick={() => onStart("ranked")}
+              startIcon={<GuessIcon name={ranked === "login" ? "login" : "trophy"} />}
             >
-              <GuessIcon name={ranked === "login" ? "login" : "trophy"} size={18} />
               {rankedLabel}
-            </button>
-            <button type="button" className="mn-focus gm-button" disabled={busy} onClick={() => onStart("practice")}>
-              <GuessIcon name="practice" size={18} />
+            </Button>
+            <Button variant="outlined" disabled={busy} onClick={() => onStart("practice")} startIcon={<GuessIcon name="practice" />}>
               {practiceLabel}
-            </button>
+            </Button>
             {practiceRound !== null && pending === null && (
-              <button type="button" className="mn-focus gm-button gm-button-quiet" disabled={busy} onClick={() => onStart("practice", true)}>
-                <GuessIcon name="refresh" size={16} />
+              <Button variant="text" disabled={busy} onClick={() => onStart("practice", true)} startIcon={<GuessIcon name="refresh" />}>
                 {tr("daily.tier.practiceRestart")}
-              </button>
+              </Button>
             )}
           </div>
         </>

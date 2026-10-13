@@ -1,4 +1,11 @@
 import { useId, type ReactNode } from "react";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import Slider from "@mui/material/Slider";
+import TextField from "@mui/material/TextField";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import Tooltip from "@mui/material/Tooltip";
 import type { AppLocale } from "@/config/locales";
 import type { GameServer } from "@/config/servers";
 import { t } from "@/i18n";
@@ -35,15 +42,17 @@ export interface FreePlaySetupProps {
   onShare: () => void;
 }
 
+/** M3 single-select segmented buttons; the selected segment leads with a check. */
 function Segmented<T extends string | number>({ label, value, options, onChange }: { label: string; value: T; options: ReadonlyArray<{ value: T; label: string }>; onChange: (value: T) => void }) {
   return (
-    <div className="mn-segmented gm-segmented" role="group" aria-label={label}>
+    <ToggleButtonGroup exclusive value={value} onChange={(_, next: T | null) => next !== null && onChange(next)} aria-label={label} className="gm-segmented">
       {options.map((option) => (
-        <button key={option.value} type="button" className="mn-focus" aria-pressed={option.value === value} onClick={() => onChange(option.value)}>
+        <ToggleButton key={option.value} value={option.value}>
+          {option.value === value && <GuessIcon name="check" size={18} />}
           {option.label}
-        </button>
+        </ToggleButton>
       ))}
-    </div>
+    </ToggleButtonGroup>
   );
 }
 
@@ -113,46 +122,45 @@ export default function FreePlaySetup({ locale, settings, preset, onChange, serv
           )}
         </div>
         <Field label={tr("timeLimit")} htmlFor={timeId}>
-          <div className="gm-row" style={{ flexWrap: "nowrap", gap: 12 }}>
-            <input
-              id={timeId}
-              className="gm-range"
-              type="range"
+          <div className="gm-row" style={{ flexWrap: "nowrap", gap: 16 }}>
+            <Slider
               min={TIME_LIMIT_MIN}
               max={TIME_LIMIT_MAX}
               step={TIME_LIMIT_STEP}
               value={settings.timeLimit}
-              aria-valuetext={seconds(settings.timeLimit)}
-              onChange={(event) => setOther({ timeLimit: clampTimeLimit(Number(event.target.value)) })}
+              getAriaValueText={seconds}
+              onChange={(_, value) => setOther({ timeLimit: clampTimeLimit(value) })}
+              slotProps={{ input: { id: timeId } }}
             />
             <span className="gm-label gm-num" style={{ flex: "0 0 auto", minWidth: 48, textAlign: "right" }}>{seconds(settings.timeLimit)}</span>
           </div>
         </Field>
         <Field label={tr("seed")} htmlFor={seedId} hint={tr("seedHint")}>
           <div className="gm-row" style={{ flexWrap: "nowrap" }}>
-            <input
+            <TextField
               id={seedId}
-              className="gm-input"
-              style={{ fontFamily: "var(--mn-font-mono, ui-monospace, monospace)" }}
+              fullWidth
+              size="small"
               value={settings.seed}
               onChange={(event) => setOther({ seed: event.target.value.slice(0, 32) })}
               onBlur={(event) => setOther({ seed: sanitizeSeed(event.target.value) || createSeed() })}
               autoComplete="off"
-              spellCheck={false}
+              slotProps={{ htmlInput: { spellCheck: false, className: "gm-mono" } }}
             />
-            <button type="button" className="mn-focus gm-button" style={{ padding: "8px 10px" }} onClick={() => setOther({ seed: createSeed() })} aria-label={tr("regenerateSeed")} title={tr("regenerateSeed")}>
-              <GuessIcon name="refresh" size={18} />
-            </button>
-            <button type="button" className="mn-focus gm-button" onClick={onShare}>
-              <GuessIcon name="share" size={18} />
+            <Tooltip title={tr("regenerateSeed")}>
+              <IconButton data-variant="outlined" onClick={() => setOther({ seed: createSeed() })} aria-label={tr("regenerateSeed")}>
+                <GuessIcon name="refresh" size={20} />
+              </IconButton>
+            </Tooltip>
+            <Button variant="outlined" onClick={onShare} startIcon={<GuessIcon name="share" />} sx={{ flexShrink: 0 }}>
               {tr("share")}
-            </button>
+            </Button>
           </div>
         </Field>
       </section>
 
       <section className="gm-panel gm-panel-soft gm-stack" style={{ gap: 8 }}>
-        <h2 className="gm-panel-title" style={{ fontSize: 16 }}>{tr("rulesTitle")}</h2>
+        <h2 className="gm-panel-title gm-panel-title-small">{tr("rulesTitle")}</h2>
         <ul className="gm-rules">
           <li>{tr("rules.rounds", { rounds: settings.rounds })}</li>
           <li>{tr("rules.timer")}</li>
@@ -163,10 +171,9 @@ export default function FreePlaySetup({ locale, settings, preset, onChange, serv
       </section>
 
       <div className="gm-stack" style={{ gap: 8 }}>
-        <button type="button" className="mn-focus gm-button gm-button-primary gm-button-wide" onClick={onStart} disabled={Boolean(startError)}>
-          <GuessIcon name="play" size={20} />
+        <Button size="large" fullWidth onClick={onStart} disabled={Boolean(startError)} startIcon={<GuessIcon name="play" />}>
           {tr("start")}
-        </button>
+        </Button>
         <p className="gm-hint" style={{ textAlign: "center" }}>{startError ?? tr("songCount", { count: songCount })}</p>
       </div>
     </div>
