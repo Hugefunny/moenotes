@@ -5,7 +5,10 @@ import CommandPalette from "../src/components/shell/CommandPalette";
 import KeyboardShortcutsHelp from "../src/components/shell/KeyboardShortcutsHelp";
 import SettingsDrawer from "../src/components/shell/SettingsDrawer";
 import TopAppBar from "../src/components/shell/TopAppBar";
+import RouteGlyph from "../src/components/shared/RouteGlyph";
 import { buildHeaderCrumbs } from "../src/lib/route/header-crumbs";
+import { getNavChildren, getNavigationGroups } from "../src/lib/route/registry";
+import type { AppRoute } from "../src/types/route";
 
 describe("material 3 shell", () => {
   test("breadcrumbs offer sibling pages, and a group landing ends with a page picker", () => {
@@ -30,6 +33,9 @@ describe("material 3 shell", () => {
     expect(html).not.toContain("Select subpage");
     // Server render (no viewport): the modal drawer's state, closed — never "Close sidebar" on first paint.
     expect(html).toContain('aria-label="サイドバーを開く"');
+    // Narrow screens get the trail on its own row under the bar (the inline one is hidden below md).
+    expect(html).toContain("mn-app-bar-trail");
+    expect(renderToString(<TopAppBar locale="en-US" homeHref="/en" crumbs={[]} />)).not.toContain("mn-app-bar-trail");
   });
 
   test("the navigation drawer marks the current page with the active indicator", () => {
@@ -38,6 +44,16 @@ describe("material 3 shell", () => {
     expect(current.length).toBe(1);
     expect(current[0]).toContain("bg-secondary-container");
     expect(html).toContain('aria-label="Main navigation"');
+  });
+
+  test("every navigation destination draws its own icon", () => {
+    const glyph = (route: AppRoute) => renderToString(<RouteGlyph icon={route.nav && route.nav.icon ? route.nav.icon : "sparkles"} routeId={route.id} />);
+    const seen = new Map<string, string>([[renderToString(<RouteGlyph icon="home" />), "home"]]);
+    for (const route of getNavigationGroups().flatMap((group) => [group, ...getNavChildren(group)])) {
+      const markup = glyph(route);
+      expect(`${route.id} shares its icon with ${seen.get(markup) ?? "nothing"}`).toBe(`${route.id} shares its icon with nothing`);
+      seen.set(markup, route.id);
+    }
   });
 
   test("closed overlays (settings, command palette, shortcuts) render nothing on the server", () => {

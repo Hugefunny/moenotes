@@ -28,3 +28,9 @@ html[data-theme="dark"] {
   --mn-cache-chart: #c98500;
   --mn-cache-data: #d55181;
 }
+
+/* Below md the top app bar carries the breadcrumb trail on a second, 40px row (src/components/shell/TopAppBar.tsx);
+   pages without a trail (home) keep the single 64dp row. */
+@media (width < 48rem) {
+  :root:has(.mn-app-bar-trail) { --md-app-bar-height: 104px; }
+}

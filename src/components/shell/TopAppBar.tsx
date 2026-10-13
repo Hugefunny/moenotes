@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import AppBar from "@mui/material/AppBar";
 import ButtonBase from "@mui/material/ButtonBase";
 import IconButton from "@mui/material/IconButton";
@@ -26,8 +26,10 @@ interface Props {
 
 /**
  * Material 3 small top app bar: navigation icon, the brand signature, the breadcrumb trail (each crumb with a menu of
- * its sibling pages) and the search / settings actions. Flat on the page surface; on scroll it takes the
- * surface-container tone (M3 "on scroll" elevation). Publishes its height as --md-app-bar-height for the shell.
+ * its sibling pages) and the search / settings actions. Below `md` the bar has no room for the trail beside the brand
+ * and the actions, so the trail takes a second, full-width row (and --md-app-bar-height grows to match, see
+ * src/styles/tokens.css). Flat on the page surface; on scroll it takes the surface-container tone (M3 "on scroll"
+ * elevation).
  */
 function TopAppBar({ locale, homeHref, crumbs }: Props) {
   const scrolled = useScrollTrigger({ disableHysteresis: true, threshold: 4 });
@@ -93,19 +95,30 @@ function TopAppBar({ locale, homeHref, crumbs }: Props) {
           </Tooltip>
         </div>
       </Toolbar>
+      <Breadcrumbs locale={locale} crumbs={crumbs} row />
     </AppBar>
   );
 }
 
-function Breadcrumbs({ locale, crumbs }: { locale: AppLocale; crumbs: HeaderCrumb[] }) {
+function Breadcrumbs({ locale, crumbs, row = false }: { locale: AppLocale; crumbs: HeaderCrumb[]; row?: boolean }) {
+  const scrollRef = useRef<HTMLElement>(null);
+  // A trail wider than its box scrolls sideways; start at its end so the current page is the crumb in view.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollLeft = el.scrollWidth;
+  }, [crumbs]);
   if (crumbs.length === 0) return null;
-  // Narrow screens keep the last two crumbs; the trail scrolls sideways if it still does not fit.
   return (
-    <nav aria-label={t(locale, "shell.breadcrumb")} className="no-scrollbar min-w-0 flex-1 overflow-x-auto">
+    <nav
+      ref={scrollRef}
+      aria-label={t(locale, "shell.breadcrumb")}
+      className={`no-scrollbar min-w-0 overflow-x-auto ${row ? "mn-app-bar-trail flex h-10 items-start px-3 md:hidden" : "flex-1 max-md:hidden"}`}
+    >
       <ol className="flex min-w-max items-center gap-0.5 text-body-medium text-on-surface-variant">
         {crumbs.map((crumb, index) => (
-          <li key={crumb.id} className={`flex items-center gap-0.5 ${index < crumbs.length - 2 ? "max-md:hidden" : ""}`}>
-            <span aria-hidden="true" className="px-0.5 text-outline">/</span>
+          <li key={crumb.id} className="flex items-center gap-0.5">
+            {/* Beside the brand every crumb takes a separator; on its own row the trail starts with the first crumb. */}
+            {(!row || index > 0) && <span aria-hidden="true" className="px-0.5 text-outline">/</span>}
             <Crumb locale={locale} crumb={crumb} />
           </li>
         ))}
