@@ -1,3 +1,14 @@
+/**
+ * The site build of `.github/workflows/build-site.yml`, in three modes (SITE_BUILD_MODE):
+ *
+ * - inspect: reuse a complete published `site-<key>` Release when one exists.
+ * - build:   render the pinned commit with Astro, re-check the data version, then pack the output with the Go
+ *            packer (`moenotes pack`: page-major ustar + zstd, split into 1 GiB parts) and write the manifest.
+ *            Runs without any GitHub token.
+ * - publish: upload the parts and the manifest into a draft prerelease, verify them from GitHub, then publish.
+ *
+ * The manifest format (schema 2) is read by server/internal/artifact; see docs/deployment.md.
+ */
 import { access, appendFile, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
@@ -6,6 +17,7 @@ import { createHash } from "node:crypto";
 import { dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { SUPPORTED_LOCALES } from "../src/config/locales";
+import { assetExportLag, buildKey, describeData, fetchJson, sourceDigest, sourceRevision, type AssetManifest } from "./site-data";
 
 export interface BuildInput {
   key: string;
@@ -14,22 +26,43 @@ export interface BuildInput {
   fingerprint: string;
   publicEnv: Record<string, string>;
 }
+export interface SitePart {
+  name: string;
+  size: number;
+  sha256: string;
+}
 export interface SiteManifest {
-  schema: 1;
+  schema: 2;
   key: string;
   revision: string;
   commit: string;
   data: { fingerprint: string; label: string };
   builtAt: string;
   locales: string[];
-  sha256: string;
+  format: "tar+zstd";
   size: number;
-  pages?: number;
+  sha256: string;
+  parts: SitePart[];
+  files: number;
+  expandedBytes: number;
+  pages: number;
 }
+
 const OUTPUT = resolve(".site-release");
-const ARCHIVE = "site.tar.gz";
+const PARTS_DIR = join(OUTPUT, "parts");
 const MANIFEST = "site-manifest.json";
-const MAX_ARCHIVE = 512 * 1024 * 1024;
+const PART_PREFIX = "site.tar.zst.";
+/** Matches server/internal/artifact: 1 GiB parts (GitHub allows 2 GiB per asset), at most 32 of them. */
+export const PART_BYTES = 1024 * 1024 * 1024;
+export const MAX_PARTS = 32;
+const MAX_EXPANDED = 64 * 1024 * 1024 * 1024;
+const MAX_FILES = 2_000_000;
+const MAX_MANIFEST = 64 * 1024;
+const PACKER = resolve(process.env.MOENOTES_PACKER ?? join(".site-release", "bin", "moenotes"));
+
+export function partName(index: number): string {
+  return `${PART_PREFIX}${String(index).padStart(3, "0")}`;
+}
 
 export function parseInput(env: Record<string, string | undefined>): BuildInput {
   const key = env.SITE_BUILD_KEY ?? "";
@@ -52,8 +85,7 @@ export function parseInput(env: Record<string, string | undefined>): BuildInput 
       throw new Error("SITE_PUBLIC_ENV must contain bounded PUBLIC_* string values only");
     }
   }
-  const expected = createHash("sha256").update(`${revision}\n${fingerprint}\n${commit}`).digest("hex").slice(0, 16);
-  if (key !== expected) throw new Error("SITE_BUILD_KEY does not match revision, fingerprint and commit");
+  if (key !== buildKey(revision, fingerprint, commit)) throw new Error("SITE_BUILD_KEY does not match revision, fingerprint and commit");
   return { key, revision, commit, fingerprint, publicEnv: Object.fromEntries(entries) };
 }
 
@@ -75,35 +107,65 @@ export function assertDataVersion(input: BuildInput, data: { fingerprint: string
 }
 
 export function validateManifest(value: unknown, input: BuildInput): asserts value is SiteManifest {
-  const manifest = value as SiteManifest | null;
-  if (!manifest || manifest.schema !== 1 || manifest.key !== input.key || manifest.revision !== input.revision
-    || manifest.commit !== input.commit || manifest.data?.fingerprint !== input.fingerprint
-    || typeof manifest.data?.label !== "string" || !manifest.data.label
-    || typeof manifest.builtAt !== "string" || !Number.isFinite(Date.parse(manifest.builtAt))
-    || !Array.isArray(manifest.locales) || manifest.locales.length !== SUPPORTED_LOCALES.length
-    || new Set(manifest.locales).size !== SUPPORTED_LOCALES.length
-    || !SUPPORTED_LOCALES.every((locale) => manifest.locales.includes(locale))
-    || !/^[a-f0-9]{64}$/.test(manifest.sha256) || !Number.isSafeInteger(manifest.size)
-    || manifest.size <= 0 || manifest.size > MAX_ARCHIVE
-    || (manifest.pages !== undefined && (!Number.isSafeInteger(manifest.pages) || manifest.pages < 0))) {
-    throw new Error("Release manifest does not match the requested complete build");
-  }
+  const m = value as SiteManifest | null;
+  const fail = (reason: string) => { throw new Error(`Release manifest does not match the requested complete build: ${reason}`); };
+  if (!m || typeof m !== "object") return fail("not an object");
+  if (m.schema !== 2) fail("schema");
+  if (m.key !== input.key || m.revision !== input.revision || m.commit !== input.commit) fail("identity");
+  if (m.data?.fingerprint !== input.fingerprint || typeof m.data?.label !== "string" || !m.data.label) fail("data");
+  if (typeof m.builtAt !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(m.builtAt) || !Number.isFinite(Date.parse(m.builtAt))) fail("builtAt");
+  if (!Array.isArray(m.locales) || m.locales.length !== SUPPORTED_LOCALES.length
+    || new Set(m.locales).size !== SUPPORTED_LOCALES.length
+    || !SUPPORTED_LOCALES.every((locale) => m.locales.includes(locale))) fail("locales");
+  if (m.format !== "tar+zstd") fail("format");
+  if (!/^[a-f0-9]{64}$/.test(m.sha256)) fail("sha256");
+  if (!Array.isArray(m.parts) || !m.parts.length || m.parts.length > MAX_PARTS) fail("parts");
+  let total = 0;
+  m.parts.forEach((part, index) => {
+    if (part?.name !== partName(index) || !/^[a-f0-9]{64}$/.test(part.sha256) || !Number.isSafeInteger(part.size)
+      || part.size <= 0 || part.size > PART_BYTES || (index < m.parts.length - 1 && part.size !== m.parts[0]!.size)) fail(`part ${index}`);
+    total += part.size;
+  });
+  if (!Number.isSafeInteger(m.size) || m.size !== total) fail("size");
+  if (!Number.isSafeInteger(m.files) || m.files <= 0 || m.files > MAX_FILES) fail("files");
+  if (!Number.isSafeInteger(m.expandedBytes) || m.expandedBytes <= 0 || m.expandedBytes > MAX_EXPANDED) fail("expandedBytes");
+  if (!Number.isSafeInteger(m.pages) || m.pages < 0 || m.pages > m.files) fail("pages");
+  if (Object.keys(m).some((name) => !["schema", "key", "revision", "commit", "data", "builtAt", "locales", "format", "size", "sha256", "parts", "files", "expandedBytes", "pages"].includes(name))) fail("unknown field");
 }
 
-export async function hashArchive(path: string): Promise<{ sha256: string; size: number }> {
+export async function hashFile(path: string, limit = PART_BYTES): Promise<{ sha256: string; size: number }> {
   const hash = createHash("sha256");
   let size = 0;
   for await (const chunk of createReadStream(path)) {
     size += chunk.length;
-    if (size > MAX_ARCHIVE) throw new Error("Site archive exceeds 512 MiB");
+    if (size > limit) throw new Error(`${path} exceeds ${limit} bytes`);
     hash.update(chunk);
   }
   return { sha256: hash.digest("hex"), size };
 }
 
+/** Checks every part of a directory against the manifest, and the whole stream's hash. */
+export async function verifyParts(manifest: SiteManifest, directory: string): Promise<void> {
+  const whole = createHash("sha256");
+  let size = 0;
+  for (const part of manifest.parts) {
+    const hash = createHash("sha256");
+    let partSize = 0;
+    for await (const chunk of createReadStream(join(directory, part.name))) {
+      partSize += chunk.length;
+      if (partSize > part.size) throw new Error(`${part.name} is larger than its manifest entry`);
+      hash.update(chunk);
+      whole.update(chunk);
+    }
+    if (partSize !== part.size || hash.digest("hex") !== part.sha256) throw new Error(`${part.name} checksum or size mismatch`);
+    size += partSize;
+  }
+  if (size !== manifest.size || whole.digest("hex") !== manifest.sha256) throw new Error("Release archive checksum or size mismatch");
+}
+
 export async function command(args: string[], capture = false): Promise<string> {
   return await new Promise((resolve, reject) => {
-    // Build/tar logs go straight to the runner. Only short machine-readable gh/git output needs pipes.
+    // Build logs go straight to the runner. Only short machine-readable gh/git/packer output needs pipes.
     const child = spawn(args[0]!, args.slice(1), { stdio: ["ignore", capture ? "pipe" : "inherit", capture ? "pipe" : "inherit"], shell: false });
     let stdout = "";
     let stderr = "";
@@ -130,42 +192,48 @@ export async function measuredCommand(args: string[], reportPath: string): Promi
     catch { console.warn("Build resource report is unavailable; see the command exit status above"); }
   }
 }
+
+interface PackResult { format: string; size: number; sha256: string; parts: SitePart[]; files: number; expandedBytes: number; pages: number }
+
 async function build(input: BuildInput): Promise<void> {
   applyBuildEnvironment(input);
   if ((await command(["git", "rev-parse", "HEAD"], true)).trim() !== input.commit) {
     throw new Error("Checked-out commit does not match SITE_BUILD_COMMIT");
   }
+  await access(PACKER).catch(() => { throw new Error(`Go packer not found at ${PACKER}; build server/cmd/moenotes first`); });
   // Dynamic imports are essential: configuration snapshots PUBLIC_* at module evaluation.
-  const { sourceRevision, describeData, fetchJson, assetExportLag } = await import("../server/upstream");
   const { assetConfig } = await import("../src/config/assets");
   const { masterdataConfig } = await import("../src/config/masterdata");
-  if (await sourceRevision(process.cwd()) !== input.revision) throw new Error("Source revision mismatch");
+  if (sourceRevision(await sourceDigest(process.cwd()), process.env) !== input.revision) throw new Error("Source revision mismatch");
   const currentData = async () => {
-    const manifest = await fetchJson<import("../server/upstream").AssetManifest>(`${assetConfig.api}/versions/current_version.json`);
+    const manifest = await fetchJson<AssetManifest>(`${assetConfig.api}/versions/current_version.json`);
     const data = describeData(manifest);
     const lag = await assetExportLag(manifest, `${Object.values(masterdataConfig.sources)[0]}${masterdataConfig.versionPath}`);
     assertDataVersion(input, data, lag);
     return data;
   };
   const data = await currentData();
-  await rm(OUTPUT, { recursive: true, force: true });
+  // Keep .site-release/bin: the workflow builds the Go packer there before this step.
+  const site = join(OUTPUT, "site");
+  for (const leftover of [site, PARTS_DIR]) await rm(leftover, { recursive: true, force: true });
   await mkdir(OUTPUT, { recursive: true });
   const cli = join(dirname(createRequire(import.meta.url).resolve("astro/package.json")), "bin", "astro.mjs");
-  await measuredCommand([process.execPath, "--bun", cli, "build", "--root", process.cwd(), "--outDir", join(OUTPUT, "site")], join(OUTPUT, "build-metrics.txt"));
-  await access(join(OUTPUT, "site", "index.html"));
+  await measuredCommand([process.execPath, "--bun", cli, "build", "--root", process.cwd(), "--outDir", site], join(OUTPUT, "build-metrics.txt"));
+  await access(join(site, "index.html"));
   await currentData();
-  await command(["tar", "--format=ustar", "-czf", join(OUTPUT, ARCHIVE), "-C", OUTPUT, "site"]);
-  const digest = await hashArchive(join(OUTPUT, ARCHIVE));
-  let pages = 0;
-  for (const entry of await readdir(join(OUTPUT, "site"), { recursive: true, withFileTypes: true })) {
-    if (entry.isFile() && entry.name.endsWith(".html")) pages++;
-  }
+  const packed = JSON.parse(await command([PACKER, "pack", site, PARTS_DIR], true)) as PackResult;
   const manifest: SiteManifest = {
-    schema: 1, key: input.key, revision: input.revision, commit: input.commit, data,
-    builtAt: new Date().toISOString(), locales: [...SUPPORTED_LOCALES], ...digest, pages,
+    schema: 2, key: input.key, revision: input.revision, commit: input.commit, data,
+    builtAt: new Date().toISOString(), locales: [...SUPPORTED_LOCALES], format: "tar+zstd",
+    size: packed.size, sha256: packed.sha256, parts: packed.parts, files: packed.files,
+    expandedBytes: packed.expandedBytes, pages: packed.pages,
   };
   validateManifest(manifest, input);
-  await writeFile(join(OUTPUT, MANIFEST), `${JSON.stringify(manifest, null, 2)}\n`);
+  await verifyParts(manifest, PARTS_DIR);
+  await writeFile(join(PARTS_DIR, MANIFEST), `${JSON.stringify(manifest, null, 2)}\n`);
+  console.log(`[site-release] ${manifest.files} files (${(manifest.expandedBytes / 2 ** 20).toFixed(0)} MiB) packed into ${manifest.parts.length} part(s), ${(manifest.size / 2 ** 20).toFixed(1)} MiB`);
+  // The rendered output is no longer needed; free the runner's disk before the artifact upload.
+  await rm(site, { recursive: true, force: true });
 }
 
 interface Release {
@@ -230,45 +298,65 @@ async function verifyTag(input: BuildInput, create = false): Promise<void> {
   }
   if (object.type !== "commit" || object.sha !== input.commit) throw new Error("Release tag points at a different source commit");
 }
-async function verifyFiles(input: BuildInput, directory: string): Promise<void> {
-  const manifest: unknown = JSON.parse(await readFile(join(directory, MANIFEST), "utf8"));
+async function readManifest(directory: string, input: BuildInput): Promise<SiteManifest> {
+  const raw = await readFile(join(directory, MANIFEST));
+  if (raw.length > MAX_MANIFEST) throw new Error("Release manifest is too large");
+  const manifest: unknown = JSON.parse(raw.toString("utf8"));
   validateManifest(manifest, input);
-  const digest = await hashArchive(join(directory, ARCHIVE));
-  if (digest.sha256 !== manifest.sha256 || digest.size !== manifest.size) throw new Error("Release archive checksum or size mismatch");
+  return manifest;
+}
+async function verifyFiles(input: BuildInput, directory: string): Promise<SiteManifest> {
+  const manifest = await readManifest(directory, input);
+  await verifyParts(manifest, directory);
+  return manifest;
+}
+/** Every expected asset uploaded exactly once with a plausible size; nothing else. */
+export function releaseComplete(existing: Pick<Release, "assets">, manifest?: SiteManifest): boolean {
+  const uploaded = existing.assets.filter((asset) => asset.state === "uploaded");
+  const manifestAsset = uploaded.filter((asset) => asset.name === MANIFEST);
+  if (manifestAsset.length !== 1 || manifestAsset[0]!.size <= 0 || manifestAsset[0]!.size > MAX_MANIFEST) return false;
+  if (!manifest) return true;
+  return manifest.parts.every((part) => {
+    const matches = uploaded.filter((asset) => asset.name === part.name);
+    return matches.length === 1 && matches[0]!.size === part.size;
+  });
+}
+async function download(tag: string, directory: string, patterns: string[]): Promise<void> {
+  await command(["gh", "release", "download", tag, "--repo", repository(), "--dir", directory, ...patterns.flatMap((pattern) => ["--pattern", pattern])]);
 }
 async function completeRelease(input: BuildInput, existing: Release): Promise<boolean> {
   if (existing.draft) return false;
   if (!existing.prerelease || existing.target_commitish !== input.commit) throw new Error("Published Release metadata mismatch; cannot overwrite");
   await verifyTag(input);
-  for (const name of [ARCHIVE, MANIFEST]) {
-    const assets = existing.assets.filter((asset) => asset.name === name && asset.state === "uploaded");
-    if (assets.length !== 1 || assets[0]!.size <= 0 || assets[0]!.size > (name === MANIFEST ? 65_536 : MAX_ARCHIVE)) {
-      throw new Error("Published Release is incomplete; cannot overwrite");
-    }
-  }
+  if (!releaseComplete(existing)) throw new Error("Published Release is incomplete or in an older format; delete it and its tag to rebuild");
   const directory = await mkdtemp(join(tmpdir(), "site-release-"));
   try {
-    await command(["gh", "release", "download", `site-${input.key}`, "--repo", repository(), "--dir", directory, "--pattern", ARCHIVE, "--pattern", MANIFEST]);
-    await verifyFiles(input, directory);
+    await download(`site-${input.key}`, directory, [MANIFEST]);
+    const manifest = await readManifest(directory, input);
+    if (!releaseComplete(existing, manifest)) throw new Error("Published Release is missing parts; cannot overwrite");
+    await download(`site-${input.key}`, directory, [`${PART_PREFIX}*`]);
+    await verifyParts(manifest, directory);
     return true;
   } finally { await rm(directory, { recursive: true, force: true }); }
 }
 async function publish(input: BuildInput): Promise<void> {
   let existing = await release(input, true);
   if (existing && await completeRelease(input, existing)) return;
-  await verifyFiles(input, OUTPUT);
+  const manifest = await verifyFiles(input, PARTS_DIR);
+  const extra = (await readdir(PARTS_DIR)).filter((name) => name !== MANIFEST && !manifest.parts.some((part) => part.name === name));
+  if (extra.length) throw new Error(`Unexpected files next to the parts: ${extra.join(", ")}`);
   await verifyTag(input, true);
   const tag = `site-${input.key}`;
   // The created draft is checked as the API returns it: the Release list can lag behind a new draft.
   existing ??= await api("releases", "--method", "POST", "-f", `tag_name=${tag}`, "-f", `target_commitish=${input.commit}`,
     "-F", "draft=true", "-F", "prerelease=true", "-f", "make_latest=false", "-f", `name=${tag}`,
-    "-f", "body=Static site build. Retained until a future manual retention policy; never automatically deleted.") as Release;
+    "-f", "body=Static site build (schema 2: page-major tar + zstd parts). Retained until a future manual retention policy; never automatically deleted.") as Release;
   if (!existing?.draft || existing.target_commitish !== input.commit) throw new Error("Release is not the expected draft; cannot overwrite");
-  await command(["gh", "release", "upload", tag, join(OUTPUT, ARCHIVE), join(OUTPUT, MANIFEST), "--repo", repository(), "--clobber"]);
-  // Only publish after both assets have been uploaded and verified from GitHub.
+  await command(["gh", "release", "upload", tag, ...manifest.parts.map((part) => join(PARTS_DIR, part.name)), join(PARTS_DIR, MANIFEST), "--repo", repository(), "--clobber"]);
+  // Only publish after every asset has been uploaded and verified from GitHub.
   const directory = await mkdtemp(join(tmpdir(), "site-release-upload-"));
   try {
-    await command(["gh", "release", "download", tag, "--repo", repository(), "--dir", directory, "--pattern", ARCHIVE, "--pattern", MANIFEST]);
+    await download(tag, directory, [MANIFEST, `${PART_PREFIX}*`]);
     await verifyFiles(input, directory);
   } finally { await rm(directory, { recursive: true, force: true }); }
   await verifyTag(input);

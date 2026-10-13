@@ -11,7 +11,7 @@ const SERVER_BUNDLED = ["@material/material-color-utilities", "@mui/material", "
 
 /**
  * `astro dev` serves player pages (/u/{server}/{profileId}) from the locale's /u shell, as the deploy server does
- * (server/static.ts): a static build has no page per player.
+ * (server/internal/web/static.go): a static build has no page per player.
  */
 function playerPages() {
   return {

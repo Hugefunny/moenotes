@@ -1,4 +1,4 @@
-// Relative imports only: the deploy server (server/upstream.ts) imports this file too and does not resolve `@/`.
+// Relative imports only: scripts outside the Astro build import this file too and do not resolve `@/`.
 
 /**
  * Our Notes game servers, in the order the switchers show them. Each has its own MasterData (moenotes-masterdata-sync)

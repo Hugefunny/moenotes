@@ -1,6 +1,6 @@
 /**
  * Notices that the site published a newer version of the open page. The server names each HTML page's version in a
- * `Server-Timing` metric (server/static.ts): the page reads the version it was loaded with from its navigation entry
+ * `Server-Timing` metric (server/internal/web/static.go): the page reads the version it was loaded with from its navigation entry
  * and compares it with a HEAD of its own URL when the tab comes back into view, when the browser restores it from its
  * back/forward cache, when the network returns and periodically while it is visible. Pages that a build left unchanged
  * keep their version, so only a page whose content changed is reported.

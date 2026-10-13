@@ -1,7 +1,8 @@
 import { PATH_PREFIX_LOCALE } from "./locales";
 
-// Our Notes servers and player page paths. Relative imports only: the deploy server (server/static.ts) and the
-// dev server (astro.config.mjs) import this file too, and neither resolves the `@/` alias.
+// Our Notes servers and player page paths. Relative imports only: the dev server (astro.config.mjs) and
+// scripts/generate-runtime-config.ts import this file too, and neither resolves the `@/` alias. The Go deploy server
+// reads the same rules from server/internal/siteconfig/site.json, which that script writes.
 
 /**
  * Our Notes servers an account can be bound on, named as starmoe-api and the game gateway name them. `tw` is the
@@ -10,8 +11,11 @@ import { PATH_PREFIX_LOCALE } from "./locales";
 export const GAME_SERVERS = ["tw", "jp", "en", "kr"] as const;
 export type GameServer = (typeof GAME_SERVERS)[number];
 
-/** International profile IDs are 11 digits with a regional prefix; JP accepts a positive signed int64. */
-const gameProfileIdPattern: Record<GameServer, RegExp> = {
+/**
+ * International profile IDs are 11 digits with a regional prefix; JP accepts a positive signed int64. Exported for
+ * the deploy server's generated configuration: keep these patterns to syntax RE2 (Go) understands as well.
+ */
+export const GAME_PROFILE_ID_PATTERNS: Readonly<Record<GameServer, RegExp>> = {
   tw: /^2\d{10}$/,
   en: /^3\d{10}$/,
   kr: /^4\d{10}$/,
@@ -24,7 +28,7 @@ export function isGameServer(value: string): value is GameServer {
 
 /** Same check starmoe-api makes, so an ID that cannot be on the server is caught before the request. */
 export function isGameProfileId(server: GameServer, id: string): boolean {
-  if (!gameProfileIdPattern[server].test(id)) return false;
+  if (!GAME_PROFILE_ID_PATTERNS[server].test(id)) return false;
   // Compare decimal text to preserve int64 precision in both browsers and the deploy server.
   return server !== "jp" || id.length < 19 || id <= "9223372036854775807";
 }

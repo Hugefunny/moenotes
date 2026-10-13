@@ -29,9 +29,20 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: server/go.mod
+          cache-dependency-path: server/go.sum
       - run: bun install --frozen-lockfile
       - run: bun run lint
       - run: bun run check:search-seo
       - run: bun run check
       - run: bun test tests/
-      - run: bun server/main.ts --self-check
+      - name: Go server (format, vet, tests, self-check)
+        working-directory: server
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then echo "gofmt needed:"; echo "$unformatted"; exit 1; fi
+          go vet ./...
+          go test ./...
+          go run ./cmd/moenotes self-check

@@ -84,7 +84,7 @@ or that the browser restores from its back/forward cache or from a suspended tab
 loaded from. The page notices a newer version of itself and offers a reload; it never reloads by itself.
 
 - The static server names the version of every HTML page in a `Server-Timing` metric, `page;desc="<size>-<mtime>"` of
-  the uncompressed file (`server/static.ts`). A build links unchanged files from the previous one, so a page keeps its
+  the uncompressed file (`server/internal/web/static.go`). A build links unchanged files from the previous one, so a page keeps its
   version until its content changes.
 - `PageUpdateNotice.astro` (in `RootLayout.astro`) reads the version the page was loaded with from its navigation entry
   and compares it with an uncached `HEAD` of its own path (`src/lib/site/page-update.ts`): 3 s after load, when the

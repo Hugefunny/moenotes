@@ -6,6 +6,9 @@ dist/
 .agents/
 .claude/
 .plan/
+.narrafork/
+.site-release/
+.tmp-md3/
 artifacts/
 .env
 .env.*
