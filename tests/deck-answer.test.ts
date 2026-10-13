@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { createBox, createCard } from "../src/lib/box/model";
-import { groupIssues, isOutOfMemory, issueTarget, parseDeckAnswer } from "../src/lib/deck/answer";
+import { challengeWorth, groupIssues, isOutOfMemory, issueTarget, parseDeckAnswer } from "../src/lib/deck/answer";
 import { formatDeckInterval, parseInterval } from "../src/lib/deck/interval";
 
 const team = (score: number) => ({
@@ -22,6 +22,31 @@ describe("answer", () => {
     expect(parsed.result?.teams[0]?.layout.members[2]).toBe(3);
     expect(parsed.result?.teams[0]?.orders?.median.score).toBe(1000);
     expect(parsed.result?.coversAllOwnedCards).toBe(true);
+    expect(parsed.result?.aggregation).toBe("expected");
+    expect(parsed.result?.exitReason).toBeNull();
+  });
+  test("retains the engine exit reason independently of the configured time limit", () => {
+    for (const exitReason of ["timeLimit", "refinementRequired", "complete"]) {
+      const raw = JSON.parse(answer({}));
+      raw.result.exitReason = exitReason;
+      expect(parseDeckAnswer(JSON.stringify(raw)).result?.exitReason).toBe(exitReason);
+    }
+  });
+  test("reads the echoed maximum objective and its maximizing order in progress and final results", () => {
+    for (const final of [false, true]) {
+      const raw = JSON.parse(answer({ final }));
+      raw.result.aggregation = "maximum";
+      raw.result.goal = { kind: "battleLive" };
+      raw.result.teams[0].orders = null;
+      raw.result.teams[0].bestOrder = { score: 1200, payoff: null, order: [5, 4, 3, 2, 1] };
+      const parsed = parseDeckAnswer(JSON.stringify(raw));
+      expect(parsed.result?.aggregation).toBe("maximum");
+      expect(parsed.result?.goalKind).toBe("battleLive");
+      expect(parsed.result?.teams[0]?.bestOrder?.order).toEqual([5, 4, 3, 2, 1]);
+      expect(parsed.result?.teams[0]?.orders).toBeNull();
+      raw.result.aggregation = "unsupported";
+      expect(() => parseDeckAnswer(JSON.stringify(raw))).toThrow("Unknown result aggregation");
+    }
   });
   test("a progress report without orders and a partial box", () => {
     const parsed = parseDeckAnswer(answer({ final: false, result: { phase: "proof", elapsedMs: 300, optimality: { proven: false, lowerBound: 900, upperBound: 1100, bestGap: 0.22, fraction: 0.4 },
@@ -112,6 +137,7 @@ describe("issues", () => {
     expect(issueTarget({ path: "declared._vip._rank", code: "missing", message: "" }, box)).toEqual({ kind: "vip" });
     expect(issueTarget({ path: "_player._characters[2]._exp", code: "missing", message: "" }, box)).toEqual({ kind: "player", area: "characters" });
     expect(issueTarget({ path: "goal.difficulty", code: "input", message: "" }, box)).toEqual({ kind: "request" });
+    expect(issueTarget({ path: "aggregation", code: "input", message: "" }, box)).toEqual({ kind: "request" });
   });
   test("group per card in box order", () => {
     const parsed = parseDeckAnswer(answer({ status: "incomplete", result: null, missing: [
@@ -123,5 +149,77 @@ describe("issues", () => {
     expect(groups.cards.map(entry => entry.masterId)).toEqual(["61", "70"]);
     expect(groups.cards[0]?.fields).toEqual(["liveSkillLevel", "gekisouSkillLevel"]);
     expect(groups.vip).toHaveLength(1);
+  });
+});
+
+
+describe("reward plan answers", () => {
+  const payoff = (numerator: string, denominator = "120") => ({ score: Number(numerator) / Number(denominator), exact: { numerator, denominator }, interval: null });
+  const planned = () => {
+    const raw = JSON.parse(answer({}));
+    raw.result.metric = { kind: "combined", consumption: 3, levels: [
+      [{ kind: "eventPoints", eventId: 7, weight: 2 }, { kind: "challengePoints", eventId: 7, weight: 35 }],
+      [{ kind: "eventItems", eventId: 7, resourceType: 1, resourceId: 90, weight: 1 }]] };
+    raw.result.aggregation = "expected";
+    raw.result.teams[0].value.payoff = payoff("480000");
+    raw.result.teams[0].levels = [{ value: payoff("480000"), terms: [payoff("120000"), payoff("48000", "7")] }, { value: payoff("1170"), terms: [payoff("1170")] }];
+    return raw;
+  };
+  test("retains the levels and each team's value and reward expectations on every level", () => {
+    const result = parseDeckAnswer(JSON.stringify(planned())).result!;
+    expect(result.metric).toBe("combined");
+    expect(result.levels).toEqual([[{ kind: "eventPoints", weight: 2 }, { kind: "challengePoints", weight: 35 }], [{ kind: "eventItems", weight: 1 }]]);
+    expect(result.teams[0]!.levels).toEqual([{ value: 4000, terms: [1000, 48000 / 7] }, { value: 9.75, terms: [9.75] }]);
+    expect(result.teams[0]!.value!.payoff!.score).toBe(4000);
+  });
+  test("fewer teams than requested and time-limited answers keep their proof state", () => {
+    for (const count of [0, 1, 3]) {
+      const raw = planned();
+      raw.result.teams = Array.from({ length: count }, (_, index) => ({ ...raw.result.teams[0], rank: index + 1 }));
+      const result = parseDeckAnswer(JSON.stringify(raw)).result!;
+      expect(result.teams).toHaveLength(count);
+      expect(result.optimality.proven).toBe(true);
+    }
+    const raw = planned(); raw.result.optimality.proven = false; raw.result.exitReason = "timeLimit";
+    expect(parseDeckAnswer(JSON.stringify(raw)).result!.optimality.proven).toBe(false);
+    expect(parseDeckAnswer(JSON.stringify(raw)).result!.exitReason).toBe("timeLimit");
+  });
+  test("other metrics carry no levels", () => {
+    const result = parseDeckAnswer(answer({})).result!;
+    expect(result.levels).toBeUndefined();
+    expect(result.teams[0]!.levels).toBeUndefined();
+  });
+  test("malformed levels, values and objectives are rejected in progress and final answers", () => {
+    const broken: ((raw: ReturnType<typeof planned>) => void)[] = [
+      raw => { raw.result.metric.levels = []; },
+      raw => { delete raw.result.metric.levels; },
+      raw => { raw.result.metric.levels[1] = []; },
+      raw => { raw.result.metric.levels[0][1].kind = "score"; },
+      raw => { raw.result.metric.levels[0][1].weight = 0; },
+      raw => { raw.result.metric.levels[0][1].weight = 1.5; },
+      raw => { raw.result.teams[0].levels.pop(); },
+      raw => { delete raw.result.teams[0].levels; },
+      raw => { raw.result.teams[0].levels[0].terms.pop(); },
+      raw => { raw.result.teams[0].levels[0].terms[1] = null; },
+      raw => { raw.result.teams[0].levels[1].value = null; },
+      raw => { raw.result.teams[0].levels[1].value.score = "9"; },
+      raw => { raw.result.teams[0].value.payoff = null; },
+      raw => { raw.result.aggregation = "maximum"; },
+    ];
+    for (const final of [false, true]) for (const patch of broken) {
+      const raw = planned(); raw.final = final;
+      patch(raw);
+      expect(() => parseDeckAnswer(JSON.stringify(raw))).toThrow();
+    }
+  });
+  test("the worth of challenge points is the best team's exact payoff for the points spent", () => {
+    const raw = JSON.parse(answer({}));
+    raw.result.metric = { kind: "eventPoints", eventId: 7, consumption: 400 };
+    raw.result.teams[0].value.payoff = payoff("840000");
+    expect(challengeWorth(parseDeckAnswer(JSON.stringify(raw)), 400)).toEqual({ value: { numerator: "840000", denominator: "120" }, cost: 400 });
+    expect(challengeWorth(parseDeckAnswer(JSON.stringify(planned())), 800)).toEqual({ value: { numerator: "480000", denominator: "120" }, cost: 800 });
+    raw.result.teams = [];
+    expect(challengeWorth(parseDeckAnswer(JSON.stringify(raw)), 400)).toBeNull();
+    expect(challengeWorth(parseDeckAnswer(answer({})), 400)).toBeNull();
   });
 });

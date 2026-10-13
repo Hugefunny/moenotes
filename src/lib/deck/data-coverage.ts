@@ -1,13 +1,24 @@
-import { isChallengeInput, solverGoalKind, usesEventData, type DeckArenaMusic, type DeckEvent, type DeckGoalInput } from "./goals";
+import { challengeRateInput, isChallengeInput, playsGekisou, solverGoalKind, usesChallengeRate, usesEventData, usesEventItemRewards, type DeckArenaMusic, type DeckEvent, type DeckGoalInput } from "./goals";
 import type { DeckDataCatalog } from "./worker-protocol";
 
-export type DeckDataGap = "catalog" | "event" | "song" | null;
+export type DeckDataGap = "catalog" | "event" | "eventItemRewards" | "song" | "luck" | "missions" | null;
 
-/** Check the selected scene against the data loaded by the Worker. Missing selections belong to `goalGap`. */
+/**
+ * Check the selected scene's coverage and supported missions in the verified Worker data. A goal input that rates
+ * challenge points by a challenge live needs that live covered as well.
+ */
 export function deckDataGap(input: DeckGoalInput, event: DeckEvent | null, catalog: DeckDataCatalog | null,
   arenas: readonly DeckArenaMusic[] = []): DeckDataGap {
   if (!catalog) return "catalog";
   if (event && usesEventData(input) && !catalog.eventIds.includes(event.id)) return "event";
+  if (usesEventItemRewards(input) && event) {
+    const rewards = catalog.eventItemRewards?.find(row => row.id === event.id && row.itemId === event.itemId);
+    if (!rewards || !(isChallengeInput(input) ? rewards.challenge : rewards.normal)) return "eventItemRewards";
+  }
+  if (usesChallengeRate(input)) {
+    const rate = deckDataGap(challengeRateInput(input), event, catalog, arenas);
+    if (rate) return rate;
+  }
   const kind = solverGoalKind(input);
   let musicId: number | null;
   if (isChallengeInput(input)) {
@@ -30,5 +41,9 @@ export function deckDataGap(input: DeckGoalInput, event: DeckEvent | null, catal
   if (musicId === null) return null;
   const music = catalog.musics.find(row => row.id === musicId);
   if (!music || kind !== "power" && !music.difficulties.includes(input.difficulty)) return "song";
+  if (playsGekisou(input)) {
+    if (music.hasLuck === true) return "luck";
+    if (music.hasLuck !== false) return "missions";
+  }
   return null;
 }

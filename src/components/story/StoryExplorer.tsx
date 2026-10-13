@@ -235,12 +235,12 @@ function ChapterGroups({ stories, locale, sort }: { stories: StoryViewModel[]; l
       .map((kind) => ({ kind, episodes: episodes.filter((episode) => (episode.episodeKind ?? "main") === kind) }))
       .filter((run) => run.episodes.length > 0);
     const chapterAsset = chapter.chapterBanner || chapter.chapterImage;
-    const chapterImageUrl = chapterAsset ? assetUrl(getAssetUrl({ path: `Story/${chapter.chapterBanner ? "Banner" : "Image"}/Chapter/${chapterAsset}.png`, type: "raw" })) : "";
-    return <section key={chapter.chapterId} className="mn-list-group overflow-hidden rounded-shape-lg border border-outline-variant bg-surface-container-low shadow-elevation-1">
-      <div className="flex flex-col">
-        {chapterImageUrl && (
-          <div className="w-full aspect-[21/9] sm:aspect-[24/9] md:aspect-[3/1] bg-surface-container-highest border-b-[1.5px] border-outline-variant overflow-hidden">
-            <img src={chapterImageUrl} alt="" className="h-full w-full object-cover transition duration-300 hover:scale-[1.01]" />
+const chapterImageUrl = chapterAsset ? assetUrl(getAssetUrl({ path: `Story/${chapter.chapterBanner ? "Banner" : "Image"}/Chapter/${chapterAsset}.png`, type: "raw", locale })) : "";
+return <section key={chapter.chapterId} className="mn-list-group overflow-hidden rounded-shape-lg border border-outline-variant bg-surface-container-low shadow-elevation-1">
+  <div className="flex flex-col">
+    {chapterImageUrl && (
+      <div className="w-full bg-surface-container-highest border-b border-outline-variant overflow-hidden">
+        <img src={chapterImageUrl} alt="" className="block h-auto w-full" />
           </div>
         )}
         <div className="flex flex-col justify-center p-6 sm:p-8">

@@ -1,16 +1,18 @@
 import { describe, expect, test } from "bun:test";
 import { deckDataGap } from "../src/lib/deck/data-coverage";
 import { defaultDeckGoalInput, type DeckEvent, type DeckGoalInput } from "../src/lib/deck/goals";
+import { defaultRewardPlan, withRewardRole } from "../src/lib/deck/reward-mix";
 import type { DeckDataCatalog } from "../src/lib/deck/worker-protocol";
 
 const event: DeckEvent = { id: 2, name: "Event", startAt: "2030/01/01 00:00:00+08:00", endAt: "2030/01/10 00:00:00+08:00",
   itemId: 90, challengeMusics: [{ id: 4, musicId: 100111 }] };
 const catalog: DeckDataCatalog = {
-  eventIds: [1], musics: [{ id: 100001, difficulties: ["easy", "expert"] }],
+  eventIds: [1], musics: [{ id: 100001, difficulties: ["easy", "expert"], hasLuck: false }],
   challengeMusics: [{ id: 1, eventId: 1, musicId: 100001 }], arenaMusics: [],
 };
 const updated: DeckDataCatalog = { ...catalog, eventIds: [1, 2],
-  musics: [...catalog.musics, { id: 100111, difficulties: ["easy", "normal", "hard", "expert"] }],
+  eventItemRewards: [{ id: 2, itemId: 90, normal: true, challenge: true }],
+  musics: [...catalog.musics, { id: 100111, difficulties: ["easy", "normal", "hard", "expert"], hasLuck: false }],
   challengeMusics: [...catalog.challengeMusics, { id: 4, eventId: 2, musicId: 100111 }],
   arenaMusics: [{ id: 7, musicId: 100001 }],
 };
@@ -23,6 +25,23 @@ describe("deck data coverage", () => {
       expect(gap({ goal, challengeMusicId: 4 })).toBe("event");
     }
     expect(gap({ goal: "power", eventParameter: true })).toBe("event");
+  });
+
+  test("event items require verified reward coverage for the selected event item and scene", () => {
+    for (const venue of ["freeLive", "challengeLive", "skip", "challengeSkip"] as const) {
+      const input = { goal: "eventItems" as const, venue, challengeMusicId: 4 };
+      expect(gap(input, updated)).toBeNull();
+      for (const eventItemRewards of [undefined, [], [{ id: 2, itemId: 91, normal: true, challenge: true }],
+        [{ id: 1, itemId: 90, normal: true, challenge: true }], [{ id: 2, itemId: 90, normal: false, challenge: false }]]) {
+        const available = { ...updated, eventItemRewards };
+        expect(gap(input, available)).toBe("eventItemRewards");
+        expect(gap({ ...input, goal: "eventPoints" }, available)).toBeNull();
+        expect(gap({ ...input, goal: "challengePoints", venue: "freeLive" }, available)).toBeNull();
+      }
+      const challenge = venue === "challengeLive" || venue === "challengeSkip";
+      expect(gap(input, { ...updated, eventItemRewards: [{ id: 2, itemId: 90, normal: !challenge, challenge }] })).toBeNull();
+      expect(gap(input, { ...updated, eventItemRewards: [{ id: 2, itemId: 90, normal: challenge, challenge: !challenge }] })).toBe("eventItemRewards");
+    }
   });
 
   test("ordinary goals run independently of a new event", () => {
@@ -57,7 +76,7 @@ describe("deck data coverage", () => {
   });
 
   test("power checks a selected song without requiring a chart or reading an unused song", () => {
-    expect(gap({ goal: "power", powerSong: true, eventParameter: false }, { ...catalog, musics: [{ id: 100001, difficulties: [] }] })).toBeNull();
+    expect(gap({ goal: "power", powerSong: true, eventParameter: false }, { ...catalog, musics: [{ id: 100001, difficulties: [], hasLuck: true }] })).toBeNull();
     expect(gap({ goal: "power", musicId: 100111, powerSong: true, eventParameter: false })).toBe("song");
     expect(gap({ goal: "power", musicId: 100111, powerSong: false, eventParameter: false })).toBeNull();
   });
@@ -69,10 +88,73 @@ describe("deck data coverage", () => {
     expect(gap({ goal: "arena", arenaMusicId: 7 }, updated)).toBeNull();
   });
 
+  test("LUCK and unknown missions block only scenes that run Gekisou", () => {
+    for (const hasLuck of [true, false, null] as const) {
+      const available = { ...updated, musics: updated.musics.map(row => ({ ...row, hasLuck })) };
+      const expected = hasLuck === true ? "luck" : hasLuck === null ? "missions" : null;
+      for (const goal of ["battle", "mission", "arena"] as const) {
+        expect(gap({ goal, arenaMusicId: 7 }, available)).toBe(expected);
+      }
+      for (const goal of ["free", "skip", "challenge", "challengeSkip", "power"] as const) {
+        expect(gap({ goal, challengeMusicId: 4, powerSong: true }, available)).toBeNull();
+      }
+      for (const goal of ["eventPoints", "challengePoints", "eventItems"] as const) {
+        for (const venue of ["battleLive", "missionLive", "arenaLive"] as const) {
+          expect(gap({ goal, venue, arenaMusicId: 7 }, available)).toBe(expected);
+        }
+        for (const venue of ["freeLive", "skip"] as const) expect(gap({ goal, venue }, available)).toBeNull();
+      }
+      for (const goal of ["eventPoints", "eventItems"] as const) {
+        for (const venue of ["challengeLive", "challengeSkip"] as const) {
+          expect(gap({ goal, venue, challengeMusicId: 4 }, available)).toBeNull();
+        }
+      }
+    }
+  });
+
+  test("mission support follows the selected arena song rather than an unused ordinary selection", () => {
+    const available = { ...updated, musics: updated.musics.map(row => ({ ...row, hasLuck: row.id === 100001 })) };
+    expect(gap({ goal: "arena", arenaMusicId: 7, musicId: 100111 }, available)).toBe("luck");
+    expect(gap({ goal: "battle", musicId: 100111 }, available)).toBeNull();
+    expect(gap({ goal: "free", musicId: 100001 }, available)).toBeNull();
+    expect(gap({ goal: "battle", musicId: 100001 }, available)).toBe("luck");
+  });
+
   test("unselected inputs keep their selection prompt and a legacy worker requires refreshed coverage", () => {
     expect(gap({ goal: "free", musicId: null })).toBeNull();
     expect(gap({ goal: "challenge", challengeMusicId: null }, updated)).toBeNull();
     expect(gap({ goal: "arena", arenaMusicId: null }, updated)).toBeNull();
     expect(gap({ goal: "free" }, null)).toBe("catalog");
   });
+});
+
+
+test("a tie-break on badges reuses badge coverage and retains the Gekisou mission gates", () => {
+  const rewards = withRewardRole(defaultRewardPlan(), "eventItems", "tieBreak");
+  for (const venue of ["freeLive", "battleLive", "missionLive", "arenaLive", "skip"] as const) {
+    const input = { goal: "challengePoints" as const, rewards, venue, arenaMusicId: 7 };
+    expect(gap(input, updated)).toBeNull();
+    const unsupported = { ...updated, eventItemRewards: [{ id: 2, itemId: 90, normal: false, challenge: true }] };
+    expect(gap(input, unsupported)).toBe("eventItemRewards");
+    expect(gap({ ...input, rewards: defaultRewardPlan() }, unsupported)).toBeNull();
+  }
+  const luck = { ...updated, musics: updated.musics.map(row => ({ ...row, hasLuck: true })) };
+  expect(gap({ goal: "challengePoints", venue: "battleLive", rewards }, luck)).toBe("luck");
+  expect(gap({ goal: "challengePoints", venue: "freeLive", rewards }, luck)).toBeNull();
+  expect(gap({ goal: "challengePoints", venue: "skip", rewards }, luck)).toBeNull();
+});
+
+test("challenge points rated by a challenge live need that live in the runtime data", () => {
+  const rewards = withRewardRole(defaultRewardPlan(), "challengePoints", "convert");
+  const input = { goal: "eventPoints" as const, venue: "freeLive" as const, rewards, challengeMusicId: 4, rateDifficulty: "hard" as const };
+  expect(gap(input, updated)).toBeNull();
+  expect(gap({ ...input, rateDifficulty: "expert" }, { ...updated, musics: updated.musics.map(row => row.id === 100111 ? { ...row, difficulties: ["hard"] } : row) })).toBe("song");
+  expect(gap(input, { ...updated, challengeMusics: catalog.challengeMusics })).toBe("song");
+  // Badges that break ties are settled by the challenge live too.
+  const withBadges = { ...input, rewards: withRewardRole(rewards, "eventItems", "tieBreak") };
+  expect(gap(withBadges, { ...updated, eventItemRewards: [{ id: 2, itemId: 90, normal: true, challenge: false }] })).toBe("eventItemRewards");
+  expect(gap(withBadges, updated)).toBeNull();
+  // A stated rate reads no challenge live.
+  const stated = { ...input, rewards: { ...rewards, rates: { ...rewards.rates, challengePoints: { auto: false, rate: 2 } } } };
+  expect(gap(stated, { ...updated, challengeMusics: catalog.challengeMusics })).toBeNull();
 });

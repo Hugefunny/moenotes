@@ -13,8 +13,11 @@ export const enUS: ChartDataGuide = {
       "id": "goal",
       "title": "What is optimized",
       "body": [
-        "Each goal is a number the search makes as large as possible: for Gekisou Live and Free Live, the expected score on the chosen song and difficulty; for event points, the expected event points per live; for highest power, the team's power.",
-        "Expected score: at the start of each live the members' skill order is shuffled. We treat the 120 orders of the five members as equally likely, simulate a whole live for each order (skills, Snap effects and, in Gekisou Live, the gekisou sections and rank bonuses) and average them. Where a skill or mission draws a lottery, the draw is averaged with the game's probabilities.",
+        "The CP goal defaults to CP only. Its optional secondary priorities compare expected CP first, then expected PT and badges in the chosen order. This option uses Average performance and applies to ordinary Live modes and ordinary Skip. Challenge Live and Challenge Skip spend CP. Badge resource and reward-data availability are required. The engine supports this combined objective in its lottery-free skill domain and reports unsupported skill conditions explicitly.",
+        "Event badges use the current event’s badge item. For each possible live result, the engine selects the single reward row for that exact result grade, then calculates the badge amount for the chosen consumption. Average performance averages these amounts; Theoretical maximum takes the highest reachable amount. Normal and challenge scenes each use their own event reward group. Each grade must contain exactly one reward row with probability marker 10000; other reward shapes are unsupported.",
+        "Each goal is a number the search makes as large as possible: for Gekisou Live and Free Live, the score on the chosen song and difficulty; for event points, the event points per live; for highest power, the team's power. Free and Challenge Live, including their event payoff goals, offer Average performance or Theoretical maximum. Gekisou modes use Average performance. Power and skipped lives have a single value, so this choice is not shown.",
+        "Average performance (default): at the start of each live the members' skill order is shuffled. We treat the 120 orders of the five members as equally likely, simulate a whole live for each order (skills, Snap effects and, in Gekisou Live, the gekisou sections and rank bonuses) and average them. Where a skill or mission draws a lottery, the draw is averaged with the game's probabilities.",
+        "Theoretical maximum ranks Free and Challenge Live teams by the highest goal value reachable across skill orders and random skill outcomes with nonzero probability. Switching keeps your collection, song, difficulty and declared play conditions. Only a complete search proves the maximum. Reaching the value requires the corresponding random outcomes and is not guaranteed every live; the option is enabled only when the engine supports the current conditions.",
         "Play: by default the play is the theoretical best, all Perfect, with every Just-eligible note in Gekisou Live hit Just. When you change the Great or Just rate under “Play assumptions”, that share of Greats and non-Just judgements is spread evenly over the whole chart and the live is computed again. It describes a declared play, not a prediction of how you will play.",
         "A team is a leader, 4 other members and the Snap paired with each. Swapping the positions of the 4 members does not change the score, so the positions in a result are only for display."
       ]
@@ -31,13 +34,15 @@ export const enUS: ChartDataGuide = {
       "id": "proven",
       "title": "Definition of “proven optimal”",
       "body": [
+        "For CP with secondary priorities, first restrict D to teams with the globally highest expected CP. Within that tier, rank by the selected secondary reward order, then the usual tie-breaks. Return up to 5 teams from that tier, even when fewer than 5 qualify. A timeout leaves this result unproven.",
         "“Proven optimal” means: among the complete set D of legal candidates, the results listed are exactly the first min(K, |D|) teams ordered by goal value (descending), then power (descending), then canonical ID order, where K is the number of teams the page returns (5). Team choice, ranks and the order of ties are all settled.",
+        "The proof applies to the selected objective under the declared play conditions: the probability-weighted average for Average performance, or the highest reachable value for Theoretical maximum. It does not turn a possible maximum into a guaranteed outcome.",
         "The proof does not evaluate every team. Each candidate has either been compared exactly with the results or been ruled out by a sound upper bound: the best value it can reach is already below the exact value of the K-th team. This is neither sampling nor an approximation.",
         "If D is empty, “proven” means no team is feasible under these conditions.",
         "This is an algorithmic proof relative to the declared scoring model and relies on the model, the bounds and the program being correct. Cards you have not entered, wrong progress values and mistakes in an actual play are outside the computation."
       ],
       "defs": [
-        ["Goal value", "The exact value of the chosen goal, such as the average score over the 120 orders."],
+        ["Goal value", "The exact value of the chosen goal and objective: its probability-weighted average or its highest reachable value."],
         ["Upper bound", "An estimate guaranteed not to be below the true value. A candidate whose upper bound is already below the cutoff has a lower true value and can be ruled out."],
         ["Canonical ID order", "When goal value and power are equal, teams are ordered by a fixed order of card IDs, so the same input always gives the same result."]
       ]
@@ -56,7 +61,7 @@ export const enUS: ChartDataGuide = {
       "title": "Search strategy",
       "body": [
         "The number of teams grows very fast with the collection, so simulating each one is not feasible. The search is a branch and bound: it builds candidates step by step (the leader first, then members and Snaps) and bounds the best value each partial team can still reach. Once that bound is below the exact value of the current K-th team, no team in that branch can enter the results and the whole branch is pruned.",
-        "The bounds come in two layers. Partial teams are bounded from precomputed tables, which is fast and only ever overestimates; only complete five-member teams are simulated over a whole live. The 120 orders and lottery draws are first enclosed in intervals and refined to exact values only when the intervals cannot separate the ranks.",
+        "The bounds come in two layers. Partial teams are bounded from precomputed tables, which is fast and only ever overestimates; only complete five-member teams are simulated over a whole live. In Average performance, the 120 orders and lottery draws are first enclosed in intervals and refined to exact values only when the intervals cannot separate the ranks.",
         "The higher the cutoff, the more is pruned. The search finds strong teams early and computes them exactly to set the cutoff, then raises it each time it finds a better team.",
         "Candidates are split by leader into disjoint groups that are searched separately and merged. The split does not change the result: the same input always gives the same teams and ranks.",
         "At the time limit the search stops and reports the best teams so far and an upper bound over the remaining candidates, the two numbers shown with “not proven”."
@@ -66,9 +71,10 @@ export const enUS: ChartDataGuide = {
       "id": "result",
       "title": "Reading a result",
       "body": [
+        "A CP result with secondary priorities retains the sorting order used for that calculation and shows expected CP, PT and badges with their exact fractions. Changing the current input marks it as a previous result until recalculation.",
         "Each result shows the goal value, the power, the formation in the game's own style, and for each position the member card, its progress and the paired Snap.",
         "A goal value is sometimes shown as an interval that contains the exact value, for example while a skill with a lottery has not been refined yet.",
-        "When the computation finishes, each team also lists the orders with the lowest, median and highest score among the 120, to show how much the skill order matters."
+        "When an Average performance calculation finishes, each team lists the orders with the lowest, median and highest score among the 120. A Theoretical maximum result shows a skill order for the highest selected goal value; the corresponding random skill outcomes are still required. The objective label belongs to that calculation. Changing the objective marks it as a previous result until you recalculate."
       ]
     },
     {

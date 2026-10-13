@@ -28,6 +28,15 @@ export const accountApi = {
 } as const;
 
 /**
+ * Guess the song on starmoe-api (its README, "Guess the song"): `daily` is the daily challenge (`GET` is today's info,
+ * the rest below it), `practice` free play's vocal-free clips.
+ */
+export const guessMusicApi = {
+  daily: "/api/guess-music/daily",
+  practice: "/api/guess-music/practice",
+} as const;
+
+/**
  * Servers of uploaded game saves. One international client serves TW/HK/MO, EN and KR, so their saves share
  * `intl`; JP has its own client.
  */

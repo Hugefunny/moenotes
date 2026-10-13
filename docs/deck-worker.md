@@ -88,11 +88,57 @@ against the message before using it. Then it:
 4. checks that `solver.datasetId`, the lowercase hex SHA-256 of the deck data bytes, equals `deckDataSha256`;
 5. reads `solver.capabilities()` as JSON text, when the solver has it, and returns the dataset catalogue in `ready`.
 
-The catalogue contains `eventIds`, `musics: [{id, difficulties}]`,
+The catalogue contains `eventIds`, `musics: [{id, difficulties, hasLuck}]`,
 `challengeMusics: [{id, eventId, musicId}]` and `arenaMusics: [{id, musicId}]`. Master IDs come from the columnar
 `MasterEvent`, `MasterLiveMusic`, `MasterChallengeMusic` and `MasterArenaMusic` tables. A song's available difficulties
 are the `_easyID`, `_normalID`, `_hardID` and `_expertID` values also present in `charts[].scoreId`. A known song can
 have an empty difficulty list. Absent or malformed tables and ambiguous IDs do not declare availability.
+
+`eventItemRewards: [{id, itemId, normal, challenge}]` reports event-badge reward availability. The event ID and
+item ID come from `MasterEvent._id` and `_eventItemId`. The normal and challenge flags join
+`_liveEventRewardGroup` and `_challengeLiveEventRewardGroup` to `_eventGroup` in `MasterLiveEventReward` and
+`MasterChallengeLiveEventReward`, respectively. Every grade in the linked group must have exactly one row across
+all resources and `_probability: 10000`. `_scoreRank` identifies the grade. The catalogue checks this shape;
+the engine computes the exact result grade and the reward amount.
+
+The page also requires the engine capability
+`eventItemRewards: {selection: "exactResultGrade", eventGroupField: "eventGroup", rowsPerGrade: 1, probabilityMarker: 10000}`
+and support for the selected scene, metric and aggregation. An absent or mismatched capability or unsupported
+reward-group shape disables the badge calculation. The request metric is
+`{kind: "eventItems", eventId, resourceType: 1, resourceId: itemId, consumption}` and its event context contains
+`resultClock` and `rewardProjection: true`. Each possible live result contributes the badge amount for its one
+exact grade; the engine aggregates these amounts for the chosen objective. Event-point and challenge-point
+requests also use `rewardProjection: true`.
+
+### Challenge-point secondary priorities
+
+The challenge-point metric accepts an optional `secondaryPriority` of `eventPointsFirst` or `eventItemsFirst`,
+with `resourceType: 1` and the event badge `resourceId`. These three fields are emitted together only for a
+combined objective. The goal uses expected rewards: maximize CP first, then PT and badges in the selected order.
+It supports ordinary Live scenes and ordinary Skip. Results contain up to `k` teams from the highest-CP tier;
+that tier may contain fewer than `k` teams. A time-limited search remains unproven.
+
+Both the event-item reward capability above and this capability are required:
+
+```json
+{"challengePointPriorities":{"priorities":["eventPointsFirst","eventItemsFirst"],"objective":"lexicographicExpected","primary":"challengePoints","bestPrimaryOnly":true,"lotteryFree":true}}
+```
+
+The engine reports unsupported skill conditions. Badge resource and reward-catalogue checks also apply to the
+combined objective. Pure challenge-point requests retain their scene and metric capability checks.
+
+The result metric echoes `secondaryPriority`, `resourceType` and `resourceId`. Each combined-result team includes
+`eventRewards: {challengePoints, eventPoints, eventItems}`; each value has `score`, an exact rational
+`{numerator, denominator}` using decimal strings, and `interval: null`. The CP primary value remains in
+`team.value.payoff`. A combined result with missing or malformed reward values is a protocol error. The page
+uses the result's echoed priority and rewards when displaying a previous calculation. Combined results show
+the complete proof state; scalar CP-bound gaps are omitted from their display because secondary ranking
+requires the full lexicographic proof.
+
+`hasLuck` is `true` when any `_gekisouMission1..3` value is LUCK (`2`), `false` when every mission is COMBO (`1`)
+or JUST (`3`), and `null` when the mission data is otherwise incomplete. Gekisou team calculations require
+`hasLuck: false`. Free Live, Challenge Live, Skip and power calculations use their own scene checks regardless of
+this flag.
 
 The page uses this view to check whether the loaded dataset can serve the selected goal while publications update.
 The original deck bytes and their `datasetId` remain the solver input. A `ready` message with an omitted or `null`

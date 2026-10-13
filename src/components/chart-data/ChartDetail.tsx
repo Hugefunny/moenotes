@@ -3,11 +3,13 @@ import { MEASURES, rangeMeasures, type MeasureStat } from "@/lib/chart-data/geki
 import { roomSize } from "@/lib/chart-data/query";
 import { SCORE_RANKS, chartFigures, formatLength, modelPower, orderRates, plainKind, quantile, rankThreshold, reachChance, requiredPower, scoreRate, weightSum } from "@/lib/chart-data/ranking";
 import { FREE } from "@/lib/chart-data/scenario";
+import { hasNominalStatistics } from "@/lib/chart-data/expectation";
 import AptitudeDetail from "./AptitudeDetail";
 import ReplayDetail from "./ReplayDetail";
 import { currentSnapRanking } from "@/lib/chart-data/snap-client";
-import { MISSIONS, ScenarioPanel } from "./SettingsPanel";
-import { Heading, Icon, Jacket, fmt, fmtInt, diffShort, SongLink, type ChartDataContext } from "./shared";
+import { currentSnapRank, snapRankFigures, snapRankStatusKey } from "@/lib/chart-data/snap-rank";
+import SettingsPanel, { MISSIONS, ScenarioPanel } from "./SettingsPanel";
+import { Heading, Icon, Jacket, fmt, fmtBounds, fmtInt, diffShort, SongLink, type ChartDataContext } from "./shared";
 
 const KIND_COLOR: Record<string, string> = { tap: "var(--md-sys-color-primary)", flick: "var(--md-sys-color-category1)", slide: "var(--md-sys-color-success)", trace: "var(--md-sys-color-category3)", combo: "var(--md-sys-color-outline-variant)" };
 type Figured = ChartRow & { base: number; weights: number[] };
@@ -111,9 +113,10 @@ function Weights({ row }: { row: Figured }) {
   );
 }
 
-// a measure as its seed mean, with the seeds' min–max when they differ; null when a seed lacks it
-const measureText = (m: MeasureStat | null) => (m
-  ? `${Number.isInteger(m.mean) ? fmtInt(m.mean) : fmt(m.mean, 1)}${m.min === m.max ? "" : ` (${fmtInt(m.min)}–${fmtInt(m.max)})`}`
+// Nominal enclosures keep their numerical endpoints; legacy samples retain their min–max display.
+const measureText = (m: MeasureStat | null, nominal: boolean) => (m
+  ? nominal ? `${m.mean}${m.min === m.max ? "" : ` ${fmtBounds([m.min, m.max])}`}`
+    : `${Number.isInteger(m.mean) ? fmtInt(m.mean) : fmt(m.mean, 1)}${m.min === m.max ? "" : ` (${fmtInt(m.min)}–${fmtInt(m.max)})`}`
   : null);
 
 // Gekisou Live's rank measures per range (seed means without Gekisou skills), the one each range ranks by in bold
@@ -142,7 +145,7 @@ function Measures({ ctx, row }: { ctx: ChartDataContext; row: ChartRow }) {
                   <td>{code ? tr("scenario.rangeMission", { n: m.index + 1, mission: tr(`missions.${code}`) }) : tr("scenario.range", { n: m.index + 1 })}</td>
                   <td>{m.measure ? tr(`detail.measure.${m.measure}`) : "–"}</td>
                   {MEASURES.map((k) => {
-                    const text = measureText(m.values[k]);
+                    const text = measureText(m.values[k], hasNominalStatistics(row.stats));
                     return <td key={k} className={k === m.measure ? "num hi" : "num dim"} title={text === null ? tr("scenario.pending") : undefined}>{text ?? "–"}</td>;
                   })}
                 </tr>
@@ -151,7 +154,7 @@ function Measures({ ctx, row }: { ctx: ChartDataContext; row: ChartRow }) {
           </tbody>
         </table>
       </div>
-      <p className="mn-cd-hint">{tr("detail.measuresHint")}</p>
+      <p className="mn-cd-hint">{tr(hasNominalStatistics(row.stats) ? "detail.expectationMeasuresHint" : "detail.measuresHint")}</p>
     </section>
   );
 }
@@ -204,12 +207,19 @@ export default function ChartDetail({ ctx, row }: { ctx: ChartDataContext; row: 
   const c = row.chart;
   const snap = ctx.snap?.active ? ctx.snap : null;
   const e = snap ? { rate: null, perMinute: null } : ctx.eff(row);
-  const measured = snap ? currentSnapRanking(snap.profile, snap.source, snap.measurement)?.rows.get(row.scoreId) : null;
+  const current = snap ? currentSnapRanking(snap.profile, snap.source, snap.measurement, snap.analysis) : null;
+  const measured = current?.rows.get(row.scoreId);
   const duration = ctx.lengthOf(row);
-  const measuredPerMinute = measured && duration !== null && duration + state.overhead * 1000 > 0 ? measured.score * 60000 / (duration + state.overhead * 1000) : null;
+  const rank = snap ? currentSnapRank(measured, rankThreshold(row, state.target, 0), snap.profile.power, current) : null;
+  const rankFigures = rank?.status === "complete" ? snapRankFigures(rank.result, duration === null ? null : duration + state.overhead * 1000) : null;
+  const rankStatus = rank ? tr(snapRankStatusKey(rank)) : "";
+  const rankNeed = rank?.status === "complete" ? rank.result.need.status === "exact" ? fmtInt(rank.result.need.power)
+    : tr(rank.result.need.status === "outsideDomain" ? "snap.rank.outsideDomain" : "snap.rank.unproven") : rankStatus;
+  const measuredPerMinute = typeof measured?.score === "number" && duration !== null && duration + state.overhead * 1000 > 0 ? measured.score * 60000 / (duration + state.overhead * 1000) : null;
   const figured = !snap && row.weights ? (row as Figured) : null;
   const orders = figured ? orderRates(figured, ctx.skills) : null;
   const battle = state.mode === "battle";
+  const nominal = battle && hasNominalStatistics(row.stats);
   // Free Live's score per power at the Great share chosen (the one Gekisou Live keeps as the song's best score)
   const free = battle && figured ? chartFigures(row.stats, plainKind(ctx.data), modelPower(ctx.data), { ...FREE, great: state.great / 100 }) : null;
   const solo = free ? scoreRate(free, ctx.skills) : null;
@@ -257,7 +267,7 @@ export default function ChartDetail({ ctx, row }: { ctx: ChartDataContext; row: 
           {snap ? <>
             <Tile label={tr("snap.score")} value={fmtInt(measured?.score)} sub={tr("snap.measurementHint")} />
             <Tile label={tr("snap.baseline")} value={fmtInt(measured?.baselineScore)} />
-            <Tile label={tr("snap.delta")} value={measured ? `${measured.delta > 0 ? "+" : ""}${fmtInt(measured.delta)}` : "–"} />
+            <Tile label={tr("snap.delta")} value={typeof measured?.delta === "number" ? `${measured.delta > 0 ? "+" : ""}${fmtInt(measured.delta)}` : "–"} />
             <Tile label={tr("snap.perMinute")} value={fmt(measuredPerMinute, 3)} />
           </> : null}
           {figured && orders ? (
@@ -274,7 +284,8 @@ export default function ChartDetail({ ctx, row }: { ctx: ChartDataContext; row: 
               label={tr("col.base")}
               value={fmt(row.base, 3)}
               sub={`W ${fmt(weightSum(figured), 3)} · ${tr("col.skip")} ${fmt(row.skip, 3)}`
-                + (row.seeds && row.seeds > 1 && row.baseRange ? ` · ${tr("detail.seeds", { n: row.seeds })} ${fmt(row.baseRange[0], 3)}–${fmt(row.baseRange[1], 3)}` : "")}
+                + (nominal ? ` · ${tr("aptitude.nominal")}${row.baseRange ? ` · ${tr("aptitude.interval")} ${fmtBounds(row.baseRange)}` : ` · ${tr("approximateShort")}`}`
+                  : row.seeds && row.seeds > 1 && row.baseRange ? ` · ${tr("detail.seeds", { n: row.seeds })} ${fmt(row.baseRange[0], 3)}–${fmt(row.baseRange[1], 3)}` : "")}
             />
           ) : null}
           {figured ? <Tile label={tr("col.perMinute")} value={fmt(e.perMinute, 3)} sub={`${tr("length")} ${tr(state.len)} + ${tr("seconds", { n: state.overhead })}`} /> : null}
@@ -296,20 +307,30 @@ export default function ChartDetail({ ctx, row }: { ctx: ChartDataContext; row: 
             <section>
               <Heading level={3} title={tr("detail.weights")} />
               <Weights row={figured} />
-              <p className="mn-cd-hint">{tr("detail.weightsHint")}</p>
+              <p className="mn-cd-hint">{tr(nominal ? "detail.expectationWeightsHint" : "detail.weightsHint")}</p>
             </section>
           ) : null}
         </div>
-        {(figured || snap) && row.scoreRanks.length ? (
+        {(snap || figured && row.scoreRanks.length > 0) ? (
           <section>
             <Heading level={3} title={tr("detail.ranks")} />
-            {snap ? <div className="mn-cd-table-scroll"><table className="mn-cd-ranks">
+            {snap ? <>
+              <SettingsPanel ctx={ctx} event />
+              <p className="mn-cd-hint">{tr("snap.eventMeasurementHint")}</p>
+              <p role="status">{rankStatus}</p>
+              <div className="mn-cd-tiles">
+                <Tile label={tr("snap.rank.meanScore")} value={rankFigures ? fmtInt(rankFigures.score) : rankStatus} />
+                <Tile label={tr("col.need")} value={rankNeed} />
+                <Tile label={tr("col.chance")} value={rankFigures ? `${fmt(rankFigures.chance * 100, 1)}%` : rankStatus} />
+                <Tile label={tr("col.goal")} value={rankFigures ? fmt(rankFigures.goal, 2) : rankStatus} />
+              </div>
+              <div className="mn-cd-table-scroll"><table className="mn-cd-ranks">
               <thead><tr><th>{tr("detail.rank")}</th><th>{tr("detail.required")}</th></tr></thead>
               <tbody>{SCORE_RANKS.filter((rank) => rankThreshold(row, rank, 0) !== null).reverse().map((rank) => <tr key={rank}>
                 <td><span className={`mn-cd-rk rk-${rank}`}>{rank}</span></td><td className="num">{fmtInt(rankThreshold(row, rank, 0))}</td>
               </tr>)}</tbody>
-            </table></div> : figured ? <RanksTable ctx={ctx} row={figured} /> : null}
-            <p className="mn-cd-hint">{snap ? tr("snap.eventMeasurementHint") : roomSize(state) ? tr("detail.ranksHintRoom", { n: state.room }) : tr("detail.ranksHint")}</p>
+            </table></div></> : figured ? <RanksTable ctx={ctx} row={figured} /> : null}
+            {!snap ? <p className="mn-cd-hint">{roomSize(state) ? tr("detail.ranksHintRoom", { n: state.room }) : tr("detail.ranksHint")}</p> : null}
           </section>
         ) : null}
         <p className="mn-cd-ids">{`${tr("detail.musicId")} ${row.musicId} · ${tr("detail.scoreId")} ${row.scoreId} · ${tr("detail.musicType")} ${row.song.musicType ?? "–"}`}</p>

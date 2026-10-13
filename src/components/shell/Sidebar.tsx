@@ -146,8 +146,11 @@ function DrawerNav({ locale, pathname, activePath, groups, onNavigate }: { local
 
 function NavGroup({ group, locale, current, collapsed, onToggle, onNavigate }: { group: AppRoute; locale: AppLocale; current: string; collapsed: boolean; onToggle: () => void; onNavigate?: (() => void) | undefined }) {
   const children = getNavChildren(group);
-  const headerActive = stripLocaleFromPathname(current) === normalizePathname(group.path);
-  const listId = `nav-group-${group.id}`;
+const headerActive = stripLocaleFromPathname(current) === normalizePathname(group.path);
+const listId = `nav-group-${group.id}`;
+// Paths nest (`/music` holds `/music/playlists` and song details), so only the longest matching item is current.
+const activeItemId = children.filter((item) => isCurrentRoute(current, item.path))
+  .sort((a, b) => b.path.length - a.path.length)[0]?.id;
   return (
     <div className="pt-1">
       <Divider className="!my-2 !mx-4" />
@@ -174,23 +177,23 @@ function NavGroup({ group, locale, current, collapsed, onToggle, onNavigate }: {
           </IconButton>
         )}
       </div>
-      {children.length > 0 && (
-        <Collapse in={!collapsed} timeout="auto">
-          <div id={listId} className="pb-1">
-            {children.map((item) => (
-              <NavItem
-                key={item.id}
-                href={localizePath(item.path, locale)}
-                active={isCurrentRoute(current, item.path)}
-                onNavigate={onNavigate}
-                nested
-                icon={<RouteGlyph icon={(item.nav && item.nav.icon ? item.nav.icon : "sparkles") as RouteIcon} routeId={item.id} className="h-5 w-5" />}
-              >
-                {t(locale, item.labelKey)}
-              </NavItem>
-            ))}
-          </div>
-        </Collapse>
+{children.length > 0 && (
+  <Collapse in={!collapsed} timeout="auto">
+    <div id={listId} className="pb-1">
+      {children.map((item) => (
+        <NavItem
+          key={item.id}
+          href={localizePath(item.path, locale)}
+          active={item.id === activeItemId}
+          onNavigate={onNavigate}
+          nested
+          icon={<RouteGlyph icon={(item.nav && item.nav.icon ? item.nav.icon : "sparkles") as RouteIcon} routeId={item.id} className="h-5 w-5" />}
+        >
+          {t(locale, item.labelKey)}
+        </NavItem>
+      ))}
+    </div>
+  </Collapse>
       )}
     </div>
   );

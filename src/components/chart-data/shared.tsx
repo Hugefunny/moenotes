@@ -4,9 +4,10 @@ import type { ChartRow } from "@/lib/chart-data/catalog";
 import type { ChartDataState } from "@/lib/chart-data/query";
 import type { ScenarioSupport } from "@/lib/chart-data/scenario";
 import type { DataBand, MusicData } from "@/lib/chart-data/types";
-import type { SnapRankingSource, SnapRankingState } from "@/lib/chart-data/snap-client";
+import type { SnapRankRequest, SnapRankingSource, SnapRankingState } from "@/lib/chart-data/snap-client";
 import type { SnapEvaluationProfile } from "@/lib/chart-data/snap-types";
 import { DIFFICULTY_SHORT_LABELS, isMusicDifficulty } from "@/lib/music/difficulty";
+import { isEstimate } from "@/lib/chart-data/expectation";
 
 /** Everything the views share: the data, the choices and the text helpers. */
 export interface ChartDataContext {
@@ -36,11 +37,16 @@ export interface ChartDataContext {
   openChart: (scoreId: number) => void;
   /** The rows the band and difficulty filters leave. */
   pool: ChartRow[];
-  snap?: { active: boolean; profile: SnapEvaluationProfile; measurement: SnapRankingState; source: SnapRankingSource | null } | undefined;
+  snap?: { analysis?: SnapRankRequest | undefined; active: boolean; profile: SnapEvaluationProfile; measurement: SnapRankingState; source: SnapRankingSource | null } | undefined;
 }
 
 export const fmt = (v: number | null | undefined, d = 2) => (v === null || v === undefined || !Number.isFinite(v) ? "–" : v.toFixed(d));
 export const fmtInt = (v: number | null | undefined) => (typeof v === "number" && Number.isFinite(v) ? Math.round(v).toLocaleString() : "–");
+/** Preserve numerical enclosures; rounding both ends can exclude the center or invent a zero-width interval. */
+export const fmtBounds = (bounds: readonly [number, number] | null | undefined) => bounds && bounds.every(Number.isFinite) && bounds[0] <= bounds[1]
+  ? `[${bounds[0]}, ${bounds[1]}]` : "–";
+export const fmtEstimate = (value: unknown) => isEstimate(value)
+  ? `${value[0]}${value[1] > 0 ? ` ${fmtBounds([value[0] - value[1], value[0] + value[1]])}` : ""}` : "–";
 export const diffShort = (difficulty: string) => (isMusicDifficulty(difficulty) ? DIFFICULTY_SHORT_LABELS[difficulty] : difficulty.slice(0, 2).toUpperCase());
 
 // line icons (24 x 24, stroked with currentColor); the star is the site's heading star

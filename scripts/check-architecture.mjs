@@ -35,6 +35,8 @@ const allowedFetchFiles = new Set([
   "src/lib/collectibles/image-client.ts",
   "src/lib/recognition/client.ts",
   "src/lib/deck/runtime-source.ts",
+  "src/lib/guess-music/daily-client.ts",
+  "src/lib/guess-music/practice-client.ts",
 ]);
 
 const allowedDomainFiles = new Set([
@@ -69,6 +71,11 @@ const allowedProtocolUrls = [
   "https://github.com",
 ];
 
+// pinyin-pro carries a dictionary of about 1 MB: the masterdata build computes the readings, pages receive only those.
+const allowedPinyinFiles = new Set([
+  "src/lib/masterdata/build-guess-music.ts",
+]);
+
 const scannedExtensions = new Set([".ts", ".tsx", ".astro"]);
 const errors = [];
 
@@ -93,6 +100,12 @@ function toRepoPath(file) {
 function checkFile(file) {
   const repoPath = toRepoPath(file);
   const source = readFileSync(file, "utf8");
+
+  if (!allowedPinyinFiles.has(repoPath)) {
+    if (/["']pinyin-pro["']/.test(source)) {
+      errors.push(`${repoPath}: pinyin-pro is build-time only; compute readings in the masterdata build.`);
+    }
+  }
 
   if (!allowedStorageFiles.has(repoPath)) {
     if (/\b(?:localStorage|sessionStorage)\b/.test(source)) {
