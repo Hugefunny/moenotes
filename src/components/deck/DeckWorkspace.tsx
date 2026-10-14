@@ -1,4 +1,6 @@
-import { Fragment, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent } from "react";
+import Button from "@mui/material/Button";
+import { withMd3 } from "@/components/md3/Md3Provider";
 import type { AppLocale } from "@/config/locales";
 import type { GameServer } from "@/config/servers";
 import { t } from "@/i18n";
@@ -11,7 +13,6 @@ import { listForServer, type ServerFaceted } from "@/lib/servers/facets";
 import { ContentServerProvider, useContentServer } from "@/lib/servers/use-content-server";
 import { mergeBoxBackup, parseBox, type BoxCard, type BoxSaveLink, type CardBox, type CardFieldName, type CardKind } from "@/lib/box/model";
 import { answerDeckFields } from "@/lib/box/deck-answers";
-import { createDeckPreview } from "@/lib/box/deck-preview";
 import { boxAccountJson, gameSaveAccountJson } from "@/lib/deck/account-envelope";
 import { CHALLENGE_POINT_COSTS, DEFAULT_DECK_GOAL, EVENT_GOALS, EVERYDAY_GOALS, MAX_BOOST, computes, computesGoal, defaultDeckGoalInput, goalGap, heldEvent,
   playsGekisou, readsAccuracy, effectiveAggregation, usesEventItemRewards, rewardLayoutOf, isChallengeInput, isNetworkInput, challengeRateRequest, recommendationRequest, solverGoalKind, goalVenues, isEventPayoffGoal, type ChallengePointCost, type DeckEvent, type DeckGoal, type DeckGoalInput, type DeckVenue, type DeckArenaMusic } from "@/lib/deck/goals";
@@ -32,14 +33,12 @@ import DeckComposer from "./DeckComposer";
 import DeckGoalConditions from "./DeckGoalConditions";
 import DeckRewardMix from "./DeckRewardMix";
 import DeckObjective from "./DeckObjective";
-import NativeFormationGroup from "@/components/chart-data/NativeFormationGroup";
 import Modal from "@/components/shared/Modal";
 import type { PlayerFieldCatalogue } from "@/lib/box/player-catalog";
 import { getCardBoxSession } from "@/lib/box/session";
 import { mergeRecognizedBox, type RecognitionSourceStamp } from "@/lib/recognition/protocol";
 import ScreenshotImport from "@/components/box/ScreenshotImport";
 import { createRecognitionContext } from "@/lib/recognition/catalogue";
-import CardIdentitySelection from "@/components/box/CardIdentitySelection";
 import CardBoxGuide from "@/components/box/CardBoxGuide";
 import CollectionIcon from "@/components/box/CollectionIcon";
 import CollectionActionMenu from "@/components/box/CollectionActionMenu";
@@ -99,7 +98,7 @@ function readStoredGoal(): DeckGoal {
   const value = safeGetLocalStorage(GOAL_STORAGE_KEY);
   return value && ([...EVENT_GOALS, ...EVERYDAY_GOALS] as string[]).includes(value) ? value as DeckGoal : DEFAULT_DECK_GOAL;
 }
-export default function DeckWorkspace(props: DeckWorkspaceProps) {
+function DeckWorkspace(props: DeckWorkspaceProps) {
   const { locale, servers } = props;
   const timeZone = useDisplayTimeZone();
   const [page, setPage] = useState(props.page);
@@ -143,8 +142,7 @@ export default function DeckWorkspace(props: DeckWorkspaceProps) {
   const [setup, setSetup] = useState(false);
   const [management, setManagement] = useState(false);
   const [importing, setImporting] = useState(false);
-  const [options, setOptions] = useState(false);
-  const [optionsTab, setOptionsTab] = useState<"team" | "constraints">("team");
+  const [constraintsOpen, setConstraintsOpen] = useState(false);
   const [constraintQuery, setConstraintQuery] = useState("");
   const [constraintFilter, setConstraintFilter] = useState<"all" | "required" | "excluded">("all");
   const [songPicker, setSongPicker] = useState(false);
@@ -157,39 +155,12 @@ export default function DeckWorkspace(props: DeckWorkspaceProps) {
   const [editingCardKey, setEditingCardKey] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [choice, setChoice] = useState<"local" | "temporary">("local");
-  const [baselineMembers, setBaselineMembers] = useState<string[]>(Array(5).fill(""));
-  const [baselineSnaps, setBaselineSnaps] = useState<(string | null)[]>(Array(5).fill(null));
-  const [baselineSaved, setBaselineSaved] = useState(false);
-  const [baselineScope, setBaselineScope] = useState<{ server: GameServer; boxId: string; revision: number } | null>(null);
-  const [baselineSaveError, setBaselineSaveError] = useState(false);
-  const baselineEditorEpoch = useRef(0);
-  const [baselineTarget, setBaselineTarget] = useState<{ slot: number; kind: CardKind } | null>(null);
   const [runError, setRunError] = useState("");
   /** The challenge live that rated challenge points for the shown run. */
   const [rateBasis, setRateBasis] = useState<DeckRateBasis | null>(null);
   const teamPanel = useRef<HTMLDivElement>(null);
   const ownedMembers = box?.cards.filter(card => card.kind === "member") ?? [];
   const ownedSnaps = box?.cards.filter(card => card.kind === "snap") ?? [];
-  const baselineCatalog = useMemo(() => {
-    const ids = (kind: CardKind) => new Set(box?.cards.filter(card => card.kind === kind).flatMap(card => card.identity.value ? [card.identity.value] : []) ?? []);
-    const heldMembers = ids("member"), heldSnaps = ids("snap");
-    return { members: members.filter(card => heldMembers.has(String(card.id))), snaps: snaps.filter(card => heldSnaps.has(String(card.id))) };
-  }, [box?.cards, members, snaps]);
-  const baselineValid = baselineMembers.length === 5 && new Set(baselineMembers).size === 5
-    && baselineMembers.every(id => baselineCatalog.members.some(card => String(card.id) === id))
-    && new Set(baselineMembers.map(id => baselineCatalog.members.find(card => String(card.id) === id)?.characterId)).size === 5
-    && baselineSnaps.length === 5 && baselineSnaps.every(id => id === null || baselineCatalog.snaps.some(card => String(card.id) === id))
-    && new Set(baselineSnaps.filter(id => id !== null)).size === baselineSnaps.filter(id => id !== null).length;
-  const baselineChanged = options && (baselineScope?.server !== server || baselineScope?.boxId !== box?.id || baselineScope?.revision !== box?.revision);
-  // The owned team shown before a run: the saved formation, or the first eligible cards; never a ranked recommendation.
-  const preview = createDeckPreview(box, catalog, { excluded, required });
-  const sample = preview.members.filter((card): card is BoxCard => card !== null);
-  const sampleSlots = Array.from({ length: 5 }, (_, index) => ({
-    member: members.find(card => String(card.id) === preview.members[index]?.identity.value),
-    support: snaps.find(card => String(card.id) === preview.snaps[index]?.identity.value),
-    memberLevel: preview.members[index]?.fields.level.value ?? undefined, memberRank: preview.members[index]?.fields.rank.value ?? undefined,
-    supportLevel: preview.snaps[index]?.fields.level.value ?? undefined, supportRank: preview.snaps[index]?.fields.rank.value ?? undefined,
-  }));
   // Keep the stored objective preference while using the selected scene's effective objective.
   const goal = goalInput.goal;
   const effectiveInput: DeckGoalInput = { ...goalInput, aggregation: effectiveAggregation(goalInput) };
@@ -238,37 +209,14 @@ export default function DeckWorkspace(props: DeckWorkspaceProps) {
     if (mode !== "temporary" || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault(); setPage(next); window.history.pushState(null, "", href(next === "box" ? "card-box" : "deck"));
   }
-  function openOptions(tab: "team" | "constraints" = "team") {
-    baselineEditorEpoch.current++;
-    setBaselineMembers(box?.baseline ? [...box.baseline.members] : Array(5).fill(""));
-    setBaselineSnaps(box?.baseline ? [...box.baseline.snaps] : Array(5).fill(null));
-    setBaselineScope(box ? { server, boxId: box.id, revision: box.revision } : null);
-    setBaselineSaveError(false); setBaselineSaved(false); setOptionsTab(tab); setOptions(true);
-    setBaselineTarget(null);
-  }
-  function closeOptions() { baselineEditorEpoch.current++; setOptions(false); setBaselineTarget(null); }
-  function moveBaseline(slot: number, direction: -1 | 1) {
-    const next = slot + direction;
-    setBaselineMembers(previous => previous.map((value, index) => index === slot ? previous[next]! : index === next ? previous[slot]! : value));
-    setBaselineSnaps(previous => previous.map((value, index) => index === slot ? previous[next]! : index === next ? previous[slot]! : value));
-    setBaselineSaved(false); setBaselineSaveError(false);
-  }
-  async function saveBaseline() {
-    if (!box || !baselineScope || baselineChanged || !baselineValid) return;
-    const epoch = baselineEditorEpoch.current;
-    if (!stored) return;
-    const saved = await storage.commit({ ...stored, baseline: { members: baselineMembers, snaps: baselineSnaps } }, baselineScope.revision);
-    if (epoch !== baselineEditorEpoch.current) return;
-    setBaselineSaveError(!saved); setBaselineSaved(saved);
-    if (saved) setBaselineScope({ ...baselineScope, revision: baselineScope.revision + 1 });
-  }
+  function openConstraints() { setConstraintsOpen(true); }
   useEffect(() => {
     const back = () => setPage(normalizePathname(window.location.pathname) === href("card-box") ? "box" : "deck");
     window.addEventListener("popstate", back);
     return () => window.removeEventListener("popstate", back);
   }, [locale]);
   useEffect(() => { setExcluded([]); setRequired([]); updateGoal({ musicId: null, challengeMusicId: null, arenaMusicId: null }); setRunError(""); setManagement(false); setSetup(false); setDeleting(false); setImporting(false);
-    baselineEditorEpoch.current++; setOptions(false); setBaselineTarget(null); setBaselineScope(null); setEditingCardKey(null); setPlayerSettings(false); setGuideOpen(false); setBackupError(false); setSongPicker(false); setConstraintQuery(""); setConstraintFilter("all"); setPendingScreenshots([]); setDraggingScreenshots(false); setSavePicker(false); }, [server]);
+    setConstraintsOpen(false); setEditingCardKey(null); setPlayerSettings(false); setGuideOpen(false); setBackupError(false); setSongPicker(false); setConstraintQuery(""); setConstraintFilter("all"); setPendingScreenshots([]); setDraggingScreenshots(false); setSavePicker(false); }, [server]);
   function openScreenshotImport() { if (linked) return; setManagement(false); setGuideOpen(false); setImporting(true); }
   function openGuide() { setManagement(false); setGuideOpen(true); }
   function openStorage() { setChoice(mode); setSetup(true); }
@@ -464,7 +412,7 @@ export default function DeckWorkspace(props: DeckWorkspaceProps) {
   function toggle(values: string[], key: string, update: (value: string[]) => void) { update(values.includes(key) ? values.filter(value => value !== key) : [...values, key]); }
   return <ContentServerProvider server={server} servers={servers}><div className={`dw-workspace ${page === "box" ? "dw-collection" : "dw-deck"}`} data-testid="deck-workspace">
     <header className="dw-header"><div><h1>{tr(page === "box" ? "boxTitle" : "title")}{page === "deck" && <span className="dw-beta">{tr("beta")}</span>}</h1><p>{page === "box" ? tr("boxDescription") : composer("workspaceNote")}</p>
-      {page === "deck" && <p className="dw-sources"><a href={href("deck-guide")}>{tr("deckGuide.link")}</a> · {tr("sources.label")}: {DECK_SOURCES.map((source, index) => <Fragment key={source.key}>{index > 0 && " · "}<a href={source.url} target="_blank" rel="noopener noreferrer">{tr(`sources.${source.key}`)}</a></Fragment>)}</p>}</div><div className="dw-actions dw-header-actions"><label className="dw-server"><span>{tr("server")}</span><select aria-label={tr("server")} value={server} disabled={busy} onChange={event => pickServer(event.target.value as GameServer)}>{servers.map(value => <option key={value} value={value}>{t(locale, `gameServer.names.${value}`)}</option>)}</select></label><a className="dw-button" href={href(page === "box" ? "deck" : "card-box")} onClick={event => changePage(event, page === "box" ? "deck" : "box")}>{tr(page === "box" ? "goDeck" : "boxTitle")}</a></div></header>
+      {page === "deck" && <p className="dw-sources"><a href={href("deck-guide")}>{tr("deckGuide.link")}</a> · {tr("sources.label")}: {DECK_SOURCES.map((source, index) => <Fragment key={source.key}>{index > 0 && " · "}<a href={source.url} target="_blank" rel="noopener noreferrer">{tr(`sources.${source.key}`)}</a></Fragment>)}</p>}</div><div className="dw-actions dw-header-actions"><label className="dw-server"><span>{tr("server")}</span><select aria-label={tr("server")} value={server} disabled={busy} onChange={event => pickServer(event.target.value as GameServer)}>{servers.map(value => <option key={value} value={value}>{t(locale, `gameServer.names.${value}`)}</option>)}</select></label>{page === "box" && <Button variant="tonal" href={href("deck")} onClick={(event: MouseEvent<HTMLAnchorElement>) => changePage(event, "deck")}>{tr("goDeck")}</Button>}</div></header>
     {storage.error && <p role="alert" className="dw-alert">{tr(`storageErrors.${storage.error}`)} <button disabled={busy || mode === "temporary"} onClick={() => void storage.reload()}>{tr("retry")}</button></p>}
     {page === "box" && <CloudBoxPanel locale={locale} server={server} box={stored} busy={busy} returnTo={returnTo} />}
     {page === "box" ? <section className={`cb-workspace dw-box-main ${draggingScreenshots ? " is-dragging-screenshots" : ""}`} onDragOver={event => {
@@ -483,52 +431,54 @@ export default function DeckWorkspace(props: DeckWorkspaceProps) {
       </>}
       {backupError && <p className="dw-alert" role="alert">{tr("importError")}</p>}
       <p className="cb-input-note">{linked ? <span>{tr("gameSave.vipNote")}</span> : <>{collection("pasteDropHint")}<span>{collection("saveGrowth")}</span></>}</p>
-    </section> : <>
-      <DeckComposer
-        labels={{ goal: composer("goalTitle"), conditions: composer("conditionsTitle"), collection: composer("collectionTitle"),
-          team: composer("teamTitle"), cards: composer("cardsTitle"), questions: composer("questionsTitle") }}
+    </section> : <DeckComposer
+        labels={{ setup: composer("setupTitle"), collection: composer("collectionTitle"), goal: composer("goalTitle"), conditions: composer("conditionsTitle"), results: composer("resultsTitle") }}
         goalGroups={[
           { id: "event", title: event ? tr("goalGroups.event", { name: event.name, end: formatEnd(event.endAt) }) : tr("goalGroups.eventNone"),
             goals: event ? [...EVENT_GOALS.filter(value => !isEventPayoffGoal(value)).map(value => goalCard(value)), rewardsCard()] : [] },
           { id: "everyday", title: tr("goalGroups.everyday"), goals: EVERYDAY_GOALS.map(value => goalCard(value)) },
         ]}
         selectedGoal={isEventPayoffGoal(goal) ? REWARDS_CARD : goal} onGoalChange={selectGoal}
-        collection={<><div className="dc-collection-summary">
-          <div className="dc-collection-stats"><span><strong>{ownedMembers.length}</strong> {tr("member")}</span><span><strong>{ownedSnaps.length}</strong> {tr("snap")}</span>
-            {box && <span className="dc-collection-source" data-source={linked ? "game-save" : "box"}><CollectionIcon name={linked ? "game" : "image"} />{tr(linked ? "gameSave.sourceSave" : "gameSave.sourceBox")}
-              {stored?.save && <small>{linkedSave.state.status === "ready" ? tr("gameSave.uploadedAt", { date: new Date(stored.save.uploadedAt).toLocaleDateString(locale) })
-                : tr(linkedSave.state.status === "loading" ? "gameSave.loadingShort" : "gameSave.unavailableShort")}</small>}</span>}
-            {box && <button type="button" className="dc-storage-label" onClick={openStorage}>{tr(mode)}</button>}</div>
-          <div className="dc-collection-actions">{!linked && <button type="button" className={ownedMembers.length ? undefined : "dc-primary"} disabled={busy} onClick={openSavePicker}><CollectionIcon name="game" />{tr("gameSave.importAction")}</button>}
-            {!linked && <button type="button" disabled={busy} onClick={openScreenshotImport}><CollectionIcon name="image" />{tr("screenshotImport")}</button>}
-            <button type="button" disabled={busy} onClick={() => box ? setManagement(true) : setSetup(true)}>{box ? tr("manage") : composer("manualShort")}</button></div>
-        </div><CloudBoxPanel locale={locale} server={server} box={stored} busy={busy} returnTo={returnTo} /></>}
+        collection={ownedMembers.length > 0 ? <div className="dc-pool">
+          <p className="dc-pool-counts"><span><strong>{ownedMembers.length}</strong>{tr("member")}</span><span><strong>{ownedSnaps.length}</strong>{tr("snap")}</span></p>
+          <p className="dc-pool-source" data-source={linked ? "game-save" : "box"}><CollectionIcon name={linked ? "game" : "image"} /><span>{[tr(linked ? "gameSave.sourceSave" : "gameSave.sourceBox"),
+            ...(stored?.save ? [linkedSave.state.status === "ready" ? tr("gameSave.uploadedAt", { date: new Date(stored.save.uploadedAt).toLocaleDateString(locale) })
+              : tr(linkedSave.state.status === "loading" ? "gameSave.loadingShort" : "gameSave.unavailableShort")] : []), tr(mode)].join(" · ")}</span></p>
+          <Button className="dc-pool-manage" variant="tonal" size="small" disabled={busy} onClick={() => setManagement(true)}>{tr("manage")}</Button>
+        </div> : <div className="dc-pool" data-empty="true">
+          <p className="dc-pool-empty">{linked ? tr(linkedSave.state.status === "loading" ? "gameSave.loading" : "solver.saveNotReady") : tr("solver.emptyBox")}</p>
+          <div className="dc-pool-actions">{linked ? <Button variant="tonal" size="small" disabled={busy} onClick={() => setManagement(true)}>{tr("manage")}</Button> : <>
+            <Button size="small" disabled={busy} onClick={openSavePicker} startIcon={<CollectionIcon name="game" />}>{tr("gameSave.importAction")}</Button>
+            <Button variant="text" size="small" disabled={busy} onClick={openScreenshotImport} startIcon={<CollectionIcon name="image" />}>{tr("screenshotImport")}</Button>
+            <Button variant="text" size="small" disabled={busy} onClick={() => box ? setManagement(true) : setSetup(true)}>{box ? tr("manage") : composer("manualShort")}</Button></>}</div>
+        </div>}
         conditions={<>
-          <DeckObjective locale={locale} input={effectiveInput} capabilities={capabilities} onChange={aggregation => updateGoal({ aggregation })} />
-          {isEventPayoffGoal(goal) ? <label>{tr("venue")}<select aria-label={tr("venue")} value={goalInput.venue} onChange={change => updateGoal({ venue: change.target.value as DeckVenue })}>
+          {isEventPayoffGoal(goal) ? <label className="dc-field">{tr("venue")}<select aria-label={tr("venue")} value={goalInput.venue} onChange={change => updateGoal({ venue: change.target.value as DeckVenue })}>
             {goalVenues(goal).map(value => <option key={value} value={value} disabled={!!capabilities && !computes(capabilities, { goal, venue: value })}>{tr(`venues.${value}`)}</option>)}</select></label> : null}
-          <DeckRewardMix locale={locale} input={effectiveInput} capabilities={capabilities} challengeSongs={challengeSongs}
-            onChange={patch => { updateGoal(patch); if (patch.goal) safeSetLocalStorage(GOAL_STORAGE_KEY, patch.goal); }} />
-          {solverGoalKind(effectiveInput) === "arenaLive" ? <label>{tr("arenaSong")}<select value={goalInput.arenaMusicId ?? ""} onChange={change => updateGoal({ arenaMusicId: change.target.value ? Number(change.target.value) : null })}><option value="">{tr(arenas.length ? "chooseArena" : "noArena")}</option>{arenas.map(row => <option key={row.id} value={row.id}>{songs.find(song => song.id === row.musicId)?.title ?? row.musicId}</option>)}</select></label> : isChallengeInput(effectiveInput) ? <div className="dc-challenge-songs" role="group" aria-label={tr("challengeSong")}>
+          {solverGoalKind(effectiveInput) === "arenaLive" ? <label className="dc-field">{tr("arenaSong")}<select value={goalInput.arenaMusicId ?? ""} onChange={change => updateGoal({ arenaMusicId: change.target.value ? Number(change.target.value) : null })}><option value="">{tr(arenas.length ? "chooseArena" : "noArena")}</option>{arenas.map(row => <option key={row.id} value={row.id}>{songs.find(song => song.id === row.musicId)?.title ?? row.musicId}</option>)}</select></label> : isChallengeInput(effectiveInput) ? <div className="dc-challenge-songs" role="group" aria-label={tr("challengeSong")}>
             {(event?.challengeMusics ?? []).map(row => {
               const music = songs.find(item => item.id === row.musicId);
-              return <button type="button" key={row.id} className="dc-song-button" aria-pressed={goalInput.challengeMusicId === row.id} onClick={() => updateGoal({ challengeMusicId: row.id })}>
+              return <button type="button" key={row.id} className="dc-song-button md3-state" aria-pressed={goalInput.challengeMusicId === row.id} onClick={() => updateGoal({ challengeMusicId: row.id })}>
                 {music ? <img className="dc-song-cover" src={music.jacketUrl} alt="" /> : <span className="dc-song-cover" aria-hidden="true" />}
                 <span className="dc-song-summary"><strong>{music?.title ?? row.musicId}</strong></span></button>;
             })}</div>
-            : (goal !== "power" || goalInput.powerSong) && <button type="button" className="dc-song-button" onClick={() => setSongPicker(true)} aria-haspopup="dialog">
+            : (goal !== "power" || goalInput.powerSong) && <button type="button" className="dc-song-button md3-state" onClick={() => setSongPicker(true)} aria-haspopup="dialog">
               {selectedSong ? <img className="dc-song-cover" src={selectedSong.jacketUrl} alt="" /> : <svg className="dc-song-cover" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M12 23V9l15-3v14M12 9l15-3M12 23c0 2-2 4-4 4s-4-1-4-3 2-4 4-4 4 1 4 3Zm15-3c0 2-2 4-4 4s-4-1-4-3 2-4 4-4 4 1 4 3Z" /></svg>}
               <span className="dc-song-summary"><small>{tr("song")}</small><strong>{selectedSong?.title ?? composer("emptySong")}</strong></span>
+              <svg className="dc-song-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
             </button>}
           {goal !== "power" && <div className="dc-field-pair">
-            <label>{tr("difficulty")}<select aria-label={tr("difficulty")} value={goalInput.difficulty} onChange={change => updateGoal({ difficulty: change.target.value as MusicDifficulty })}>
+            <label className="dc-field">{tr("difficulty")}<select aria-label={tr("difficulty")} value={goalInput.difficulty} onChange={change => updateGoal({ difficulty: change.target.value as MusicDifficulty })}>
               {MUSIC_DIFFICULTIES.filter(value => !selectedSong || selectedSong.difficulties.some(entry => entry.difficulty === value)).map(value => <option key={value} value={value}>{value.toUpperCase()}</option>)}</select></label>
-            {isEventPayoffGoal(goal) && <label>{tr("consumption")}{isChallengeInput(effectiveInput)
+            {isEventPayoffGoal(goal) && <label className="dc-field">{tr("consumption")}{isChallengeInput(effectiveInput)
               ? <select aria-label={tr("consumption")} value={goalInput.challengePoints} onChange={change => updateGoal({ challengePoints: Number(change.target.value) as ChallengePointCost })}>
                 {CHALLENGE_POINT_COSTS.map(value => <option key={value} value={value}>{tr("challengePoints", { n: value })}</option>)}</select>
               : <select aria-label={tr("consumption")} value={goalInput.boosts} onChange={change => updateGoal({ boosts: Number(change.target.value) })}>
                 {Array.from({ length: MAX_BOOST + 1 }, (_, value) => <option key={value} value={value}>{tr("boosts", { n: value })}</option>)}</select>}</label>}
           </div>}
+          <DeckRewardMix locale={locale} input={effectiveInput} capabilities={capabilities} challengeSongs={challengeSongs}
+            onChange={patch => { updateGoal(patch); if (patch.goal) safeSetLocalStorage(GOAL_STORAGE_KEY, patch.goal); }} />
+          <DeckObjective locale={locale} input={effectiveInput} capabilities={capabilities} onChange={aggregation => updateGoal({ aggregation })} />
           <DeckGoalConditions locale={locale} input={effectiveInput} capabilities={capabilities} onChange={updateGoal} />
           {goal === "power" && <div className="dc-checks">
             <label><input type="checkbox" checked={goalInput.powerSong} onChange={change => updateGoal({ powerSong: change.target.checked })} />{tr("powerSong")}</label>
@@ -536,46 +486,33 @@ export default function DeckWorkspace(props: DeckWorkspaceProps) {
           </div>}
           {isNetworkInput(effectiveInput) && <p className="dw-muted">{tr("rankFixed")}</p>}
           {readsAccuracy(effectiveInput) && <details className="dc-play-style"><summary>{composer("advanced")}</summary>
-            <label>{tr("greatRate", { n: effectiveInput.greatPercent })}<input aria-label={tr("greatRate", { n: effectiveInput.greatPercent })} type="range" min={0} max={playsGekisou(effectiveInput) ? 100 - effectiveInput.justPercent : 100}
+            <label>{tr("greatRate", { n: effectiveInput.greatPercent })}<input className="md3-range" style={{ "--md3-range-progress": `${effectiveInput.greatPercent / (playsGekisou(effectiveInput) ? 100 - effectiveInput.justPercent || 1 : 100) * 100}%` } as CSSProperties} aria-label={tr("greatRate", { n: effectiveInput.greatPercent })} type="range" min={0} max={playsGekisou(effectiveInput) ? 100 - effectiveInput.justPercent : 100}
               value={effectiveInput.greatPercent} onChange={change => updateGoal({ greatPercent: Number(change.target.value) })} /></label>
-            {playsGekisou(effectiveInput) && <label>{tr("justRate", { n: effectiveInput.justPercent })}<input aria-label={tr("justRate", { n: effectiveInput.justPercent })} type="range" min={0} max={100 - effectiveInput.greatPercent}
+            {playsGekisou(effectiveInput) && <label>{tr("justRate", { n: effectiveInput.justPercent })}<input className="md3-range" style={{ "--md3-range-progress": `${effectiveInput.justPercent / (100 - effectiveInput.greatPercent || 1) * 100}%` } as CSSProperties} aria-label={tr("justRate", { n: effectiveInput.justPercent })} type="range" min={0} max={100 - effectiveInput.greatPercent}
               value={effectiveInput.justPercent} onChange={change => updateGoal({ justPercent: Number(change.target.value) })} /></label>}
             {capabilities && (!capabilities.accuracy.great || playsGekisou(effectiveInput) && !capabilities.accuracy.just) ? <p className="dw-muted">{tr("accuracyComing")}</p>
               : <p className="dw-muted">{tr(playsGekisou(effectiveInput) ? "accuracyNoteGekisou" : "accuracyNote")}</p>}
             {isEventPayoffGoal(goal) && isNetworkInput(effectiveInput) && <label>{tr("othersAverage")}<input type="number" min={0} inputMode="numeric" placeholder={tr("othersAverageSame")}
               value={goalInput.othersAverageScore ?? ""} onChange={change => updateGoal({ othersAverageScore: change.target.value === "" ? null : Number(change.target.value) })} /></label>}
           </details>}
-          <div className="dc-condition-actions"><button type="button" disabled={!box || busy} onClick={() => openOptions("constraints")}>{composer("searchConstraints")}{required.length + excluded.length > 0 && <span> · {required.length + excluded.length}</span>}</button>
-            <button type="button" disabled={!box || busy} onClick={() => setPlayerSettings(true)}>{composer("playerBonuses")}</button></div>
+          <div className="dc-condition-actions"><Button variant="outlined" size="small" disabled={!box || busy} onClick={openConstraints}>{composer("searchConstraints")}{required.length + excluded.length > 0 && <span className="dc-count">{required.length + excluded.length}</span>}</Button>
+            <Button variant="outlined" size="small" disabled={!box || busy} onClick={() => setPlayerSettings(true)}>{composer("playerBonuses")}</Button></div>
         </>}
-        team={<div ref={teamPanel} className="dc-team-body">
+        run={<>
+          {engineNotice()}
+          {job.status === "running" ? <Button className="dc-run-button" variant="tonal" size="large" fullWidth onClick={solver.stop}>{tr("solver.stop")}</Button>
+            : <Button className="dc-run-button" size="large" fullWidth disabled={busy || !ownedMembers.length || !canRun} onClick={runSolver}>{tr(job.status === "idle" ? "solver.start" : "solver.rerun")}</Button>}
+          {job.status !== "running" && (runBlocker || blocker) && <small className="dc-blocker">{runBlocker || blocker}</small>}
+        </>}
+        results={<div ref={teamPanel} className="dc-team-body">
           {job.status !== "idle" ? <DeckResult locale={locale} job={job} goal={goal} rateBasis={rateBasis} stale={stale} timeLimit={goalInput.timeLimit} box={box} catalog={catalog} linked={linked} busy={busy}
             onStop={solver.stop} onRerun={runSolver} onEditCard={setEditingCardKey} onPlayer={() => setPlayerSettings(true)} onAnswerAll={(keys, name, value) => void answerAll(keys, name, value)} />
-          : sample.length > 0 ? <>
-            <p className="dc-team-caption" data-team-source={preview.source}>{composer(preview.source === "baseline" ? "currentTeam" : "fromCollection")}</p>
-            <div className="dc-stage"><NativeFormationGroup locale={locale} slots={sampleSlots} label={composer("teamTitle")} /></div>
-            <div className="dc-slot-labels">{preview.members.map((card, index) => <div key={index} title={card ? cardTitle(card, catalog) : tr("emptySlot")}>
-              <span className={index === 2 ? "dc-leader" : ""}>{index === 2 ? composer("leaderShort") : index + 1}</span>
-              <strong>{card ? cardTitle(card, catalog) : tr("emptySlot")}</strong></div>)}</div>
-          </> : <div className="dc-empty-team"><div className="dc-empty-slots" aria-hidden="true">{Array.from({ length: 5 }, (_, index) => <span key={index} className={index === 2 ? "is-leader" : ""}>+</span>)}</div>
-            <h3>{composer("emptyTitle")}</h3><p>{composer("emptyDescription")}</p></div>}
+          : <div className="dc-empty-team"><div className="dc-empty-slots" aria-hidden="true">{Array.from({ length: 5 }, (_, index) => <span key={index} className={index === 2 ? "is-leader" : ""} />)}</div>
+            <h3>{composer(ownedMembers.length ? "readyTitle" : "emptyTitle")}</h3><p>{composer(ownedMembers.length ? "readyDescription" : "emptyDescription")}</p></div>}
         </div>}
-        teamActions={box && job.status === "idle" && <button type="button" disabled={busy || !ownedMembers.length} onClick={() => openOptions("team")}>{composer("editTeam")}</button>}
-        notice={engineNotice()}
-        primaryAction={<div className="dc-main-actions">
-          {job.status === "running" ? <button type="button" className="dc-primary" onClick={solver.stop}>{tr("solver.stop")}</button>
-            : <button type="button" className="dc-primary" disabled={busy || !ownedMembers.length || !canRun} onClick={runSolver}>{tr(job.status === "idle" ? "solver.start" : "solver.rerun")}</button>}
-          {job.status !== "running" && (runBlocker || blocker) && <small className="dc-blocker">{runBlocker || blocker}</small>}
-        </div>}
-        cards={box && ownedMembers.length + ownedSnaps.length > 0 && <>
-          <div className="dc-mini-cards">{[...ownedMembers.slice(0, 5), ...ownedSnaps.slice(0, 3)].map(card => <button type="button" className="dc-mini-card" key={card.key} disabled={busy} aria-label={composer("editThisCard", { name: cardTitle(card, catalog) })} onClick={() => setEditingCardKey(card.key)}>
-            <BoxArtwork card={card} catalog={catalog} locale={locale} /><span>{cardTitle(card, catalog)}</span></button>)}</div>
-          <button type="button" className="dc-view-all" onClick={() => setManagement(true)}>{composer("moreCards", { count: box.cards.length })}</button>
-        </>}
-      />
-    </>}
+      />}
     <Modal historyNavigation={false} isOpen={setup} onClose={() => setSetup(false)} title={tr(box ? "storageChoice" : "createBox")} closeLabel={tr("close")}><div className="dw-dialog"><p>{tr("storagePrompt")}</p><div className="dw-storage-options">{(["local", "temporary"] as const).map(value => <button className={choice === value ? "is-selected" : ""} aria-pressed={choice === value} key={value} onClick={() => setChoice(value)}><strong>{tr(value)}</strong><span>{tr(value === "local" ? "localNote" : "temporaryNote")}</span></button>)}</div><p className="dw-muted">{tr("cloud.storageNote")}</p>{storage.error && <p className="dw-alert" role="alert">{tr(`storageErrors.${storage.error}`)}</p>}<button disabled={busy} className="dw-primary" onClick={async () => { if (await storage.start(choice)) { setSetup(false); if (page === "deck") setManagement(true); } }}>{tr(box ? "save" : "continue")}</button></div></Modal>
-    <Modal historyNavigation={false} isOpen={management && box !== null} onClose={() => setManagement(false)} title={tr("boxTitle")} closeLabel={tr("close")} size="xl">{stored && box && <BoxManager key={`${server}:${stored.id}`} locale={locale} box={stored} view={linked ? box : undefined} notice={saveNotice} mode={mode} busy={busy} commit={storage.commit} playerCatalogue={playerCatalogue} onRecognize={openScreenshotImport} onImportSave={openSavePicker} onGuide={openGuide} onStorage={() => { setManagement(false); openStorage(); }} onDelete={() => { setManagement(false); setDeleting(true); }} {...catalog} />}</Modal>
+    <Modal historyNavigation={false} isOpen={management && box !== null} onClose={() => setManagement(false)} title={tr("boxTitle")} closeLabel={tr("close")} size="xl">{stored && box && <CloudBoxPanel locale={locale} server={server} box={stored} busy={busy} returnTo={returnTo} />}{stored && box && <BoxManager key={`${server}:${stored.id}`} locale={locale} box={stored} view={linked ? box : undefined} notice={saveNotice} mode={mode} busy={busy} commit={storage.commit} playerCatalogue={playerCatalogue} onRecognize={openScreenshotImport} onImportSave={openSavePicker} onGuide={openGuide} onStorage={() => { setManagement(false); openStorage(); }} onDelete={() => { setManagement(false); setDeleting(true); }} {...catalog} />}</Modal>
     {box && <BoxCardEditor locale={locale} box={box} cardKey={editingCardKey} busy={busy} commit={storage.commit} onClose={() => setEditingCardKey(null)} readOnly={linked} {...catalog} />}
     <MusicSelectDialog key={`songs:${server}`} locale={locale} songs={songs} open={songPicker} onClose={() => setSongPicker(false)}
       current={selectedSong ? { musicId: selectedSong.id, difficulty: goalInput.difficulty } : null} sortPage="deck-song"
@@ -586,48 +523,15 @@ export default function DeckWorkspace(props: DeckWorkspaceProps) {
     <ScreenshotImport locale={locale} server={server} source={recognition.context?.source} sourceIssue={recognition.issue} box={box} mode={mode} catalog={catalog} isOpen={importing} onClose={() => { setImporting(false); setPendingScreenshots([]); }} onSave={saveScreenshot} pendingFiles={pendingScreenshots} onPendingFilesConsumed={() => setPendingScreenshots([])} />
     <CardBoxGuide key={`guide:${server}`} locale={locale} members={members} snaps={snaps} isOpen={guideOpen} onClose={() => setGuideOpen(false)} onStartImport={openScreenshotImport} />
     <GameSavePicker locale={locale} server={server} isOpen={savePicker} onClose={() => setSavePicker(false)} list={saveList} busy={busy} onLink={pickGameSave} returnTo={returnTo} onScreenshot={openScreenshotImport} />
-    <Modal historyNavigation={false} isOpen={options} onClose={closeOptions} title={composer(optionsTab === "team" ? "teamEditorTitle" : "constraintsTitle")} closeLabel={tr("close")} size="lg"><div className="dw-dialog dc-options">
-      <div className="dc-option-tabs" role="group" aria-label={composer("searchConstraints")}><button type="button" aria-pressed={optionsTab === "team"} onClick={() => setOptionsTab("team")}>{composer("editTeam")}</button><button type="button" aria-pressed={optionsTab === "constraints"} onClick={() => setOptionsTab("constraints")}>{composer("searchConstraints")}</button></div>
-      {optionsTab === "constraints" ? <>
+    <Modal historyNavigation={false} isOpen={constraintsOpen} onClose={() => setConstraintsOpen(false)} title={composer("constraintsTitle")} closeLabel={tr("close")} size="lg"><div className="dw-dialog dc-options">
         <p className="dw-muted">{composer("constraintDescription")}</p>
         <input className="dc-option-search" aria-label={tr("searchCards")} placeholder={tr("searchCards")} value={constraintQuery} onChange={event => setConstraintQuery(event.target.value)} />
         <div className="dc-option-tabs" role="group" aria-label={composer("constraintsTitle")}>{(["all", "required", "excluded"] as const).map(value => <button type="button" key={value} aria-pressed={constraintFilter === value} onClick={() => setConstraintFilter(value)}>{composer(value === "all" ? "constraintAll" : value === "required" ? "constraintRequired" : "constraintExcluded")}</button>)}</div>
-        {(box?.cards ?? []).filter(card => (constraintFilter === "all" || (constraintFilter === "required" ? required : excluded).includes(card.key))
-          && `${cardTitle(card, catalog)} ${cardSubtitle(card, catalog)} ${card.identity.value ?? ""}`.toLowerCase().includes(constraintQuery.toLowerCase())).map(card => <div key={card.key} className="dc-constraint-card"><BoxArtwork card={card} catalog={catalog} locale={locale} /><div className="dc-constraint-info"><strong>{cardTitle(card, catalog)}</strong><small>{cardSubtitle(card, catalog)}</small></div>
-            <div className="dc-constraint-actions">{card.kind === "member" && <label><input type="checkbox" checked={required.includes(card.key)} disabled={excluded.includes(card.key) || required.filter(key => box?.cards.find(other => other.key === key)?.kind === card.kind).length >= 5 && !required.includes(card.key)} onChange={() => toggle(required, card.key, setRequired)} />{tr("required")}</label>}<label><input type="checkbox" checked={excluded.includes(card.key)} disabled={required.includes(card.key)} onChange={() => toggle(excluded, card.key, setExcluded)} />{tr("excluded")}</label></div></div>)}
-      </> : box && <><p className="dw-muted">{composer("savedTeamDescription")}</p>
-        {baselineChanged && <p role="alert" className="dw-alert">{composer("teamChanged")} <button type="button" onClick={() => openOptions("team")}>{composer("reloadTeam")}</button></p>}
-        {baselineSaveError && <p role="alert" className="dw-alert">{composer("teamSaveFailed")}</p>}
-        {Array.from({ length: 5 }, (_, slot) => <div className="dw-baseline-row" key={slot} data-baseline-slot={slot}>
-        <div className="dc-slot-control"><span className={slot === 2 ? "dw-tag dw-leader" : ""}>{tr(slot === 2 ? "leader" : "slot", { n: slot + 1 })}</span>
-          <div><button type="button" disabled={busy || baselineChanged || slot === 0} aria-label={composer("moveSlotUp", { n: slot + 1 })} onClick={() => moveBaseline(slot, -1)}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="m6 14 6-6 6 6" /></svg></button>
-            <button type="button" disabled={busy || baselineChanged || slot === 4} aria-label={composer("moveSlotDown", { n: slot + 1 })} onClick={() => moveBaseline(slot, 1)}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="m6 10 6 6 6-6" /></svg></button></div></div>
-        {(["member", "snap"] as const).map(kind => {
-          const id = kind === "member" ? baselineMembers[slot] : baselineSnaps[slot];
-          const currentCard = (kind === "member" ? ownedMembers : ownedSnaps).find(card => card.identity.value === id);
-          return <button type="button" className="dw-baseline-card" data-kind={kind} key={kind} disabled={busy} aria-haspopup="dialog"
-            aria-label={`${tr("baseline")} · ${tr(kind)} ${slot + 1}`} onClick={() => setBaselineTarget({ slot, kind })}>
-            {currentCard ? <BoxArtwork card={currentCard} catalog={catalog} locale={locale} /> : <span className="dw-baseline-empty" aria-hidden="true">+</span>}
-            <span><small>{tr(kind)}</small><strong>{currentCard ? cardTitle(currentCard, catalog) : tr(kind === "member" ? "chooseCard" : "emptySlot")}</strong></span>
-          </button>;
-        })}
-      </div>)}<button type="button" className="dw-primary" disabled={busy || baselineChanged || !baselineValid} onClick={() => void saveBaseline()}>{tr(baselineSaved ? "baselineSaved" : "saveBaseline")}</button></>}
-      <button type="button" onClick={closeOptions}>{tr("done")}</button></div></Modal>
-    <Modal historyNavigation={false} isOpen={options && baselineTarget !== null} onClose={() => setBaselineTarget(null)}
-      title={`${tr("baseline")} · ${tr(baselineTarget?.kind ?? "member")} · ${tr(baselineTarget?.slot === 2 ? "leader" : "slot", { n: (baselineTarget?.slot ?? 0) + 1 })}`} closeLabel={tr("close")} size="xl">
-      {baselineTarget && <CardIdentitySelection key={`${baselineTarget.kind}:${baselineTarget.slot}`} locale={locale} kind={baselineTarget.kind} catalog={baselineCatalog}
-        value={baselineTarget.kind === "member" ? baselineMembers[baselineTarget.slot] || null : baselineSnaps[baselineTarget.slot] ?? null}
-        allowUnknown={baselineTarget.kind === "snap"} clearLabel={tr("emptySlot")} disabledLabel={tr("alreadyInTeam")}
-        disabledIds={baselineTarget.kind === "member"
-          ? baselineCatalog.members.filter(card => baselineMembers.some((id, slot) => slot !== baselineTarget.slot
-            && baselineCatalog.members.find(member => String(member.id) === id)?.characterId === card.characterId)).map(card => String(card.id))
-          : baselineSnaps.flatMap((id, slot) => slot !== baselineTarget.slot && id ? [id] : [])}
-        onChange={id => {
-          if (baselineTarget.kind === "member") setBaselineMembers(previous => previous.map((value, slot) => slot === baselineTarget.slot ? id ?? "" : value));
-          else setBaselineSnaps(previous => previous.map((value, slot) => slot === baselineTarget.slot ? id : value));
-          setBaselineSaved(false); setBaselineTarget(null);
-        }} />}
-    </Modal>
+        <div className="dc-constraint-list">{(box?.cards ?? []).filter(card => (constraintFilter === "all" || (constraintFilter === "required" ? required : excluded).includes(card.key))
+          && `${cardTitle(card, catalog)} ${cardSubtitle(card, catalog)} ${card.identity.value ?? ""}`.toLowerCase().includes(constraintQuery.toLowerCase())).map(card => <div key={card.key} className="dc-constraint-card"><BoxArtwork card={card} catalog={catalog} locale={locale} square /><div className="dc-constraint-info"><strong>{cardTitle(card, catalog)}</strong><small>{cardSubtitle(card, catalog)}</small></div>
+            <div className="dc-constraint-actions">{card.kind === "member" && <label><input type="checkbox" checked={required.includes(card.key)} disabled={excluded.includes(card.key) || required.filter(key => box?.cards.find(other => other.key === key)?.kind === card.kind).length >= 5 && !required.includes(card.key)} onChange={() => toggle(required, card.key, setRequired)} />{tr("required")}</label>}<label><input type="checkbox" checked={excluded.includes(card.key)} disabled={required.includes(card.key)} onChange={() => toggle(excluded, card.key, setExcluded)} />{tr("excluded")}</label></div></div>)}</div>
+      <Button variant="tonal" onClick={() => setConstraintsOpen(false)}>{tr("done")}</Button></div></Modal>
     <Modal historyNavigation={false} isOpen={deleting} onClose={() => setDeleting(false)} title={tr("deleteBox")} closeLabel={tr("close")}><div className="dw-dialog"><p>{tr("deleteNote")}</p><button className="dw-danger" disabled={busy} onClick={async () => { if (await storage.remove()) setDeleting(false); }}>{tr("confirmDelete")}</button></div></Modal>
   </div></ContentServerProvider>;
 }
+export default withMd3(DeckWorkspace);

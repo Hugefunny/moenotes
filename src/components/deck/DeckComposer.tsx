@@ -23,69 +23,54 @@ export interface DeckComposerProps {
   goalGroups: readonly DeckComposerGoalGroup[];
   selectedGoal: string;
   onGoalChange: (id: string) => void;
-  labels: { goal: string; conditions: string; collection: string; team: string; cards: string; questions: string };
+  labels: { setup: string; collection: string; goal: string; conditions: string; results: string };
   collection: ReactNode;
   conditions: ReactNode;
-  team: ReactNode;
-  primaryAction: ReactNode;
-  teamActions?: ReactNode;
-  questions?: ReactNode;
-  cards?: ReactNode;
-  notice?: ReactNode;
+  /** The run button, its blockers and engine notices; it stays at the foot of the setup. */
+  run: ReactNode;
+  results: ReactNode;
 }
 
-/** A persistent workbench: goal and conditions on top, then the run action, then the team or results. The caller owns every fact, constraint, modal, and action. */
-export default function DeckComposer({ goalGroups, selectedGoal, onGoalChange, labels, collection, conditions, team,
-  primaryAction, teamActions, questions, cards, notice }: DeckComposerProps) {
+/**
+ * The deck workbench: the setup (card pool, goal, conditions, run) beside the results. Wide containers keep the setup in
+ * view while the results scroll; narrow ones stack them with the run action pinned to the bottom of the screen. The
+ * caller owns every fact, constraint, modal and action.
+ */
+export default function DeckComposer({ goalGroups, selectedGoal, onGoalChange, labels, collection, conditions, run, results }: DeckComposerProps) {
   const id = useId();
-
+  const selected = goalGroups.flatMap(group => group.goals).find(goal => goal.id === selectedGoal);
   return <div className="dc-composer">
-    <section className="dc-collection" aria-labelledby={`${id}-collection`}>
-      <h2 id={`${id}-collection`}>{labels.collection}</h2>
-      <div className="dc-collection-content">{collection}</div>
-    </section>
-
-    <div className="dc-controls">
-      <section className="dc-panel dc-goal-section" aria-labelledby={`${id}-goal`}>
-        <div className="dc-section-heading"><h2 id={`${id}-goal`}>{labels.goal}</h2></div>
-        {goalGroups.map(group => <div className="dc-goal-group" key={group.id} role="group" aria-labelledby={`${id}-goal-${group.id}`}>
-          <h3 className="dc-goal-group-title" id={`${id}-goal-${group.id}`}>{group.title}</h3>
-          {group.goals.length ? <div className="dc-goals">{group.goals.map(goal => <button className="dc-goal" type="button" key={goal.id} aria-pressed={selectedGoal === goal.id}
-            disabled={goal.disabled} onClick={() => onGoalChange(goal.id)} aria-describedby={`${id}-goal-${goal.id}-note`}>
-            {goal.icon && <span className="dc-goal-icon" aria-hidden="true">{goal.icon}</span>}
-            <span className="dc-goal-text"><span className="dc-goal-title">{goal.title}{goal.badge && <span className="dc-goal-badge">{goal.badge}</span>}</span>
-              <span className="dc-goal-note" id={`${id}-goal-${goal.id}-note`}>{goal.description}</span></span>
-            <span className="dc-goal-check" aria-hidden="true"><svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="m3.5 8 3 3 6-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
-          </button>)}</div> : group.empty && <p className="dc-goal-empty">{group.empty}</p>}
-        </div>)}
-      </section>
-
-      <section className="dc-panel dc-settings" aria-labelledby={`${id}-conditions`}>
-        <div className="dc-section-heading"><h2 id={`${id}-conditions`}>{labels.conditions}</h2></div>
-        <div className="dc-conditions">{conditions}</div>
+    <div className="dc-bench">
+      <aside className="dc-setup" aria-label={labels.setup}>
+        <div className="dc-setup-body">
+          <section className="dc-block dc-collection" aria-labelledby={`${id}-collection`}>
+            <h2 id={`${id}-collection`}>{labels.collection}</h2>
+            {collection}
+          </section>
+          <section className="dc-block dc-goal-section" aria-labelledby={`${id}-goal`}>
+            <h2 id={`${id}-goal`}>{labels.goal}</h2>
+            {goalGroups.map(group => <div className="dc-goal-group" key={group.id} role="group" aria-labelledby={`${id}-goal-${group.id}`}>
+              <h3 className="dc-goal-group-title" id={`${id}-goal-${group.id}`}>{group.title}</h3>
+              {group.goals.length ? <div className="dc-goals">{group.goals.map(goal => <button className="dc-goal md3-state" type="button" key={goal.id} aria-pressed={selectedGoal === goal.id}
+                disabled={goal.disabled} onClick={() => onGoalChange(goal.id)} title={goal.description}>
+                {goal.icon && <span className="dc-goal-icon" aria-hidden="true">{goal.icon}</span>}
+                <span className="dc-goal-title">{goal.title}</span>
+                {goal.badge && <span className="dc-goal-badge">{goal.badge}</span>}
+              </button>)}</div> : group.empty && <p className="dc-goal-empty">{group.empty}</p>}
+            </div>)}
+            {selected && <p className="dc-goal-description" aria-live="polite">{selected.description}</p>}
+          </section>
+          <section className="dc-block dc-settings" aria-labelledby={`${id}-conditions`}>
+            <h2 id={`${id}-conditions`}>{labels.conditions}</h2>
+            <div className="dc-conditions">{conditions}</div>
+          </section>
+        </div>
+        <div className="dc-run">{run}</div>
+      </aside>
+      <section className="dc-results dc-team" aria-labelledby={`${id}-results`}>
+        <h2 id={`${id}-results`} className="dc-results-title">{labels.results}</h2>
+        {results}
       </section>
     </div>
-
-    <div className="dc-panel dc-run">
-      {notice && <div className="dc-notice" role="status">{notice}</div>}
-      <div className="dc-primary-action">{primaryAction}</div>
-    </div>
-
-    <section className="dc-panel dc-team" aria-labelledby={`${id}-team`}>
-      <div className="dc-section-heading"><h2 id={`${id}-team`}>{labels.team}</h2>
-        {teamActions && <div className="dc-team-actions">{teamActions}</div>}
-      </div>
-      <div className="dc-team-content">{team}</div>
-    </section>
-
-    {questions && <section className="dc-panel dc-questions" aria-labelledby={`${id}-questions`}>
-      <div className="dc-section-heading"><h2 id={`${id}-questions`}>{labels.questions}</h2></div>
-      <div className="dc-question-content">{questions}</div>
-    </section>}
-
-    {cards && <section className="dc-panel dc-card-pool" aria-labelledby={`${id}-cards`}>
-      <div className="dc-section-heading"><h2 id={`${id}-cards`}>{labels.cards}</h2></div>
-      <div className="dc-card-content">{cards}</div>
-    </section>}
   </div>;
 }

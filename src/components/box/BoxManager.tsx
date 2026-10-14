@@ -5,7 +5,9 @@ import { answerField, createCard, mergeBoxBackup, parseBox, CARD_FIELDS, type Bo
 import type { CardViewModel } from "@/lib/cards/data";
 import type { SupportCardViewModel } from "@/lib/support-cards/data";
 import Modal from "@/components/shared/Modal";
-import { MemberSquareArtwork } from "@/components/shared/CardSquareArtwork";
+import { MemberSquareArtwork, SupportSquareArtwork } from "@/components/shared/CardSquareArtwork";
+import { safeGetLocalStorage, safeSetLocalStorage } from "@/lib/storage/safe-storage";
+import CardStats, { STAT_FIELDS } from "./CardStats";
 import SupportCardArtwork from "@/components/support-cards/SupportCardArtwork";
 import PlayerStateManager from "./PlayerStateManager";
 import type { PlayerFieldCatalogue } from "@/lib/box/player-catalog";
@@ -37,19 +39,42 @@ export function cardTitle(card: BoxCard, catalog: BoxCatalog): string {
   return card.kind === "member" ? catalog.members.find(item => String(item.id) === id)?.characterName ?? id ?? "?"
     : catalog.snaps.find(item => String(item.id) === id)?.name ?? id ?? "?";
 }
+/** The card's own name (its title), without the character it shows. */
+export function cardName(card: BoxCard, catalog: BoxCatalog): string {
+  const id = card.identity.value;
+  return (card.kind === "member" ? catalog.members.find(item => String(item.id) === id) : catalog.snaps.find(item => String(item.id) === id))?.title ?? id ?? "?";
+}
 export function cardSubtitle(card: BoxCard, catalog: BoxCatalog): string {
   return card.kind === "member" ? catalog.members.find(item => String(item.id) === card.identity.value)?.title ?? ""
-    : catalog.snaps.find(item => String(item.id) === card.identity.value)?.characters.map(character => character.name).join(" · ") ?? "";
+    : catalog.snaps.find(item => String(item.id) === card.identity.value)?.title ?? "";
 }
 export function cardRarityLabel(card: BoxCard, catalog: BoxCatalog): string | null {
   const row = (card.kind === "member" ? catalog.members : catalog.snaps).find(item => String(item.id) === card.identity.value);
   if (!row) return null;
   return ({ 2: "R", 3: "SR", 4: "SSR", 10: "EX", 20: "BD" } as const)[row.rarity];
 }
-export function BoxArtwork({ card, catalog, locale }: { card: BoxCard; catalog: BoxCatalog; locale: AppLocale }) {
+/**
+ * A Box card's artwork. `square` draws every kind as a plain 1:1 icon (image and frame, no level text), for grids and lists
+ * that show the values beside the art; otherwise members carry their level and rank and Snaps keep their wide art.
+ */
+export function BoxArtwork({ card, catalog, locale, square = false }: { card: BoxCard; catalog: BoxCatalog; locale: AppLocale; square?: boolean }) {
   const member = card.kind === "member" ? catalog.members.find(item => String(item.id) === card.identity.value) : undefined;
   const snap = card.kind === "snap" ? catalog.snaps.find(item => String(item.id) === card.identity.value) : undefined;
+  if (square) return member ? <MemberSquareArtwork card={member} locale={locale} className="dw-card-art" native={false} />
+    : snap ? <SupportSquareArtwork card={snap} locale={locale} className="dw-card-art" native={false} /> : <div className="dw-card-art dw-card-unknown">?</div>;
   return member ? <MemberSquareArtwork card={member} locale={locale} className="dw-card-art" level={card.fields.level.value ?? undefined} rank={card.fields.rank.value ?? undefined} /> : snap ? <SupportCardArtwork assetId={snap.assetId} characterIds={snap.characterIds} rarity={snap.rarity} cardType={snap.cardType} alt={snap.name} attributeLabel={t(locale, `cards.attributes.${snap.cardType}`)} fallbackLabel={snap.name} className="dw-card-art dw-snap-art" /> : <div className="dw-card-art dw-card-unknown">?</div>;
+}
+/** How the Box lists its cards. */
+type BoxSort = "box" | "rarity" | "level";
+type BoxView = "grid" | "list";
+const VIEW_STORAGE_KEY = "moenotes.box.view";
+const SORTS: readonly BoxSort[] = ["box", "rarity", "level"];
+function sortCards(cards: readonly BoxCard[], sort: BoxSort, catalog: BoxCatalog): BoxCard[] {
+  if (sort === "box") return [...cards];
+  const rarity = (card: BoxCard) => (card.kind === "member" ? catalog.members : catalog.snaps).find(item => String(item.id) === card.identity.value)?.rarity ?? 0;
+  const level = (card: BoxCard) => card.fields.level.value ?? -1;
+  const keys = sort === "rarity" ? [rarity, level] : [level, rarity];
+  return [...cards].sort((a, b) => keys[0]!(b) - keys[0]!(a) || keys[1]!(b) - keys[1]!(a));
 }
 export function BoxCardEditor({ locale, box, cardKey, busy, commit, onClose, members, snaps, readOnly = false }: BoxCardEditorProps) {
   const tr = (key: string, values?: Record<string, string | number>) => t(locale, `deckWorkspace.${key}`, values);
@@ -136,6 +161,10 @@ export default function BoxManager({ locale, box, mode, busy, commit, members, s
   useEffect(() => { if (view && tab === "review") setTab("member"); }, [view, tab]);
   const tabs: readonly (CardKind | "review" | "player")[] = view ? ["member", "snap", "player"] : ["member", "snap", "review", "player"];
   const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<BoxSort>("box");
+  const [boxView, setBoxView] = useState<BoxView>("grid");
+  useEffect(() => { if (safeGetLocalStorage(VIEW_STORAGE_KEY) === "list") setBoxView("list"); }, []);
+  function changeView(next: BoxView) { setBoxView(next); safeSetLocalStorage(VIEW_STORAGE_KEY, next); }
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [kind, setKind] = useState<CardKind>("member");
@@ -144,7 +173,10 @@ export default function BoxManager({ locale, box, mode, busy, commit, members, s
   const file = useRef<HTMLInputElement>(null);
   const catalog = { members, snaps };
   const review = (card: BoxCard) => card.identity.needsReview || card.identity.value === null || CARD_FIELDS.some(name => card.fields[name].needsReview);
-  const visible = shown.cards.filter(card => (tab === "review" ? review(card) : card.kind === tab) && `${cardTitle(card, catalog)} ${cardSubtitle(card, catalog)} ${card.identity.value ?? ""}`.toLowerCase().includes(query.toLowerCase()));
+  const visible = sortCards(shown.cards.filter(card => (tab === "review" ? review(card) : card.kind === tab) && `${cardTitle(card, catalog)} ${cardSubtitle(card, catalog)} ${card.identity.value ?? ""}`.toLowerCase().includes(query.toLowerCase())), sort, catalog);
+  // A list shows one kind's columns; the review queue mixes kinds, so it lists the member columns.
+  const listFields = STAT_FIELDS[tab === "snap" ? "snap" : "member"];
+  const openCard = (key: string) => { setEditingKey(key); setSaveError(false); };
   function exportBox() {
     const url = URL.createObjectURL(new Blob([JSON.stringify(box, null, 2)], { type: "application/json" }));
     const anchor = document.createElement("a"); anchor.href = url; anchor.download = `moenotes-box-${box.server}.json`; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
@@ -189,16 +221,39 @@ export default function BoxManager({ locale, box, mode, busy, commit, members, s
         event.preventDefault(); setTab(tabs[next]!);
         event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>("[role=tab]")[next]?.focus();
       }}>{tr(value === "player" ? "playerTitle" : value)}{value !== "player" && <span>{shown.cards.filter(card => value === "review" ? review(card) : card.kind === value).length}</span>}</button>)}
-    </div>{tab !== "player" && <input className="cb-card-search" type="search" name="card-search" autoComplete="off" aria-label={tr("searchCards")} placeholder={tr("searchCards")} value={query} onChange={event => setQuery(event.target.value)} />}</div>
+    </div>{tab !== "player" && <div className="cb-list-tools">
+      <input className="cb-card-search" type="search" name="card-search" autoComplete="off" aria-label={tr("searchCards")} placeholder={tr("searchCards")} value={query} onChange={event => setQuery(event.target.value)} />
+      <select className="cb-sort" aria-label={collection("sort")} value={sort} onChange={event => setSort(event.target.value as BoxSort)}>
+        {SORTS.map(value => <option key={value} value={value}>{collection(`sorts.${value}`)}</option>)}</select>
+      <div className="md3-segmented cb-view" role="group" aria-label={collection("view")}>{(["grid", "list"] as const).map(value => <button key={value} type="button" className="md3-segment" aria-pressed={boxView === value}
+        aria-label={collection(`views.${value}`)} title={collection(`views.${value}`)} onClick={() => changeView(value)}><ViewIcon view={value} /></button>)}</div>
+    </div>}</div>
     {invalid && <p role="alert" className="dw-alert">{tr("importError")}</p>}
     {saveError && <p role="alert" className="dw-alert">{tr("saveError")}</p>}
     <div className="cb-collection-content" role="tabpanel" id={`${tabId}-panel`} aria-labelledby={`${tabId}-${tab}`}>
     {tab === "player" ? <PlayerStateManager locale={locale} box={box} view={view} catalogue={playerCatalogue ?? null} busy={busy} commit={commit} /> : <>
-    <div className="dw-card-grid">{visible.map(card => <button className="dw-box-card" key={card.key} disabled={busy} onClick={() => { setEditingKey(card.key); setSaveError(false); }}>
-      <BoxArtwork card={card} catalog={catalog} locale={locale} /><strong>{cardTitle(card, catalog)}</strong><span className="dw-card-subtitle">{cardSubtitle(card, catalog)}</span>
-      <span className="cb-card-rarity" aria-label={`${t(locale, "cards.rarity")} ${cardRarityLabel(card, catalog) ?? tr("review")}`}>{cardRarityLabel(card, catalog) ?? tr("review")}</span>
-      <dl className="cb-card-facts">{(["level", "rank", ...(card.kind === "member" ? ["awake" as const] : [])] as const).map(name => <div key={name}><dt>{name === "level" ? tr("collection.cultivationLevel") : tr(name)}</dt><dd aria-label={card.fields[name].value === null ? tr("unknown") : undefined}>{card.fields[name].value ?? "—"}</dd></div>)}</dl>{review(card) && <span className="dw-tag dw-warning">{tr("review")}</span>}
-    </button>)}</div>
+    {visible.length > 0 && (boxView === "grid" ? <ul className="cb-grid" data-kind={tab === "snap" ? "snap" : "member"}>{visible.map(card => <li key={card.key} className="cb-tile md3-state" data-review={review(card) || undefined}>
+      <button type="button" className="cb-tile-hit" disabled={busy} aria-label={`${cardTitle(card, catalog)} ${cardSubtitle(card, catalog)}`.trim()} onClick={() => openCard(card.key)} />
+      <BoxArtwork card={card} catalog={catalog} locale={locale} square />
+      <div className="cb-tile-copy"><strong>{cardTitle(card, catalog)}</strong><span>{cardSubtitle(card, catalog)}</span></div>
+      <CardStats locale={locale} card={card} />
+      {review(card) && <span className="cb-tile-review">{tr("review")}</span>}
+    </li>)}</ul>
+    : <div className="cb-table-scroll"><table className="cb-table">
+      <thead><tr><th scope="col">{collection("columns.card")}</th><th scope="col">{t(locale, "cards.rarity")}</th>
+        {listFields.map(name => <th scope="col" key={name} title={name === "level" ? collection("cultivationLevel") : tr(name)}>{tr(`statShort.${name}`)}</th>)}</tr></thead>
+      <tbody>{visible.map(card => <tr key={card.key} data-review={review(card) || undefined}>
+        <th scope="row"><button type="button" className="cb-row-card" disabled={busy} onClick={() => openCard(card.key)}>
+          <BoxArtwork card={card} catalog={catalog} locale={locale} square />
+          <span><strong>{cardTitle(card, catalog)}</strong><small>{cardSubtitle(card, catalog)}</small></span>
+          {review(card) && <span className="cb-tile-review">{tr("review")}</span>}</button></th>
+        <td>{cardRarityLabel(card, catalog) ?? "—"}</td>
+        {listFields.map(name => {
+          const value = STAT_FIELDS[card.kind].includes(name) ? card.fields[name].value : undefined;
+          return <td key={name} data-max={name !== "level" && value === 5 ? "true" : undefined}>{value === undefined ? "" : value ?? "—"}</td>;
+        })}
+      </tr>)}</tbody>
+    </table></div>)}
     {!visible.length && <div className="dw-empty"><strong>{collection(query ? "noMatches" : tab === "review" ? "reviewComplete" : "emptyCards")}</strong><p>{query ? collection("searchHint") : view ? tr("gameSave.emptyCardsNote") : collection(tab === "review" ? "reviewCompleteNote" : "emptyCardsNote")}</p>{query && <button type="button" onClick={() => setQuery("")}>{collection("clearSearch")}</button>}</div>}
     {view ? <p className="cb-coverage cb-save-coverage"><CollectionIcon name="check" />{tr("gameSave.coverageNote")}</p> : <div className="dw-coverage cb-coverage">{(["member", "snap"] as const).map(value => <label key={value}><input type="checkbox" disabled={busy} checked={box.coverage[value].complete} onChange={event => void commit({ ...box, coverage: { ...box.coverage, [value]: { complete: event.target.checked, declaredAt: Date.now() } } })} />{tr(value === "member" ? "allMembers" : "allSnaps")}</label>)}<p>{tr("unknownPreserved")}</p></div>}
     </>}
@@ -211,4 +266,8 @@ export default function BoxManager({ locale, box, mode, busy, commit, members, s
     </Modal>
     <BoxCardEditor locale={locale} box={shown} cardKey={editingKey} busy={busy} commit={commit} onClose={() => setEditingKey(null)} readOnly={!!view} {...catalog} />
   </section>;
+}
+function ViewIcon({ view }: { view: BoxView }) {
+  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d={view === "grid" ? "M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" : "M4 6h16M4 12h16M4 18h16"} /></svg>;
 }
