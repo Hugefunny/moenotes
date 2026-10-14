@@ -21,8 +21,10 @@ function useNativeUi(): boolean {
 }
 
 /** A member card as the game's 1:1 square icon (frame, attribute and rarity painted by the game where available). */
-export function MemberSquareArtwork({ locale, card, className = "", level, rank }: { locale: AppLocale; card: CardViewModel; className?: string; level?: number | undefined; rank?: number | undefined }) {
-  return useNativeUi()
+export function MemberSquareArtwork({ locale, card, className = "", level, rank, native = true }: { locale: AppLocale; card: CardViewModel; className?: string; level?: number | undefined; rank?: number | undefined;
+  /** False draws the square image and frame without the game's prefab, which reserves room for level text around the card. */
+  native?: boolean }) {
+  return useNativeUi() && native
     ? <NativeMemberArtwork locale={locale} card={card} className={className} level={level} rank={rank} />
     : <SquareImage
       sources={[memberSquareUrl(card, locale), getCardThumbnailUrl(card.assetId), getCharacterFaceIconUrl(card.characterId)]}
@@ -31,9 +33,9 @@ export function MemberSquareArtwork({ locale, card, className = "", level, rank 
 }
 
 /** A support card (Snap) as the game's 1:1 square icon; the wide Snap art is cropped by the square, not stretched. */
-export function SupportSquareArtwork({ locale, card, className = "", level, rank }: { locale: AppLocale; card: SupportCardViewModel; className?: string; level?: number | undefined; rank?: number | undefined }) {
+export function SupportSquareArtwork({ locale, card, className = "", level, rank, native = true }: { locale: AppLocale; card: SupportCardViewModel; className?: string; level?: number | undefined; rank?: number | undefined; native?: boolean }) {
   const face = card.characterIds[0];
-  return useNativeUi() && card.rarity !== 10
+  return useNativeUi() && native && card.rarity !== 10
     ? <NativeSupportArtwork card={card} className={className} level={level} rank={rank} />
     : <SquareImage
       sources={[getSupportCardThumbnailUrl(card.assetId), ...(face ? [getCharacterFaceIconUrl(face)] : [])]}
