@@ -28,7 +28,7 @@ Pure tests cover default None, URL restoration, slot pairing, search/filter/leve
 
 [Browser proof](snap-ranking-browser-proof.json) records 85-chart real UI runs, five slots, URL restoration, mobile overflow, and the production-built Worker matching two independently captured same-input WASM cases. The proof distinguishes the UI seed/member Gekisou settings from those two reference cases. It does not claim native-game certification from a WASM-to-WASM comparison.
 
-The `ournotes-player@0.1.6` Bun patch exposes the published player input-plan helper and adds the reviewed UI projection/Sprite restoration changes. The input-plan implementation is unchanged. Use Bun 1.4.2 to reproduce the patched installation and tests.
+The pinned `ournotes-player` version carries the player input-plan helper this page measures with, together with the reviewed UI projection and Sprite restoration. The input-plan implementation is unchanged.
 
 The feature and data-update PRs integrate into `dev`. Production data publishing and native whole-live certification remain separate steps.
 

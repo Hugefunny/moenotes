@@ -45,6 +45,6 @@ The current observed library is TW client 1.0.1/build 25. Its legacy index lacks
 Reproducible upstream components:
 
 - nnnotes [Sprite geometry producer Draft #16](https://github.com/MetaSekaiLab/nnnotes/pull/16), using `Exporter.sprite_render_data`, source catalog/bundle hashes and string-encoded 64-bit path IDs.
-- ournotes-player [projection and Sprite restoration Draft #16](https://github.com/empty-sekai/ournotes-player/pull/16), applied as a small Bun patch over the published 0.1.6 UI module.
+- ournotes-player [projection and Sprite restoration Draft #16](https://github.com/empty-sekai/ournotes-player/pull/16), in the published UI module.
 
 The producer accepts a frozen catalog and explicit keys: `nnnotes --config private.toml --catalog saved-catalog.bin sprite-geometries --keys selected-keys.json -o private-ui/sprite-geometries.json`. Keep observations of public bitmaps distinct from original Sprite metadata; matching labels or dimensions alone does not prove identical native pixels.
