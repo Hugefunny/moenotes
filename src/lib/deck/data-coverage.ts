@@ -1,14 +1,15 @@
-import { challengeRateInput, isChallengeInput, playsGekisou, solverGoalKind, usesChallengeRate, usesEventData, usesEventItemRewards, type DeckArenaMusic, type DeckEvent, type DeckGoalInput } from "./goals";
+import { challengeRateInput, isChallengeInput, playsGekisou, solverGoalKind, usesChallengeRate, usesEventData, usesEventItemRewards, type DeckArenaMusic, type DeckEvent, type DeckGoalInput, type DeckSolverCapabilities } from "./goals";
 import type { DeckDataCatalog } from "./worker-protocol";
 
-export type DeckDataGap = "catalog" | "event" | "eventItemRewards" | "song" | "luck" | "missions" | null;
+export type DeckDataGap = "catalog" | "event" | "eventItemRewards" | "song" | "luck" | "luckGreat" | "missions" | null;
 
 /**
  * Check the selected scene's coverage and supported missions in the verified Worker data. A goal input that rates
- * challenge points by a challenge live needs that live covered as well.
+ * challenge points by a challenge live needs that live covered as well. A Gekisou live with a LUCK mission needs an
+ * engine that computes LUCK missions, and Great judgements there need its support for judgement conversions.
  */
 export function deckDataGap(input: DeckGoalInput, event: DeckEvent | null, catalog: DeckDataCatalog | null,
-  arenas: readonly DeckArenaMusic[] = []): DeckDataGap {
+  arenas: readonly DeckArenaMusic[] = [], capabilities: Pick<DeckSolverCapabilities, "luckMissions" | "luckGreatConversions"> | null = null): DeckDataGap {
   if (!catalog) return "catalog";
   if (event && usesEventData(input) && !catalog.eventIds.includes(event.id)) return "event";
   if (usesEventItemRewards(input) && event) {
@@ -16,7 +17,7 @@ export function deckDataGap(input: DeckGoalInput, event: DeckEvent | null, catal
     if (!rewards || !(isChallengeInput(input) ? rewards.challenge : rewards.normal)) return "eventItemRewards";
   }
   if (usesChallengeRate(input)) {
-    const rate = deckDataGap(challengeRateInput(input), event, catalog, arenas);
+    const rate = deckDataGap(challengeRateInput(input), event, catalog, arenas, capabilities);
     if (rate) return rate;
   }
   const kind = solverGoalKind(input);
@@ -42,8 +43,9 @@ export function deckDataGap(input: DeckGoalInput, event: DeckEvent | null, catal
   const music = catalog.musics.find(row => row.id === musicId);
   if (!music || kind !== "power" && !music.difficulties.includes(input.difficulty)) return "song";
   if (playsGekisou(input)) {
-    if (music.hasLuck === true) return "luck";
-    if (music.hasLuck !== false) return "missions";
+    if (music.hasLuck === null) return "missions";
+    if (music.hasLuck && !capabilities?.luckMissions) return "luck";
+    if (music.hasLuck && input.greatPercent > 0 && !capabilities?.luckGreatConversions) return "luckGreat";
   }
   return null;
 }

@@ -598,6 +598,7 @@ export const zhCN = {
       "loading": "正在加载组卡引擎…",
       "dataUpdating": "组卡数据更新中。",
       "luckUnsupported": "该谱面含 LUCK 段，暂不支持此激奏场景的组卡。自由 Live、挑战 Live 和 Skip 仍可计算。",
+      "luckGreatUnsupported": "该谱面含 LUCK 段：演奏含 Great 时，判定转换技能会改变 LUCK 抽签，暂不支持。请在「演奏假设」里把 Great 率设为 0%。",
       "missionsUnavailable": "无法确认该谱面的激奏任务，请刷新组卡数据后重试。",
       "saveNotReady": "存档还没有读好，请稍候。",
       "emptyBox": "卡池还是空的，请先从游戏存档或截图导入卡牌。",

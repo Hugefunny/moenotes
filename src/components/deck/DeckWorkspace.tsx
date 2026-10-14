@@ -195,7 +195,7 @@ export default function DeckWorkspace(props: DeckWorkspaceProps) {
   const effectiveInput: DeckGoalInput = { ...goalInput, aggregation: effectiveAggregation(goalInput) };
   const gap = goalGap(effectiveInput, event);
   const dataGap = solver.engine.status === "ready" ? deckDataGap(effectiveInput, event, solver.engine.catalog,
-    props.deckArenas?.find(value => value.server === server)?.songs) : null;
+    props.deckArenas?.find(value => value.server === server)?.songs, capabilities) : null;
   const supported = capabilities ? computes(capabilities, effectiveInput) : !usesEventItemRewards(effectiveInput) && !rewardLayoutOf(effectiveInput) && effectiveInput.aggregation === "expected";
   const idsOf = (keys: readonly string[], kind: CardKind) => keys.flatMap(key => {
     const card = box?.cards.find(item => item.key === key && item.kind === kind);
@@ -456,6 +456,7 @@ export default function DeckWorkspace(props: DeckWorkspaceProps) {
     if (engine.status === "failed") return <p className="dc-engine-note" role="alert">{tr(`solver.failure.${engine.code}`)} <button type="button" onClick={solver.retry}>{tr("retry")}</button></p>;
     if (dataGap === "eventItemRewards") return <p className="dc-engine-note" role="status">{tr("solver.eventItemRewardsUnsupported")}</p>;
     if (dataGap === "luck") return <p className="dc-engine-note" role="status">{tr("solver.luckUnsupported")}</p>;
+    if (dataGap === "luckGreat") return <p className="dc-engine-note" role="status">{tr("solver.luckGreatUnsupported")}</p>;
     if (dataGap) return <p className="dc-engine-note" role="status">{tr(dataGap === "missions" ? "solver.missionsUnavailable" : "solver.dataUpdating")} <button type="button" onClick={solver.retry}>{tr("retry")}</button></p>;
     if (runError) return <p className="dc-engine-note" role="alert">{runError}</p>;
     return null;

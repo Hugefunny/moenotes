@@ -596,6 +596,7 @@ export const koKR = {
       "loading": "편성 엔진을 불러오는 중…",
       "dataUpdating": "편성 데이터를 업데이트 중입니다.",
       "luckUnsupported": "이 채보에는 LUCK 구간이 있어 현재 이 격주 조건의 편성 계산은 지원하지 않습니다. 자유 Live, 챌린지 Live 및 Skip은 계속 계산할 수 있습니다.",
+      "luckGreatUnsupported": "이 채보에는 LUCK 구간이 있습니다. Great 판정이 있으면 판정 변환 스킬이 LUCK 추첨을 바꾸므로 아직 지원하지 않습니다. 「플레이 조건」에서 Great 비율을 0%로 설정하세요.",
       "missionsUnavailable": "이 채보의 격주 미션을 확인할 수 없습니다. 편성 데이터를 새로고침한 뒤 다시 시도하세요.",
       "saveNotReady": "세이브 데이터를 불러오는 중입니다.",
       "emptyBox": "보유 카드가 없습니다. 먼저 게임 세이브나 스크린샷에서 가져오세요.",

@@ -597,6 +597,7 @@ export const zhTW = {
       "loading": "正在載入組卡引擎…",
       "dataUpdating": "組卡資料更新中。",
       "luckUnsupported": "此譜面含 LUCK 區間，暫不支援此擊奏場景的組卡。自由 Live、挑戰 Live 和 Skip 仍可計算。",
+      "luckGreatUnsupported": "該譜面含 LUCK 段：演奏含 Great 時，判定轉換技能會改變 LUCK 抽籤，暫不支援。請在「演奏假設」裡把 Great 率設為 0%。",
       "missionsUnavailable": "無法確認此譜面的擊奏任務，請重新整理組卡資料後再試。",
       "saveNotReady": "存檔還沒有讀好，請稍候。",
       "emptyBox": "卡池還是空的，請先從遊戲存檔或截圖匯入卡牌。",

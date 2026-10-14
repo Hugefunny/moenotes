@@ -154,6 +154,10 @@ export interface DeckSolverCapabilities {
   eventItemRewards?: { selection: "exactResultGrade"; eventGroupField: "eventGroup"; rowsPerGrade: 1; probabilityMarker: 10000 };
   /** Combined metrics: levels compared in turn, each the expected weighted sum of several metrics with integer weights. */
   combinedMetric?: { maxLevels: number; maxTerms: number; maxWeight: number };
+  /** Gekisou lives with LUCK missions are computed. */
+  luckMissions?: boolean;
+  /** Plays with Great judgements are computed in LUCK lives, where a held judgement conversion changes the draws. */
+  luckGreatConversions?: boolean;
 }
 
 export function parseCapabilities(json: string | null): DeckSolverCapabilities | null {
@@ -185,7 +189,8 @@ export function parseCapabilities(json: string | null): DeckSolverCapabilities |
     && combined.kind === "combined" && combined.objective === "lexicographicWeightedExpectedSums" && combined.weights === "integer"
     && Number.isSafeInteger(combined.maxLevels) && Number.isSafeInteger(combined.maxTerms) && Number.isSafeInteger(combined.maxWeight)
     ? { maxLevels: combined.maxLevels as number, maxTerms: combined.maxTerms as number, maxWeight: combined.maxWeight as number } : undefined;
-  return { goals: strings(raw.goals), metrics, aggregations, ...(eventItemRewards ? { eventItemRewards } : {}), ...(combinedMetric ? { combinedMetric } : {}), patternPlay: raw.patternPlay === true || !!raw.patternPlay && typeof raw.patternPlay === "object", accuracy: { great: accuracy.great === true, just: accuracy.just === true } };
+  return { goals: strings(raw.goals), metrics, aggregations, ...(eventItemRewards ? { eventItemRewards } : {}), ...(combinedMetric ? { combinedMetric } : {}),
+    luckMissions: raw.luckMissions === true, luckGreatConversions: raw.luckGreatConversions === true, patternPlay: raw.patternPlay === true || !!raw.patternPlay && typeof raw.patternPlay === "object", accuracy: { great: accuracy.great === true, just: accuracy.just === true } };
 }
 
 /** Whether the engine computes a goal input's goal kind and metric. */

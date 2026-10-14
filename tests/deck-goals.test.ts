@@ -189,6 +189,15 @@ describe("capabilities", () => {
     expect(parseCapabilities(null)).toBeNull();
     expect(parseCapabilities("not json")).toBeNull();
   });
+  test("LUCK support reads the engine's declared LUCK missions and judgement conversions", () => {
+    expect(capabilities.luckMissions).toBe(false);
+    expect(capabilities.luckGreatConversions).toBe(false);
+    const luck = parseCapabilities(JSON.stringify({ goals: [], metrics: {}, accuracy: {}, luckMissions: true, luckGreatConversions: false }))!;
+    expect(luck.luckMissions).toBe(true);
+    expect(luck.luckGreatConversions).toBe(false);
+    expect(parseCapabilities(JSON.stringify({ goals: [], metrics: {}, accuracy: {}, luckMissions: "yes", luckGreatConversions: true }))!)
+      .toMatchObject({ luckMissions: false, luckGreatConversions: true });
+  });
   test("maximum requires support for both the chosen scene and metric and preserves play restrictions", () => {
     const legacy = { goals: ["freeLive", "battleLive"], metrics: { freeLive: ["score", "eventPoints"], battleLive: ["score"] }, accuracy: { great: false, just: false } };
     const input = { ...defaultDeckGoalInput("free"), musicId: 100, aggregation: "maximum" as const };
