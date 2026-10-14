@@ -123,7 +123,7 @@ export const isNetworkInput = (input: Pick<DeckGoalInput, "goal" | "venue">): bo
 export const readsAccuracy = (input: Pick<DeckGoalInput, "goal" | "venue">): boolean => !["power", "skip"].includes(solverGoalKind(input));
 /** Retain the objective preference for supported non-Gekisou played lives. */
 export const effectiveAggregation = (input: Pick<DeckGoalInput, "goal" | "venue"> & Partial<Pick<DeckGoalInput, "aggregation">>): DeckAggregation =>
-  readsAccuracy(input) && !playsGekisou(input) ? input.aggregation ?? "expected" : "expected";
+  readsAccuracy(input) ? input.aggregation ?? "expected" : "expected";
 
 type RewardInput = Pick<DeckGoalInput, "goal"> & Partial<Pick<DeckGoalInput, "venue" | "rewards">>;
 /** The rewards a goal input can count beside its own. A challenge live spends challenge points and earns none. */

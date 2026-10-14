@@ -44,14 +44,14 @@ describe("recommendation request", () => {
     }
     expect(request({ goal: "eventPoints", venue: "skip", musicId: 245, aggregation: "maximum" }).aggregation).toBeUndefined();
   });
-  test("Gekisou scenes use Expected and returning to Free Live restores the objective preference", () => {
+  test("Gekisou scenes keep the objective preference with their play conditions", () => {
     const stored = { ...defaultDeckGoalInput("free"), musicId: 245, arenaMusicId: 42, aggregation: "maximum" as const,
       playMode: "pattern" as const, greatPercent: 7, justPercent: 81, missEvery: 17 };
     expect(effectiveAggregation(stored)).toBe("maximum");
     for (const goal of ["battle", "mission", "arena"] as const) {
       const selected = { ...stored, goal };
-      expect(effectiveAggregation(selected)).toBe("expected");
-      expect(request(selected)).toEqual(request({ ...selected, aggregation: "expected" }));
+      expect(effectiveAggregation(selected)).toBe("maximum");
+      expect(request(selected)).toEqual({ ...request({ ...selected, aggregation: "expected" }), aggregation: "maximum" });
       expect(selected.aggregation).toBe("maximum");
       expect(selected.greatPercent).toBe(7);
       expect(selected.justPercent).toBe(81);
@@ -59,13 +59,13 @@ describe("recommendation request", () => {
       expect(request({ ...selected, goal: "free" }).aggregation).toBe("maximum");
     }
   });
-  test("event payoff venues retain Maximum only for non-Gekisou played lives", () => {
+  test("event payoff venues retain Maximum for every played live", () => {
     for (const goal of ["eventPoints", "eventItems", "challengePoints"] as const) {
       for (const venue of ["battleLive", "missionLive", "arenaLive", "freeLive", "challengeLive", "skip", "challengeSkip"] as const) {
         if (goal === "challengePoints" && (venue === "challengeLive" || venue === "challengeSkip")) continue;
         const input = { ...defaultDeckGoalInput(goal), venue, musicId: 245, arenaMusicId: 42, challengeMusicId: 1,
           aggregation: "maximum" as const };
-        const available = venue === "freeLive" || venue === "challengeLive";
+        const available = venue !== "skip" && venue !== "challengeSkip";
         expect(effectiveAggregation(input)).toBe(available ? "maximum" : "expected");
         expect(request(input).aggregation).toBe(available ? "maximum" : undefined);
         expect(input.aggregation).toBe("maximum");
@@ -196,7 +196,9 @@ describe("capabilities", () => {
     const cap = parseCapabilities(JSON.stringify({ ...legacy, aggregations: { maximum: { freeLive: ["score"] } } }))!;
     expect(computes(cap, input)).toBe(true);
     expect(computes(cap, { ...input, goal: "eventPoints" })).toBe(false);
-    expect(computes(cap, { ...input, goal: "battle" })).toBe(true);
+    expect(computes(cap, { ...input, goal: "battle" })).toBe(false);
+    const battle = parseCapabilities(JSON.stringify({ ...legacy, aggregations: { maximum: { freeLive: ["score"], battleLive: ["score"] } } }))!;
+    expect(computes(battle, { ...input, goal: "battle" })).toBe(true);
     expect(computes(cap, { ...input, greatPercent: 5 })).toBe(false);
     expect(computes(cap, { ...input, playMode: "pattern" })).toBe(false);
     expect(computes(cap, { ...input, goal: "eventPoints", aggregation: "expected" })).toBe(true);

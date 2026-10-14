@@ -53,7 +53,7 @@ test("the objective has native labelled radio choices, with maximum gated by eng
   expect(ready).toContain('checked="" value="maximum"');
   expect(ready).not.toContain('disabled=""');
   expect(ready).not.toContain("Not yet supported");
-  expect(ready).toContain("not guaranteed every live");
+  expect(ready).toContain("highest of its 120 order averages");
   expect(ready).toContain("proved only when the search completes");
   const unavailable = render({ ...defaultDeckGoalInput("free"), aggregation: "maximum" });
   expect(unavailable).toMatch(/<input[^>]*disabled=""[^>]*checked=""[^>]*value="maximum"/);
@@ -66,19 +66,22 @@ test("the objective has native labelled radio choices, with maximum gated by eng
   expect(render(defaultDeckGoalInput("skip"))).toBe("");
 });
 
-test("Gekisou scenes and payoff venues show the Expected note without an unavailable selection", () => {
+test("Gekisou scenes and payoff venues offer the maximum their engine computes", () => {
   const cap = { goals: ["freeLive", "battleLive", "missionLive", "arenaLive"], metrics: {}, accuracy: { great: true, just: true },
-    aggregations: { maximum: { battleLive: ["score"], missionLive: ["score"], arenaLive: ["score"] } } };
+    aggregations: { maximum: { battleLive: ["score", "eventPoints"], missionLive: ["score", "eventPoints"], arenaLive: ["score", "eventPoints"] } } };
   for (const goal of ["battle", "mission", "arena"] as const) {
     const html = renderToStaticMarkup(<DeckObjective locale="en-US" input={{ ...defaultDeckGoalInput(goal), aggregation: "maximum" }} capabilities={cap} onChange={() => {}} />);
-    expect(html).not.toContain('type="radio"');
-    expect(html).toContain("Gekisou modes use Average performance");
+    expect(html).toContain('checked="" value="maximum"');
+    expect(html).not.toContain('disabled=""');
   }
   for (const venue of ["battleLive", "missionLive", "arenaLive"] as const) {
     const html = renderToStaticMarkup(<DeckObjective locale="en-US" input={{ ...defaultDeckGoalInput("eventPoints"), venue, aggregation: "maximum" }} capabilities={cap} onChange={() => {}} />);
-    expect(html).not.toContain('type="radio"');
-    expect(html).toContain("Gekisou modes use Average performance");
+    expect(html).toContain('checked="" value="maximum"');
   }
+  const without = { ...cap, aggregations: { maximum: { freeLive: ["score"] } } };
+  const html = renderToStaticMarkup(<DeckObjective locale="en-US" input={{ ...defaultDeckGoalInput("battle"), aggregation: "maximum" }} capabilities={without} onChange={() => {}} />);
+  expect(html).toMatch(/<input[^>]*disabled=""[^>]*checked=""[^>]*value="maximum"/);
+  expect(html).toContain("unavailable for these conditions");
 });
 
 test("maximum results retain their own metric, objective, proof state and best order after inputs change", () => {
@@ -93,7 +96,7 @@ test("maximum results retain their own metric, objective, proof state and best o
   const html = renderToStaticMarkup(<DeckResult locale="en-US" goal="battle" rateBasis={null} stale timeLimit={60} box={null} catalog={{ members: [], snaps: [] }} linked={false} busy={false}
     job={{ status: "done", key: "maximum", answer, rate: null, stopped: false }} onStop={noop} onRerun={noop} onEditCard={noop} onPlayer={noop} onAnswerAll={noop} />);
   expect(html).toContain("Theoretical maximum");
-  expect(html).toContain("Maximum points per live");
+  expect(html).toContain("Average points in the best order");
   expect(html).toContain("previous result");
   expect(html).toContain("not proven");
   expect(html).toContain("5 → 4 → 3 → 2 → 1");

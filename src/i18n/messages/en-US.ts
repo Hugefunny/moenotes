@@ -28,7 +28,7 @@ export const enUS = {
     consent: "This application can read the full content of the selected archives. Only authorize applications you trust.",
   },
   deckWorkspace: {
-    objective: {"label": "Search objective", "expected": "Average performance", "maximum": "Theoretical maximum", "unsupported": "Not yet supported", "expectedNote": "Keeps your play conditions and ranks teams by the average over random skill orders, LUCK and other random outcomes.", "maximumNote": "For Free and Challenge Live, finds the highest value reachable through skill orders and random skill outcomes under your play conditions. The maximum is proved only when the search completes; it is not guaranteed every live.", "unavailable": "Theoretical maximum is unavailable for these conditions. Choose Average performance to search.", "loading": "Checking whether theoretical maximum is available…", "gekisouNote": "Gekisou modes use Average performance. Theoretical maximum is available for Free and Challenge Live."},
+    objective: {"label": "Search objective", "expected": "Average performance", "maximum": "Theoretical maximum", "unsupported": "Not yet supported", "expectedNote": "Keeps your play conditions and ranks teams by the average over random skill orders, LUCK and other random outcomes.", "maximumNote": "Keeps your play conditions and takes the most favorable skill order: within each order, LUCK and other random outcomes are averaged by their true probabilities, and a team is worth the highest of its 120 order averages. It does not assume the best luck, and it is proved only when the search completes.", "unavailable": "Theoretical maximum is unavailable for these conditions. Choose Average performance to search.", "loading": "Checking whether theoretical maximum is available…"},
     "arenaSong": "Arena song",
     "chooseArena": "Choose an Arena song",
     "noArena": "No Arena songs in this server’s current data",
@@ -595,9 +595,9 @@ export const enUS = {
     "solver": {
       "eventItemsUnsupported": "This engine does not support event badges selected by exact result grade.",
       "eventItemRewardsUnsupported": "This scene’s event reward data is unsupported. Each grade must have exactly one reward row with probability marker 10000.",
-      "maximumLabel": {"score": "Theoretical maximum score", "challengePoints": "Maximum CP earned per live", "eventPoints": "Maximum points per live", "eventItems": "Maximum badges per live"},
+      "maximumLabel": {"score": "Average score in the best order", "challengePoints": "Average CP earned in the best order", "eventPoints": "Average points in the best order", "eventItems": "Average badges in the best order"},
       "deterministicLabel": {"score": "Score", "challengePoints": "CP earned per live", "eventPoints": "Points per live", "eventItems": "Badges per live"},
-      "bestOrder": "Skill order for the highest objective value",
+      "bestOrder": "Best skill order",
       "metricLabel": {"score": "Expected score"},
       "playSummary": "Declared play: {notes} judged notes · {misses} Misses",
       "start": "Build team",
