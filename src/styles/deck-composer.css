@@ -69,7 +69,8 @@
 .dc-collection {
   display: flex;
   align-items: center;
-  gap: 20px;
+  flex-wrap: wrap;
+  gap: 10px 20px;
   min-width: 0;
   padding: 13px 17px;
   margin-bottom: 17px;
@@ -78,9 +79,10 @@
   background: var(--md-sys-color-surface-container-low);
 }
 .dc-composer .dc-collection > h2 { flex-shrink: 0; font-size: 13px; }
-.dc-collection-content { flex: 1; min-width: 0; }
-.dc-collection-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; min-width: 0; }
-.dc-collection-stats { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; min-width: 0; }
+/* The summary sits beside the heading; the cloud sync status takes its own row below. */
+.dc-collection-content { display: contents; }
+.dc-collection-summary { display: flex; flex: 1; flex-wrap: wrap; align-items: center; gap: 10px 18px; min-width: 0; }
+.dc-collection-stats { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; min-width: 0; min-height: 40px; }
 .dc-collection-stats > * { display: inline-flex; align-items: baseline; gap: 5px; }
 .dc-collection-stats strong { font-size: 18px; font-weight: 800; }
 .dc-collection-stats .dc-collection-source { align-items: center; gap: 6px; padding: 4px 10px; border-radius: var(--md-sys-shape-corner-small); background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-primary); font-size: 12px; font-weight: 600; }
@@ -89,7 +91,11 @@
 .dc-collection-stats .dc-collection-source small { color: var(--md-sys-color-on-surface-variant); font-weight: 400; }
 .dc-collection-stats span, .dc-collection-stats small { color: var(--md-sys-color-on-surface-variant); font-size: 11px; }
 .dc-collection-actions { display: flex; gap: 7px; flex-wrap: wrap; margin-left: auto; }
-.dc-collection-actions button { font-size: 12px; }
+.dc-collection-actions button { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; }
+.dc-collection-actions svg { flex-shrink: 0; }
+.dc-collection-content > .cb-cloud-note { flex-basis: 100%; margin: 0; padding-top: 10px; border-top: 1px solid var(--dc-line); font-size: 12px; }
+.dc-collection-content > .cb-cloud-sync { flex-basis: 100%; margin: 0; padding: 10px 0 0; border-top: 1px solid var(--dc-line); border-bottom: 0; }
+.dc-collection-content > .cb-cloud-sync .cb-cloud-actions > button { min-height: 36px; padding: 6px 12px; font-size: 12px; }
 
 .dc-composer { display: grid; gap: 17px; }
 .dc-composer > .dc-collection { margin-bottom: 0; }
@@ -145,8 +151,6 @@
 .dc-composer .dc-primary:hover:not(:disabled) { background: #34538e; border-color: #34538e; }
 .dc-primary-action > p, .dc-primary-action > small { min-width: 0; margin-right: auto; color: var(--md-sys-color-on-surface-variant); font-size: 11px; }
 .dc-main-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; width: 100%; min-width: 0; }
-.dc-main-actions .dc-primary { margin-right: auto; }
-.dc-composer .dc-manual-start { color: var(--md-sys-color-on-surface-variant); font-size: 11px; }
 .dc-condition-actions { display: grid; gap: 7px; min-width: 0; }
 .dc-condition-actions > button { width: 100%; text-align: left; }
 .dc-composer .dc-team-caption { color: var(--md-sys-color-on-surface-variant); margin-bottom: 9px; font-size: 12px; line-height: 1.5; }
@@ -193,7 +197,7 @@
 .dc-mini-card strong, .dc-mini-card > span { font-size: 11px; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dc-mini-card small { color: var(--md-sys-color-on-surface-variant); font-size: 11px; }
 .dc-composer .dc-view-all { margin-top: 12px; width: 100%; color: var(--dc-accent); }
-.dc-composer .dc-storage-label { align-items: center; min-height: 40px; padding: 5px 7px; font-size: 11px; font-weight: 600; color: var(--md-sys-color-on-surface-variant); }
+.dc-composer .dc-storage-label { align-items: center; min-height: 28px; padding: 3px 9px; border-color: transparent; border-radius: var(--md-sys-shape-corner-small); background: var(--md-sys-color-surface-container); font-size: 11px; font-weight: 600; color: var(--md-sys-color-on-surface-variant); }
 
 .dc-option-tabs { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
 .dc-option-tabs button[aria-selected="true"], .dc-option-tabs button[aria-pressed="true"] { border-color: #4166a9; background: color-mix(in oklab, #4166a9 8%, var(--md-sys-color-surface-container-low)); color: #4166a9; }
@@ -223,9 +227,10 @@
   .dc-composer h2 { font-size: 13px; }
   .dc-section-heading { gap: 7px; margin-bottom: 10px; }
   .dc-collection { gap: 10px; padding: 10px 12px; margin-bottom: 12px; flex-wrap: wrap; }
-  .dc-collection-content { flex-basis: 100%; }
+  .dc-collection-summary { flex-basis: 100%; }
   .dc-collection-summary { gap: 9px; }
-  .dc-collection-actions { gap: 6px; }
+  .dc-collection-actions { gap: 6px; width: 100%; margin-left: 0; }
+  .dc-composer .dc-collection-actions button { flex: 1 1 auto; justify-content: center; }
   .dc-composer .dc-collection-actions button { padding: 7px 9px; font-size: 11px; }
   .dc-goals { grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 5px; }
   .dc-composer .dc-goal { min-height: 42px; padding: 7px; gap: 6px; }
@@ -250,7 +255,6 @@
   .dc-composer .dc-primary-action > button { flex: 1; padding: 9px 10px; font-size: 11px; }
   .dc-main-actions { gap: 7px; }
   .dc-composer .dc-main-actions > button { flex: 1 1 100%; width: 100%; padding: 9px 8px; font-size: 11px; }
-  .dc-composer .dc-main-actions .dc-manual-start { flex-basis: auto; width: auto; background: transparent; border-color: transparent; }
   .dc-empty-slots { gap: 5px; }
   .dc-empty-slots > span { font-size: 16px; border-radius: 5px; }
   .dc-composer .dc-team-caption, .dc-composer .dc-empty-team p, .dc-stale { font-size: 11px; }

@@ -451,6 +451,7 @@ export default function DeckWorkspace(props: DeckWorkspaceProps) {
   const canRun = engine.status === "ready" && supported && !gap && !dataGap && saveReady;
   const blocker = engine.status === "loading" ? tr("solver.loading") : engine.status === "unavailable" ? tr(`solver.unavailable.${engine.reason}`)
     : engine.status === "failed" ? "" : !supported ? tr(rewardLayoutOf(effectiveInput) ? effectiveInput.aggregation === "expected" ? "rewardMix.unavailable" : "rewardMix.expectedOnly" : goal === "eventItems" ? "solver.eventItemsUnsupported" : "comingSoon") : gap ? tr(`solver.gap.${gap}`) : !saveReady ? tr("solver.saveNotReady") : "";
+  const runBlocker = ownedMembers.length ? "" : tr(linked && !saveReady ? "solver.saveNotReady" : "solver.emptyBox");
   function engineNotice() {
     if (engine.status === "failed") return <p className="dc-engine-note" role="alert">{tr(`solver.failure.${engine.code}`)} <button type="button" onClick={solver.retry}>{tr("retry")}</button></p>;
     if (dataGap === "eventItemRewards") return <p className="dc-engine-note" role="status">{tr("solver.eventItemRewardsUnsupported")}</p>;
@@ -462,9 +463,9 @@ export default function DeckWorkspace(props: DeckWorkspaceProps) {
   function toggle(values: string[], key: string, update: (value: string[]) => void) { update(values.includes(key) ? values.filter(value => value !== key) : [...values, key]); }
   return <ContentServerProvider server={server} servers={servers}><div className={`dw-workspace ${page === "box" ? "dw-collection" : "dw-deck"}`} data-testid="deck-workspace">
     <header className="dw-header"><div><h1>{tr(page === "box" ? "boxTitle" : "title")}{page === "deck" && <span className="dw-beta">{tr("beta")}</span>}</h1><p>{page === "box" ? tr("boxDescription") : composer("workspaceNote")}</p>
-      {page === "deck" && <p className="dw-sources"><a href={href("deck-guide")}>{tr("deckGuide.link")}</a> · {tr("sources.label")}: {DECK_SOURCES.map((source, index) => <Fragment key={source.key}>{index > 0 && " · "}<a href={source.url} target="_blank" rel="noopener noreferrer">{tr(`sources.${source.key}`)}</a></Fragment>)}</p>}</div><div className="dw-actions"><label className="dw-server">{tr("server")}<select aria-label={tr("server")} value={server} disabled={busy} onChange={event => pickServer(event.target.value as GameServer)}>{servers.map(value => <option key={value} value={value}>{t(locale, `gameServer.names.${value}`)}</option>)}</select></label><a className="dw-button" href={href(page === "box" ? "deck" : "card-box")} onClick={event => changePage(event, page === "box" ? "deck" : "box")}>{tr(page === "box" ? "goDeck" : "boxTitle")}</a></div></header>
+      {page === "deck" && <p className="dw-sources"><a href={href("deck-guide")}>{tr("deckGuide.link")}</a> · {tr("sources.label")}: {DECK_SOURCES.map((source, index) => <Fragment key={source.key}>{index > 0 && " · "}<a href={source.url} target="_blank" rel="noopener noreferrer">{tr(`sources.${source.key}`)}</a></Fragment>)}</p>}</div><div className="dw-actions dw-header-actions"><label className="dw-server"><span>{tr("server")}</span><select aria-label={tr("server")} value={server} disabled={busy} onChange={event => pickServer(event.target.value as GameServer)}>{servers.map(value => <option key={value} value={value}>{t(locale, `gameServer.names.${value}`)}</option>)}</select></label><a className="dw-button" href={href(page === "box" ? "deck" : "card-box")} onClick={event => changePage(event, page === "box" ? "deck" : "box")}>{tr(page === "box" ? "goDeck" : "boxTitle")}</a></div></header>
     {storage.error && <p role="alert" className="dw-alert">{tr(`storageErrors.${storage.error}`)} <button disabled={busy || mode === "temporary"} onClick={() => void storage.reload()}>{tr("retry")}</button></p>}
-    <CloudBoxPanel locale={locale} server={server} box={stored} busy={busy} returnTo={returnTo} />
+    {page === "box" && <CloudBoxPanel locale={locale} server={server} box={stored} busy={busy} returnTo={returnTo} />}
     {page === "box" ? <section className={`cb-workspace dw-box-main ${draggingScreenshots ? " is-dragging-screenshots" : ""}`} onDragOver={event => {
       if (busy || ![...event.dataTransfer.types].includes("Files")) return;
       event.preventDefault(); event.dataTransfer.dropEffect = "copy"; setDraggingScreenshots(true);
@@ -491,16 +492,16 @@ export default function DeckWorkspace(props: DeckWorkspaceProps) {
           { id: "everyday", title: tr("goalGroups.everyday"), goals: EVERYDAY_GOALS.map(value => goalCard(value)) },
         ]}
         selectedGoal={isEventPayoffGoal(goal) ? REWARDS_CARD : goal} onGoalChange={selectGoal}
-        collection={<div className="dc-collection-summary">
+        collection={<><div className="dc-collection-summary">
           <div className="dc-collection-stats"><span><strong>{ownedMembers.length}</strong> {tr("member")}</span><span><strong>{ownedSnaps.length}</strong> {tr("snap")}</span>
             {box && <span className="dc-collection-source" data-source={linked ? "game-save" : "box"}><CollectionIcon name={linked ? "game" : "image"} />{tr(linked ? "gameSave.sourceSave" : "gameSave.sourceBox")}
               {stored?.save && <small>{linkedSave.state.status === "ready" ? tr("gameSave.uploadedAt", { date: new Date(stored.save.uploadedAt).toLocaleDateString(locale) })
                 : tr(linkedSave.state.status === "loading" ? "gameSave.loadingShort" : "gameSave.unavailableShort")}</small>}</span>}
             {box && <button type="button" className="dc-storage-label" onClick={openStorage}>{tr(mode)}</button>}</div>
-          <div className="dc-collection-actions">{!linked && <button type="button" disabled={busy} onClick={openSavePicker}>{tr("gameSave.importAction")}</button>}
-            {!linked && <button type="button" disabled={busy} onClick={openScreenshotImport}>{tr("screenshotImport")}</button>}
-            {box && <button type="button" disabled={busy} onClick={() => setManagement(true)}>{tr("manage")}</button>}</div>
-        </div>}
+          <div className="dc-collection-actions">{!linked && <button type="button" className={ownedMembers.length ? undefined : "dc-primary"} disabled={busy} onClick={openSavePicker}><CollectionIcon name="game" />{tr("gameSave.importAction")}</button>}
+            {!linked && <button type="button" disabled={busy} onClick={openScreenshotImport}><CollectionIcon name="image" />{tr("screenshotImport")}</button>}
+            <button type="button" disabled={busy} onClick={() => box ? setManagement(true) : setSetup(true)}>{box ? tr("manage") : composer("manualShort")}</button></div>
+        </div><CloudBoxPanel locale={locale} server={server} box={stored} busy={busy} returnTo={returnTo} /></>}
         conditions={<>
           <DeckObjective locale={locale} input={effectiveInput} capabilities={capabilities} onChange={aggregation => updateGoal({ aggregation })} />
           {isEventPayoffGoal(goal) ? <label>{tr("venue")}<select aria-label={tr("venue")} value={goalInput.venue} onChange={change => updateGoal({ venue: change.target.value as DeckVenue })}>
@@ -562,12 +563,8 @@ export default function DeckWorkspace(props: DeckWorkspaceProps) {
         notice={engineNotice()}
         primaryAction={<div className="dc-main-actions">
           {job.status === "running" ? <button type="button" className="dc-primary" onClick={solver.stop}>{tr("solver.stop")}</button>
-            : <button type="button" className="dc-primary" disabled={busy || (!!ownedMembers.length && !canRun)} onClick={() => {
-              if (!ownedMembers.length) { if (!linked) openSavePicker(); return; }
-              runSolver();
-            }}>{!ownedMembers.length ? tr(linked ? "gameSave.loadingShort" : "gameSave.importAction") : tr(job.status === "idle" ? "solver.start" : "solver.rerun")}</button>}
-          {ownedMembers.length > 0 && job.status !== "running" && blocker && <small className="dc-blocker">{blocker}</small>}
-          {!ownedMembers.length && !linked && <button type="button" className="dc-manual-start" onClick={() => box ? setManagement(true) : setSetup(true)}>{composer("manualShort")}</button>}
+            : <button type="button" className="dc-primary" disabled={busy || !ownedMembers.length || !canRun} onClick={runSolver}>{tr(job.status === "idle" ? "solver.start" : "solver.rerun")}</button>}
+          {job.status !== "running" && (runBlocker || blocker) && <small className="dc-blocker">{runBlocker || blocker}</small>}
         </div>}
         cards={box && ownedMembers.length + ownedSnaps.length > 0 && <>
           <div className="dc-mini-cards">{[...ownedMembers.slice(0, 5), ...ownedSnaps.slice(0, 3)].map(card => <button type="button" className="dc-mini-card" key={card.key} disabled={busy} aria-label={composer("editThisCard", { name: cardTitle(card, catalog) })} onClick={() => setEditingCardKey(card.key)}>
