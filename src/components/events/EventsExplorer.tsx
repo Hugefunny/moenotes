@@ -110,6 +110,7 @@ export default function EventsExplorer({ locale, servers, initialEvents, bands }
 
   const quickFilterContent = (
     <BaseFilters
+      locale={locale}
       sort={sort}
       variant="plain"
       title={t(locale, "events.filterTitle")}

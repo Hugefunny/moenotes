@@ -103,6 +103,7 @@ export default function CharactersExplorer({ locale, servers, initialCharacters 
 
   useQuickFilter(t(locale, "characters.filterTitle"), (
     <BaseFilters
+      locale={locale}
       sort={sort}
       variant="plain"
       title={t(locale, "characters.filterTitle")}

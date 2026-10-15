@@ -134,6 +134,7 @@ export default function MusicFilters({ locale, controller, variant = "plain", on
   }) }), [sort]);
   return (
     <BaseFilters
+      locale={locale}
       sort={panelSort}
       variant={variant}
       title={t(locale, "music.filterTitle")}

@@ -2954,11 +2954,9 @@ export const koKR = {
     reset: "필터 초기화",
     collapse: "접기",
     expand: "펼치기",
-    count: "{filtered} / {total}",
+    count: "{total}개 중 {filtered}개",
+    total: "{total}개",
     openQuickFilter: "필터 열기",
-    drawerHintTitle: "필터가 사이드로 이동했습니다",
-    drawerHintBody: "필터 버튼으로 언제든 필터를 열거나 접을 수 있습니다.",
-    drawerHintDismiss: "확인",
     dateRange: "기간", dateFrom: "시작", dateTo: "종료", dateClear: "지우기",
   },
   browserNotice: {

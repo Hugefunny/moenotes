@@ -86,6 +86,7 @@ export default function BackgroundsExplorer({ locale, servers, initialBackground
 
   const quickFilterContent = (
     <BaseFilters
+      locale={locale}
       sort={sort}
       variant="plain"
       title={t(locale, "backgrounds.filterTitle")}

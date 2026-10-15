@@ -139,6 +139,7 @@ export default function Live2DViewer({ locale, characters, bands }: Props) {
 
   const quickFilterContent = (
     <BaseFilters
+      locale={locale}
       variant="plain"
       title={t(locale, "live2d.filterTitle")}
       searchValue={query}

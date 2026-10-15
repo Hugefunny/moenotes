@@ -1648,9 +1648,6 @@ export const ruRU = {
     expand: "Развернуть",
     count: "{filtered} / {total}",
     openQuickFilter: "Открыть фильтры",
-    drawerHintTitle: "Фильтры перемещены на боковую панель",
-    drawerHintBody: "Нажмите на вкладку слева, чтобы в любое время развернуть или свернуть фильтры.",
-    drawerHintDismiss: "Понятно"
   },
   browserNotice: {
     title: "Этот браузер может отображать сайт некорректно",

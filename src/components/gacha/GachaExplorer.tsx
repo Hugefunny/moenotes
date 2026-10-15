@@ -115,6 +115,7 @@ export default function GachaExplorer({ locale, servers, initialGachas, bands }:
 
   const quickFilterContent = (
     <BaseFilters
+      locale={locale}
       sort={sort}
       variant="plain"
       title={t(locale, "gacha.filterTitle")}

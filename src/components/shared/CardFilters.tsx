@@ -111,6 +111,7 @@ export default function CardFilters<T>({ locale, controller, kind, variant = "pl
   const support = kind === "support";
   return (
     <BaseFilters
+      locale={locale}
       sort={sort}
       variant={variant}
       title={title ?? t(locale, `${pack}.filterTitle`)}

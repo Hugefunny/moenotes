@@ -105,6 +105,7 @@ export default function RewardsExplorer({ locale, servers, initialEntries }: Pro
 
   const quickFilterContent = (
     <BaseFilters
+      locale={locale}
       sort={sort}
       variant="plain"
       title={t(locale, "rewards.filterTitle")}

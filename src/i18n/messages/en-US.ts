@@ -2965,11 +2965,9 @@ export const enUS = {
     reset: "Reset filters",
     collapse: "Collapse",
     expand: "Expand",
-    count: "{filtered} / {total}",
+    count: "{filtered} of {total}",
+    total: "{total} entries",
     openQuickFilter: "Open filter",
-    drawerHintTitle: "Filters moved to the side",
-    drawerHintBody: "Use the Filter button to open or fold the filters anytime.",
-    drawerHintDismiss: "Got it",
     dateRange: "Date range", dateFrom: "From", dateTo: "To", dateClear: "Clear",
   },
   browserNotice: {

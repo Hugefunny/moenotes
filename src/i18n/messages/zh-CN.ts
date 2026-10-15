@@ -3009,11 +3009,9 @@ export const zhCN = {
     reset: "重置筛选",
     collapse: "收起",
     expand: "展开",
-    count: "{filtered} / {total}",
+    count: "{filtered} / {total} 项",
+    total: "共 {total} 项",
     openQuickFilter: "打开筛选器",
-    drawerHintTitle: "筛选器已移至侧边",
-    drawerHintBody: "随时点击“筛选”按钮，即可打开或收起筛选面板。",
-    drawerHintDismiss: "知道了",
     dateRange: "日期范围", dateFrom: "开始", dateTo: "结束", dateClear: "清除",
   },
   browserNotice: {

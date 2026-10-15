@@ -1649,9 +1649,6 @@ export const frFR = {
     expand: "Développer",
     count: "{filtered} / {total}",
     openQuickFilter: "Ouvrir les filtres",
-    drawerHintTitle: "Filtres déplacés sur le côté",
-    drawerHintBody: "Cliquez sur l'onglet à gauche pour afficher ou masquer les filtres à tout moment.",
-    drawerHintDismiss: "Compris"
   },
   browserNotice: {
     title: "Ce navigateur peut ne pas afficher correctement le site",

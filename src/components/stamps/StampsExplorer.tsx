@@ -187,6 +187,7 @@ export default function StampsExplorer({ locale, servers, initialStamps, initial
 
   const quickFilterContent = (
     <BaseFilters
+      locale={locale}
       sort={sort}
       variant="plain"
       title={t(locale, "stamps.filterTitle")}

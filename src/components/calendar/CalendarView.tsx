@@ -129,6 +129,7 @@ export default function CalendarView({ locale, data, birthdays, servers, charact
 
   const filterContent = (
     <BaseFilters
+      locale={locale}
       variant="plain"
       searchValue={query}
       onSearchChange={setQuery}

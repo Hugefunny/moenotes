@@ -164,6 +164,7 @@ export default function ComicsExplorer({ locale, servers, initialComics, initial
 
   const quickFilterContent = (
     <BaseFilters
+      locale={locale}
       sort={sort}
       variant="plain"
       title={t(locale, "comics.filterTitle")}

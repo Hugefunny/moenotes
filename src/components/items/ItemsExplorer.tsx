@@ -89,6 +89,7 @@ export default function ItemsExplorer({ locale, servers, initialItems }: Props) 
 
   const quickFilterContent = (
     <BaseFilters
+      locale={locale}
       sort={sort}
       variant="plain"
       title={t(locale, "items.filterTitle")}

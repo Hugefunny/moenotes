@@ -2999,11 +2999,9 @@ export const jaJP = {
     reset: "フィルターをリセット",
     collapse: "折りたたむ",
     expand: "展開",
-    count: "{filtered} / {total}",
+    count: "{total} 件中 {filtered} 件",
+    total: "{total} 件",
     openQuickFilter: "フィルターを開く",
-    drawerHintTitle: "フィルターがサイドに移動しました",
-    drawerHintBody: "「フィルター」ボタンでいつでもフィルターを開いたり閉じたりできます。",
-    drawerHintDismiss: "了解",
     dateRange: "期間", dateFrom: "開始", dateTo: "終了", dateClear: "クリア",
   },
   browserNotice: {

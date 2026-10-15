@@ -131,6 +131,7 @@ export default function TitlesExplorer({ locale, servers, initialTitles, bands, 
 
   const quickFilterContent = (
     <BaseFilters
+      locale={locale}
       sort={sort}
       variant="plain"
       title={t(locale, "titles.filterTitle")}

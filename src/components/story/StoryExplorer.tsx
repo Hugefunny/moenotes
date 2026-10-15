@@ -102,6 +102,7 @@ export default function StoryExplorer({ locale, servers, initialCategory, initia
   const hasActive = sort.value !== "default" || Boolean(query || otherCategories.length || lead !== null || partner !== null || levels.length);
   const quickFilterContent = hasFilters ? (
     <BaseFilters
+      locale={locale}
       sort={sort}
       variant="plain"
       title={t(locale, storyCategoryKey(initialCategory))}

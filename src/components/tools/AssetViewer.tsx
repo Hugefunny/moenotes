@@ -417,6 +417,7 @@ export default function AssetViewer({ locale }: Props) {
 
   const filterContent = (
     <BaseFilters
+      locale={locale}
       sort={{
         label: t(locale, "assetBrowser.sort"), value: sort,
         defaultOption: { value: "default", label: t(locale, "sorting.default") },

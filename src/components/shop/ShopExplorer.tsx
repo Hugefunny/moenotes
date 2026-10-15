@@ -77,6 +77,7 @@ export default function ShopExplorer({ locale, servers, initialShops }: Props) {
 
   const quickFilterContent = (
     <BaseFilters
+      locale={locale}
       sort={sort}
       variant="plain"
       title={t(locale, "shop.filterTitle")}

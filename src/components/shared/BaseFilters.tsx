@@ -1,6 +1,8 @@
 import SortControl, { type SortControlProps } from "./SortControl";
 import { type ReactNode, useCallback, useEffect, useId, useRef, useState } from "react";
 import { Icon } from "@/components/shared/icons";
+import type { AppLocale } from "@/config/locales";
+import { t } from "@/i18n";
 
 // Re-export for convenience
 export { default as FilterButton } from "@/components/shared/FilterButton";
@@ -12,6 +14,8 @@ export * from "@/components/shared/filters";
 export interface BaseFiltersProps {
   /** Visual style: "plain" (flat for drawer) or "card" (standalone panel with own header/card, default: "plain") */
   variant?: "card" | "plain";
+  /** Names the result count ("67 entries", "12 of 67"); without it the count shows bare numbers. */
+  locale?: AppLocale;
   sort?: SortControlProps;
   title?: string;
   searchValue: string;
@@ -139,6 +143,7 @@ function FilterSearchInput({ id, value, onChange, placeholder }: FilterSearchInp
 /** The filter panel of an explorer page: search bar, result count, sort, the page's sections and a reset button. */
 export default function BaseFilters({
   variant = "plain",
+  locale,
   sort,
   title = "",
   searchValue,
@@ -167,9 +172,10 @@ export default function BaseFilters({
     return () => query.removeEventListener("change", handleChange);
   }, []);
 
-  const count = totalCount !== undefined
-    ? resultCount !== undefined && resultCount !== totalCount ? `${resultCount} / ${totalCount}` : `${totalCount}`
-    : null;
+  const filtering = resultCount !== undefined && resultCount !== totalCount;
+  const count = totalCount === undefined ? null
+    : locale ? t(locale, filtering ? "filter.count" : "filter.total", { filtered: resultCount ?? totalCount, total: totalCount })
+    : filtering ? `${resultCount} / ${totalCount}` : `${totalCount}`;
 
   const filterControls = (
     <div className="space-y-5">

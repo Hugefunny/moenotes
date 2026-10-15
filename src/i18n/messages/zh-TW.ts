@@ -3008,11 +3008,9 @@ export const zhTW = {
     reset: "重置篩選",
     collapse: "收起",
     expand: "展開",
-    count: "{filtered} / {total}",
+    count: "{filtered} / {total} 項",
+    total: "共 {total} 項",
     openQuickFilter: "開啟篩選器",
-    drawerHintTitle: "篩選器已移至側邊",
-    drawerHintBody: "隨時點選「篩選」按鈕，即可開啟或收合篩選面板。",
-    drawerHintDismiss: "知道了",
     dateRange: "日期範圍", dateFrom: "開始", dateTo: "結束", dateClear: "清除",
   },
   browserNotice: {

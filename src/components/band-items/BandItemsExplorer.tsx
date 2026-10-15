@@ -103,6 +103,7 @@ export default function BandItemsExplorer({ locale, servers, initialItems, initi
 
   const quickFilterContent = (
     <BaseFilters
+      locale={locale}
       sort={sort}
       variant="plain"
       title={t(locale, "bandItems.filterTitle")}
