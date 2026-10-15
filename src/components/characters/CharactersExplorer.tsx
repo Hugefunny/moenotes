@@ -25,6 +25,7 @@ import {
   parseCharacterFilterState,
   positionOptions,
   schoolOptions,
+  toggleSchool,
   type CharacterFilterState,
 } from "@/lib/characters/list-filter";
 
@@ -98,7 +99,7 @@ export default function CharactersExplorer({ locale, servers, initialCharacters 
     memory.clearState();
   };
 
-  const toggle = (field: "positions" | "schools", value: string) => setFilters((current) => ({ ...current, [field]: toggleArrayItem(current[field], value) }));
+  const toggle = (field: "positions", value: string) => setFilters((current) => ({ ...current, [field]: toggleArrayItem(current[field], value) }));
 
   useQuickFilter(t(locale, "characters.filterTitle"), (
     <BaseFilters
@@ -131,7 +132,7 @@ export default function CharactersExplorer({ locale, servers, initialCharacters 
       <FilterSection title={t(locale, "characters.list.school")}>
         <div className="flex flex-wrap gap-2">
           <FilterButton active={filters.schools.length === 0} onClick={() => setFilters((current) => ({ ...current, schools: [] }))}>ALL</FilterButton>
-          {schools.map((school) => <FilterButton key={school.key} active={filters.schools.includes(school.key)} onClick={() => toggle("schools", school.key)}>{school.name}</FilterButton>)}
+          {schools.map((school) => <FilterButton key={school.name} active={school.keys.some((key) => filters.schools.includes(key))} onClick={() => setFilters((current) => ({ ...current, schools: toggleSchool(current.schools, school.keys) }))}>{school.name}</FilterButton>)}
         </div>
       </FilterSection>
       <FilterSection title={t(locale, "characters.list.birthMonth")}>

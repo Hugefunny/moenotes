@@ -22,6 +22,7 @@ import {
   matchesCharacterFilters,
   positionOptions,
   schoolOptions,
+  toggleSchool,
   EMPTY_CHARACTER_FILTERS,
 } from "../src/lib/characters/list-filter";
 import { cardSortReaders, listSortOf, tableSortOf, CARD_SORT_FIELDS } from "../src/lib/cards/list-sort";
@@ -166,8 +167,15 @@ describe("character list filters", () => {
     expect(match({ positions: ["Vo."] })).toEqual([1, 6]);
   });
 
+  test("schools named alike under different text ids are one option that picks every id", () => {
+    const options = schoolOptions([{ schoolKey: "Haneoka_1", school: "Haneoka" }, { schoolKey: "Haneoka_2", school: "Haneoka" }, { schoolKey: "Tsukinomori", school: "Tsukinomori" }]);
+    expect(options).toEqual([{ name: "Haneoka", keys: ["Haneoka_1", "Haneoka_2"] }, { name: "Tsukinomori", keys: ["Tsukinomori"] }]);
+    expect(toggleSchool([], options[0]!.keys)).toEqual(["Haneoka_1", "Haneoka_2"]);
+    expect(toggleSchool(["Haneoka_2", "Tsukinomori"], options[0]!.keys)).toEqual(["Tsukinomori"]);
+  });
+
   test("school, birth month and band filters combine; values within one facet widen", () => {
-    expect(schoolOptions(characters)).toEqual([{ key: "School_A", name: "A" }, { key: "School_B", name: "B" }]);
+    expect(schoolOptions(characters)).toEqual([{ name: "A", keys: ["School_A"] }, { name: "B", keys: ["School_B"] }]);
     expect(match({ schools: ["School_B"] })).toEqual([6, 8]);
     expect(match({ months: [4, 11] })).toEqual([1, 8]);
     expect(match({ schools: ["School_B"], months: [6] })).toEqual([6]);
