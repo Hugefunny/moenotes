@@ -7,7 +7,7 @@ import type { SupportCardViewModel } from "@/lib/support-cards/data";
 import Modal from "@/components/shared/Modal";
 import { MemberSquareArtwork, SupportSquareArtwork } from "@/components/shared/CardSquareArtwork";
 import { safeGetLocalStorage, safeSetLocalStorage } from "@/lib/storage/safe-storage";
-import CardStats, { STAT_FIELDS } from "./CardStats";
+import CardStats, { STAT_FIELDS, StepMeter } from "./CardStats";
 import SupportCardArtwork from "@/components/support-cards/SupportCardArtwork";
 import PlayerStateManager from "./PlayerStateManager";
 import type { PlayerFieldCatalogue } from "@/lib/box/player-catalog";
@@ -250,7 +250,7 @@ export default function BoxManager({ locale, box, mode, busy, commit, members, s
         <td>{cardRarityLabel(card, catalog) ?? "—"}</td>
         {listFields.map(name => {
           const value = STAT_FIELDS[card.kind].includes(name) ? card.fields[name].value : undefined;
-          return <td key={name} data-max={name !== "level" && value === 5 ? "true" : undefined}>{value === undefined ? "" : value ?? "—"}</td>;
+          return <td key={name} data-field={name}>{value === undefined ? "" : name === "level" ? value ?? "—" : <StepMeter value={value} />}</td>;
         })}
       </tr>)}</tbody>
     </table></div>)}

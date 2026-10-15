@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { renderToStaticMarkup } from "react-dom/server";
-import CardStats from "../src/components/box/CardStats";
+import CardStats, { StepMeter } from "../src/components/box/CardStats";
 import { answerField, createCard } from "../src/lib/box/model";
 
 const answered = (kind: "member" | "snap", values: Record<string, number>) => {
@@ -11,12 +11,23 @@ const answered = (kind: "member" | "snap", values: Record<string, number>) => {
 test("a member's stats list every value, mark finished steps and dash unknown ones", () => {
   const html = renderToStaticMarkup(<CardStats locale="en-US" card={answered("member", { level: 70, awake: 5, rank: 2, liveSkillLevel: 5 })} />);
   expect((html.match(/<dt>/g) ?? []).length).toBe(5);
-  expect((html.match(/data-max="true"/g) ?? []).length).toBe(2);
-  expect(html).toContain('<dd aria-label="Unknown">—</dd>');
+  expect((html.match(/data-field="[a-zA-Z]+" data-max="true"/g) ?? []).length).toBe(2);
   expect(html).toContain("<dd>70</dd>");
+  expect(html).toMatch(/<dd aria-label="Unknown"><span class="cs-meter" data-unknown="true">.*?<span class="cs-num">—<\/span>/);
 });
 test("a Snap's stats show its level and rank only", () => {
   const html = renderToStaticMarkup(<CardStats locale="en-US" card={answered("snap", { level: 50, rank: 5 })} />);
   expect((html.match(/<dt>/g) ?? []).length).toBe(2);
   expect(html).toContain('data-field="rank" data-max="true"');
+});
+test("a step meter fills one segment per step and marks the maximum", () => {
+  const filled = (html: string) => (html.match(/data-on="true"/g) ?? []).length;
+  const three = renderToStaticMarkup(<StepMeter value={3} />);
+  expect((three.match(/<span(?: data-on="true")?><\/span>/g) ?? []).length).toBe(5);
+  expect(filled(three)).toBe(3);
+  expect(three).not.toContain("data-max");
+  const five = renderToStaticMarkup(<StepMeter value={5} />);
+  expect(filled(five)).toBe(5);
+  expect(five).toContain('class="cs-meter" data-max="true"');
+  expect(filled(renderToStaticMarkup(<StepMeter value={null} />))).toBe(0);
 });

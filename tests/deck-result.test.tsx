@@ -61,7 +61,10 @@ test("a result names its member cards and Snaps by card title, never by characte
     job={{ status: "done", key: "expected", answer, rate: null, stopped: false }} onStop={() => {}} onRerun={() => {}} onEditCard={() => {}} onPlayer={() => {}} onAnswerAll={() => {}} />);
   expect(html).toContain('aria-label="Card title 1 → Card title 2 → Card title 3 → Card title 4 → Card title 5"');
   expect(html).toContain('<span class="dr-step-name" aria-hidden="true">Card title 3</span>');
-  expect(html).toContain('<strong title="Card title 1">Card title 1</strong>');
-  expect(html).toContain('<strong title="Snap title 11">Snap title 11</strong>');
+  expect(html).toContain('<strong class="dr-slot-name" title="Card title 1"><span class="dr-slot-tag">1</span>Card title 1</strong>');
+  expect(html).toContain('<strong class="dr-slot-name" title="Card title 3"><span class="dr-slot-tag">Leader</span>Card title 3</strong>');
+  expect(html).toContain('<strong class="dr-slot-name" title="Snap title 11">Snap title 11</strong>');
+  // Slots without a Snap keep their place: four in the first team, five in the folded second one.
+  expect((html.match(/class="dr-slot-card dr-slot-snap dr-slot-empty"/g) ?? []).length).toBe(9);
   expect(html.replace(/ alt="[^"]*"/g, "")).not.toContain("Character ");
 });

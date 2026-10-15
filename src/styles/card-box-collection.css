@@ -45,7 +45,9 @@
 .cb-table thead th{padding-block:8px;color:var(--md-sys-color-on-surface-variant);font-size:var(--md-sys-typescale-label-medium-size);font-weight:500}
 .cb-table :is(thead th:first-child,tbody th){width:100%;text-align:left}
 .cb-table tbody th{padding-left:0}
-.cb-table td[data-max=true]{color:var(--md-sys-color-primary);font-weight:500}
+.cb-table td[data-field=level]{font-weight:500}
+.cb-table .cs-meter{width:auto}
+.cb-table .cs-pips{flex:0 0 40px}
 @media(hover:hover){.cb-table tbody tr:hover{background:rgb(var(--md-sys-color-on-surface-rgb)/.06)}}
 .cb-row-card{display:flex;align-items:center;gap:12px;width:100%;min-width:220px;padding:4px;border:0;border-radius:var(--md-sys-shape-corner-small);background:transparent;color:inherit;text-align:left;font:inherit;cursor:pointer}
 .cb-row-card:disabled{cursor:default}

@@ -12,7 +12,7 @@ import type { DeckJobState } from "./use-deck-solver";
 import { BoxArtwork, cardName, type BoxCatalog } from "@/components/box/BoxManager";
 import CardStats from "@/components/box/CardStats";
 import NativeFormationGroup from "@/components/chart-data/NativeFormationGroup";
-import { MemberSquareArtwork } from "@/components/shared/CardSquareArtwork";
+import { MemberSquareArtwork, SupportSquareArtwork } from "@/components/shared/CardSquareArtwork";
 import { termRate, type RewardTerm } from "@/lib/deck/reward-mix";
 import { RewardBreakdown, RewardOrder, RewardTies } from "./DeckRewardMix";
 
@@ -214,7 +214,10 @@ function CardFace({ id, catalog, locale, leader = false, changed = false }: { id
   </span>;
 }
 
-/** Each slot's member card and Snap with their values, in formation order under the formation art. */
+/**
+ * Each slot's member card and Snap with their values, in formation order under the formation art. Every slot has the
+ * same rows (art, name, values for the member, then for the Snap), so names of any length keep the values in line.
+ */
 function Slots({ locale, team, box, catalog }: { locale: AppLocale; team: DeckTeam; box: CardBox | null; catalog: BoxCatalog }) {
   const tr = (key: string, values?: Record<string, string | number>) => t(locale, `deckWorkspace.solver.${key}`, values);
   const cardOf = (kind: "member" | "snap", id: number | null) => id === null ? null : box?.cards.find(card => card.kind === kind && card.identity.value === String(id)) ?? null;
@@ -224,18 +227,18 @@ function Slots({ locale, team, box, catalog }: { locale: AppLocale; team: DeckTe
       const snapId = team.layout.snaps[slot] ?? null, snap = cardOf("snap", snapId);
       const snapView = snapId === null ? undefined : catalog.snaps.find(card => card.id === snapId);
       return <li key={slot} data-leader={slot === LEADER_SLOT}>
-        <span className="dr-slot-tag">{slot === LEADER_SLOT ? tr("leaderShort") : slot + 1}</span>
         <div className="dr-slot-card">
-          {member && <BoxArtwork card={member} catalog={catalog} locale={locale} square />}
-          <div className="dr-slot-copy"><strong title={view?.title}>{view?.title ?? id}</strong></div>
+          {view ? <MemberSquareArtwork card={view} locale={locale} className="dw-card-art" native={false} /> : <span className="dw-card-art dw-card-unknown">?</span>}
+          <strong className="dr-slot-name" title={view?.title}><span className="dr-slot-tag">{slot === LEADER_SLOT ? tr("leaderShort") : slot + 1}</span>{view?.title ?? id}</strong>
           {member && <CardStats locale={locale} card={member} />}
         </div>
-        <div className="dr-slot-card dr-slot-snap">
-          {snapId === null ? <span className="dr-muted">{tr("meta.noSnap")}</span> : <>
-            {snap && <BoxArtwork card={snap} catalog={catalog} locale={locale} square />}
-            <div className="dr-slot-copy"><small>{tr("meta.snap")}</small><strong title={snapView?.title}>{snapView?.title ?? snapId}</strong></div>
-            {snap && <CardStats locale={locale} card={snap} />}</>}
-        </div>
+        {snapId === null ? <p className="dr-slot-card dr-slot-snap dr-slot-empty">{tr("meta.noSnap")}</p> : <div className="dr-slot-card dr-slot-snap">
+          <div className="dr-slot-snap-head">
+            {snapView ? <SupportSquareArtwork card={snapView} locale={locale} className="dw-card-art" native={false} /> : <span className="dw-card-art dw-card-unknown">?</span>}
+            <small>{tr("meta.snap")}</small></div>
+          <strong className="dr-slot-name" title={snapView?.title}>{snapView?.title ?? snapId}</strong>
+          {snap && <CardStats locale={locale} card={snap} />}
+        </div>}
       </li>;
     })}</ol>
     <p className="dr-note">{tr("freeSeating")}</p>

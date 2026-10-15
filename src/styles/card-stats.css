@@ -1,9 +1,28 @@
-/* A card's recorded values: a short label over each value, steps at their maximum in the primary color. */
-.cs-stats { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 2px; min-width: 0; margin: 0; padding: 4px 2px; border-radius: var(--md-sys-shape-corner-small); background: var(--md-sys-color-surface-container); font-variant-numeric: tabular-nums; }
-.cs-stats > div { display: grid; justify-items: center; gap: 0; min-width: 0; }
-.cs-stats dt { max-width: 100%; overflow: hidden; color: var(--md-sys-color-on-surface-variant); font-size: 10px; line-height: 14px; letter-spacing: 0; white-space: nowrap; text-overflow: clip; }
-.cs-stats dd { margin: 0; color: var(--md-sys-color-on-surface); font-size: var(--md-sys-typescale-label-large-size); line-height: 18px; font-weight: 500; }
-.cs-stats > [data-field="level"] dd { color: var(--md-sys-color-on-surface); }
-.cs-stats > [data-max="true"] dd { color: var(--md-sys-color-primary); }
-.cs-stats > [data-max="true"] dt { color: var(--md-sys-color-primary); }
-.cs-stats dd[aria-label] { color: var(--md-sys-color-on-surface-variant); font-weight: 400; }
+/* A card's recorded values: the level as a number, then each 1–5 step as five segments filled up to its value.
+   Filled segments use the primary color; a step at its maximum switches to the tertiary color, label included. */
+.cs { container: card-stats / inline-size; min-width: 0; }
+.cs-stats { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 4px 8px; min-width: 0; margin: 0; font-variant-numeric: tabular-nums; }
+.cs-stats > div { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; align-items: center; min-width: 0; }
+.cs-stats dt { overflow: hidden; color: var(--md-sys-color-on-surface-variant); font-size: var(--md-sys-typescale-label-small-size); line-height: 16px; letter-spacing: 0; white-space: nowrap; }
+.cs-stats dd { min-width: 0; margin: 0; }
+.cs-stats > [data-field="level"] dd { color: var(--md-sys-color-on-surface); font-size: var(--md-sys-typescale-title-small-size); line-height: 20px; font-weight: 500; }
+.cs-stats > [data-field="level"] dd[aria-label] { color: var(--md-sys-color-on-surface-variant); font-weight: 400; }
+.cs-stats > [data-max="true"] dt { color: var(--md-sys-color-tertiary); font-weight: 500; }
+
+/* A step meter: the segments take the free width up to a cap, the number follows them */
+.cs-meter { display: inline-flex; align-items: center; gap: 6px; width: 100%; min-width: 0; vertical-align: middle; }
+.cs-pips { display: flex; flex: 1 1 auto; gap: 2px; min-width: 24px; max-width: 64px; }
+.cs-pips > span { flex: 1 1 0; height: 6px; border-radius: 1px; background: rgb(var(--md-sys-color-on-surface-rgb) / 0.12); }
+.cs-pips > span[data-on] { background: var(--md-sys-color-primary); }
+.cs-num { flex: none; min-width: 1ch; color: var(--md-sys-color-on-surface); font-size: var(--md-sys-typescale-label-medium-size); line-height: 16px; font-weight: 500; text-align: end; }
+.cs-meter[data-max] .cs-num { color: var(--md-sys-color-tertiary); }
+.cs-meter[data-max] .cs-pips > span { background: var(--md-sys-color-tertiary); }
+.cs-meter[data-unknown] .cs-num { color: var(--md-sys-color-on-surface-variant); font-weight: 400; }
+
+/* Wide: the level stands at the left and the steps sit two to a row beside it */
+@container card-stats (min-width: 200px) {
+  .cs-stats { grid-template-columns: auto auto minmax(0, 1fr) auto minmax(0, 1fr); column-gap: 8px; }
+  .cs-stats > div { grid-column: span 2; }
+  .cs-stats > [data-field="level"] { grid-column: 1; grid-row: 1 / span 2; grid-template-columns: none; align-self: start; justify-items: start; padding-right: 4px; }
+  .cs-stats[data-kind="snap"] > [data-field="level"] { grid-row: 1; display: flex; align-items: baseline; gap: 4px; }
+}

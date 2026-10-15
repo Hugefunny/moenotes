@@ -170,19 +170,23 @@
 .dr-team-body { display: grid; gap: 16px; min-width: 0; padding: 0 16px 16px; }
 .dr-formation { width: min(100%, 640px); margin-inline: auto; }
 
-/* Slots: five columns under the formation art; one row each in narrow containers */
-.dr-slots-section { display: grid; gap: 6px; min-width: 0; }
-.dr-slots { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; min-width: 0; margin: 0; padding: 0; list-style: none; }
-.dr-slots > li { display: grid; align-content: start; gap: 8px; min-width: 0; padding: 8px; border-radius: var(--md-sys-shape-corner-medium); background: var(--md-sys-color-surface); }
-.dr-slots > li[data-leader="true"] { box-shadow: inset 0 0 0 1px var(--md-sys-color-primary); }
-.dr-slot-tag { justify-self: start; min-width: 22px; padding: 0 6px; text-align: center; white-space: nowrap; border-radius: var(--md-sys-shape-corner-extra-small); background: var(--md-sys-color-surface-container-highest); color: var(--md-sys-color-on-surface-variant); font-size: var(--md-sys-typescale-label-small-size); line-height: 18px; font-weight: 500; }
+/* Slots: five columns under the formation art that share their rows (art, name, values for the member, then the Snap),
+   so names of any length keep the values in line; one row per slot in narrow results */
+.dr-slots-section { container: dr-slots / inline-size; display: grid; gap: 6px; min-width: 0; }
+.dr-slots { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0 6px; min-width: 0; margin: 0; padding: 0; list-style: none; }
+.dr-slots > li { position: relative; display: grid; grid-row: span 6; grid-template-rows: subgrid; min-width: 0; padding: 8px; border-radius: var(--md-sys-shape-corner-medium); background: var(--md-sys-color-surface); }
+.dr-slots > li[data-leader="true"] { background: color-mix(in srgb, var(--md-sys-color-primary-container) 45%, var(--md-sys-color-surface)); box-shadow: inset 0 0 0 1px var(--md-sys-color-primary); }
+.dr-slot-tag { position: absolute; top: 8px; right: 8px; min-width: 20px; padding: 0 6px; text-align: center; white-space: nowrap; border-radius: var(--md-sys-shape-corner-extra-small); background: var(--md-sys-color-surface-container-highest); color: var(--md-sys-color-on-surface-variant); font-size: var(--md-sys-typescale-label-small-size); line-height: 18px; font-weight: 500; font-variant-numeric: tabular-nums; }
 .dr-slots > li[data-leader="true"] .dr-slot-tag { background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
-.dr-slot-card { display: grid; gap: 4px; min-width: 0; }
-.dr-slot-card > .dw-card-art { display: none; }
-.dr-slot-snap { padding-top: 8px; border-top: 1px solid var(--md-sys-color-outline-variant); }
-.dr-slot-copy { display: grid; min-width: 0; }
-.dr-slot-copy strong { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: var(--md-sys-typescale-title-small-size); line-height: 20px; font-weight: 500; overflow-wrap: anywhere; }
-.dr-slot-copy :is(span, small) { overflow: hidden; color: var(--md-sys-color-on-surface-variant); font-size: var(--md-sys-typescale-body-small-size); line-height: 16px; white-space: nowrap; text-overflow: ellipsis; }
+.dr-slot-card { display: grid; grid-row: span 3; grid-template-rows: subgrid; row-gap: 6px; min-width: 0; margin: 0; }
+.dr-slot-card > .dw-card-art { grid-row: 1; width: 44px; }
+.dr-slot-name { grid-row: 2; align-self: start; display: -webkit-box; min-width: 0; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: var(--md-sys-typescale-title-small-size); line-height: 20px; font-weight: 500; overflow-wrap: anywhere; }
+.dr-slot-card > .cs { grid-row: 3; align-self: start; }
+.dr-slots .dr-slot-snap { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--md-sys-color-outline-variant); }
+.dr-slot-snap-head { grid-row: 1; display: flex; align-items: center; gap: 6px; min-width: 0; }
+.dr-slot-snap-head > .dw-card-art { width: 28px; flex: 0 0 28px; }
+.dr-slot-snap-head > small { color: var(--md-sys-color-on-surface-variant); font-size: var(--md-sys-typescale-label-small-size); line-height: 16px; font-weight: 500; }
+.dc-composer .dr-slot-empty { display: block; color: var(--md-sys-color-on-surface-variant); font-size: var(--md-sys-typescale-body-small-size); line-height: var(--md-sys-typescale-body-small-line-height); }
 
 /* Skill activation orders */
 .dr-orders { display: grid; gap: 12px; min-width: 0; padding: 12px; border-radius: var(--md-sys-shape-corner-medium); background: var(--md-sys-color-surface); }
@@ -258,16 +262,20 @@
   .dr-rank { min-width: 0; }
   .dr-power { display: flex; align-items: baseline; gap: 6px; justify-self: end; }
   .dr-team-body { gap: 12px; padding: 0 12px 12px; }
+}
+/* Narrow results: each slot is one row, its member over its Snap, with the art beside the name and values */
+@container dr-slots (max-width: 520px) {
   .dr-slots { grid-template-columns: minmax(0, 1fr); gap: 4px; }
-  .dr-slots > li { grid-template-columns: auto minmax(0, 1fr); gap: 6px 8px; padding: 8px; }
-  .dr-slot-tag { grid-row: span 2; align-self: start; justify-self: center; }
-  .dr-slot-card { grid-template-columns: 36px minmax(0, 1fr); align-items: center; gap: 4px 8px; }
-  .dr-slot-card > .dw-card-art { display: block; grid-row: span 2; width: 36px; }
-  .dr-slot-card > .cs-stats { grid-column: 2; }
-  .dr-slot-snap { grid-column: 2; grid-template-columns: 28px minmax(0, 1fr) minmax(88px, auto); padding-top: 6px; }
-  .dr-slot-snap > .dw-card-art { grid-row: auto; width: 28px; }
-  .dr-slot-snap > .cs-stats { grid-column: 3; }
-  .dr-slot-snap .dr-slot-copy small { display: none; }
+  .dr-slots > li { grid-row: auto; grid-template-rows: none; }
+  .dr-slot-tag { position: static; display: inline-block; margin-right: 6px; vertical-align: 1px; }
+  .dr-slot-card { grid-row: auto; grid-template-rows: none; grid-template-columns: 40px minmax(0, 1fr); align-items: start; gap: 2px 10px; }
+  .dr-slot-card > .dw-card-art { grid-column: 1; grid-row: 1 / span 2; width: 40px; }
+  .dr-slot-name { grid-column: 2; grid-row: 1; display: block; white-space: nowrap; text-overflow: ellipsis; }
+  .dr-slot-card > .cs { grid-column: 2; grid-row: 2; }
+  .dr-slots .dr-slot-snap { margin-top: 8px; padding-top: 8px; }
+  .dr-slot-snap-head { display: contents; }
+  .dr-slot-snap-head > .dw-card-art { grid-column: 1; grid-row: 1 / span 2; justify-self: center; }
+  .dr-slot-snap-head > small { display: none; }
 }
 @container deck-composer (max-width: 440px) {
   .dr-order-list > div { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "label score" "order order"; gap: 4px 8px; }
