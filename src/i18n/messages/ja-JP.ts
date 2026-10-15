@@ -1906,6 +1906,8 @@ export const jaJP = {
     detailNotFound: "星図に記されていない少女",
     detailNotFoundDescription: "この少女の記憶は現在の星図には見当たりません。キャラクター一覧に戻り、新たな出会いを探してみましょう。",
     assets: {
+      label: "画像",
+      open: "{name}を拡大表示",
       sprite: "立ち絵",
       spriteDesc: "全身立ち絵レイヤー",
       thumbnail: "ポートレート",

@@ -7,16 +7,18 @@ interface Props {
   titleKey: string;
   descriptionKey: string;
   showDescription?: boolean;
+  /** The page renders its own heading (and h1), e.g. a detail page titled with the entity's name. */
+  hideHeader?: boolean;
 }
 
-const { locale, titleKey, descriptionKey, showDescription = true } = Astro.props;
+const { locale, titleKey, descriptionKey, showDescription = true, hideHeader = false } = Astro.props;
 ---
 
-<header class="md3-page-heading">
+{!hideHeader && <header class="md3-page-heading">
   <div class="flex flex-wrap items-center gap-3">
     <h1>{t(locale, titleKey)}</h1>
     <slot name="title-badge" />
   </div>
   {showDescription ? <p>{t(locale, descriptionKey)}</p> : null}
-</header>
+</header>}
 <slot />

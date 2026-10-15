@@ -118,3 +118,12 @@ html[data-audio-dock="open"] .mn-toaster { bottom: calc(6rem + env(safe-area-ins
   .mn-toast[data-icon="update"] .mn-toast-icon svg { animation: none; }
   .mn-toast-action { transition: none; }
 }
+
+/* Character page heading (CharacterDetail's CharacterHero): a strap in the character's main and sub color runs down
+   beside her name. The hairline keeps a white sub color visible on the light theme. */
+.mn-character-hero { position: relative; }
+.mn-character-hero::before {
+  content: ""; position: absolute; inset-block: 2px; left: 0; width: 6px; border-radius: 3px;
+  background: linear-gradient(to bottom, var(--mn-strap-main) 0 64%, var(--mn-strap-sub) 64% 100%);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--md-sys-color-outline-variant) 60%, transparent);
+}

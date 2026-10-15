@@ -1916,6 +1916,8 @@ export const zhCN = {
     detailNotFound: "未寻得这位少女的身影",
     detailNotFoundDescription: "在星光的指引下尚未觅得她的名字。返回图鉴，重温其他少女们耀眼的旅程吧。",
     assets: {
+      label: "图片",
+      open: "查看{name}大图",
       sprite: "立绘",
       spriteDesc: "盛放光彩的舞台全身立绘",
       thumbnail: "半身像",

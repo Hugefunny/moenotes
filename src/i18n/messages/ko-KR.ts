@@ -1861,6 +1861,8 @@ export const koKR = {
     detailNotFound: "성도에 기록되지 않은 소녀",
     detailNotFoundDescription: "이 소녀의 기억은 현재의 성도에서 찾을 수 없습니다. 캐릭터 도감으로 돌아가 새로운 인연을 찾아보세요.",
     assets: {
+      label: "이미지",
+      open: "{name} 크게 보기",
       sprite: "스프라이트",
       spriteDesc: "전신 스프라이트 레이어",
       thumbnail: "포트레이트",

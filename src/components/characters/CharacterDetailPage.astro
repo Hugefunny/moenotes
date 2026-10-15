@@ -20,6 +20,6 @@ const [initialData, progressionData, extrasData, servers] = await Promise.all([
 ]);
 ---
 
-<PageLayout locale={locale} titleKey="seo.characterDetail.title" descriptionKey="seo.characterDetail.description">
+<PageLayout locale={locale} titleKey="seo.characterDetail.title" descriptionKey="seo.characterDetail.description" hideHeader>
   <CharacterDetail client:load servers={servers} locale={locale} characterId={characterId} initialData={initialData} progressionData={progressionData} extrasData={extrasData} />
 </PageLayout>

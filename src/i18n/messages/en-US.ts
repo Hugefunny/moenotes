@@ -1872,6 +1872,8 @@ export const enUS = {
     detailNotFound: "Unfound silhouette",
     detailNotFoundDescription: "Her name has not yet been inscribed under the starlight. Return to the codex to revisit the shining journeys of other girls.",
     assets: {
+      label: "Images",
+      open: "View {name} at full size",
       sprite: "Sprite",
       spriteDesc: "Full-length stage portrait glowing with light",
       thumbnail: "Portrait",

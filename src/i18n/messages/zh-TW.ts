@@ -1915,6 +1915,8 @@ export const zhTW = {
     detailNotFound: "未尋得這位少女的身影",
     detailNotFoundDescription: "在星光的指引下尚未覓得她的名字。返回圖鑑，重溫其他少女們耀眼的旅程吧。",
     assets: {
+      label: "圖片",
+      open: "查看{name}大圖",
       sprite: "立繪",
       spriteDesc: "盛放光彩的舞台全身立繪",
       thumbnail: "半身像",
