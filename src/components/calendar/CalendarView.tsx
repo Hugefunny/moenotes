@@ -58,6 +58,12 @@ type CalendarViewMode = "grid" | "list";
 const VIEWS: readonly CalendarViewMode[] = ["grid", "list"];
 /** Bar rows a desktop week shows before "+N more". */
 const MAX_LANES = 4;
+/**
+ * Which items keep a bar row when a week runs out of them: what a reader plans around (events, gachas, lives,
+ * birthdays) before the passes, login bonuses and missions that run all month and would otherwise fill every row.
+ */
+const LANE_RANK: Readonly<Record<CalendarKind, number>> = { event: 0, gacha: 1, realLive: 2, birthday: 3, mission: 4, loginBonus: 5, seasonPass: 6, monthlyPass: 7 };
+const laneRank = (item: CalendarItem) => LANE_RANK[item.kind];
 
 /** Month and list views of everything dated on the reader's server, in the reader's time zone. */
 export default function CalendarView({ locale, data, birthdays, servers, characters, buildMonth }: Props) {
@@ -285,7 +291,7 @@ function WeekRow({ locale, week, month, items, today, selectedDay, onSelectDay }
   selectedDay: CalendarDate | null;
   onSelectDay: (day: CalendarDate) => void;
 }) {
-  const layout = useMemo(() => layoutWeekLimited(items, week, MAX_LANES), [items, week]);
+  const layout = useMemo(() => layoutWeekLimited(items, week, MAX_LANES, laneRank), [items, week]);
   const perDay = useMemo(() => week.map((day) => itemsOnDay(items, day)), [items, week]);
   return (
     <div className="relative grid grid-cols-7 border-b border-outline-variant last:border-b-0" role="row">
