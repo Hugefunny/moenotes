@@ -1,7 +1,7 @@
 import { useId } from "react";
 import type { AppLocale } from "@/config/locales";
 import { t } from "@/i18n";
-import { computes, effectiveAggregation, playsGekisou, readsAccuracy, type DeckAggregation, type DeckGoalInput, type DeckSolverCapabilities } from "@/lib/deck/goals";
+import { computes, effectiveAggregation, readsAccuracy, type DeckAggregation, type DeckGoalInput, type DeckSolverCapabilities } from "@/lib/deck/goals";
 
 /** Choose how to rank random outcomes without changing the live or its play conditions. */
 export default function DeckObjective({ locale, input, capabilities, onChange }: {
@@ -13,7 +13,6 @@ export default function DeckObjective({ locale, input, capabilities, onChange }:
   const id = useId();
   if (!readsAccuracy(input)) return null;
   const tr = (key: string) => t(locale, `deckWorkspace.objective.${key}`);
-  if (playsGekisou(input)) return <p className="dw-muted">{tr("gekisouNote")}</p>;
   const selected = effectiveAggregation(input);
   const maximum = !!capabilities && computes(capabilities, { ...input, aggregation: "maximum" });
   // Tagged only once the loaded engine has answered; while it loads, the availability note says so instead.

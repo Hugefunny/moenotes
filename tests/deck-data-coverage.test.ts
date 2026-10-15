@@ -112,6 +112,25 @@ describe("deck data coverage", () => {
     }
   });
 
+  test("an engine that computes LUCK missions opens LUCK Gekisou lives except plays with Greats it cannot convert", () => {
+    const luck = { ...updated, musics: updated.musics.map(row => ({ ...row, hasLuck: true })) };
+    const at = (patch: Partial<DeckGoalInput>, capabilities: { luckMissions?: boolean; luckGreatConversions?: boolean } | null, available: DeckDataCatalog = luck) =>
+      deckDataGap({ ...defaultDeckGoalInput(), musicId: 100001, arenaMusicId: 7, ...patch }, event, available, [{ id: 7, musicId: 100001 }], capabilities);
+    const certified = { luckMissions: true, luckGreatConversions: false };
+    for (const goal of ["battle", "mission", "arena"] as const) {
+      expect(at({ goal }, null)).toBe("luck");
+      expect(at({ goal }, { luckMissions: false })).toBe("luck");
+      expect(at({ goal }, certified)).toBeNull();
+      expect(at({ goal, greatPercent: 10 }, certified)).toBe("luckGreat");
+      expect(at({ goal, greatPercent: 10, playMode: "pattern" }, certified)).toBe("luckGreat");
+      expect(at({ goal, greatPercent: 10 }, { luckMissions: true, luckGreatConversions: true })).toBeNull();
+      expect(at({ goal, greatPercent: 10 }, certified, updated)).toBeNull();
+    }
+    expect(at({ goal: "eventPoints", venue: "battleLive", greatPercent: 10 }, certified)).toBe("luckGreat");
+    expect(at({ goal: "free", greatPercent: 10 }, certified)).toBeNull();
+    expect(at({ goal: "battle" }, certified, { ...luck, musics: luck.musics.map(row => ({ ...row, hasLuck: null })) })).toBe("missions");
+  });
+
   test("mission support follows the selected arena song rather than an unused ordinary selection", () => {
     const available = { ...updated, musics: updated.musics.map(row => ({ ...row, hasLuck: row.id === 100001 })) };
     expect(gap({ goal: "arena", arenaMusicId: 7, musicId: 100111 }, available)).toBe("luck");

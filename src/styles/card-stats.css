@@ -1,0 +1,9 @@
+/* A card's recorded values: a short label over each value, steps at their maximum in the primary color. */
+.cs-stats { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 2px; min-width: 0; margin: 0; padding: 4px 2px; border-radius: var(--md-sys-shape-corner-small); background: var(--md-sys-color-surface-container); font-variant-numeric: tabular-nums; }
+.cs-stats > div { display: grid; justify-items: center; gap: 0; min-width: 0; }
+.cs-stats dt { max-width: 100%; overflow: hidden; color: var(--md-sys-color-on-surface-variant); font-size: 10px; line-height: 14px; letter-spacing: 0; white-space: nowrap; text-overflow: clip; }
+.cs-stats dd { margin: 0; color: var(--md-sys-color-on-surface); font-size: var(--md-sys-typescale-label-large-size); line-height: 18px; font-weight: 500; }
+.cs-stats > [data-field="level"] dd { color: var(--md-sys-color-on-surface); }
+.cs-stats > [data-max="true"] dd { color: var(--md-sys-color-primary); }
+.cs-stats > [data-max="true"] dt { color: var(--md-sys-color-primary); }
+.cs-stats dd[aria-label] { color: var(--md-sys-color-on-surface-variant); font-weight: 400; }
