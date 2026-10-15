@@ -43,14 +43,14 @@
 
   /* ── Headings (M3 type scale; no decoration) ── */
   .md3-page-heading { margin: 0 0 24px; padding: 8px 0 0; }
-  .md3-page-heading h1 { min-width: 0; margin: 0; font-family: var(--md-ref-typeface-brand); font-size: var(--md-sys-typescale-headline-large-size); line-height: var(--md-sys-typescale-headline-large-line-height); font-weight: 400; color: var(--md-sys-color-on-surface); overflow-wrap: anywhere; }
+  .md3-page-heading h1 { min-width: 0; margin: 0; font-family: var(--md-ref-typeface-brand); font-size: var(--md-sys-typescale-headline-large-size); line-height: var(--md-sys-typescale-headline-large-line-height); font-weight: var(--md-sys-typescale-weight-semibold); color: var(--md-sys-color-on-surface); overflow-wrap: anywhere; }
   .md3-page-heading p { max-width: 76ch; margin: 8px 0 0; color: var(--md-sys-color-on-surface-variant); font-size: var(--md-sys-typescale-body-large-size); line-height: var(--md-sys-typescale-body-large-line-height); letter-spacing: var(--md-sys-typescale-body-large-tracking); }
   @media (max-width: 600px) {
     .md3-page-heading h1 { font-size: var(--md-sys-typescale-headline-medium-size); line-height: var(--md-sys-typescale-headline-medium-line-height); }
     .md3-page-heading p { font-size: var(--md-sys-typescale-body-medium-size); line-height: var(--md-sys-typescale-body-medium-line-height); }
   }
   .md3-section-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 16px; min-width: 0; }
-  .md3-section-heading h2 { flex: 1 1 auto; min-width: 0; margin: 0; font-family: var(--md-ref-typeface-brand); font-size: var(--md-sys-typescale-title-large-size); line-height: var(--md-sys-typescale-title-large-line-height); font-weight: 400; color: var(--md-sys-color-on-surface); overflow-wrap: anywhere; }
+  .md3-section-heading h2 { flex: 1 1 auto; min-width: 0; margin: 0; font-family: var(--md-ref-typeface-brand); font-size: var(--md-sys-typescale-title-large-size); line-height: var(--md-sys-typescale-title-large-line-height); font-weight: var(--md-sys-typescale-weight-semibold); color: var(--md-sys-color-on-surface); overflow-wrap: anywhere; }
 
   /* ── Placeholder art (missing banners/thumbnails): a tonal tile instead of the old orbit texture ── */
   .md3-placeholder {

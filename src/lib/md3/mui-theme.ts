@@ -47,14 +47,15 @@ const font = (t: Type, family = "var(--md-ref-typeface-plain)"): FontStyle => ({
   letterSpacing: t.tracking,
   fontWeight: t.weight,
 });
+// Weights as in src/styles/md3/tokens.css: display bold, headlines and the large title semibold.
 const TYPE = {
-  displayLarge: typeScale("display-large", 400),
-  displayMedium: typeScale("display-medium", 400),
-  displaySmall: typeScale("display-small", 400),
-  headlineLarge: typeScale("headline-large", 400),
-  headlineMedium: typeScale("headline-medium", 400),
-  headlineSmall: typeScale("headline-small", 400),
-  titleLarge: typeScale("title-large", 400),
+  displayLarge: typeScale("display-large", 700),
+  displayMedium: typeScale("display-medium", 700),
+  displaySmall: typeScale("display-small", 700),
+  headlineLarge: typeScale("headline-large", 600),
+  headlineMedium: typeScale("headline-medium", 600),
+  headlineSmall: typeScale("headline-small", 600),
+  titleLarge: typeScale("title-large", 600),
   titleMedium: typeScale("title-medium", 500),
   titleSmall: typeScale("title-small", 500),
   labelLarge: typeScale("label-large", 500),

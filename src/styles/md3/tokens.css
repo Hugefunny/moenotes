@@ -32,6 +32,10 @@
   --md-sys-typescale-body-small-size: 12px;      --md-sys-typescale-body-small-line-height: 16px;      --md-sys-typescale-body-small-tracking: 0.4px;
   --md-sys-typescale-weight-regular: 400;
   --md-sys-typescale-weight-medium: 500;
+  /* Beyond the M3 baseline (all regular above the titles): headings carry weight so a page reads as a hierarchy, not
+     one even grey. Display is bold, headlines and the large title semibold; body and labels keep the baseline. */
+  --md-sys-typescale-weight-semibold: 600;
+  --md-sys-typescale-weight-bold: 700;
 
   /* ── Elevation (shadow part; the tonal part comes from the surface-container roles) ── */
   --md-sys-elevation-level0: none;

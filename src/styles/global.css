@@ -22,7 +22,8 @@
   }
 }
 
-/* Tailwind font weights follow the M3 type scale (regular 400 / medium 500): no 600–900 emphasis. */
+/* Weight comes from the type scale (headings semibold or bold, src/styles/md3/tokens.css); the weight utilities stay
+   capped at medium so components do not pick their own emphasis. */
 @theme {
   --font-weight-semibold: 500;
   --font-weight-bold: 500;

@@ -1,13 +1,14 @@
 /**
  * Material 3 schemes from one seed color (the default brand blue, or a band's MasterBand.mainColorCode chosen in the
- * settings): tonal-spot schemes from material-color-utilities, plus the extended groups of src/lib/md3/roles.ts
- * harmonized toward the seed so success / warning / category hues sit in the same family as the theme.
+ * settings): tonal-spot schemes from material-color-utilities with more of the seed in the neutrals (NEUTRAL_CHROMA),
+ * plus the extended groups of src/lib/md3/roles.ts harmonized toward the seed so success / warning / category hues sit
+ * in the same family as the theme.
  *
  * The result is cached in browser storage (src/lib/settings/apply-theme.ts) so the head bootstrap script applies it
  * before the first paint; the default seed's schemes are baked into src/styles/md3/tokens.css by
  * scripts/generate-md3-tokens.ts.
  */
-import { Blend, Hct, SchemeTonalSpot, TonalPalette, argbFromHex, hexFromArgb } from "@material/material-color-utilities";
+import { Blend, DynamicScheme, Hct, SchemeTonalSpot, TonalPalette, Variant, argbFromHex, hexFromArgb } from "@material/material-color-utilities";
 import { MD3_BASE_ROLES, MD3_EXTENDED_GROUPS, type Md3Colors, type Md3ExtendedGroup, type Md3Schemes } from "@/lib/md3/roles";
 
 /** The legacy brand accent-deep: the default theme keeps the MoeNotes blue. */
@@ -47,10 +48,31 @@ function extendedGroup(group: Md3ExtendedGroup, seedArgb: number, dark: boolean)
   };
 }
 
+/**
+ * Chroma of the surfaces and outlines, and of the secondary roles (selected chips, segmented buttons). Tonal spot keeps
+ * them near grey (6, 8 and 16); with these the default blue reads as a night sky rather than grey, and a band's color
+ * carries into the page it themes.
+ */
+const NEUTRAL_CHROMA = 14;
+const NEUTRAL_VARIANT_CHROMA = 18;
+const SECONDARY_CHROMA = 24;
+
 /** One theme (light or dark) for `seed` (`#RRGGBB`). */
 export function md3Colors(seed: string, dark: boolean): Md3Colors {
   const seedArgb = argbFromHex(seed);
-  const scheme = new SchemeTonalSpot(Hct.fromInt(seedArgb), dark, 0);
+  const source = Hct.fromInt(seedArgb);
+  const tonalSpot = new SchemeTonalSpot(source, dark, 0);
+  const scheme = new DynamicScheme({
+    sourceColorHct: source,
+    variant: Variant.TONAL_SPOT,
+    contrastLevel: 0,
+    isDark: dark,
+    primaryPalette: tonalSpot.primaryPalette,
+    secondaryPalette: TonalPalette.fromHueAndChroma(tonalSpot.secondaryPalette.hue, SECONDARY_CHROMA),
+    tertiaryPalette: tonalSpot.tertiaryPalette,
+    neutralPalette: TonalPalette.fromHueAndChroma(source.hue, NEUTRAL_CHROMA),
+    neutralVariantPalette: TonalPalette.fromHueAndChroma(source.hue, NEUTRAL_VARIANT_CHROMA),
+  });
   const colors: Md3Colors = {};
   for (const role of MD3_BASE_ROLES) colors[role] = hexFromArgb(scheme[role]);
   for (const group of MD3_EXTENDED_GROUPS) Object.assign(colors, extendedGroup(group, seedArgb, dark));
