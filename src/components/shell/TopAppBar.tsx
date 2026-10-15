@@ -140,15 +140,14 @@ function Crumb({ locale, crumb }: { locale: AppLocale; crumb: HeaderCrumb }) {
     <>
       {crumb.picker ? (
         <ButtonBase
-          aria-label={menuLabel}
           aria-haspopup="menu"
           aria-expanded={open}
           aria-controls={open ? menuId : undefined}
           onClick={(event) => setAnchor(event.currentTarget)}
-          className={`md3-state h-8 gap-1 !rounded-shape-sm !px-3 text-label-large ${chip}`}
+          className={`md3-state h-8 gap-1 !rounded-shape-sm !pl-3 !pr-1.5 text-label-large ${chip}`}
         >
-          <Icon name="more" className="h-[18px] w-[18px]" />
-          <Icon name="chevronDown" className="h-[18px] w-[18px]" />
+          <span>{menuLabel}</span>
+          <Icon name="chevronDown" className={`h-[18px] w-[18px] transition-transform ${open ? "rotate-180" : ""}`} />
         </ButtonBase>
       ) : (
         <span className={`flex h-8 items-center overflow-hidden rounded-shape-sm ${chip}`}>
