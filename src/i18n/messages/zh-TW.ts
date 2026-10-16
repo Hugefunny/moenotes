@@ -1043,6 +1043,14 @@ export const zhTW = {
     accent: { title: "主題色", default: "預設" },
     density: { title: "介面密度", comfortable: "寬鬆", compact: "緊湊" },
     songTitles: { title: "歌曲名稱", forceJapanese: "一律顯示日文曲名", hint: "無論網站語言為何，都以日文原名顯示歌曲。" },
+    spoiler: {
+      title: "劇透內容過濾",
+      showLabel: "劇透內容顯示",
+      eulaNotice: "根據bilibili.inc用戶條款EULA第八章要求 本站暫不提供未發布內容的查看",
+      devOnly: "該功能僅供開發者測試",
+      restrictedTitle: "未發布內容暫不提供查看",
+      devTestingBadge: "開發者測試",
+    },
     data: {
       cacheTitle: "下載緩存",
       total: "已緩存",
@@ -1070,6 +1078,7 @@ export const zhTW = {
   },
   actions: {
     close: "關閉",
+    back: "返回",
     clearCache: "清除緩存",
     refresh: "刷新",
     open: "打開",

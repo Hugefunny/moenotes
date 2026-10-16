@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { AppLocale } from "@/config/locales";
 import type { GameServer } from "@/config/servers";
 import ServerScope from "@/components/shared/ServerScope";
@@ -13,6 +13,7 @@ import { exchangePath } from "@/lib/exchange/links";
 import { formatScheduleRange } from "@/lib/schedule";
 import { useDisplayTimeZone } from "@/lib/schedule/use-display-time-zone";
 import { useNow } from "@/lib/schedule/use-now";
+import { isSpoiler, useSpoiler } from "@/lib/settings/spoiler";
 
 interface Props {
   locale: AppLocale;
@@ -25,10 +26,21 @@ export default function ExchangeExplorer({ locale, servers, initialCategories }:
   const { server, pickServer, items: categories } = useServerList(locale, servers, initialCategories);
   const timeZone = useDisplayTimeZone();
   const now = useNow();
+  const { showSpoiler } = useSpoiler();
   const serverOnly = useServerOnlyLabel(locale);
   const [activeId, setActiveId] = useState<number | null>(null);
 
-  const active = activeId === null ? categories : categories.filter((category) => category.id === activeId);
+  const visibleCategories = useMemo(() => {
+    if (showSpoiler || now === null) return categories;
+    return categories
+      .map((category) => ({
+        ...category,
+        exchanges: category.exchanges.filter((exchange) => !isSpoiler(exchange.startAt, now)),
+      }))
+      .filter((category) => category.exchanges.length > 0);
+  }, [categories, showSpoiler, now]);
+
+  const active = activeId === null ? visibleCategories : visibleCategories.filter((category) => category.id === activeId);
 
   return (
     <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer}>

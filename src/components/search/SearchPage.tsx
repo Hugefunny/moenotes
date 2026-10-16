@@ -5,6 +5,7 @@ import { stripLocaleFromPathname } from "@/i18n/routing";
 import { searchContent, type ContentSearchResult } from "@/lib/search/client";
 import { CONTENT_KIND_ORDER, KIND_LABEL_KEY } from "@/lib/search/kinds";
 import { buildStaticIndexPageItems, type StaticSearchPageItem } from "@/lib/search/static-page-items";
+import { isSpoiler, useSpoilerSetting } from "@/lib/settings/spoiler";
 
 interface Props {
   locale: AppLocale;
@@ -36,12 +37,18 @@ export default function SearchPage({ locale }: Props) {
       [t(locale, item.labelKey), item.path, ...item.keywords].some((value) => value.toLocaleLowerCase().includes(q)));
   }, [staticItems, locale, q]);
 
+  const { showSpoiler, now } = useSpoilerSetting();
+  const visibleContent = useMemo(() => {
+    if (showSpoiler || now === null) return content;
+    return content.filter((result) => !isSpoiler(result.startAt, now));
+  }, [content, showSpoiler, now]);
+
   const grouped = useMemo(() => {
     const byKind = new Map<ContentSearchResult["kind"], ContentSearchResult[]>();
     for (const kind of CONTENT_KIND_ORDER) byKind.set(kind, []);
-    for (const result of content) byKind.get(result.kind)?.push(result);
+    for (const result of visibleContent) byKind.get(result.kind)?.push(result);
     return CONTENT_KIND_ORDER.map((kind) => ({ kind, results: byKind.get(kind) ?? [] })).filter(({ results }) => results.length > 0);
-  }, [content]);
+  }, [visibleContent]);
 
   const presentKinds = useMemo(() => grouped.map(({ kind }) => kind), [grouped]);
   const visibleGroups = activeKind === "all" ? grouped : grouped.filter(({ kind }) => kind === activeKind);

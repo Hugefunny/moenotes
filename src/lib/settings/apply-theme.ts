@@ -124,5 +124,15 @@ export function buildThemeBootstrapScript(): string {
       document.head.appendChild(style);
     }
   } catch(e) {}
+  try {
+    var search = window.location.search;
+    if (/[?&]spoiler=allow(?:&|$)/i.test(search)) {
+      localStorage.setItem(${JSON.stringify(storageKeys.spoilerUnlocked)}, '1');
+      localStorage.setItem(${JSON.stringify(storageKeys.showSpoiler)}, '1');
+    } else if (/[?&]spoiler=(?:disallow|deny|disable|reset)(?:&|$)/i.test(search)) {
+      localStorage.setItem(${JSON.stringify(storageKeys.spoilerUnlocked)}, '0');
+      localStorage.setItem(${JSON.stringify(storageKeys.showSpoiler)}, '0');
+    }
+  } catch(e) {}
 })();`;
 }

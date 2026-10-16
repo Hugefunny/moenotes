@@ -17,6 +17,7 @@ import { imageFileName } from "@/lib/collectibles/image-client";
 import { parsePositiveIntParam, useQueryOverlay } from "@/lib/overlay/use-query-overlay";
 import { useListPageMemory } from "@/lib/scroll/use-list-page-memory";
 import type { ComicViewModel } from "@/lib/comics/data";
+import { isSpoiler, useSpoilerSetting } from "@/lib/settings/spoiler";
 
 interface Props {
   locale: AppLocale;
@@ -31,7 +32,12 @@ const COMIC_FILES = ["imageUrl"] as const;
 export default function ComicsExplorer({ locale, servers, initialComics, initialBandNames }: Props) {
   const memory = useListPageMemory("comics");
   const { server, pickServer, items: serverItems } = useServerList(locale, servers, initialComics);
-  const comics = useServerFiles(serverItems, server, COMIC_FILES);
+  const { showSpoiler, now } = useSpoilerSetting();
+  const visibleServerItems = useMemo(() => {
+    if (showSpoiler || now === null) return serverItems;
+    return serverItems.filter((comic) => !isSpoiler(comic.startAt, now));
+  }, [serverItems, showSpoiler, now]);
+  const comics = useServerFiles(visibleServerItems, server, COMIC_FILES);
   
   const [query, setQuery] = useState("");
   const sort = useListSort("comics", locale, "");

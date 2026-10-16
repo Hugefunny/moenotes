@@ -25,6 +25,8 @@ import {
 } from "@/lib/story/player-data";
 import StoryStage from "@/components/tools/StoryStage";
 import StoryPickerDialog from "@/components/tools/StoryPickerDialog";
+import SpoilerNotice from "@/components/shared/SpoilerNotice";
+import { isSpoiler, useSpoilerSetting } from "@/lib/settings/spoiler";
 import { StageSignature } from "@/components/tools/Live2DStage";
 import {
   AutoIcon,
@@ -82,8 +84,15 @@ export default function StoryPlayerTool({ locale, stories }: Props) {
     return buildStoryPlayerEntries(stories, siteEntries, locale, t(locale, "storyPlayer.otherEpisodes"));
   }, [site, linked, stories, locale]);
 
-  const index = useMemo(() => entries.findIndex((entry) => entry.advId === advId), [entries, advId]);
-  const current = index >= 0 ? entries[index]! : null;
+  const { showSpoiler, now } = useSpoilerSetting();
+  const visibleEntries = useMemo(() => {
+    if (showSpoiler || now === null) return entries;
+    return entries.filter((entry) => !entry.startAt || !isSpoiler(entry.startAt, now));
+  }, [entries, showSpoiler, now]);
+  const rawCurrent = useMemo(() => entries.find((entry) => entry.advId === advId) ?? null, [entries, advId]);
+  const isUnreleased = Boolean(now !== null && rawCurrent?.startAt && isSpoiler(rawCurrent.startAt, now));
+  const index = useMemo(() => visibleEntries.findIndex((entry) => entry.advId === advId), [visibleEntries, advId]);
+  const current = !showSpoiler && isUnreleased ? null : (index >= 0 ? visibleEntries[index]! : rawCurrent);
 
   // The address names the story: open it once the index has arrived (or from its manifest, when the index lacks it).
   useEffect(() => {
@@ -126,15 +135,17 @@ export default function StoryPlayerTool({ locale, stories }: Props) {
 
   return (
     <div className="space-y-3 @container">
-      {current ? (
+      {!showSpoiler && isUnreleased ? (
+        <SpoilerNotice locale={locale} />
+      ) : current ? (
         <StoryView
           key={current.advId}
           locale={locale}
           entry={current}
           language={language}
           onLanguage={setLanguage}
-          previous={index > 0 ? entries[index - 1]! : null}
-          next={index + 1 < entries.length ? entries[index + 1]! : null}
+          previous={index > 0 ? visibleEntries[index - 1]! : null}
+          next={index + 1 < visibleEntries.length ? visibleEntries[index + 1]! : null}
           onChoose={choose}
           onPick={openPicker}
           onInfo={openInfo}
@@ -145,7 +156,7 @@ export default function StoryPlayerTool({ locale, stories }: Props) {
       )}
       <p className="px-1 text-right text-label-small text-on-surface-variant">{t(locale, "storyPlayer.credit")}</p>
 
-      <StoryPickerDialog locale={locale} entries={entries} open={pickerOpen} onClose={() => setPickerOpen(false)} currentId={advId} onSelect={choose} />
+      <StoryPickerDialog locale={locale} entries={visibleEntries} open={pickerOpen} onClose={() => setPickerOpen(false)} currentId={advId} onSelect={choose} />
       <StoryInfoDialog locale={locale} open={infoOpen} onClose={() => setInfoOpen(false)} runtimes={runtimes} />
     </div>
   );

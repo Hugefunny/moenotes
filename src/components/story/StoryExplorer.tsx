@@ -26,6 +26,8 @@ import type { RawText } from "@/lib/cards/data";
 import { t } from "@/i18n";
 import { localizePath } from "@/i18n/routing";
 import { formatPlayTime, storyEpisodeLabel } from "@/lib/story/labels";
+import { useNow } from "@/lib/schedule/use-now";
+import { isSpoiler, useSpoiler } from "@/lib/settings/spoiler";
 
 export type StorySection = "main" | "event" | "friendship" | "birthday" | "other";
 
@@ -61,7 +63,14 @@ export default function StoryExplorer({ locale, servers, initialCategory, initia
   const characters = initialCharacters;
   const texts = initialTexts;
 
-  const sectionStories = useMemo(() => stories.filter((story) => inStorySection(initialCategory, story)), [stories, initialCategory]);
+  const now = useNow();
+  const { showSpoiler } = useSpoiler();
+  const visibleStories = useMemo(() => {
+    if (showSpoiler || now === null) return stories;
+    return stories.filter((story) => !isSpoiler(story.startAt, now));
+  }, [stories, showSpoiler, now]);
+
+  const sectionStories = useMemo(() => visibleStories.filter((story) => inStorySection(initialCategory, story)), [visibleStories, initialCategory]);
   const hasFilters = initialCategory !== "main";
   const isFriendship = initialCategory === "friendship";
   const pairCharacters = useMemo(() => {

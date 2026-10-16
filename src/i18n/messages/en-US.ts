@@ -1007,6 +1007,14 @@ export const enUS = {
     accent: { title: "Theme color", default: "Default" },
     density: { title: "Density", comfortable: "Comfortable", compact: "Compact" },
     songTitles: { title: "Song titles", forceJapanese: "Always show Japanese titles", hint: "Show every song under its original Japanese title, whatever the site language." },
+    spoiler: {
+      title: "Spoiler content filter",
+      showLabel: "Show spoiler content",
+      eulaNotice: "According to bilibili.inc user terms EULA Chapter 8 requirements, this site currently does not provide viewing of unreleased content.",
+      devOnly: "This feature is for developer testing only",
+      restrictedTitle: "Unreleased content restricted",
+      devTestingBadge: "Developer testing",
+    },
     data: {
       cacheTitle: "Download cache",
       total: "Cached",
@@ -1032,7 +1040,7 @@ export const enUS = {
       unavailable: "This browser does not let the site keep files (private browsing can block it), so they download each time.",
     },
   },
-  actions: { close: "Close", clearCache: "Clear cache", refresh: "Refresh", open: "Open", viewGroup: "View group" },
+  actions: { close: "Close", back: "Back", clearCache: "Clear cache", refresh: "Refresh", open: "Open", viewGroup: "View group" },
   home: {
     heading: "BanG Dream! Our Notes Database",
     now: "Happening now",

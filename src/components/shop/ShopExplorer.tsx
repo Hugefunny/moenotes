@@ -22,6 +22,7 @@ import type { ServerFaceted } from "@/lib/servers/facets";
 import { useServerList } from "@/lib/servers/use-content-server";
 import type { ShopLimitKind, ShopPaymentKind, ShopSummaryViewModel } from "@/lib/shop/data";
 import { shopPath } from "@/lib/shop/links";
+import { isSpoiler, useSpoiler } from "@/lib/settings/spoiler";
 
 interface Props {
   locale: AppLocale;
@@ -44,18 +45,24 @@ export default function ShopExplorer({ locale, servers, initialShops }: Props) {
   const [selectedLimits, setSelectedLimits] = useState<ShopLimitKind[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<ScheduleStatus[]>([]);
 
-  const availablePayments = useMemo(() => paymentKinds.filter((kind) => shops.some((shop) => shop.payment.kind === kind)), [shops]);
-  const availableLimits = useMemo(() => limitKinds.filter((kind) => shops.some((shop) => shop.limitKind === kind)), [shops]);
+  const { showSpoiler } = useSpoiler();
+  const visibleShops = useMemo(() => {
+    if (showSpoiler || now === null) return shops;
+    return shops.filter((shop) => !isSpoiler(shop.startAt, now));
+  }, [shops, showSpoiler, now]);
+
+  const availablePayments = useMemo(() => paymentKinds.filter((kind) => visibleShops.some((shop) => shop.payment.kind === kind)), [visibleShops]);
+  const availableLimits = useMemo(() => limitKinds.filter((kind) => visibleShops.some((shop) => shop.limitKind === kind)), [visibleShops]);
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase();
-    return shops.filter((shop) => {
+    return visibleShops.filter((shop) => {
       if (selectedPayments.length > 0 && !selectedPayments.includes(shop.payment.kind)) return false;
       if (selectedLimits.length > 0 && !selectedLimits.includes(shop.limitKind)) return false;
       if (selectedStatuses.length > 0 && now !== null && !selectedStatuses.includes(scheduleStatus(shop.startAt, shop.endAt, now))) return false;
       return !needle || shop.searchText.includes(needle);
     });
-  }, [shops, query, selectedPayments, selectedLimits, selectedStatuses, now]);
+  }, [visibleShops, query, selectedPayments, selectedLimits, selectedStatuses, now]);
 
   const sorted = useMemo(() => sortEntries(filtered, sort.value, locale, now === null ? {} : { now }), [filtered, sort.value, locale, now]);
   const hasActiveFilters = sort.value !== "default" || Boolean(query) || selectedPayments.length > 0 || selectedLimits.length > 0 || selectedStatuses.length > 0;

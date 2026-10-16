@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import type { AppLocale } from "@/config/locales";
 import type { GameServer } from "@/config/servers";
 import BandLogo from "@/components/shared/BandLogo";
@@ -9,9 +10,9 @@ import { t } from "@/i18n";
 import { realLiveStatus, type RealLiveStatus, type RealLiveViewModel } from "@/lib/real-lives/data";
 import { formatMasterDate } from "@/lib/schedule";
 import { useDisplayTimeZone } from "@/lib/schedule/use-display-time-zone";
-import { useNow } from "@/lib/schedule/use-now";
 import type { ServerFaceted } from "@/lib/servers/facets";
 import { useServerList } from "@/lib/servers/use-content-server";
+import { isSpoiler, useSpoilerSetting } from "@/lib/settings/spoiler";
 
 interface Props {
   locale: AppLocale;
@@ -30,16 +31,20 @@ const toneByStatus: Record<RealLiveStatus, string> = {
 /** The bands' real-world lives the game schedules, earliest first. */
 export default function RealLivesView({ locale, servers, lives: initialLives }: Props) {
   const { server, pickServer, items: lives } = useServerList(locale, servers, initialLives);
-  const now = useNow();
+  const { showSpoiler, now } = useSpoilerSetting();
   const timeZone = useDisplayTimeZone();
+  const visibleLives = useMemo(() => {
+    if (showSpoiler || now === null) return lives;
+    return lives.filter((live) => !isSpoiler(live.startAt, now));
+  }, [lives, showSpoiler, now]);
   return (
     <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer}>
-      {lives.length === 0 ? (
+      {visibleLives.length === 0 ? (
         <p className="md3-surface p-8 text-center text-body-medium text-on-surface-variant">{t(locale, "realLives.empty")}</p>
       ) : (
         <>
           <ol className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
-            {lives.map((live) => {
+            {visibleLives.map((live) => {
               const status = now === null ? null : realLiveStatus(live, now);
               const names = live.bands.map((band) => band.name).filter(Boolean).join(" / ");
               return (
@@ -74,7 +79,7 @@ export default function RealLivesView({ locale, servers, lives: initialLives }: 
               );
             })}
           </ol>
-          <TimesNote locale={locale} value={lives[0]?.startAt ?? ""} timeZone={timeZone} className="mt-4 text-body-small text-on-surface-variant" />
+          <TimesNote locale={locale} value={visibleLives[0]?.startAt ?? ""} timeZone={timeZone} className="mt-4 text-body-small text-on-surface-variant" />
         </>
       )}
     </ServerScope>

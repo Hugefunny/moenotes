@@ -19,6 +19,8 @@ import { entityLinkPath } from "@/lib/route/entity-link";
 import { formatMasterDate, formatScheduleRange } from "@/lib/schedule";
 import { useNow } from "@/lib/schedule/use-now";
 import { useDisplayTimeZone } from "@/lib/schedule/use-display-time-zone";
+import SpoilerNotice from "@/components/shared/SpoilerNotice";
+import { isSpoiler, useSpoiler } from "@/lib/settings/spoiler";
 
 interface Props {
   locale: AppLocale;
@@ -48,7 +50,11 @@ export default function ExchangeDetail({ locale, exchange: faceted, servers }: P
 function ExchangeDetailView({ locale, exchange, schedules }: { locale: AppLocale; exchange: ExchangeDetailViewModel | null; schedules: ReactNode }) {
   const now = useNow();
   const timeZone = useDisplayTimeZone();
+  const { showSpoiler } = useSpoiler();
+  const isUnreleased = Boolean(now !== null && exchange?.startAt && isSpoiler(exchange.startAt, now));
+
   if (!exchange) return <NotFound locale={locale} />;
+  if (!showSpoiler && isUnreleased) return <SpoilerNotice locale={locale} />;
 
   const schedule = formatScheduleRange(exchange.startAt, exchange.endAt, locale, timeZone) || t(locale, "exchange.alwaysOpen");
   const limited = exchange.products.filter((product) => product.limitCount > 0).length;

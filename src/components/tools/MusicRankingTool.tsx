@@ -13,6 +13,8 @@ import { getMusicRankingHref, parseMusicRankingSearch } from "@/lib/game-api/lin
 import type { DeckCardLookup } from "@/lib/game-api/music-ranking";
 import type { MusicViewModel } from "@/lib/music/data";
 import { getRoutePathById } from "@/lib/route/registry";
+import SpoilerNotice from "@/components/shared/SpoilerNotice";
+import { isSpoiler, useSpoilerSetting } from "@/lib/settings/spoiler";
 
 interface Props {
   locale: AppLocale;
@@ -27,7 +29,9 @@ export default function MusicRankingTool({ locale, songs: allSongs, deckCards }:
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [restored, setRestored] = useState(false);
+  const { showSpoiler, now } = useSpoilerSetting();
   const song = useMemo(() => songs.find((entry) => entry.id === selectedId) ?? null, [songs, selectedId]);
+  const isUnreleased = Boolean(now !== null && song?.startAt && isSpoiler(song.startAt, now));
 
   useEffect(() => {
     const musicId = parseMusicRankingSearch(window.location.search);
@@ -41,6 +45,14 @@ export default function MusicRankingTool({ locale, songs: allSongs, deckCards }:
   }, [restored, dialogOpen, song, locale]);
 
   const openDialog = () => setDialogOpen(true);
+
+  if (!showSpoiler && isUnreleased) {
+    return (
+      <div className="space-y-5">
+        <SpoilerNotice locale={locale} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5">

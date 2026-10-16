@@ -17,6 +17,7 @@ import { imageFileName } from "@/lib/collectibles/image-client";
 import { parsePositiveIntParam, useQueryOverlay } from "@/lib/overlay/use-query-overlay";
 import { useListPageMemory } from "@/lib/scroll/use-list-page-memory";
 import type { StampViewModel } from "@/lib/stamps/data";
+import { isSpoiler, useSpoilerSetting } from "@/lib/settings/spoiler";
 
 interface Props {
   locale: AppLocale;
@@ -31,7 +32,12 @@ const STAMP_FILES = ["imageUrl"] as const;
 export default function StampsExplorer({ locale, servers, initialStamps, initialBandNames }: Props) {
   const memory = useListPageMemory("stamps");
   const { server, pickServer, items: serverItems } = useServerList(locale, servers, initialStamps);
-  const stamps = useServerFiles(serverItems, server, STAMP_FILES);
+  const { showSpoiler, now } = useSpoilerSetting();
+  const visibleServerItems = useMemo(() => {
+    if (showSpoiler || now === null) return serverItems;
+    return serverItems.filter((stamp) => !isSpoiler(stamp.startAt, now));
+  }, [serverItems, showSpoiler, now]);
+  const stamps = useServerFiles(visibleServerItems, server, STAMP_FILES);
   
   const [query, setQuery] = useState("");
   const sort = useListSort("stamps", locale, "");

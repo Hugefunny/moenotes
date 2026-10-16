@@ -28,7 +28,7 @@ async function nameIds(file: string, field: "nameTextId" | "titleTextId"): Promi
 /** A title without a MasterText row (comics): the default locale's name, which is all the list shows either. */
 const plainTitle = (text: string): LocalizableMasterText => ({ simplifiedChinese: text, english: text });
 
-async function collectibleEntries<VM extends { id: number; name: string; searchText: string }>(
+async function collectibleEntries<VM extends { id: number; name: string; searchText: string; startAt?: string }>(
   kind: ContentSearchKind,
   routeId: string,
   load: (locale: AppLocale) => Promise<Array<ServerFaceted<VM>>>,
@@ -41,6 +41,7 @@ async function collectibleEntries<VM extends { id: number; name: string; searchT
     href: entityLinkPath({ routeId, query: { id: String(item.id) } }),
     title: title(item),
     searchText: toSearchTextRecord(searchTexts.get(String(item.id))),
+    ...(item.startAt ? { startAt: item.startAt } : {}),
   }));
 }
 

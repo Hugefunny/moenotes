@@ -25,9 +25,11 @@ import type { GachaDetailViewModel, GachaGimmickEntry, GachaPool, GachaProductBo
 import { formatCompactCount } from "@/lib/format/compact-count";
 import { getItemIconUrl } from "@/lib/items/assets";
 import { getRoutePathById } from "@/lib/route/registry";
-import { formatScheduleRange } from "@/lib/schedule";
+import { formatScheduleRange, scheduleStatus } from "@/lib/schedule";
 import { useNow } from "@/lib/schedule/use-now";
 import { useDisplayTimeZone } from "@/lib/schedule/use-display-time-zone";
+import { useSpoiler } from "@/lib/settings/spoiler";
+import { SpoilerNotice, DeveloperTestingBanner } from "@/components/shared/SpoilerNotice";
 import { getSupportRarityIconUrl, type SupportCardRarity } from "@/lib/support-cards/assets";
 
 interface Props {
@@ -68,6 +70,12 @@ function GachaDetailView({ locale, gacha, schedules }: { locale: AppLocale; gach
 
   if (!gacha) return <NotFound locale={locale} />;
 
+  const { showSpoiler } = useSpoiler();
+  const isUnreleased = Boolean(now !== null && scheduleStatus(gacha.startAt, gacha.endAt, now) === "upcoming");
+  if (isUnreleased && !showSpoiler) {
+    return <SpoilerNotice locale={locale} />;
+  }
+
   const schedule = formatScheduleRange(gacha.startAt, gacha.endAt, locale, timeZone) || t(locale, "gacha.alwaysOpen");
   const pickupBadge = t(locale, "gacha.pickup");
   const pickupCards = [
@@ -77,6 +85,7 @@ function GachaDetailView({ locale, gacha, schedules }: { locale: AppLocale; gach
 
   return (
     <div className="w-full space-y-8">
+      {isUnreleased && <DeveloperTestingBanner locale={locale} />}
       <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(22rem,2fr)_3fr] lg:items-start">
         {/* Left column: banner and rates stay in view while the pool is browsed. */}
         <aside className="flex w-full flex-col gap-6 lg:sticky lg:top-24">

@@ -1041,6 +1041,14 @@ export const jaJP = {
     accent: { title: "テーマカラー", default: "デフォルト" },
     density: { title: "表示密度", comfortable: "ゆったり", compact: "コンパクト" },
     songTitles: { title: "楽曲名", forceJapanese: "常に日本語の曲名を表示", hint: "サイトの言語にかかわらず、楽曲を日本語の原題で表示します。" },
+    spoiler: {
+      title: "ネタバレフィルター",
+      showLabel: "ネタバレコンテンツの表示",
+      eulaNotice: "bilibili.incの利用規約EULA第8章の要件に基づき、当サイトでは未公開コンテンツの閲覧を提供しておりません。",
+      devOnly: "この機能は開発者テスト専用です",
+      restrictedTitle: "未公開コンテンツの閲覧制限",
+      devTestingBadge: "開発者テスト",
+    },
     data: {
       cacheTitle: "ダウンロードキャッシュ",
       total: "キャッシュ済み",
@@ -1066,7 +1074,7 @@ export const jaJP = {
       unavailable: "このブラウザではサイトがファイルを保存できないため（プライベートブラウズでは制限される場合があります）、毎回ダウンロードされます。",
     },
   },
-  actions: { close: "閉じる", clearCache: "キャッシュ削除", refresh: "更新", open: "開く", viewGroup: "グループを見る" },
+  actions: { close: "閉じる", back: "戻る", clearCache: "キャッシュ削除", refresh: "更新", open: "開く", viewGroup: "グループを見る" },
   home: {
     heading: "BanG Dream! Our Notes データベース",
     now: "開催中",

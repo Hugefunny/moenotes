@@ -1044,6 +1044,14 @@ export const zhCN = {
     accent: { title: "主题色", default: "默认" },
     density: { title: "界面密度", comfortable: "宽松", compact: "紧凑" },
     songTitles: { title: "歌曲名", forceJapanese: "始终显示日文曲名", hint: "无论网站语言如何，都以日文原名显示歌曲。" },
+    spoiler: {
+      title: "剧透内容过滤",
+      showLabel: "剧透内容显示",
+      eulaNotice: "根据bilibili.inc用户条款EULA第八章要求 本站暂不提供未发布内容的查看",
+      devOnly: "该功能仅供开发者测试",
+      restrictedTitle: "未发布内容暂不提供查看",
+      devTestingBadge: "开发者测试",
+    },
     data: {
       cacheTitle: "下载缓存",
       total: "已缓存",
@@ -1071,6 +1079,7 @@ export const zhCN = {
   },
   actions: {
     close: "关闭",
+    back: "返回",
     clearCache: "清除缓存",
     refresh: "刷新",
     open: "打开",

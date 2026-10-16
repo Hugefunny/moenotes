@@ -11,6 +11,9 @@ import { formatMasterDay } from "@/lib/schedule";
 import { useDisplayTimeZone } from "@/lib/schedule/use-display-time-zone";
 import { localizePath } from "@/i18n/routing";
 import { getRoutePathById } from "@/lib/route/registry";
+import { useNow } from "@/lib/schedule/use-now";
+import { isSpoiler, useSpoiler } from "@/lib/settings/spoiler";
+import { SpoilerNotice, DeveloperTestingBanner } from "@/components/shared/SpoilerNotice";
 import Modal from "@/components/shared/Modal";
 import {
   getCardBackgroundUrl,
@@ -104,6 +107,9 @@ function CardDetailView({ locale, data, materials }: { locale: AppLocale; data: 
   const [downloadState, setDownloadState] = useState<("idle" | "downloading" | "success")>("idle");
 
   const card = data.card;
+  const now = useNow();
+  const { showSpoiler } = useSpoiler();
+  const isUnreleased = Boolean(now !== null && card?.startAt && isSpoiler(card.startAt, now));
   const growth = data.growth;
   const maxBuild = useMemo(() => maxMemberCardBuild(growth), [growth]);
   const [build, setBuild] = useState<MemberCardBuild>(maxBuild);
@@ -269,6 +275,10 @@ function CardDetailView({ locale, data, materials }: { locale: AppLocale; data: 
     );
   }
 
+  if (isUnreleased && !showSpoiler) {
+    return <SpoilerNotice locale={locale} />;
+  }
+
   const attribute = t(locale, `cards.attributes.${card.cardType}`);
   const rarity = t(locale, `cards.rarities.${card.rarity}`);
   const levelLimit = memberCardLevelLimit(growth, build.awakeCount);
@@ -328,6 +338,7 @@ function CardDetailView({ locale, data, materials }: { locale: AppLocale; data: 
 
   return (
     <div className="space-y-8 w-full">
+      {isUnreleased && <DeveloperTestingBanner locale={locale} />}
       <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(22rem,2fr)_3fr] lg:items-start">
         {/* Left Column: Fixed / Sticky Asset Pane */}
         <aside className="lg:sticky lg:top-24 w-full flex flex-col pt-8">

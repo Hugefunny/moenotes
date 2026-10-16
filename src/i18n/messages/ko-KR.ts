@@ -996,6 +996,14 @@ export const koKR = {
     accent: { title: "테마 색상", default: "기본" },
     density: { title: "화면 밀도", comfortable: "여유 있게", compact: "촘촘하게" },
     songTitles: { title: "곡 제목", forceJapanese: "항상 일본어 곡 제목 표시", hint: "사이트 언어와 관계없이 모든 곡을 일본어 원제로 표시합니다." },
+    spoiler: {
+      title: "스포일러 필터",
+      showLabel: "스포일러 콘텐츠 표시",
+      eulaNotice: "bilibili.inc 사용자 약관 EULA 제8장 요건에 따라 본 사이트는 미공개 콘텐츠 조회를 제공하지 않습니다.",
+      devOnly: "해당 기능은 개발자 테스트 전용입니다",
+      restrictedTitle: "미공개 콘텐츠 조회 제한",
+      devTestingBadge: "개발자 테스트",
+    },
     data: {
       cacheTitle: "다운로드 캐시",
       total: "저장된 용량",
@@ -1021,7 +1029,7 @@ export const koKR = {
       unavailable: "이 브라우저에서는 사이트가 파일을 저장할 수 없어(시크릿 모드에서는 막힐 수 있습니다) 매번 다시 다운로드합니다.",
     },
   },
-  actions: { close: "닫기", clearCache: "캐시 지우기", refresh: "새로고침", open: "열기", viewGroup: "그룹 보기" },
+  actions: { close: "닫기", back: "돌아가기", clearCache: "캐시 지우기", refresh: "새로고침", open: "열기", viewGroup: "그룹 보기" },
   home: {
     heading: "BanG Dream! Our Notes 데이터베이스",
     now: "진행 중",

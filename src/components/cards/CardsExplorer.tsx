@@ -17,6 +17,8 @@ import { useListPageMemory } from "@/lib/scroll/use-list-page-memory";
 import { useCardView } from "@/lib/cards/use-card-view";
 import { memberCardSubject, parseCardFilterState } from "@/lib/filter/card-filter";
 import type { CardViewModel } from "@/lib/cards/data";
+import { useNow } from "@/lib/schedule/use-now";
+import { isSpoiler, useSpoiler } from "@/lib/settings/spoiler";
 
 interface Props {
   locale: AppLocale;
@@ -28,10 +30,16 @@ interface Props {
 
 export default function CardsExplorer({ locale, initialCards, servers, skillNames }: Props) {
   const memory = useListPageMemory("cards");
+  const now = useNow();
+  const { showSpoiler } = useSpoiler();
   const { server, pickServer, items: cards } = useServerList(locale, servers, initialCards);
+  const visibleCards = useMemo(() => {
+    if (showSpoiler || now === null) return cards;
+    return cards.filter((card) => !isSpoiler(card.startAt, now));
+  }, [cards, showSpoiler, now]);
   const skillOf = useCallback((card: CardViewModel) => skillNames.live[String(card.liveSkillId)] ?? "", [skillNames]);
   const numericSort = useMemo(() => ({ fields: CARD_SORT_FIELDS, read: cardSortReaders(skillOf, Object.values(skillNames.live), locale) }), [skillOf, skillNames, locale]);
-  const controller = useCardFilters(cards, locale, "cards", memberCardSubject, { numericSort });
+  const controller = useCardFilters(visibleCards, locale, "cards", memberCardSubject, { numericSort });
   const { filters, setFilters, sorted, filtered, reset, hasActiveFilters, bands, characters } = controller;
   const [view, setView] = useCardView("cards");
 

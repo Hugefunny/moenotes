@@ -38,6 +38,7 @@ import { useOverlay } from "@/lib/overlay/use-overlay";
 import { useOverlayLayer } from "@/lib/overlay/use-overlay-layer";
 import { DENSITIES, GAME_SERVER_SETTINGS } from "@/lib/settings/schema";
 import { useSettings } from "@/lib/settings/use-settings";
+import { useSpoiler } from "@/lib/settings/spoiler";
 import type { AppSettings } from "@/types/settings";
 
 interface SettingsDrawerProps {
@@ -145,6 +146,10 @@ function GeneralSettings({ locale, pathname, bands = [] }: SettingsDrawerProps) 
 
       <Section title={t(locale, "settings.songTitles.title")}>
         <JapaneseTitlesToggle locale={locale} />
+      </Section>
+
+      <Section title={t(locale, "settings.spoiler.title")}>
+        <SpoilerToggle locale={locale} />
       </Section>
 
       <Section title={t(locale, "settings.gameServer")}>
@@ -338,6 +343,40 @@ function JapaneseTitlesToggle({ locale }: { locale: AppLocale }) {
           setForceJapaneseTitles(event.target.checked);
         }}
       />
+    </div>
+  );
+}
+
+/** Filter unreleased / datamined content under Bilibili EULA, unlockable via backdoor ?Spoiler=allow */
+function SpoilerToggle({ locale }: { locale: AppLocale }) {
+  const { isUnlocked, showSpoiler, setShowSpoiler } = useSpoiler();
+  const id = useId();
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-start justify-between gap-4">
+        <label htmlFor={id} className={`min-w-0 ${isUnlocked ? "cursor-pointer" : "cursor-not-allowed"}`}>
+          <span className="block text-body-large text-on-surface">{t(locale, "settings.spoiler.showLabel")}</span>
+          <span className="mt-0.5 block text-body-medium text-on-surface-variant">
+            {t(locale, "settings.spoiler.eulaNotice")}
+          </span>
+        </label>
+        <Switch
+          id={id}
+          checked={showSpoiler}
+          disabled={!isUnlocked}
+          className="-my-3 shrink-0"
+          onChange={(event) => {
+            if (isUnlocked) setShowSpoiler(event.target.checked);
+          }}
+        />
+      </div>
+      {isUnlocked && (
+        <div className="inline-flex items-center gap-1.5 rounded-shape-xs bg-surface-container-high px-2 py-1 text-label-small text-on-surface-variant">
+          <Icon name="info" className="h-3.5 w-3.5 shrink-0 text-primary" />
+          <span>{t(locale, "settings.spoiler.devOnly")}</span>
+        </div>
+      )}
     </div>
   );
 }

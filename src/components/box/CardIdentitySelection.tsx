@@ -9,6 +9,7 @@ import { t } from "@/i18n";
 import CardFilters, { useCardFilters } from "@/components/shared/CardFilters";
 import CardViewSwitch from "@/components/shared/CardViewSwitch";
 import MemberCardItem, { MemberCardTile } from "@/components/cards/MemberCardItem";
+import { isSpoiler, useSpoilerSetting } from "@/lib/settings/spoiler";
 import SupportCardItem, { SupportCardTile } from "@/components/support-cards/SupportCardItem";
 
 type IdentityChoice = { kind: "member"; card: CardViewModel } | { kind: "snap"; card: SupportCardViewModel };
@@ -23,7 +24,12 @@ export default function CardIdentitySelection({ locale, kind, catalog, value, on
 }) {
   const tr = (key: string, values?: Record<string, string | number>) => t(locale, `deckWorkspace.${key}`, values);
   const [selected, setSelected] = useState(value);
-  const choices = useMemo<IdentityChoice[]>(() => kind === "member" ? catalog.members.map(card => ({ kind: "member", card })) : catalog.snaps.map(card => ({ kind: "snap", card })), [kind, catalog]);
+  const { showSpoiler, now } = useSpoilerSetting();
+  const choices = useMemo<IdentityChoice[]>(() => {
+    const members = !showSpoiler && now !== null ? catalog.members.filter(card => !isSpoiler(card.startAt, now)) : catalog.members;
+    const snaps = !showSpoiler && now !== null ? catalog.snaps.filter(card => !isSpoiler(card.startAt, now)) : catalog.snaps;
+    return kind === "member" ? members.map(card => ({ kind: "member", card })) : snaps.map(card => ({ kind: "snap", card }));
+  }, [kind, catalog, showSpoiler, now]);
   const filters = useCardFilters(choices, locale, `box-identity-${kind}`, describeChoice);
   const [view, setView] = useCardView(`box-identity-${kind}`);
   const chosen = choices.find(choice => String(choice.card.id) === selected);

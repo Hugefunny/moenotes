@@ -16,6 +16,8 @@ import ChartStage, { StageSignature } from "@/components/tools/ChartStage";
 import ChartQuickSettings from "@/components/tools/ChartQuickSettings";
 import type { ChartPlayer } from "ournotes-player";
 import { useSongTitle } from "@/lib/music/title-preference";
+import SpoilerNotice from "@/components/shared/SpoilerNotice";
+import { isSpoiler, useSpoilerSetting } from "@/lib/settings/spoiler";
 
 interface Props {
   locale: AppLocale;
@@ -30,9 +32,11 @@ export default function ChartPreview3D({ locale, songs: allSongs }: Props) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [restored, setRestored] = useState(false);
   const [player, setPlayer] = useState<ChartPlayer | null>(null);
+  const { showSpoiler, now } = useSpoilerSetting();
 
   const song = useMemo(() => songs.find((entry) => entry.id === selectedId) ?? null, [songs, selectedId]);
   const difficulty = song ? resolveDifficulty(song, preferred) : null;
+  const isUnreleased = Boolean(now !== null && song?.startAt && isSpoiler(song.startAt, now));
 
   useEffect(() => {
     const { musicId, difficulty: requested } = parseChartPreviewSearch(window.location.search);
@@ -50,6 +54,14 @@ export default function ChartPreview3D({ locale, songs: allSongs }: Props) {
   }, [restored, dialogOpen, song, difficulty, locale]);
 
   const openDialog = () => setDialogOpen(true);
+
+  if (!showSpoiler && isUnreleased) {
+    return (
+      <div className="space-y-4">
+        <SpoilerNotice locale={locale} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

@@ -11,6 +11,7 @@ export interface ContentSearchResult {
   title: string;
   /** Localized detail path (locale prefix applied). */
   href: `/${string}`;
+  startAt?: string | undefined;
 }
 
 export { loadContentSearchIndex };
@@ -37,6 +38,7 @@ export async function searchContent(query: string, locale: AppLocale): Promise<C
     kind: entry.kind,
     title: localizeMasterText(entry.title, locale) || entry.title.id || entry.key,
     href: localizeHref(entry.href, locale),
+    startAt: entry.startAt,
   });
   if (!q) return entries.map(localizeEntry);
   return entries

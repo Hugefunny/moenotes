@@ -18,6 +18,7 @@ import { useDisplayTimeZone } from "@/lib/schedule/use-display-time-zone";
 import { useNow } from "@/lib/schedule/use-now";
 import type { ServerFaceted } from "@/lib/servers/facets";
 import { useServerList } from "@/lib/servers/use-content-server";
+import { isSpoiler, useSpoilerSetting } from "@/lib/settings/spoiler";
 
 interface Props {
   locale: AppLocale;
@@ -42,6 +43,21 @@ const tabClass = (active: boolean) => ` md3-state shrink-0 rounded-full border p
 export default function MissionsExplorer({ locale, servers, categories: initialCategories, limitedGroups: initialGroups }: Props) {
   const { server, pickServer, items: categories } = useServerList(locale, servers, initialCategories);
   const groups = useMemo(() => initialGroups.filter((group) => group.servers.includes(server)), [initialGroups, server]);
+  const { showSpoiler, now } = useSpoilerSetting();
+
+  const visibleCategories = useMemo(() => {
+    if (showSpoiler || now === null) return categories;
+    return categories.map((cat) => ({
+      ...cat,
+      missions: cat.missions.filter((mission) => !isSpoiler(mission.startAt, now)),
+    }));
+  }, [categories, showSpoiler, now]);
+
+  const visibleGroups = useMemo(() => {
+    if (showSpoiler || now === null) return groups;
+    return groups.filter((group) => !isSpoiler(group.startAt, now));
+  }, [groups, showSpoiler, now]);
+
   const [tab, setTab] = useState<Tab | null>(null);
   const [highlight, setHighlight] = useState<string | null>(null);
   const pendingScroll = useRef<string | null>(null);
@@ -51,10 +67,10 @@ export default function MissionsExplorer({ locale, servers, categories: initialC
     const { mode, id } = parseMissionsDeepLink(window.location.search);
     if (mode === "limited") {
       setTab("limited");
-      const group = id === null ? undefined : groups.find((entry) => entry.id === id || entry.missionIds.includes(id));
+      const group = id === null ? undefined : visibleGroups.find((entry) => entry.id === id || entry.missionIds.includes(id));
       if (group) setHighlight(`limited-${group.id}`);
     } else if (mode === "regular" || id !== null) {
-      const category = id === null ? undefined : categories.find((entry) => entry.missions.some((mission) => mission.id === id));
+      const category = id === null ? undefined : visibleCategories.find((entry) => entry.missions.some((mission) => mission.id === id));
       if (category) {
         setTab(category.id);
         setHighlight(`mission-${id}`);
@@ -68,8 +84,8 @@ export default function MissionsExplorer({ locale, servers, categories: initialC
     pendingScroll.current = highlight;
   }, [highlight]);
 
-  const activeTab: Tab = tab ?? categories[0]?.id ?? "limited";
-  const active = typeof activeTab === "number" ? categories.find((category) => category.id === activeTab) : undefined;
+  const activeTab: Tab = tab ?? visibleCategories[0]?.id ?? "limited";
+  const active = typeof activeTab === "number" ? visibleCategories.find((category) => category.id === activeTab) : undefined;
 
   useEffect(() => {
     const target = pendingScroll.current;
@@ -81,7 +97,7 @@ export default function MissionsExplorer({ locale, servers, categories: initialC
       pendingScroll.current = null;
     });
     return () => window.cancelAnimationFrame(handle);
-  }, [activeTab, highlight, categories, groups]);
+  }, [activeTab, highlight, visibleCategories, visibleGroups]);
 
   const pick = (next: Tab) => {
     setTab(next);
@@ -93,7 +109,7 @@ export default function MissionsExplorer({ locale, servers, categories: initialC
   return (
     <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer}>
       <nav aria-label={t(locale, "missions.tabs")} className="mn-scrollbar-none -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-        {categories.map((category) => (
+        {visibleCategories.map((category) => (
           <button key={category.id} type="button" onClick={() => pick(category.id)} aria-pressed={activeTab === category.id} className={tabClass(activeTab === category.id)}>
             {t(locale, `missions.categories.${missionCategoryKey(category.id)}`)}
             <span className="ml-1.5 font-mono text-label-small opacity-70">{category.missions.length}</span>
@@ -101,13 +117,13 @@ export default function MissionsExplorer({ locale, servers, categories: initialC
         ))}
         <button type="button" onClick={() => pick("limited")} aria-pressed={activeTab === "limited"} className={tabClass(activeTab === "limited")}>
           {t(locale, "missions.limited")}
-          <span className="ml-1.5 font-mono text-label-small opacity-70">{groups.length}</span>
+          <span className="ml-1.5 font-mono text-label-small opacity-70">{visibleGroups.length}</span>
         </button>
       </nav>
 
       <div className="mt-5" aria-live="polite">
         {activeTab === "limited" ? (
-          <LimitedGroups locale={locale} groups={groups} servers={servers} highlight={highlight} />
+          <LimitedGroups locale={locale} groups={visibleGroups} servers={servers} highlight={highlight} />
         ) : active ? (
           <MissionList locale={locale} category={active} highlight={highlight} />
         ) : (

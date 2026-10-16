@@ -41,6 +41,7 @@ import { useDisplayTimeZone } from "@/lib/schedule/use-display-time-zone";
 import { useNow } from "@/lib/schedule/use-now";
 import { valueForServer, type ServerFacetedValue } from "@/lib/servers/facets";
 import { useAssetUrl, useContentServer } from "@/lib/servers/use-content-server";
+import { isSpoiler, useSpoiler } from "@/lib/settings/spoiler";
 
 interface Props {
   locale: AppLocale;
@@ -95,10 +96,16 @@ export default function CalendarView({ locale, data, birthdays, servers, charact
     replaceQueryParam("month", monthKey(next));
   };
 
+  const { showSpoiler } = useSpoiler();
+  const visibleEntries = useMemo(() => {
+    if (showSpoiler || now === null) return entries;
+    return entries.filter((entry) => !isSpoiler(entry.startAt, now));
+  }, [entries, showSpoiler, now]);
+
   const days = useMemo(() => monthGrid(month, weekStart), [month, weekStart]);
   const first = days[0]!;
   const last = days[days.length - 1]!;
-  const allItems = useMemo(() => calendarItems(entries, birthdays, first, last, timeZone), [entries, birthdays, first, last, timeZone]);
+  const allItems = useMemo(() => calendarItems(visibleEntries, birthdays, first, last, timeZone), [visibleEntries, birthdays, first, last, timeZone]);
   const items = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase();
     return filterCalendarItems(allItems, { kinds: selectedKinds, characterIds: selectedCharacters }).filter((item) => !needle || item.title.toLocaleLowerCase().includes(needle));

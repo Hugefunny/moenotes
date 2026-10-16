@@ -22,9 +22,11 @@ import { getEventTrackerHref } from "@/lib/game-api/links";
 import type { MusicViewModel } from "@/lib/music/data";
 import { entityLinkPath } from "@/lib/route/entity-link";
 import { getRoutePathById } from "@/lib/route/registry";
-import { formatMasterDate, formatScheduleRange } from "@/lib/schedule";
+import { formatMasterDate, formatScheduleRange, scheduleStatus } from "@/lib/schedule";
 import { useNow } from "@/lib/schedule/use-now";
 import { useDisplayTimeZone } from "@/lib/schedule/use-display-time-zone";
+import { useSpoiler } from "@/lib/settings/spoiler";
+import { SpoilerNotice, DeveloperTestingBanner } from "@/components/shared/SpoilerNotice";
 import { entityServer, valueForServer, type ServerFacetedValue } from "@/lib/servers/facets";
 import { useAssetUrl, useContentServer } from "@/lib/servers/use-content-server";
 
@@ -51,8 +53,14 @@ export default function EventDetail({ locale, event: faceted, servers }: Props) 
 
 function EventDetailView({ locale, server, event, schedules }: { locale: AppLocale; server: GameServer; event: EventDetailViewModel | null; schedules: ReactNode }) {
   const now = useNow();
+  const { showSpoiler } = useSpoiler();
   const timeZone = useDisplayTimeZone();
   if (!event) return <NotFound locale={locale} />;
+
+  const isUnreleased = Boolean(now !== null && scheduleStatus(event.startAt, event.endAt, now) === "upcoming");
+  if (isUnreleased && !showSpoiler) {
+    return <SpoilerNotice locale={locale} />;
+  }
 
   const alt = t(locale, "events.bannerAlt", { name: event.name });
   const rankings = (["score", "music", "totalMusic"] as const).filter((kind) => event.rankings[kind]);
@@ -65,6 +73,7 @@ function EventDetailView({ locale, server, event, schedules }: { locale: AppLoca
 
   return (
     <div className="w-full space-y-8">
+      {isUnreleased && <DeveloperTestingBanner locale={locale} />}
       <div className="overflow-hidden rounded-shape-lg border border-outline-variant bg-surface-container-low shadow-elevation-1">
         {event.backgroundUrl
           ? <EventScene event={event} alt={alt} eager className="aspect-[4/3] sm:aspect-[16/9] xl:aspect-[5/2]" />

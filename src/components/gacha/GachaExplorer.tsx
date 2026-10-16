@@ -22,6 +22,7 @@ import { formatScheduleRange, scheduleStatus, type ScheduleStatus } from "@/lib/
 import { useNow } from "@/lib/schedule/use-now";
 import { useDisplayTimeZone } from "@/lib/schedule/use-display-time-zone";
 import { useListPageMemory } from "@/lib/scroll/use-list-page-memory";
+import { useSpoiler } from "@/lib/settings/spoiler";
 
 interface Props {
   locale: AppLocale;
@@ -30,12 +31,13 @@ interface Props {
   bands: Array<[number, string]>;
 }
 
-const statuses: ScheduleStatus[] = ["ongoing", "upcoming", "permanent", "ended"];
+const ALL_STATUSES: ScheduleStatus[] = ["ongoing", "upcoming", "permanent", "ended"];
 const categories: GachaCategory[] = ["stars", "ticket", "ad", "pass", "bonus", "other"];
 
 export default function GachaExplorer({ locale, servers, initialGachas, bands }: Props) {
   const memory = useListPageMemory("gacha");
   const now = useNow();
+  const { showSpoiler } = useSpoiler();
   const timeZone = useDisplayTimeZone();
   const { server, pickServer, items: gachas } = useServerList(locale, servers, initialGachas);
   const [query, setQuery] = useState("");
@@ -44,6 +46,8 @@ export default function GachaExplorer({ locale, servers, initialGachas, bands }:
   const [selectedStatuses, setSelectedStatuses] = useState<ScheduleStatus[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<GachaCategory[]>([]);
   const [selectedBands, setSelectedBands] = useState<number[]>([]);
+
+  const statuses: ScheduleStatus[] = useMemo(() => (showSpoiler ? ALL_STATUSES : ["ongoing", "permanent", "ended"]), [showSpoiler]);
 
   useEffect(() => {
     const remembered = parseRememberedFilters(memory.state?.filtersHash);
@@ -86,13 +90,15 @@ export default function GachaExplorer({ locale, servers, initialGachas, bands }:
   const filteredGachas = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase();
     return gachas.filter((gacha) => {
+      // Spoiler filtering: if spoiler display is disabled, hide upcoming gachas
+      if (!showSpoiler && now !== null && scheduleStatus(gacha.startAt, gacha.endAt, now) === "upcoming") return false;
       // Status depends on the visitor's clock, so it only filters once that is known.
       if (selectedStatuses.length > 0 && now !== null && !selectedStatuses.includes(scheduleStatus(gacha.startAt, gacha.endAt, now))) return false;
       if (selectedBands.length > 0 && !gacha.bandIds.some((id) => selectedBands.includes(id))) return false;
       if (selectedCategories.length > 0 && !selectedCategories.includes(gacha.category)) return false;
       return !needle || gacha.searchText.includes(needle);
     });
-  }, [gachas, query, selectedStatuses, selectedBands, selectedCategories, now]);
+  }, [gachas, query, selectedStatuses, selectedBands, selectedCategories, now, showSpoiler]);
 
   const sortedGachas = useMemo(() => sortEntries(filteredGachas, sort.value, locale, now === null ? {} : { now }), [filteredGachas, sort.value, locale, now]);
 
@@ -273,7 +279,7 @@ function parseRememberedFilters(raw?: string) {
     const parsed = JSON.parse(raw) as Partial<typeof fallback>;
     return {
       query: typeof parsed.query === "string" ? parsed.query : "",
-      statuses: Array.isArray(parsed.statuses) ? parsed.statuses.filter((status) => statuses.includes(status)) : [],
+      statuses: Array.isArray(parsed.statuses) ? parsed.statuses.filter((status) => ALL_STATUSES.includes(status)) : [],
       bands: Array.isArray(parsed.bands) ? parsed.bands : [],
       categories: Array.isArray(parsed.categories) ? parsed.categories.filter((category) => categories.includes(category)) : [],
     };

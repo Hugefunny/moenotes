@@ -18,6 +18,8 @@ import { getRoutePathById } from "@/lib/route/registry";
 import { formatScheduleRange } from "@/lib/schedule";
 import { useNow } from "@/lib/schedule/use-now";
 import { useDisplayTimeZone } from "@/lib/schedule/use-display-time-zone";
+import SpoilerNotice from "@/components/shared/SpoilerNotice";
+import { isSpoiler, useSpoiler } from "@/lib/settings/spoiler";
 
 interface Props {
   locale: AppLocale;
@@ -42,7 +44,11 @@ export default function RewardDetail({ locale, entry: faceted, servers }: Props)
 function RewardDetailView({ locale, entry, schedules }: { locale: AppLocale; entry: RewardEntryDetail | null; schedules: ReactNode }) {
   const now = useNow();
   const timeZone = useDisplayTimeZone();
+  const { showSpoiler } = useSpoiler();
+  const isUnreleased = Boolean(now !== null && entry?.startAt && isSpoiler(entry.startAt, now));
+
   if (!entry) return <NotFound locale={locale} />;
+  if (!showSpoiler && isUnreleased) return <SpoilerNotice locale={locale} />;
 
   const schedule = formatScheduleRange(entry.startAt, entry.endAt, locale, timeZone) || t(locale, "rewards.alwaysOpen");
   const facts: Array<[string, ReactNode]> = [

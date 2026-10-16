@@ -70,6 +70,7 @@ export interface StoryPickerStory {
   /** The episode's banner (asset path without extension, text-bearing: per locale); empty when it has none. */
   image: string;
   searchText: string;
+  startAt?: string;
 }
 
 /** An episode the story site has, with what the picker, the search and the header show. */

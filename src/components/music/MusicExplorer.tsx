@@ -22,6 +22,8 @@ import { useChartMetrics } from "@/lib/music/use-chart-metrics";
 import MusicFilters, { chartMetricsOf, useMusicFilters, type MusicFiltersController } from "@/components/music/MusicFilters";
 import MusicTable, { songHref } from "@/components/music/MusicTable";
 import SongCard from "@/components/music/SongCard";
+import { useNow } from "@/lib/schedule/use-now";
+import { isSpoiler, useSpoiler } from "@/lib/settings/spoiler";
 
 interface Props {
   locale: AppLocale;
@@ -35,12 +37,18 @@ const VIEWS = ["grid", "list", "table"] as const;
 
 export default function MusicExplorer({ locale, servers, initialSongs, categories = [] }: Props) {
   const memory = useListPageMemory("music");
+  const now = useNow();
+  const { showSpoiler } = useSpoiler();
   const [view, setView] = useCollectionView("music", VIEWS, "grid");
 
   const { server, pickServer, items: songs } = useServerList(locale, servers, initialSongs);
+  const visibleSongs = useMemo(() => {
+    if (showSpoiler || now === null) return songs;
+    return songs.filter((song) => !isSpoiler(song.startAt, now));
+  }, [songs, showSpoiler, now]);
   const { index: metrics } = useChartMetrics();
   const categoryNames = useMemo(() => new Map(categories), [categories]);
-  const music = useMusicFilters(songs, locale, "music", { metrics, categories: categoryNames });
+  const music = useMusicFilters(visibleSongs, locale, "music", { metrics, categories: categoryNames });
   const { filters, setFilters } = music;
   const titleOf = useSongTitle();
   const assetUrl = useServerAssetUrl(server);

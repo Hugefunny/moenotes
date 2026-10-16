@@ -12,6 +12,9 @@ import { useDisplayTimeZone } from "@/lib/schedule/use-display-time-zone";
 import { localizePath } from "@/i18n/routing";
 import { getRoutePathById } from "@/lib/route/registry";
 import { getChartPreviewHref } from "@/lib/music/chart-preview";
+import { useNow } from "@/lib/schedule/use-now";
+import { isSpoiler, useSpoiler } from "@/lib/settings/spoiler";
+import { SpoilerNotice, DeveloperTestingBanner } from "@/components/shared/SpoilerNotice";
 import Modal from "@/components/shared/Modal";
 import ChartSheetDialog from "@/components/music/ChartSheetDialog";
 import { difficultyStyles } from "@/components/music/difficulty-styles";
@@ -78,6 +81,9 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
   const [sheetDifficulty, setSheetDifficulty] = useState<SongDifficultyModel["difficulty"] | null>(null);
 
   const song = data.song;
+  const now = useNow();
+  const { showSpoiler } = useSpoiler();
+  const isUnreleased = Boolean(now !== null && song?.startAt && isSpoiler(song.startAt, now));
 
   const copyJacketLink = async () => {
     if (!song) return;
@@ -133,6 +139,10 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
     );
   }
 
+  if (isUnreleased && !showSpoiler) {
+    return <SpoilerNotice locale={locale} />;
+  }
+
   const attributeName = t(locale, `cards.attributes.${song.musicType}`);
   const title = titleOf(song);
 
@@ -172,6 +182,7 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
 
   return (
     <div className="space-y-8 w-full">
+      {isUnreleased && <DeveloperTestingBanner locale={locale} />}
       <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(20rem,1fr)_1.5fr] lg:items-start">
         {/* Left Column: Fixed / Sticky Asset Pane */}
         <aside className="lg:sticky lg:top-24 w-full flex flex-col pt-8">

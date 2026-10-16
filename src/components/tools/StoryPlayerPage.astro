@@ -33,6 +33,7 @@ const stories: StoryPickerStory[] = (await getBuildStories(locale)).map((story) 
     ? `Story/Banner/${story.assets.banner ? "Episode" : "Chapter"}/${story.assets.banner || story.assets.image}`
     : "",
   searchText: story.searchText,
+  startAt: story.startAt,
 }));
 ---
 

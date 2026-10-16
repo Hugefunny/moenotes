@@ -13,6 +13,7 @@ import { buildStaticSearchIndex } from "@/lib/search/static-index";
 import { searchContent } from "@/lib/search/client";
 import { CONTENT_KIND_ORDER, KIND_LABEL_KEY } from "@/lib/search/kinds";
 import { getRoutePathById } from "@/lib/route/registry";
+import { isSpoiler, useSpoilerSetting } from "@/lib/settings/spoiler";
 
 interface CommandPaletteProps {
   locale: AppLocale;
@@ -33,6 +34,7 @@ interface PaletteRow {
  */
 function CommandPalette({ locale }: CommandPaletteProps) {
   const { isOpen, close } = useOverlay("command");
+  const { showSpoiler, now } = useSpoilerSetting();
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const [content, setContent] = useState<PaletteRow[]>([]);
@@ -59,10 +61,13 @@ function CommandPalette({ locale }: CommandPaletteProps) {
     let cancelled = false;
     void searchContent(query, locale).then((results) => {
       if (cancelled) return;
-      setContent(results.map((result) => ({ id: result.key, kind: result.kind, label: result.title, href: result.href })));
+      const filtered = !showSpoiler && now !== null
+        ? results.filter((result) => !isSpoiler(result.startAt, now))
+        : results;
+      setContent(filtered.map((result) => ({ id: result.key, kind: result.kind, label: result.title, href: result.href })));
     });
     return () => { cancelled = true; };
-  }, [query, locale]);
+  }, [query, locale, showSpoiler, now]);
 
   // Group content rows by kind, ordered; pages form their own leading group.
   const groups = useMemo(() => {

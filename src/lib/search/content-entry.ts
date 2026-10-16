@@ -23,4 +23,5 @@ export interface ContentSearchEntry {
   title: LocalizableMasterText;
   /** Per-locale search blob (already lowercase); localized client-side with an en fallback. */
   searchText: Partial<Record<AppLocale, string>>;
+  startAt?: string | undefined;
 }

@@ -16,6 +16,9 @@ import { storyPath } from "@/lib/story/paths";
 import type { RawText } from "@/lib/cards/data";
 import StoryScriptReader from "@/components/story/StoryScriptReader";
 import StoryPlayerLink from "@/components/story/StoryPlayerLink";
+import SpoilerNotice from "@/components/shared/SpoilerNotice";
+import { useNow } from "@/lib/schedule/use-now";
+import { isSpoiler, useSpoiler } from "@/lib/settings/spoiler";
 
 /** Main episodes have an illustration; bond stories only a banner. Banners carry lettering, so they follow the locale. */
 function storyArtworkUrl(story: StoryViewModel | null, locale: AppLocale): string {
@@ -54,6 +57,14 @@ export default function StoryDetail({ servers, advServers, story, ...props }: St
 }
 
 function StoryDetailView({ locale, advId, initialTitle, initialScript, initialCharacters, initialTexts, story, previous, next }: Omit<StoryDetailProps, "story"> & { story: StoryViewModel | null }) {
+  const now = useNow();
+  const { showSpoiler } = useSpoiler();
+  const isUnreleased = Boolean(now !== null && story?.startAt && isSpoiler(story.startAt, now));
+
+  if (!showSpoiler && isUnreleased) {
+    return <SpoilerNotice locale={locale} />;
+  }
+
   const [artworkFailed, setArtworkFailed] = useState(false);
   const artworkUrl = useAssetUrl()(storyArtworkUrl(story, locale));
   const isChapter = story?.category === "main" || story?.category === "event" || story?.category === "birthday";

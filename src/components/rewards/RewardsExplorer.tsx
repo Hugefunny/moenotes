@@ -19,6 +19,7 @@ import { formatScheduleRange, scheduleStatus, type ScheduleStatus } from "@/lib/
 import { useNow } from "@/lib/schedule/use-now";
 import { useDisplayTimeZone } from "@/lib/schedule/use-display-time-zone";
 import { useListPageMemory } from "@/lib/scroll/use-list-page-memory";
+import { isSpoiler, useSpoiler } from "@/lib/settings/spoiler";
 
 interface Props {
   locale: AppLocale;
@@ -75,14 +76,20 @@ export default function RewardsExplorer({ locale, servers, initialEntries }: Pro
     };
   }, [saveCurrentState]);
 
+  const { showSpoiler } = useSpoiler();
+  const visibleEntries = useMemo(() => {
+    if (showSpoiler || now === null) return entries;
+    return entries.filter((entry) => !isSpoiler(entry.startAt, now));
+  }, [entries, showSpoiler, now]);
+
   const filteredEntries = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase();
-    return entries.filter((entry) => {
+    return visibleEntries.filter((entry) => {
       if (selectedKinds.length > 0 && !selectedKinds.includes(entry.kind)) return false;
       if (selectedStatuses.length > 0 && now !== null && !selectedStatuses.includes(scheduleStatus(entry.startAt, entry.endAt, now))) return false;
       return !needle || entry.searchText.includes(needle);
     });
-  }, [entries, query, selectedKinds, selectedStatuses, now]);
+  }, [visibleEntries, query, selectedKinds, selectedStatuses, now]);
 
   const sortedEntries = useMemo(() => sortEntries(filteredEntries, sort.value, locale), [filteredEntries, sort.value, locale]);
 

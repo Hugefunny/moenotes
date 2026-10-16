@@ -21,6 +21,8 @@ import { useNow } from "@/lib/schedule/use-now";
 import { entityServer, valueForServer, type ServerFacetedValue } from "@/lib/servers/facets";
 import { useContentServer } from "@/lib/servers/use-content-server";
 import { formatShopPrice, orderShopPrices, type ShopDetailViewModel } from "@/lib/shop/data";
+import SpoilerNotice from "@/components/shared/SpoilerNotice";
+import { isSpoiler, useSpoiler } from "@/lib/settings/spoiler";
 
 interface Props {
   locale: AppLocale;
@@ -51,7 +53,11 @@ export default function ShopDetail({ locale, shop: faceted, servers, neighbors }
 function ShopDetailView({ locale, shop, schedules }: { locale: AppLocale; shop: ShopDetailViewModel | null; schedules: ReactNode }) {
   const now = useNow();
   const timeZone = useDisplayTimeZone();
+  const { showSpoiler } = useSpoiler();
+  const isUnreleased = Boolean(now !== null && shop?.startAt && isSpoiler(shop.startAt, now));
+
   if (!shop) return <NotFound locale={locale} />;
+  if (!showSpoiler && isUnreleased) return <SpoilerNotice locale={locale} />;
 
   const schedule = formatScheduleRange(shop.startAt, shop.endAt, locale, timeZone) || t(locale, "shop.alwaysOpen");
   const facts: Array<[string, ReactNode]> = [

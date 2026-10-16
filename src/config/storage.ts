@@ -14,4 +14,8 @@ export const storageKeys = {
   audioDock: "moenotes:audio-dock:v1",
   /** Shared with the song title preference (src/lib/music/title-preference.ts): "1" / "0". */
   forceJapaneseTitles: "moenotes:force-ja-titles",
+  /** Shared with spoiler content preference: "1" / "0". */
+  showSpoiler: "moenotes:show-spoiler",
+  /** Whether developer testing mode for spoiler content is unlocked via ?Spoiler=allow: "1" / "0". */
+  spoilerUnlocked: "moenotes:spoiler-unlocked",
 } as const;

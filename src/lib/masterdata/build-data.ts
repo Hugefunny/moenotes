@@ -1219,6 +1219,7 @@ export function getBuildContentSearchIndex(): Promise<ContentSearchEntry[]> {
         href: `/cards/${card.id}`,
         title: titleRow(rows, cardSubtitleIds.get(card.id)),
         searchText: toSearchTextRecord(cardSearchTexts.get(String(card.id))),
+        startAt: card.startAt,
       });
     }
 
@@ -1236,6 +1237,7 @@ export function getBuildContentSearchIndex(): Promise<ContentSearchEntry[]> {
         href: `/support-cards/${card.id}`,
         title: titleRow(rows, supportNameIds.get(card.id)),
         searchText: toSearchTextRecord(supportCardSearchTexts.get(String(card.id))),
+        startAt: card.startAt,
       });
     }
 
@@ -1270,6 +1272,7 @@ export function getBuildContentSearchIndex(): Promise<ContentSearchEntry[]> {
         href: `/music/${song.id}`,
         title: titleRow(rows, musicTitleIds.get(song.id)),
         searchText: toSearchTextRecord(musicSearchTexts.get(String(song.id))),
+        startAt: song.startAt,
       });
     }
 
@@ -1291,6 +1294,7 @@ export function getBuildContentSearchIndex(): Promise<ContentSearchEntry[]> {
         href: `/story/${story.advId}`,
         title: titleRow(rows, advTitleIds.get(story.advId)),
         searchText: toSearchTextRecord(storySearchTexts.get(String(story.advId))),
+        startAt: story.startAt,
       });
     }
 
@@ -1308,6 +1312,7 @@ export function getBuildContentSearchIndex(): Promise<ContentSearchEntry[]> {
         href: `/gacha/${gacha.id}`,
         title: titleRow(rows, gachaNameIds.get(gacha.id)),
         searchText: toSearchTextRecord(gachaSearchTexts.get(String(gacha.id))),
+        startAt: gacha.startAt,
       });
     }
 
@@ -1325,6 +1330,7 @@ export function getBuildContentSearchIndex(): Promise<ContentSearchEntry[]> {
         href: `/events/${event.id}`,
         title: titleRow(rows, eventNameIds.get(event.id)),
         searchText: toSearchTextRecord(eventSearchTexts.get(String(event.id))),
+        startAt: event.startAt,
       });
     }
 
@@ -1349,6 +1355,7 @@ export function getBuildContentSearchIndex(): Promise<ContentSearchEntry[]> {
         href: `/rewards/${reward.slug}`,
         title: titleRow(rows, rewardNameIds.get(reward.slug)),
         searchText: toSearchTextRecord(rewardSearchTexts.get(reward.slug)),
+        startAt: reward.startAt,
       });
     }
 

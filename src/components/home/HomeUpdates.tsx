@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { AppLocale } from "@/config/locales";
 import type { GameServer } from "@/config/servers";
 import ServerScope from "@/components/shared/ServerScope";
@@ -22,6 +22,7 @@ import type { MusicViewModel } from "@/lib/music/data";
 import { getRoutePathById } from "@/lib/route/registry";
 import { parseMasterDate } from "@/lib/schedule";
 import { useNow } from "@/lib/schedule/use-now";
+import { isSpoiler, useSpoiler } from "@/lib/settings/spoiler";
 import type { SupportCardViewModel } from "@/lib/support-cards/data";
 
 interface Props {
@@ -70,8 +71,30 @@ export default function HomeUpdates({ locale, home, servers, module, availabilit
 
 function Updates({ locale, module, servers, availability, rewards, songs, cards, supportCards }: UpdatesProps) {
   const now = useNow();
+  const { showSpoiler } = useSpoiler();
   const [cardKind, setCardKind] = useState<CardKind>("member");
   const upcoming = t(locale, "schedule.upcoming");
+
+  const visibleRewards = useMemo(() => {
+    if (showSpoiler || now === null) return rewards;
+    return rewards.filter((entry) => !isSpoiler(entry.startAt, now));
+  }, [rewards, showSpoiler, now]);
+
+  const visibleSongs = useMemo(() => {
+    if (showSpoiler || now === null) return songs;
+    return songs.filter((song) => !isSpoiler(song.startAt, now));
+  }, [songs, showSpoiler, now]);
+
+  const visibleCards = useMemo(() => {
+    if (showSpoiler || now === null) return cards;
+    return cards.filter((card) => !isSpoiler(card.startAt, now));
+  }, [cards, showSpoiler, now]);
+
+  const visibleSupportCards = useMemo(() => {
+    if (showSpoiler || now === null) return supportCards;
+    return supportCards.filter((card) => !isSpoiler(card.startAt, now));
+  }, [supportCards, showSpoiler, now]);
+
   // Scheduled releases already ship in MasterData; mark them once the browser clock is known.
   const badgeFor = (startAt: string) => {
     const start = parseMasterDate(startAt);
@@ -87,9 +110,9 @@ function Updates({ locale, module, servers, availability, rewards, songs, cards,
         <SectionHeading id="home-rewards" title={t(locale, "home.activities")}>
           <SectionLink href={localizePath(getRoutePathById("rewards"), locale)} label={t(locale, "home.viewAll")} />
         </SectionHeading>
-        {rewards.length > 0 ? (
+        {visibleRewards.length > 0 ? (
           <ul className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
-            {rewards.map((entry) => <RewardRow key={entry.slug} entry={entry} locale={locale} now={now} />)}
+            {visibleRewards.map((entry) => <RewardRow key={entry.slug} entry={entry} locale={locale} now={now} />)}
           </ul>
         ) : (
           <div className="md3-surface px-6 py-8 text-center">
@@ -102,14 +125,14 @@ function Updates({ locale, module, servers, availability, rewards, songs, cards,
   }
 
   if (module === "music") {
-    if (songs.length === 0) return null;
+    if (visibleSongs.length === 0) return null;
     return (
       <section aria-labelledby="home-music">
         <SectionHeading id="home-music" title={t(locale, "home.latestMusic")}>
           <SectionLink href={localizePath(getRoutePathById("music"), locale)} label={t(locale, "home.viewAll")} />
         </SectionHeading>
         <div className={latestGrid}>
-          {songs.map((song) => (
+          {visibleSongs.map((song) => (
             <div key={song.id} className="relative min-w-0">
               <SongCard song={song} locale={locale} {...badgeFor(song.startAt)} />
               <span className="pointer-events-none absolute right-2 top-9 z-10">{flags(availability.music, song.id)}</span>
@@ -140,13 +163,13 @@ function Updates({ locale, module, servers, availability, rewards, songs, cards,
       </SectionHeading>
       <div className={latestGrid}>
         {cardKind === "member"
-          ? cards.map((card) => (
+          ? visibleCards.map((card) => (
             <div key={card.id} className="relative min-w-0">
               <MemberCardItem card={card} locale={locale} {...badgeFor(card.startAt)} />
               <span className="pointer-events-none absolute right-2 top-9 z-10">{flags(availability.cards, card.id)}</span>
             </div>
           ))
-          : supportCards.map((card) => (
+          : visibleSupportCards.map((card) => (
             <div key={card.id} className="relative min-w-0">
               <SupportCardItem card={card} locale={locale} {...badgeFor(card.startAt)} />
               <span className="pointer-events-none absolute right-2 top-9 z-10">{flags(availability.supportCards, card.id)}</span>

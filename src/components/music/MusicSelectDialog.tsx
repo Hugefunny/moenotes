@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import type { AppLocale } from "@/config/locales";
 import { t } from "@/i18n";
 import Modal from "@/components/shared/Modal";
@@ -6,6 +6,7 @@ import MusicFilters, { useMusicFilters } from "@/components/music/MusicFilters";
 import { useSongTitle } from "@/lib/music/title-preference";
 import { getBandSmallIconUrl } from "@/lib/cards/assets";
 import type { MusicViewModel } from "@/lib/music/data";
+import { isSpoiler, useSpoilerSetting } from "@/lib/settings/spoiler";
 import {
   DIFFICULTY_CHIP_CLASSES,
   DIFFICULTY_SHORT_LABELS,
@@ -45,8 +46,14 @@ export default function MusicSelectDialog({
   sortPage = "music-select",
   songOnly = false,
 }: MusicSelectDialogProps) {
+  const { showSpoiler, now } = useSpoilerSetting();
+  const visibleSongs = useMemo(() => {
+    if (showSpoiler || now === null) return songs;
+    return songs.filter((song) => !isSpoiler(song.startAt, now));
+  }, [songs, showSpoiler, now]);
+
   // Lives outside the modal body, so the filters survive closing and reopening.
-  const music = useMusicFilters(songs, locale, sortPage);
+  const music = useMusicFilters(visibleSongs, locale, sortPage);
   const gridRef = useRef<HTMLUListElement>(null);
   const currentId = current?.musicId ?? null;
 

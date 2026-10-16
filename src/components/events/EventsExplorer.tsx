@@ -21,6 +21,7 @@ import { useDisplayTimeZone } from "@/lib/schedule/use-display-time-zone";
 import { useListPageMemory } from "@/lib/scroll/use-list-page-memory";
 import type { ServerFaceted } from "@/lib/servers/facets";
 import { useAssetUrl, useServerList } from "@/lib/servers/use-content-server";
+import { useSpoiler } from "@/lib/settings/spoiler";
 
 interface Props {
   locale: AppLocale;
@@ -29,17 +30,20 @@ interface Props {
   bands: Array<[number, string]>;
 }
 
-const statuses: ScheduleStatus[] = ["ongoing", "upcoming", "ended"];
+const ALL_STATUSES: ScheduleStatus[] = ["ongoing", "upcoming", "ended"];
 
 export default function EventsExplorer({ locale, servers, initialEvents, bands }: Props) {
   const memory = useListPageMemory("event-list");
   const now = useNow();
+  const { showSpoiler } = useSpoiler();
   const timeZone = useDisplayTimeZone();
   const { server, pickServer, items: events } = useServerList(locale, servers, initialEvents);
   const [query, setQuery] = useState("");
   const sort = useListSort("event-list", locale, "date,endingSoon");
   const [selectedStatuses, setSelectedStatuses] = useState<ScheduleStatus[]>([]);
   const [selectedBands, setSelectedBands] = useState<number[]>([]);
+
+  const statuses: ScheduleStatus[] = useMemo(() => (showSpoiler ? ALL_STATUSES : ["ongoing", "ended"]), [showSpoiler]);
 
   // Servers that have held events, for a server that has not yet.
   const eventServers = useMemo(() => orderServers(initialEvents.flatMap((event) => event.servers)).filter((entry) => servers.includes(entry)), [initialEvents, servers]);
@@ -83,12 +87,14 @@ export default function EventsExplorer({ locale, servers, initialEvents, bands }
   const filteredEvents = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase();
     return events.filter((event) => {
+      // Spoiler filtering: if spoiler display is disabled, hide upcoming events
+      if (!showSpoiler && now !== null && scheduleStatus(event.startAt, event.endAt, now) === "upcoming") return false;
       // Status depends on the visitor's clock, so it only filters once that is known.
       if (selectedStatuses.length > 0 && now !== null && !selectedStatuses.includes(scheduleStatus(event.startAt, event.endAt, now))) return false;
       if (selectedBands.length > 0 && !event.bandIds.some((id) => selectedBands.includes(id))) return false;
       return !needle || event.searchText.includes(needle);
     });
-  }, [events, query, selectedStatuses, selectedBands, now]);
+  }, [events, query, selectedStatuses, selectedBands, now, showSpoiler]);
 
   const sortedEvents = useMemo(() => sortEntries(filteredEvents, sort.value, locale, now === null ? {} : { now }), [filteredEvents, sort.value, locale, now]);
 
@@ -267,7 +273,7 @@ function parseRememberedFilters(raw?: string) {
     const parsed = JSON.parse(raw) as Partial<typeof fallback>;
     return {
       query: typeof parsed.query === "string" ? parsed.query : "",
-      statuses: Array.isArray(parsed.statuses) ? parsed.statuses.filter((status) => statuses.includes(status)) : [],
+      statuses: Array.isArray(parsed.statuses) ? parsed.statuses.filter((status) => ALL_STATUSES.includes(status)) : [],
       bands: Array.isArray(parsed.bands) ? parsed.bands : [],
     };
   } catch {

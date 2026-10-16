@@ -479,8 +479,8 @@ function components(density: Md3Density): ThemeOptions["components"] {
         root: { width: 52 + 24, height: 32 + 24, padding: 12 },
         switchBase: {
           padding: 16,
-          top: 0,
-          left: 0,
+          top: 4,
+          left: 4,
           color: c("outline"),
           "&:hover": { backgroundColor: ca("on-surface", HOVER) },
           "&.Mui-checked": {

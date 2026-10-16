@@ -29,6 +29,7 @@ import { CharacterSectionTabs, CostumesPanel, RankRewardsPanel, useCharacterSect
 import CharacterVoicesSection from "@/components/characters/CharacterVoices";
 import { BondPartnersPanel, CharacterMissionsPanel, RelatedPanels } from "@/components/characters/CharacterExtraSections";
 import type { CharacterExtrasData } from "@/lib/characters/relations";
+import { isSpoiler, useSpoilerSetting } from "@/lib/settings/spoiler";
 
 interface Props {
   locale: AppLocale;
@@ -83,6 +84,18 @@ export default function CharacterDetail({ locale, initialData, progressionData, 
 
 function CharacterDetailView({ locale, data, progression, extras }: { locale: AppLocale; data: DetailData; progression: CharacterProgressionData | null; extras: CharacterExtrasData }) {
   const assetUrl = useAssetUrl();
+  const { showSpoiler, now } = useSpoilerSetting();
+  const visibleCards = useMemo(() => {
+    if (showSpoiler || now === null) return data.cards;
+    return data.cards.filter((card) => !isSpoiler(card.startAt, now));
+  }, [data.cards, showSpoiler, now]);
+  const visibleExtras = useMemo(() => {
+    if (showSpoiler || now === null) return extras;
+    return {
+      ...extras,
+      supportCards: extras.supportCards.filter((card) => !isSpoiler(card.startAt, now)),
+    };
+  }, [extras, showSpoiler, now]);
   const [section, setSection] = useCharacterSection();
   const loading = false;
   const error = false;
@@ -406,13 +419,13 @@ function CharacterDetailView({ locale, data, progression, extras }: { locale: Ap
         <section className="flex-1 min-w-0 space-y-6">
           <CharacterSectionTabs locale={locale} value={section} onChange={setSection} />
           {section === "costumes" && <CostumesPanel locale={locale} costumes={progression?.costumes ?? []} />}
-          {section === "voices" && <CharacterVoicesSection locale={locale} characterId={character.id} characterNames={characterNames} cards={data.cards} />}
+          {section === "voices" && <CharacterVoicesSection locale={locale} characterId={character.id} characterNames={characterNames} cards={visibleCards} />}
           {section === "bonds" && <>
             <BondPartnersPanel locale={locale} extras={extras} />
             <RankRewardsPanel locale={locale} title={t(locale, "characters.rewards.friendshipTitle")} groups={progression?.friendshipRewards ?? []} />
           </>}
           {section === "missions" && <CharacterMissionsPanel locale={locale} characterName={character.name} extras={extras} />}
-          {section === "related" && <RelatedPanels locale={locale} cards={data.cards} extras={extras} />}
+          {section === "related" && <RelatedPanels locale={locale} cards={visibleCards} extras={visibleExtras} />}
           {section === "profile" && <>
           {/* Character Bio Info Card */}
           <div className="md3-surface overflow-hidden">
@@ -495,7 +508,7 @@ function CharacterDetailView({ locale, data, progression, extras }: { locale: Ap
           {/* The full card lists live in the related section; the profile keeps the counts. */}
           <div className="md3-surface flex flex-wrap items-center justify-between gap-3 px-6 py-4 sm:px-8">
             <p className="text-label-large text-on-surface">
-              {t(locale, "characters.related.summary", { cards: data.cards.length, supportCards: extras.supportCards.length, stories: extras.stories.length + extras.friendshipStories.length })}
+              {t(locale, "characters.related.summary", { cards: visibleCards.length, supportCards: visibleExtras.supportCards.length, stories: extras.stories.length + extras.friendshipStories.length })}
             </p>
             <button type="button" onClick={() => setSection("related")} className="md3-state rounded-full border border-outline-variant bg-surface-container-low px-4 py-1.5 text-label-medium text-on-surface hover:text-primary">
               {t(locale, "characters.related.open")}

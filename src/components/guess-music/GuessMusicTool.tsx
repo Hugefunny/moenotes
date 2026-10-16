@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import { withMd3 } from "@/components/md3/Md3Provider";
@@ -8,6 +8,7 @@ import { t } from "@/i18n";
 import { SETTINGS_PARAMS, hasSettingsParams } from "@/lib/guess-music/settings";
 import type { GuessSong } from "@/lib/guess-music/songs";
 import type { ServerFaceted } from "@/lib/servers/facets";
+import { isSpoiler, useSpoilerSetting } from "@/lib/settings/spoiler";
 import DailyChallenge from "./DailyChallenge";
 import FreePlayTool from "./FreePlayTool";
 import GuessIcon from "./GuessIcon";
@@ -30,6 +31,12 @@ const TABS: Array<{ id: GuessTab; icon: "calendar" | "tune" }> = [
  */
 function GuessMusicTool({ locale, songs, servers }: GuessMusicToolProps) {
   const tr = (key: string) => t(locale, `guessMusic.${key}`);
+  const { showSpoiler, now } = useSpoilerSetting();
+  const visibleSongs = useMemo(() => {
+    if (showSpoiler || now === null) return songs;
+    return songs.filter((song) => !isSpoiler(song.startAt, now));
+  }, [songs, showSpoiler, now]);
+
   // The static HTML knows no address: it shows the default tab, and the address picks once mounted.
   const [tab, setTab] = useState<GuessTab>("daily");
   // A run or a game is on screen: the tabs hide, so nothing keeps playing behind another tab.
@@ -62,9 +69,9 @@ function GuessMusicTool({ locale, songs, servers }: GuessMusicToolProps) {
       )}
       <div id="gm-tab-panel" role="tabpanel" aria-labelledby={`gm-tab-${tab}`} className="gm-stack" style={{ gap: 16 }}>
         {tab === "daily" ? (
-          <DailyChallenge locale={locale} songs={songs} onPlayingChange={setPlaying} onPlayFree={() => choose("free")} />
+          <DailyChallenge locale={locale} songs={visibleSongs} onPlayingChange={setPlaying} onPlayFree={() => choose("free")} />
         ) : (
-          <FreePlayTool locale={locale} songs={songs} servers={servers} onPlayingChange={setPlaying} />
+          <FreePlayTool locale={locale} songs={visibleSongs} servers={servers} onPlayingChange={setPlaying} />
         )}
       </div>
     </div>
