@@ -12,6 +12,7 @@ import {
 } from "@/config/analytics";
 import { localizePath } from "@/i18n/routing";
 import { buildThemeBootstrapScript } from "@/lib/settings/apply-theme";
+import { buildMediaQueryCompatScript } from "@/lib/browser/media-query-compat";
 import { absolutePageUrl, buildHreflang, buildPageMetadata, type PageMetadata } from "@/lib/seo/metadata";
 import { breadcrumbJsonLd, serializeJsonLd, websiteJsonLd } from "@/lib/seo/jsonld";
 import type { BreadcrumbDetail } from "@/types/route";
@@ -25,6 +26,7 @@ interface Props {
 
 const { locale, pathname, meta: metaOverrides, breadcrumbDetail } = Astro.props;
 const meta = buildPageMetadata(pathname, locale, metaOverrides);
+const mediaQueryCompatScript = buildMediaQueryCompatScript();
 const themeScript = buildThemeBootstrapScript();
 const website = websiteJsonLd(locale);
 const breadcrumbs = breadcrumbJsonLd(pathname, locale, breadcrumbDetail);
@@ -44,6 +46,8 @@ const googleAnalyticsBootstrapScript = isGoogleAnalyticsEnabled
     <style is:inline>@layer theme, base, mui, components, utilities;</style>
     <Md3ThemeVars />
     <meta name="color-scheme" content="light dark" />
+    <!-- Install the legacy WebView listener bridge before shared stores or MUI islands can load. -->
+    <script is:inline set:html={mediaQueryCompatScript}></script>
     <!-- Resolve the theme before any external stylesheet can block this script. -->
     <script is:inline set:html={themeScript}></script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
