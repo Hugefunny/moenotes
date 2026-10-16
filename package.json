@@ -35,7 +35,7 @@
     "@mui/material": "9.4.0",
     "@tailwindcss/vite": "^4.1.18",
     "astro": "7.3.5",
-    "ournotes-player": "0.1.7",
+    "ournotes-player": "0.1.8",
     "pinyin-pro": "3.29.4",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
