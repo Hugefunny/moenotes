@@ -43,7 +43,6 @@ export function buildGameSaveTables(server: GameServer, rows: GameSaveMasterRows
     snapLevels: levels(rows.supportCardLevels),
     characterRanks: rows.characterRanks.map(row => [integer(row.rank), integer(row.exp)] as [number, number]).sort((a, b) => a[0] - b[0]),
     characters: rows.characters.filter(row => row.isNonPlayable !== true).map(row => id(row.id)),
-    nonPlayableCharacters: rows.characters.filter(row => row.isNonPlayable === true).map(row => id(row.id)),
     bandItems,
     memoryMusicGroups: rows.memoryMusicGroups.map(row => id(row.id)),
     memoryMusics: Object.fromEntries(rows.memoryMusics.map(row => [id(row.id), id(row.groupId)])),

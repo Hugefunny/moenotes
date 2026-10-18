@@ -107,7 +107,7 @@ test("memory and events distinguish unknown from an explicit empty choice with v
 test("a linked save shows character ranks, furniture and memory read-only while VIP stays editable", async () => {
   const source = await catalog();
   const saveTables: GameSaveTables = { server: "tw", members: {}, snaps: {}, memberLevels: {}, snapLevels: {}, characterRanks: [[1, 0], [2, 5], [3, 9]],
-    characters: ["1", "2"], nonPlayableCharacters: [], bandItems: { "9007199254740993": [1, 2, 4] }, memoryMusicGroups: [], memoryMusics: {} };
+    characters: ["1", "2"], bandItems: { "9007199254740993": [1, 2, 4] }, memoryMusicGroups: [], memoryMusics: {} };
   const stored = answerPlayerField(createBox("tw", "profile"), source, "characterRank.1", 3, 1);
   const link = { server: "intl" as const, accountId: "20000000001", sha256: "a".repeat(64), uploadedAt: 10 };
   const save = parseGameSave(JSON.stringify({ _characters: [{ _masterId: 2, _exp: 6 }], _bandItems: [{ _masterId: "9007199254740993", _level: 4 }] }));
