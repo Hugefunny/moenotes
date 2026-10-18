@@ -15,7 +15,10 @@ export interface GameSaveTables {
   memberLevels: Readonly<Record<string, readonly (readonly [number, number])[]>>;
   snapLevels: Readonly<Record<string, readonly (readonly [number, number])[]>>;
   characterRanks: readonly (readonly [number, number])[];
+  /** Playable characters: the ones a save lists and a player ranks. */
   characters: readonly string[];
+  /** Non-playable characters: never ranked, so always at experience 0. */
+  nonPlayableCharacters: readonly string[];
   /** Band item ID → its levels. */
   bandItems: Readonly<Record<string, readonly number[]>>;
   memoryMusicGroups: readonly string[];

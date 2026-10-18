@@ -21,7 +21,7 @@ const tables: GameSaveTables = buildGameSaveTables("tw", {
   memberCardLevels: [{ group: 1, level: 3, exp: 30 }, { group: 1, level: 1, exp: 0 }, { group: 1, level: 2, exp: 10 }, { group: 2, level: 1, exp: 0 }, { group: 2, level: 2, exp: 5 }],
   supportCardLevels: [{ group: 1, level: 1, exp: 0 }, { group: 1, level: 2, exp: 7 }],
   characterRanks: [{ id: 2, rank: 2, exp: 3 }, { id: 1, rank: 1, exp: 0 }, { id: 3, rank: 3, exp: 9 }],
-  characters: [{ id: 1 }, { id: 2 }, { id: 3 }],
+  characters: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 1001, isNonPlayable: true }],
   bandItems: [{ id: 501 }, { id: 502 }],
   bandItemLevels: [{ bandItemId: 501, level: 2 }, { bandItemId: 501, level: 1 }, { bandItemId: 502, level: 1 }],
   memoryMusicGroups: [{ id: 7 }],
@@ -268,7 +268,7 @@ describe("account envelope", () => {
     expect(parsed.declared).toBeNull();
     expect(parsed.account._player._memberCards).toEqual([{ _masterId: 101, _exp: 10, _awakeCount: null, _rank: 3, _liveSkillLevel: null, _performanceSkillLevel: null }]);
     expect(parsed.account._player._supportCards).toEqual([{ _masterId: 201, _exp: null, _rank: null }]);
-    expect(parsed.account._player._characters).toEqual([{ _masterId: 1, _exp: null }, { _masterId: 2, _exp: 9 }, { _masterId: 3, _exp: null }]);
+    expect(parsed.account._player._characters).toEqual([{ _masterId: 1, _exp: null }, { _masterId: 2, _exp: 9 }, { _masterId: 3, _exp: null }, { _masterId: 1001, _exp: 0 }]);
     expect(parsed.account._player._bandItems).toEqual([{ _masterId: 501, _level: 0 }]);
     expect(parsed.account._player._memory).toEqual({ _musicGroups: [], _members: [], _supports: [] });
     expect(parsed.coverage).toEqual({ "_player._memberCards": "complete", "_player._supportCards": "partial", "_player._characters": "complete", "_player._bandItems": "partial",
@@ -277,6 +277,14 @@ describe("account envelope", () => {
       { path: "_player._memberCards[0]._exp", reason: "Level 2 read from a screenshot; experience is that level's threshold" },
       { path: "_player._characters[1]._exp", reason: "Character rank 3 entered manually; experience is that rank's threshold" },
     ]);
+  });
+  test("a partial character list still lists every non-playable character at experience 0", () => {
+    const box = createBox("tw", "box", 1);
+    box.player.characterRanks = { 2: answerField({ status: "unknown", value: null, history: [], needsReview: false }, { id: "c2", value: 2, source: "manual", at: 4 }) };
+    box.player.characterCoverage = "partial";
+    const parsed = JSON.parse(boxAccountJson(target, box, tables));
+    expect(parsed.coverage["_player._characters"]).toBe("partial");
+    expect(parsed.account._player._characters).toEqual([{ _masterId: 2, _exp: 3 }, { _masterId: 1001, _exp: 0 }]);
   });
   test("IDs are written as exact integer tokens and a linked Box is not assembled from its own facts", () => {
     const box = createBox("tw", "box", 1);

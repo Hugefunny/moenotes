@@ -102,6 +102,10 @@ export function boxAccountJson(target: AccountTarget, box: CardBox, tables: Game
     if (rank !== null && exp !== null) assumptions.push({ path: `_player._characters[${index}]._exp`, reason: `Character rank ${rank} ${origin(box.player.characterRanks[id]!)}; experience is that rank's threshold` });
     return `{"_masterId":${long(id)},"_exp":${int(exp)}}`;
   });
+  // A non-playable character never gains experience, so it is listed at 0 whatever the declared coverage.
+  for (const id of tables.nonPlayableCharacters) {
+    if (!characterIds.includes(id)) characters.push(`{"_masterId":${long(id)},"_exp":0}`);
+  }
 
   const itemIds = [...new Set([...Object.keys(box.player.bandItemStates), ...Object.keys(box.player.bandItems)])];
   const bandItems = itemIds.map(id => {
