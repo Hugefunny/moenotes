@@ -1,7 +1,9 @@
 import { useMemo, useState, type ReactNode } from "react";
 import type { AppLocale } from "@/config/locales";
 import type { GameServer } from "@/config/servers";
-import ServerScope from "@/components/shared/ServerScope";
+import ServerScope, { HeadingServerSwitch } from "@/components/shared/ServerScope";
+import DetailHero from "@/components/shared/DetailHero";
+import { DetailRow } from "@/components/shared/DetailRows";
 import ServerSchedules from "@/components/shared/ServerSchedules";
 import TimesNote from "@/components/shared/TimesNote";
 import BannerImage from "@/components/shared/BannerImage";
@@ -36,10 +38,13 @@ const backLink = " md3-state inline-flex rounded-full border border-outline-vari
 export default function ExchangeDetail({ locale, exchange: faceted, servers }: Props) {
   const [server, pickServer] = useContentServer(locale, servers);
   const exchange = useMemo(() => faceted && moveReleaseUrls(valueForServer(faceted, server), entityServer(faceted, server)), [faceted, server]);
+  // The hero carries the server switch beside the name, so the scope leaves its own out.
+  const serverSwitch = <HeadingServerSwitch locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={faceted?.servers ?? []} />;
   return (
-    <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={faceted?.servers ?? []}>
+    <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={faceted?.servers ?? []} hideSwitch>
       <ExchangeDetailView
         locale={locale}
+        serverSwitch={serverSwitch}
         exchange={exchange}
         schedules={faceted && <ServerSchedules locale={locale} faceted={faceted} servers={servers} alwaysLabel={t(locale, "exchange.alwaysOpen")} />}
       />
@@ -47,7 +52,7 @@ export default function ExchangeDetail({ locale, exchange: faceted, servers }: P
   );
 }
 
-function ExchangeDetailView({ locale, exchange, schedules }: { locale: AppLocale; exchange: ExchangeDetailViewModel | null; schedules: ReactNode }) {
+function ExchangeDetailView({ locale, exchange, serverSwitch, schedules }: { locale: AppLocale; serverSwitch: ReactNode; exchange: ExchangeDetailViewModel | null; schedules: ReactNode }) {
   const now = useNow();
   const timeZone = useDisplayTimeZone();
   const { showSpoiler } = useSpoiler();
@@ -74,6 +79,8 @@ function ExchangeDetailView({ locale, exchange, schedules }: { locale: AppLocale
 
   return (
     <div className="w-full space-y-8">
+      <DetailHero title={exchange.name} aside={serverSwitch} eyebrow={<ScheduleBadge locale={locale} startAt={exchange.startAt} endAt={exchange.endAt} now={now} />} />
+
       <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(22rem,2fr)_3fr] lg:items-start">
         <aside className="flex w-full flex-col gap-6 lg:sticky lg:top-24">
           {/* The shop banners are 420×180: kept at most at their own width rather than blown up across the column. */}
@@ -81,18 +88,9 @@ function ExchangeDetailView({ locale, exchange, schedules }: { locale: AppLocale
             <BannerImage eager className="mx-auto max-w-[420px] rounded-shape-md border border-outline-variant" src={exchange.bannerUrl} alt={exchange.name} fallback={exchange.name} />
           </div>
           <div className="md3-surface overflow-hidden">
-            <div className="border-b border-outline-variant p-6">
-              <ScheduleBadge locale={locale} startAt={exchange.startAt} endAt={exchange.endAt} now={now} />
-              <h2 className="mt-3 font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-medium">{exchange.name}</h2>
-            </div>
-            <div className="divide-y divide-dashed divide-outline-variant/60 px-6 py-2">
-              {facts.map(([label, value]) => (
-                <div key={label} className="flex items-center justify-between gap-4 py-3.5 text-body-medium">
-                  <span className="shrink-0 font-semibold text-on-surface-variant">{label}</span>
-                  <span className="min-w-0 text-right font-semibold text-on-surface">{value}</span>
-                </div>
-              ))}
-            </div>
+            <dl className="divide-y divide-outline-variant px-6">
+              {facts.map(([label, value]) => <DetailRow key={label} label={label} value={value} />)}
+            </dl>
             <TimesNote locale={locale} value={exchange.startAt || exchange.endAt} timeZone={timeZone} className="px-6 pb-5 text-body-small text-on-surface-variant" />
             <div className="px-6 pb-5 empty:hidden">{schedules}</div>
           </div>
@@ -211,7 +209,7 @@ function RelationLink({ locale, relation }: { locale: AppLocale; relation: NonNu
 function NotFound({ locale }: { locale: AppLocale }) {
   return (
     <div className="md3-surface p-8 text-center sm:p-12">
-      <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "exchange.detail.notFoundTitle")}</h2>
+      <h1 className="text-headline-small text-on-surface">{t(locale, "exchange.detail.notFoundTitle")}</h1>
       <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "exchange.detail.notFoundDescription")}</p>
       <a href={localizePath(getRoutePathById("exchange"), locale)} className={`${backLink} mt-6`}>{t(locale, "exchange.detail.backToList")}</a>
     </div>

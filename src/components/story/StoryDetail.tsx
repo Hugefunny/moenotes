@@ -1,7 +1,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import type { AppLocale } from "@/config/locales";
 import type { GameServer } from "@/config/servers";
-import ServerScope from "@/components/shared/ServerScope";
+import ServerScope, { HeadingServerSwitch } from "@/components/shared/ServerScope";
 import { forServer, type ServerFaceted } from "@/lib/servers/facets";
 import { useAssetUrl, useContentServer } from "@/lib/servers/use-content-server";
 import { t } from "@/i18n";
@@ -50,13 +50,17 @@ export default function StoryDetail({ servers, advServers, story, ...props }: St
   const [server, pickServer] = useContentServer(props.locale, servers);
   const shown = useMemo(() => story && forServer(story, server), [story, server]);
   return (
-    <ServerScope locale={props.locale} servers={servers} server={server} onChange={pickServer} entityServers={advServers}>
-      <StoryDetailView {...props} story={shown} />
+    <ServerScope locale={props.locale} servers={servers} server={server} onChange={pickServer} entityServers={advServers} hideSwitch>
+      <StoryDetailView
+        {...props}
+        story={shown}
+        serverSwitch={<HeadingServerSwitch locale={props.locale} servers={servers} server={server} onChange={pickServer} entityServers={advServers} />}
+      />
     </ServerScope>
   );
 }
 
-function StoryDetailView({ locale, advId, initialTitle, initialScript, initialCharacters, initialTexts, story, previous, next }: Omit<StoryDetailProps, "story"> & { story: StoryViewModel | null }) {
+function StoryDetailView({ locale, advId, initialTitle, initialScript, initialCharacters, initialTexts, story, previous, next, serverSwitch }: Omit<StoryDetailProps, "story"> & { story: StoryViewModel | null; serverSwitch: ReactNode }) {
   const now = useNow();
   const { showSpoiler } = useSpoiler();
   const isUnreleased = Boolean(now !== null && story?.startAt && isSpoiler(story.startAt, now));
@@ -86,7 +90,7 @@ function StoryDetailView({ locale, advId, initialTitle, initialScript, initialCh
       )}
       <div className="flex min-w-0 flex-1 flex-col justify-center p-6">
         <p className="text-label-medium text-primary">{eyebrow || `ADV ${advId}`}</p>
-        <h1 className="mt-2 text-headline-small text-on-surface">{initialTitle}</h1>
+        <h1 className="mt-2 text-balance text-headline-medium text-on-surface sm:text-headline-large">{initialTitle}</h1>
         {story?.description && <p className="mt-3 whitespace-pre-line text-body-medium leading-6 text-on-surface-variant">{story.description}</p>}
         {story?.birthday && (
           <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -121,7 +125,9 @@ function StoryDetailView({ locale, advId, initialTitle, initialScript, initialCh
     {controls && <div className="border-t border-outline-variant px-6 py-4">{controls}</div>}
   </header>;
 
+  // The page heading is this header's title (PageLayout `hideHeader`); the server switch sits above it, in the column.
   return <div className="mx-auto max-w-4xl">
+    <div className="mb-4 empty:hidden">{serverSwitch}</div>
     {initialScript
       ? <StoryScriptReader locale={locale} script={initialScript} characters={initialCharacters} texts={initialTexts} layer="page" renderHeader={header} />
       : <>

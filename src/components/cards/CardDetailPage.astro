@@ -19,6 +19,6 @@ const [initialData, materials, servers] = await Promise.all([
 ]);
 ---
 
-<PageLayout locale={locale} titleKey="seo.cardDetail.title" descriptionKey="seo.cardDetail.description">
+<PageLayout locale={locale} titleKey="seo.cardDetail.title" descriptionKey="seo.cardDetail.description" hideHeader>
   <CardDetail client:load servers={servers} locale={locale} cardId={cardId} initialData={initialData} materials={materials} />
 </PageLayout>

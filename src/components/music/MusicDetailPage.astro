@@ -20,6 +20,6 @@ const [song, detail, extras, servers] = await Promise.all([
 ]);
 ---
 
-<PageLayout locale={locale} titleKey="seo.songDetail.title" descriptionKey="seo.songDetail.description">
+<PageLayout locale={locale} titleKey="seo.songDetail.title" descriptionKey="seo.songDetail.description" hideHeader>
   <MusicDetail client:load servers={servers} locale={locale} songId={songId} initialSong={song} liveDetail={detail?.value ?? null} liveExtras={extras} />
 </PageLayout>

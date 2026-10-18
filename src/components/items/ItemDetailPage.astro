@@ -18,6 +18,6 @@ const [detail, neighbors, servers] = await Promise.all([
 ]);
 ---
 
-<PageLayout locale={locale} titleKey="seo.itemDetail.title" descriptionKey="seo.itemDetail.description">
+<PageLayout locale={locale} titleKey="seo.itemDetail.title" descriptionKey="seo.itemDetail.description" hideHeader>
   <ItemDetail client:load servers={servers} locale={locale} detail={detail} neighbors={neighbors.get(itemId) ?? {}} />
 </PageLayout>

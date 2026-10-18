@@ -15,6 +15,6 @@ const gacha = await getBuildGachaDetail(locale, gachaId);
 const servers = await getBuildServers();
 ---
 
-<PageLayout locale={locale} titleKey="seo.gachaDetail.title" descriptionKey="seo.gachaDetail.description">
+<PageLayout locale={locale} titleKey="seo.gachaDetail.title" descriptionKey="seo.gachaDetail.description" hideHeader>
   <GachaDetail client:load servers={servers} locale={locale} gacha={gacha} />
 </PageLayout>

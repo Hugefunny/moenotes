@@ -1,7 +1,9 @@
 import { useMemo, useState, type ReactNode } from "react";
 import type { AppLocale } from "@/config/locales";
 import type { GameServer } from "@/config/servers";
-import ServerScope from "@/components/shared/ServerScope";
+import ServerScope, { HeadingServerSwitch } from "@/components/shared/ServerScope";
+import DetailHero from "@/components/shared/DetailHero";
+import { DetailRow } from "@/components/shared/DetailRows";
 import ServerSchedules from "@/components/shared/ServerSchedules";
 import TimesNote from "@/components/shared/TimesNote";
 import { moveReleaseUrls } from "@/lib/assets/release";
@@ -53,14 +55,16 @@ function rarityIcon(kind: GachaPool["kind"], rarity: number): string {
 export default function GachaDetail({ locale, gacha: faceted, servers }: Props) {
   const [server, pickServer] = useContentServer(locale, servers);
   const gacha = useMemo(() => faceted && moveReleaseUrls(valueForServer(faceted, server), entityServer(faceted, server)), [faceted, server]);
+  // The hero carries the server switch beside the name, so the scope leaves its own out.
+  const serverSwitch = <HeadingServerSwitch locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={faceted?.servers ?? []} />;
   return (
-    <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={faceted?.servers ?? []}>
-      <GachaDetailView locale={locale} gacha={gacha} schedules={faceted && <ServerSchedules locale={locale} faceted={faceted} servers={servers} alwaysLabel={t(locale, "gacha.alwaysOpen")} />} />
+    <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={faceted?.servers ?? []} hideSwitch>
+      <GachaDetailView locale={locale} gacha={gacha} serverSwitch={serverSwitch} schedules={faceted && <ServerSchedules locale={locale} faceted={faceted} servers={servers} alwaysLabel={t(locale, "gacha.alwaysOpen")} />} />
     </ServerScope>
   );
 }
 
-function GachaDetailView({ locale, gacha, schedules }: { locale: AppLocale; gacha: GachaDetailViewModel | null; schedules: ReactNode }) {
+function GachaDetailView({ locale, gacha, serverSwitch, schedules }: { locale: AppLocale; gacha: GachaDetailViewModel | null; serverSwitch: ReactNode; schedules: ReactNode }) {
   const assetUrl = useAssetUrl();
   const now = useNow();
   const timeZone = useDisplayTimeZone();
@@ -86,6 +90,18 @@ function GachaDetailView({ locale, gacha, schedules }: { locale: AppLocale; gach
   return (
     <div className="w-full space-y-8">
       {isUnreleased && <DeveloperTestingBanner locale={locale} />}
+      <DetailHero
+        title={gacha.name}
+        long
+        aside={serverSwitch}
+        eyebrow={<>
+          <ScheduleBadge locale={locale} startAt={gacha.startAt} endAt={gacha.endAt} now={now} />
+          {gacha.isLimited && <LimitedChip locale={locale} />}
+        </>}
+      >
+        {gacha.description && <p className="mt-1 max-w-[60ch] text-body-large text-on-surface-variant">{gacha.description}</p>}
+      </DetailHero>
+
       <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(22rem,2fr)_3fr] lg:items-start">
         {/* Left column: banner and rates stay in view while the pool is browsed. */}
         <aside className="flex w-full flex-col gap-6 lg:sticky lg:top-24">
@@ -101,29 +117,19 @@ function GachaDetailView({ locale, gacha, schedules }: { locale: AppLocale; gach
               <span className="absolute left-6 top-6 rounded-full bg-primary px-3 py-1 text-label-medium text-on-primary shadow-elevation-1">{gacha.viewLabel}</span>
             )}
           </div>
-          {gacha.pools.length > 0 && <div className="hidden lg:block"><RatePanel locale={locale} pools={gacha.pools} /></div>}
+          {gacha.pools.length > 0 && <RatePanel locale={locale} pools={gacha.pools} />}
         </aside>
 
         {/* Right column */}
         <section className="min-w-0 flex-1 space-y-6">
-          <div className="md3-surface overflow-hidden">
-            <div className="border-b border-outline-variant p-6 sm:p-8">
-              <div className="flex flex-wrap items-center gap-2">
-                <ScheduleBadge locale={locale} startAt={gacha.startAt} endAt={gacha.endAt} now={now} />
-                {gacha.isLimited && <LimitedChip locale={locale} />}
-              </div>
-              <h2 className="mt-3 font-[var(--md-ref-typeface-brand)] text-headline-medium text-on-surface sm:text-headline-large">{gacha.name}</h2>
-              {gacha.description && <p className="mt-3 text-body-large text-on-surface-variant">{gacha.description}</p>}
-            </div>
-            <div className="bg-surface-container-low p-6 sm:p-8">
-              <div className="divide-y divide-dashed divide-outline-variant/60">
-                <DetailRow label={t(locale, "gacha.period")} value={<span className="tabular-nums">{schedule}</span>} />
-                <DetailRow label={t(locale, "gacha.category")} value={t(locale, `gacha.categories.${gacha.category}`)} />
-                <DetailRow label={t(locale, "gacha.gachaId")} value={`#${gacha.id}`} />
-              </div>
-              <TimesNote locale={locale} value={gacha.startAt || gacha.endAt} timeZone={timeZone} className="mt-3 text-body-small text-on-surface-variant" />
-              {schedules}
-            </div>
+          <div className="md3-surface overflow-hidden px-6 pb-5 sm:px-8">
+            <dl className="divide-y divide-outline-variant">
+              <DetailRow label={t(locale, "gacha.period")} value={<span className="tabular-nums">{schedule}</span>} />
+              <DetailRow label={t(locale, "gacha.category")} value={t(locale, `gacha.categories.${gacha.category}`)} />
+              <DetailRow label={t(locale, "gacha.gachaId")} value={`#${gacha.id}`} />
+            </dl>
+            <TimesNote locale={locale} value={gacha.startAt || gacha.endAt} timeZone={timeZone} className="mt-1 text-body-small text-on-surface-variant" />
+            {schedules}
           </div>
 
           {gacha.drawOptions.length > 0 && <GachaDrawOptions locale={locale} options={gacha.drawOptions} title={t(locale, "gacha.options.title")} />}
@@ -135,9 +141,6 @@ function GachaDetailView({ locale, gacha, schedules }: { locale: AppLocale; gach
           {gacha.bonusRewards.length > 0 && <BonusPanel locale={locale} bonusRewards={gacha.bonusRewards} />}
 
           {gacha.gimmicks.length > 0 && <GimmickPanel locale={locale} gimmicks={gacha.gimmicks} />}
-
-          {/* Narrow screens read the name before the rates; wide screens keep the rates in the sticky column. */}
-          {gacha.pools.length > 0 && <div className="lg:hidden"><RatePanel locale={locale} pools={gacha.pools} /></div>}
 
           {pickupCards.length > 0 && (
             <Panel title={t(locale, "gacha.pickupTitle")}>
@@ -211,14 +214,6 @@ function Panel({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-function DetailRow({ label, value }: { label: string; value: ReactNode }) {
-  return (
-    <div className="flex items-center justify-between gap-4 py-3.5 text-body-medium">
-      <span className="shrink-0 font-semibold text-on-surface-variant">{label}</span>
-      <span className="min-w-0 text-right font-semibold text-on-surface">{value}</span>
-    </div>
-  );
-}
 
 function RatePanel({ locale, pools }: { locale: AppLocale; pools: GachaPool[] }) {
   const format = new Intl.NumberFormat(locale, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 2 });
@@ -459,7 +454,7 @@ function GimmickPanel({ locale, gimmicks }: { locale: AppLocale; gimmicks: Gacha
 function NotFound({ locale }: { locale: AppLocale }) {
   return (
     <div className="md3-surface p-8 text-center sm:p-12">
-      <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "gacha.notFoundTitle")}</h2>
+      <h1 className="text-headline-small text-on-surface">{t(locale, "gacha.notFoundTitle")}</h1>
       <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "gacha.notFoundDescription")}</p>
       <a href={localizePath(getRoutePathById("gacha"), locale)} className="md3-state mt-6 inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
         {t(locale, "gacha.backToList")}

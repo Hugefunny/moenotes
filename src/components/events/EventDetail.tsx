@@ -10,7 +10,9 @@ import RewardChip from "@/components/shared/RewardChip";
 import ScheduleBadge from "@/components/shared/ScheduleBadge";
 import ServerSchedules from "@/components/shared/ServerSchedules";
 import TimesNote from "@/components/shared/TimesNote";
-import ServerScope from "@/components/shared/ServerScope";
+import ServerScope, { HeadingServerSwitch } from "@/components/shared/ServerScope";
+import DetailHero from "@/components/shared/DetailHero";
+import { DetailRow } from "@/components/shared/DetailRows";
 import SupportCardItem from "@/components/support-cards/SupportCardItem";
 import { t } from "@/i18n";
 import { localizePath } from "@/i18n/routing";
@@ -44,14 +46,16 @@ const CARD_RANKS = [1, 2, 3, 4, 5];
 export default function EventDetail({ locale, event: faceted, servers }: Props) {
   const [server, pickServer] = useContentServer(locale, servers);
   const event = useMemo(() => faceted && moveReleaseUrls(valueForServer(faceted, server), entityServer(faceted, server)), [faceted, server]);
+  // The hero carries the server switch beside the name, so the scope leaves its own out.
+  const serverSwitch = <HeadingServerSwitch locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={faceted?.servers ?? []} />;
   return (
-    <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={faceted?.servers ?? []}>
-      <EventDetailView locale={locale} server={server} event={event} schedules={faceted && <ServerSchedules locale={locale} faceted={faceted} servers={servers} alwaysLabel="" />} />
+    <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={faceted?.servers ?? []} hideSwitch>
+      <EventDetailView locale={locale} server={server} event={event} serverSwitch={serverSwitch} schedules={faceted && <ServerSchedules locale={locale} faceted={faceted} servers={servers} alwaysLabel="" />} />
     </ServerScope>
   );
 }
 
-function EventDetailView({ locale, server, event, schedules }: { locale: AppLocale; server: GameServer; event: EventDetailViewModel | null; schedules: ReactNode }) {
+function EventDetailView({ locale, server, event, serverSwitch, schedules }: { locale: AppLocale; server: GameServer; event: EventDetailViewModel | null; serverSwitch: ReactNode; schedules: ReactNode }) {
   const now = useNow();
   const { showSpoiler } = useSpoiler();
   const timeZone = useDisplayTimeZone();
@@ -74,6 +78,14 @@ function EventDetailView({ locale, server, event, schedules }: { locale: AppLoca
   return (
     <div className="w-full space-y-8">
       {isUnreleased && <DeveloperTestingBanner locale={locale} />}
+      <DetailHero
+        title={event.name}
+        aside={serverSwitch}
+        eyebrow={<ScheduleBadge locale={locale} startAt={event.startAt} endAt={event.endAt} now={now} />}
+      >
+        {event.chapterDescription && <p className="mt-1 line-clamp-3 max-w-[60ch] whitespace-pre-line text-body-large text-on-surface-variant">{event.chapterDescription}</p>}
+      </DetailHero>
+
       <div className="overflow-hidden rounded-shape-lg border border-outline-variant bg-surface-container-low shadow-elevation-1">
         {event.backgroundUrl
           ? <EventScene event={event} alt={alt} eager className="aspect-[4/3] sm:aspect-[16/9] xl:aspect-[5/2]" />
@@ -83,28 +95,12 @@ function EventDetailView({ locale, server, event, schedules }: { locale: AppLoca
       <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(22rem,2fr)_3fr] lg:items-start">
         <aside className="flex w-full flex-col gap-6 lg:sticky lg:top-24">
           <div className="md3-surface overflow-hidden">
-            <div className="border-b border-outline-variant p-6">
-              <ScheduleBadge locale={locale} startAt={event.startAt} endAt={event.endAt} now={now} />
-              <h2 className="mt-3 font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-medium">{event.name}</h2>
-              <ScheduleCountdown locale={locale} startAt={event.startAt} endAt={event.endAt} now={now} className="mt-2" />
-              {event.chapterDescription && <p className="mt-3 line-clamp-4 whitespace-pre-line text-body-medium leading-6 text-on-surface-variant">{event.chapterDescription}</p>}
-            </div>
-            <div className="divide-y divide-dashed divide-outline-variant/60 px-6 py-2">
-              {facts.map(([label, value]) => (
-                <div key={label} className="flex items-center justify-between gap-4 py-3.5 text-body-medium">
-                  <span className="shrink-0 font-semibold text-on-surface-variant">{label}</span>
-                  <span className="min-w-0 text-right font-semibold text-on-surface">{value}</span>
-                </div>
-              ))}
-              {event.eventItem && (
-                <div className="flex items-center justify-between gap-4 py-3.5 text-body-medium">
-                  <span className="shrink-0 font-semibold text-on-surface-variant">{t(locale, "events.eventItem")}</span>
-                  <RewardChip reward={event.eventItem} locale={locale} />
-                </div>
-              )}
-            </div>
+            <dl className="divide-y divide-outline-variant px-6">
+              {facts.map(([label, value]) => <DetailRow key={label} label={label} value={value} />)}
+              {event.eventItem && <DetailRow label={t(locale, "events.eventItem")} value={<RewardChip reward={event.eventItem} locale={locale} />} />}
+            </dl>
             {rankings.length > 0 && (
-              <div className="px-6 pb-4">
+              <div className="px-6 pb-4 pt-2">
                 <a
                   href={getEventTrackerHref(locale, { server, event: String(event.id) })}
                   className="md3-state inline-flex rounded-full border border-outline-variant bg-surface-container-low px-4 py-2 text-label-medium text-primary shadow-elevation-1"
@@ -590,7 +586,7 @@ function LiveTable({ locale, rows }: { locale: AppLocale; rows: EventLiveRow[] }
 function NotFound({ locale }: { locale: AppLocale }) {
   return (
     <div className="md3-surface p-8 text-center sm:p-12">
-      <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "events.notFoundTitle")}</h2>
+      <h1 className="text-headline-small text-on-surface">{t(locale, "events.notFoundTitle")}</h1>
       <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "events.notFoundDescription")}</p>
       <a href={localizePath(getRoutePathById("event-list"), locale)} className="md3-state mt-6 inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
         {t(locale, "events.backToList")}

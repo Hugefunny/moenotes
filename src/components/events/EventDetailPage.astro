@@ -15,6 +15,6 @@ const event = await getBuildEventDetail(locale, eventId);
 const servers = await getBuildServers();
 ---
 
-<PageLayout locale={locale} titleKey="seo.eventDetail.title" descriptionKey="seo.eventDetail.description">
+<PageLayout locale={locale} titleKey="seo.eventDetail.title" descriptionKey="seo.eventDetail.description" hideHeader>
   <EventDetail client:load servers={servers} locale={locale} event={event} />
 </PageLayout>

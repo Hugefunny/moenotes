@@ -1,7 +1,9 @@
 import { useMemo, useState, type ReactNode } from "react";
 import type { AppLocale } from "@/config/locales";
 import type { GameServer } from "@/config/servers";
-import ServerScope from "@/components/shared/ServerScope";
+import ServerScope, { HeadingServerSwitch } from "@/components/shared/ServerScope";
+import DetailHero from "@/components/shared/DetailHero";
+import { DetailRow } from "@/components/shared/DetailRows";
 import EntityPager from "@/components/shared/EntityPager";
 import { moveReleaseUrls } from "@/lib/assets/release";
 import { entityServer, valueForServer, type ServerFacetedValue } from "@/lib/servers/facets";
@@ -35,17 +37,19 @@ const TARGET_PREVIEW = 8;
 export default function ItemDetail({ locale, detail, neighbors, servers }: Props) {
   const [server, pickServer] = useContentServer(locale, servers);
   const value = useMemo(() => detail && moveReleaseUrls(valueForServer(detail, server), entityServer(detail, server)), [detail, server]);
+  // The hero carries the server switch beside the name, so the scope leaves its own out.
+  const serverSwitch = <HeadingServerSwitch locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={detail?.servers ?? []} />;
   return (
-    <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={detail?.servers ?? []}>
+    <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={detail?.servers ?? []} hideSwitch>
       <div className="w-full space-y-8">
-        {value ? <ItemDetailView locale={locale} detail={value} /> : <NotFound locale={locale} />}
+        {value ? <ItemDetailView locale={locale} detail={value} serverSwitch={serverSwitch} /> : <NotFound locale={locale} />}
         <EntityPager locale={locale} listRouteId="items" {...neighbors} />
       </div>
     </ServerScope>
   );
 }
 
-function ItemDetailView({ locale, detail }: { locale: AppLocale; detail: ItemDetailViewModel }) {
+function ItemDetailView({ locale, detail, serverSwitch }: { locale: AppLocale; detail: ItemDetailViewModel; serverSwitch: ReactNode }) {
   const { item } = detail;
   const timeZone = useDisplayTimeZone();
   const period = formatScheduleRange(detail.startAt, detail.endAt, locale, timeZone);
@@ -58,38 +62,33 @@ function ItemDetailView({ locale, detail }: { locale: AppLocale; detail: ItemDet
   if (period) facts.push([t(locale, "items.detail.period"), <span className="tabular-nums">{period}</span>]);
 
   return (
-    <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(20rem,2fr)_3fr] lg:items-start">
-      <aside className="flex w-full flex-col gap-6 lg:sticky lg:top-24">
-        <div className="md3-surface overflow-hidden">
-          <div className="flex flex-col items-center gap-4 border-b border-outline-variant p-6 text-center">
-            <ItemIcon locale={locale} imagePath={item.imagePath} name={item.name} className="h-28 w-28" />
-            <div className="min-w-0">
-              <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-medium">{item.name}</h2>
-              {detail.reading && <p className="mt-1 text-label-medium text-on-surface-variant">{detail.reading}</p>}
-            </div>
-          </div>
-          {item.desc && <p className="whitespace-pre-line px-6 pt-5 text-body-medium leading-7 text-on-surface">{item.desc}</p>}
-          <dl className="divide-y divide-dashed divide-outline-variant/60 px-6 py-2">
-            {facts.map(([label, value]) => (
-              <div key={label} className="flex items-center justify-between gap-4 py-3.5 text-body-medium">
-                <dt className="shrink-0 font-semibold text-on-surface-variant">{label}</dt>
-                <dd className="min-w-0 text-right font-semibold text-on-surface">{value}</dd>
-              </div>
-            ))}
+    <>
+      <DetailHero
+        title={item.name}
+        subtitle={detail.reading || undefined}
+        media={<ItemIcon locale={locale} imagePath={item.imagePath} name={item.name} className="h-20 w-20 shrink-0 sm:h-24 sm:w-24" />}
+        aside={serverSwitch}
+      >
+        {item.desc && <p className="mt-1 max-w-[60ch] whitespace-pre-line text-body-large text-on-surface-variant">{item.desc}</p>}
+      </DetailHero>
+      <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(20rem,2fr)_3fr] lg:items-start">
+        <aside className="lg:sticky lg:top-24">
+          <dl className="md3-surface divide-y divide-outline-variant px-6">
+            {facts.map(([label, value]) => <DetailRow key={label} label={label} value={value} />)}
           </dl>
-        </div>
-      </aside>
+        </aside>
 
-      <section className="min-w-0 flex-1 space-y-6">
-        <SourcesPanel locale={locale} sources={detail.sources} />
-        <UsagesPanel locale={locale} usages={detail.usages} />
-        <div className="flex justify-start">
-          <a href={localizePath(getRoutePathById("items"), locale)} className="md3-state inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
-            {t(locale, "items.detail.backToList")}
-          </a>
-        </div>
-      </section>
-    </div>
+        <section className="min-w-0 flex-1 space-y-6">
+          <SourcesPanel locale={locale} sources={detail.sources} />
+          <UsagesPanel locale={locale} usages={detail.usages} />
+          <div className="flex justify-start">
+            <a href={localizePath(getRoutePathById("items"), locale)} className="md3-state inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
+              {t(locale, "items.detail.backToList")}
+            </a>
+          </div>
+        </section>
+      </div>
+    </>
   );
 }
 
@@ -228,7 +227,7 @@ function CollapsibleGroup({ locale, title, aside, count, limit, children }: { lo
 function NotFound({ locale }: { locale: AppLocale }) {
   return (
     <div className="md3-surface p-8 text-center sm:p-12">
-      <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "items.detail.notFoundTitle")}</h2>
+      <h1 className="text-headline-small text-on-surface">{t(locale, "items.detail.notFoundTitle")}</h1>
       <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "items.detail.notFoundDescription")}</p>
     </div>
   );
