@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import type { MusicViewModel, SongDifficultyModel } from "../src/lib/music/data";
+import { normalizeMusic, type MusicViewModel, type RawMusic, type SongDifficultyModel } from "../src/lib/music/data";
+import { compareByStartDesc } from "../src/lib/schedule";
 import {
   EMPTY_MUSIC_FILTERS,
   MUSIC_OTHER_BAND,
@@ -79,3 +80,59 @@ describe("music band filter", () => {
     expect(hasOtherBandMusic(bandSongs.slice(0, 2))).toBe(false);
   });
 });
+
+describe("music default sorting", () => {
+  test("songs sort by release date descending (newest first, oldest last, tie-breaking by id descending)", () => {
+    const list = [
+      { id: 1, startAt: "2017/03/16 00:00:00" },
+      { id: 2, startAt: "2024/09/20 15:00:00" },
+      { id: 3, startAt: "2026/01/01 12:00:00" },
+      { id: 4, startAt: "2024/09/20 15:00:00" },
+      { id: 5, startAt: "" },
+    ];
+    const sorted = [...list].sort(compareByStartDesc);
+    expect(sorted.map((item) => item.id)).toEqual([3, 4, 2, 1, 5]);
+  });
+
+  test("normalizeMusic returns songs sorted by release date descending", () => {
+    const baseRaw: RawMusic = {
+      id: 0,
+      titleTextID: "t",
+      jacketAssetName: "j",
+      composerTextID: "c",
+      lyricistTextID: "l",
+      arrangerTextID: "a",
+      bandIDs: [1],
+      musicType: 1,
+      startAt: "",
+      easyID: 0,
+      normalID: 0,
+      hardID: 0,
+      expertID: 0,
+      musicSoundID: 0,
+      jingleSoundID: 0,
+      musicCategories: [],
+      liveScoreRankGroup: 0,
+      anotherVocalIDs: [],
+      scoreCLiveMusicRewardID: 0,
+      scoreBLiveMusicRewardID: 0,
+      scoreALiveMusicRewardID: 0,
+      scoreSLiveMusicRewardID: 0,
+      scoreSSLiveMusicRewardID: 0,
+      comboEasyLiveMusicRewardID: 0,
+      comboNormalLiveMusicRewardID: 0,
+      comboHardLiveMusicRewardID: 0,
+      comboExpertLiveMusicRewardID: 0,
+    };
+    const rawList: RawMusic[] = [
+      { ...baseRaw, id: 10, startAt: "2018/01/01 00:00:00" },
+      { ...baseRaw, id: 20, startAt: "2025/12/31 23:59:59" },
+      { ...baseRaw, id: 30, startAt: "2023/06/15 12:00:00" },
+      { ...baseRaw, id: 40, startAt: "2023/06/15 12:00:00" },
+      { ...baseRaw, id: 5, startAt: "" },
+    ];
+    const normalized = normalizeMusic(rawList, [], [], [], [], "zh-CN");
+    expect(normalized.map((s) => s.id)).toEqual([20, 40, 30, 10, 5]);
+  });
+});
+

@@ -2,6 +2,7 @@ import type { AppLocale } from "@/config/locales";
 import { getAssetUrl } from "@/lib/assets/url";
 import { getCueUrl } from "@/lib/story/assets";
 import { isUsableMasterText, localizeMasterText, type MasterTextRow } from "@/lib/masterdata/localize-text";
+import { compareByStartDesc } from "@/lib/schedule";
 
 export interface MasterTable<T> {
   _allData: T[];
@@ -383,7 +384,7 @@ export function normalizeMusic(
       audioUrl: getMusicAudioUrl(soundMap.get(music.musicSoundID), locale),
       previewAudioUrl: getMusicAudioUrl(soundMap.get(music.jingleSoundID), locale),
     };
-  });
+  }).sort(compareByStartDesc);
 }
 
 /** The three ranges' Gekisou missions of a MasterLiveMusic row; empty when the row has none. */

@@ -24,6 +24,7 @@ import {
   type MusicFilterState,
 } from "@/lib/music/filter";
 import { EMPTY_METRICS_INDEX, lookupMetrics, type ChartMetrics, type ChartMetricsIndex } from "@/lib/music/metrics";
+import { compareByStartDesc } from "@/lib/schedule";
 
 /** Numeric sorts of the music list: the focus chart's level / notes / BPM / NPS, the song's length and category. */
 const PANEL_SORT_FIELDS: readonly NumericSortField[] = [
@@ -87,6 +88,9 @@ export function useMusicFilters(songs: readonly MusicViewModel[], locale: AppLoc
       return entry ? pick(entry) : null;
     };
     const levelOf = (difficulty: MusicDifficulty) => (song: MusicViewModel) => focusChart(song, difficulty)?.displayLevel ?? null;
+    if (sort.value === "default") {
+      return [...filtered].sort(compareByStartDesc);
+    }
     return sortEntries(filtered, sort.value, locale, {
       numeric: {
         level: levelOf(focus),

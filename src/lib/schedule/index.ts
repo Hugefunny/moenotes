@@ -56,9 +56,15 @@ export function scheduleStatus(startAt: string, endAt: string, now: number): Sch
 }
 
 /** Newest first; entries without a start date sort last. */
-export function compareByStartDesc(a: { startAt: string; id: number | string }, b: { startAt: string; id: number | string }): number {
-  const diff = (parseMasterDate(b.startAt) ?? -Infinity) - (parseMasterDate(a.startAt) ?? -Infinity);
-  if (diff) return diff;
+export function compareByStartDesc(a: { startAt?: string | null; id: number | string }, b: { startAt?: string | null; id: number | string }): number {
+  const timeA = parseMasterDate(a.startAt);
+  const timeB = parseMasterDate(b.startAt);
+  if (timeA !== null && timeB !== null) {
+    const diff = timeB - timeA;
+    if (diff) return diff;
+  } else if (timeA !== null || timeB !== null) {
+    return timeA !== null ? -1 : 1;
+  }
   return typeof a.id === "number" && typeof b.id === "number" ? b.id - a.id : String(b.id).localeCompare(String(a.id));
 }
 
