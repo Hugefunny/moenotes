@@ -1861,8 +1861,6 @@ export const koKR = {
     detailNotFound: "성도에 기록되지 않은 소녀",
     detailNotFoundDescription: "이 소녀의 기억은 현재의 성도에서 찾을 수 없습니다. 캐릭터 도감으로 돌아가 새로운 인연을 찾아보세요.",
     assets: {
-      label: "이미지",
-      open: "{name} 크게 보기",
       sprite: "스프라이트",
       spriteDesc: "전신 스프라이트 레이어",
       thumbnail: "포트레이트",
@@ -3092,7 +3090,7 @@ export const koKR = {
   },
   // ── W1 foundation ──
   audio: { play: "재생", pause: "일시정지", loading: "불러오는 중", retry: "재생 실패, 다시 시도", previous: "이전 곡", next: "다음 곡", modes: { sequential: "순서대로 재생", "repeat-all": "전체 반복", "repeat-one": "한 곡 반복", shuffle: "셔플" }, dock: { label: "오디오 플레이어", seek: "재생 위치", volume: "음량", mute: "음소거", unmute: "음소거 해제", queue: "재생 대기열", queueEmpty: "대기열이 비어 있습니다.", remove: "대기열에서 {title} 제거", close: "플레이어 닫기", mode: "재생 모드: {mode}", expand: "대기열 보기", collapse: "대기열 숨기기" } },
-  lightbox: { label: "이미지 뷰어", counter: "{current} / {total}", previous: "이전 이미지", next: "다음 이미지", zoomIn: "확대", zoomOut: "축소", reset: "확대 초기화", download: "다운로드", close: "닫기", loading: "이미지를 불러오는 중…", failed: "이미지를 불러올 수 없습니다" },
+  lightbox: { label: "이미지 뷰어", images: "이미지", open: "{name} 크게 보기", counter: "{current} / {total}", previous: "이전 이미지", next: "다음 이미지", zoomIn: "확대", zoomOut: "축소", reset: "확대 초기화", download: "다운로드", close: "닫기", loading: "이미지를 불러오는 중…", failed: "이미지를 불러올 수 없습니다" },
   detailNav: { label: "항목 탐색", previous: "이전", next: "다음", backToList: "목록으로" },
   collectionView: { label: "보기 방식", grid: "그리드", list: "목록", table: "표", card: "카드", square: "아이콘", nameSeparator: ", " },
   // ── pack G ──

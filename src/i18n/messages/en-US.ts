@@ -1872,8 +1872,6 @@ export const enUS = {
     detailNotFound: "Unfound silhouette",
     detailNotFoundDescription: "Her name has not yet been inscribed under the starlight. Return to the codex to revisit the shining journeys of other girls.",
     assets: {
-      label: "Images",
-      open: "View {name} at full size",
       sprite: "Sprite",
       spriteDesc: "Full-length stage portrait glowing with light",
       thumbnail: "Portrait",
@@ -3103,7 +3101,7 @@ export const enUS = {
   },
   // ── W1 foundation ──
   audio: { play: "Play", pause: "Pause", loading: "Loading", retry: "Playback failed, retry", previous: "Previous track", next: "Next track", modes: { sequential: "Play in order", "repeat-all": "Repeat all", "repeat-one": "Repeat one", shuffle: "Shuffle" }, dock: { label: "Audio player", seek: "Playback position", volume: "Volume", mute: "Mute", unmute: "Unmute", queue: "Queue", queueEmpty: "The queue is empty.", remove: "Remove {title} from the queue", close: "Close player", mode: "Playback mode: {mode}", expand: "Show queue", collapse: "Hide queue" } },
-  lightbox: { label: "Image viewer", counter: "{current} / {total}", previous: "Previous image", next: "Next image", zoomIn: "Zoom in", zoomOut: "Zoom out", reset: "Reset zoom", download: "Download", close: "Close", loading: "Loading image…", failed: "The image could not be loaded" },
+  lightbox: { label: "Image viewer", images: "Images", open: "View {name} at full size", counter: "{current} / {total}", previous: "Previous image", next: "Next image", zoomIn: "Zoom in", zoomOut: "Zoom out", reset: "Reset zoom", download: "Download", close: "Close", loading: "Loading image…", failed: "The image could not be loaded" },
   detailNav: { label: "Entry navigation", previous: "Previous", next: "Next", backToList: "Back to list" },
   collectionView: { label: "Display", grid: "Grid", list: "List", table: "Table", card: "Cards", square: "Icons", nameSeparator: ", " },
   // ── pack G ──
