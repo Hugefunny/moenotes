@@ -77,7 +77,6 @@ export default function AssetGallery({ locale, assets, shape = "portrait", child
         <div className="flex flex-wrap gap-2" role="group" aria-label={t(locale, "lightbox.images")}>
           {assets.map((asset) => (
             <button key={asset.id} type="button" aria-pressed={asset.id === active.id} onClick={() => setActiveId(asset.id)} className="md3-filter-chip md3-state">
-              {asset.id === active.id && <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>}
               {asset.label}
             </button>
           ))}

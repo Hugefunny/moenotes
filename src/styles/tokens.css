@@ -16,9 +16,26 @@
   --mn-cache-chart: #eda100;
   --mn-cache-data: #e87ba4;
 
-  /* Font stacks behind the M3 typefaces (src/styles/md3/tokens.css --md-ref-typeface-*). */
-  --mn-font-display: "Inter", "PingFang SC", "Microsoft YaHei", ui-sans-serif, system-ui, sans-serif;
-  --mn-font-body: "Inter", "PingFang SC", "Microsoft YaHei", ui-sans-serif, system-ui, sans-serif;
+  /* Font stacks behind the M3 typefaces (src/styles/md3/tokens.css --md-ref-typeface-*), as MoeSekai sets them: Roboto
+     Flex (self-hosted, RootLayout) covers Latin; CJK uses the platform fonts of the page's language, so kanji, hanzi
+     and hangul get their native shapes without shipping a CJK web font. */
+  --mn-font-latin: "Roboto Flex Variable", "Roboto Flex", Roboto;
+  --mn-font-cjk: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", "Source Han Sans SC";
+  --mn-font-system: system-ui, -apple-system, "Segoe UI", "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+  --mn-font-display: var(--mn-font-latin), var(--mn-font-cjk), var(--mn-font-system);
+  --mn-font-body: var(--mn-font-latin), var(--mn-font-cjk), var(--mn-font-system);
+}
+
+:root[data-locale="ja-JP"] {
+  --mn-font-cjk: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo UI", "Meiryo", "Noto Sans CJK JP", "Source Han Sans JP";
+}
+
+:root[data-locale="zh-TW"] {
+  --mn-font-cjk: "PingFang TC", "Microsoft JhengHei UI", "Microsoft JhengHei", "Noto Sans CJK TC", "Source Han Sans TC";
+}
+
+:root[data-locale="ko-KR"] {
+  --mn-font-cjk: "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans CJK KR", "Source Han Sans K";
 }
 
 html[data-theme="dark"] {

@@ -297,13 +297,13 @@ function components(density: Md3Density): ThemeOptions["components"] {
     MuiPaper: {
       defaultProps: { elevation: 0 },
       styleOverrides: {
-        root: { backgroundImage: "none", backgroundColor: c("surface-container-low"), color: c("on-surface") },
+        root: { backgroundImage: "none", backgroundColor: c("surface-card"), color: c("on-surface") },
         rounded: { borderRadius: shape.md },
-        outlined: { border: `1px solid ${c("outline-variant")}`, backgroundColor: c("surface") },
+        outlined: { border: `1px solid ${ca("outline-variant", 0.7)}`, backgroundColor: c("surface-card") },
       },
       variants: [
         { props: { variant: "filled" }, style: { backgroundColor: c("surface-container-highest") } },
-        { props: { variant: "elevated" }, style: { backgroundColor: c("surface-container-low"), boxShadow: elevation(1) } },
+        { props: { variant: "elevated" }, style: { backgroundColor: c("surface-card"), boxShadow: elevation(1) } },
       ],
     },
     MuiCard: {
@@ -537,11 +537,10 @@ function components(density: Md3Density): ThemeOptions["components"] {
     // Segmented buttons (M3): outlined pill group, secondary-container when selected.
     MuiToggleButtonGroup: {
       styleOverrides: {
-        root: { borderRadius: shape.full, gap: 0, "& .MuiToggleButtonGroup-grouped": { borderColor: c("outline") } },
+        // MoeSekai's segmented buttons: a surface-container-high trough, the selected segment filled with the seed.
+        root: { borderRadius: shape.md, gap: 2, padding: 4, backgroundColor: c("surface-container-high") },
         grouped: {
-          "&:not(:first-of-type)": { marginLeft: -1, borderLeftColor: c("outline") },
-          "&:first-of-type": { borderTopLeftRadius: shape.full, borderBottomLeftRadius: shape.full },
-          "&:last-of-type": { borderTopRightRadius: shape.full, borderBottomRightRadius: shape.full },
+          "&&": { margin: 0, border: 0, borderRadius: shape.sm },
         },
       },
     },
@@ -550,20 +549,20 @@ function components(density: Md3Density): ThemeOptions["components"] {
         root: {
           ...font(TYPE.labelLarge),
           position: "relative",
-          minHeight: compact ? 32 : 40,
-          paddingInline: compact ? 12 : 16,
-          gap: 8,
+          minHeight: compact ? 28 : 32,
+          paddingInline: compact ? 10 : 12,
+          gap: 6,
           textTransform: "none",
-          border: `1px solid ${c("outline")}`,
-          borderRadius: 0,
-          color: c("on-surface"),
-          "&:hover": { backgroundColor: "transparent" },
+          border: 0,
+          borderRadius: shape.sm,
+          color: c("on-surface-variant"),
+          "&:hover": { backgroundColor: "transparent", color: c("on-surface") },
           ...stateLayer(),
-          "&.Mui-selected, &.Mui-selected:hover": { backgroundColor: c("secondary-container"), color: c("on-secondary-container") },
+          "&.Mui-selected, &.Mui-selected:hover": { backgroundColor: c("primary-container"), color: c("on-primary-container") },
           "&.Mui-disabled": { color: ca("on-surface", DISABLED_CONTENT), borderColor: ca("on-surface", DISABLED_CONTAINER) },
           "& svg": { width: 18, height: 18 },
         },
-        sizeSmall: { minHeight: 32, paddingInline: 12 },
+        sizeSmall: { minHeight: 28, paddingInline: 10 },
       },
     },
 
