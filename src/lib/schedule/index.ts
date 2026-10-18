@@ -69,6 +69,20 @@ export function compareByStartDesc(a: { startAt?: string | null; id: number | st
 }
 
 /**
+ * The newest entry that has started by `now` (compareByStartDesc order): an announced one stays out until it starts,
+ * and undated entries count as started, after every dated one.
+ */
+export function latestStarted<T extends { startAt?: string | undefined; id: number | string }>(entries: readonly T[], now: number): T | undefined {
+  let latest: T | undefined;
+  for (const entry of entries) {
+    const start = parseMasterDate(entry.startAt);
+    if (start !== null && start > now) continue;
+    if (!latest || compareByStartDesc({ startAt: entry.startAt ?? "", id: entry.id }, { startAt: latest.startAt ?? "", id: latest.id }) < 0) latest = entry;
+  }
+  return latest;
+}
+
+/**
  * A MasterData timestamp in `timeZone` (the reader's, from useDisplayTimeZone), or in its server's time while that is
  * not known yet (the static HTML).
  */

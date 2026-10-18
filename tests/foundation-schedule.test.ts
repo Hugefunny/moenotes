@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { dateRangeBound, inDateRange, isDateRangeActive } from "../src/lib/filter/date-range";
 import { countdownParts } from "../src/lib/schedule/countdown";
+import { latestStarted } from "../src/lib/schedule";
 
 const at = (iso: string) => Date.parse(iso);
 
@@ -50,5 +51,28 @@ describe("countdownParts", () => {
     expect(countdownParts(start, end, at("2026-06-01T00:00:00+08:00"))).toEqual({ status: "ended", target: null, remaining: 0, count: 0, unit: null });
     expect(countdownParts(start, "", at("2026-06-01T00:00:00+08:00")).status).toBe("permanent");
     expect(countdownParts(null, null, 0).status).toBe("permanent");
+  });
+});
+
+describe("latestStarted", () => {
+  const now = at("2026-10-18T00:00:00+09:00");
+  test("picks the newest entry that has started", () => {
+    const entries = [
+      { id: 1, startAt: "2026/09/01 15:00:00" },
+      { id: 2, startAt: "2026/10/01 15:00:00" },
+      { id: 3, startAt: "2026/11/01 15:00:00" },
+    ];
+    expect(latestStarted(entries, now)?.id).toBe(2);
+  });
+  test("breaks ties by the larger id", () => {
+    expect(latestStarted([{ id: 4, startAt: "2026/10/01 15:00:00" }, { id: 7, startAt: "2026/10/01 15:00:00" }], now)?.id).toBe(7);
+  });
+  test("ranks undated entries after dated ones, the largest id first", () => {
+    expect(latestStarted([{ id: 9 }, { id: 2, startAt: "2026/01/01 00:00:00" }], now)?.id).toBe(2);
+    expect(latestStarted([{ id: 3 }, { id: 8, startAt: "" }, { id: 5 }], now)?.id).toBe(8);
+  });
+  test("is empty when nothing has started", () => {
+    expect(latestStarted([{ id: 1, startAt: "2027/01/01 00:00:00" }], now)).toBeUndefined();
+    expect(latestStarted([], now)).toBeUndefined();
   });
 });

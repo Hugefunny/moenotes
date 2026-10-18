@@ -6,27 +6,19 @@ import { forServer, type ServerFaceted } from "@/lib/servers/facets";
 import { useAssetUrl, useContentServer } from "@/lib/servers/use-content-server";
 import { t } from "@/i18n";
 import { localizePath } from "@/i18n/routing";
-import { getAssetUrl } from "@/lib/assets/url";
 import type { ParsedStoryScript } from "@/lib/story/parser";
 import type { RawStoryCharacter, StoryNeighbor, StoryViewModel } from "@/lib/story/data";
 import { formatPlayTime, storyEpisodeLabel, storyUnlockLabels } from "@/lib/story/labels";
 import CharacterAvatarStack from "@/components/shared/CharacterAvatarStack";
 import RewardChip from "@/components/shared/RewardChip";
 import { storyPath } from "@/lib/story/paths";
+import { getStoryArtworkUrl } from "@/lib/story/assets";
 import type { RawText } from "@/lib/cards/data";
 import StoryScriptReader from "@/components/story/StoryScriptReader";
 import StoryPlayerLink from "@/components/story/StoryPlayerLink";
 import SpoilerNotice from "@/components/shared/SpoilerNotice";
 import { useNow } from "@/lib/schedule/use-now";
 import { isSpoiler, useSpoiler } from "@/lib/settings/spoiler";
-
-/** Main episodes have an illustration; bond stories only a banner. Banners carry lettering, so they follow the locale. */
-function storyArtworkUrl(story: StoryViewModel | null, locale: AppLocale): string {
-  if (!story) return "";
-  if ((story.category === "main" || story.category === "event" || story.category === "birthday") && story.assets.image) return getAssetUrl({ path: `Story/Image/Episode/${story.assets.image}.png`, type: "raw", locale });
-  if (story.assets.banner) return getAssetUrl({ path: `Story/Banner/Episode/${story.assets.banner}.png`, type: "raw", locale });
-  return "";
-}
 
 interface StoryDetailProps {
   locale: AppLocale;
@@ -65,7 +57,7 @@ function StoryDetailView({ locale, advId, initialTitle, initialScript, initialCh
   const { showSpoiler } = useSpoiler();
   const isUnreleased = Boolean(now !== null && story?.startAt && isSpoiler(story.startAt, now));
   const [artworkFailed, setArtworkFailed] = useState(false);
-  const artworkUrl = useAssetUrl()(storyArtworkUrl(story, locale));
+  const artworkUrl = useAssetUrl()(story ? getStoryArtworkUrl(story, locale) : "");
 
   // Every hook runs before this return, so the notice can replace a page already rendered without it.
   if (!showSpoiler && isUnreleased) {
