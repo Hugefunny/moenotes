@@ -189,7 +189,7 @@ export default function BaseFilters({
         <div className="flex min-h-10 items-center justify-between gap-3 px-1" aria-live="polite">
           <span className="text-label-large text-on-surface-variant">{count}</span>
           {hasActiveFilters && onReset && (
-            <button type="button" onClick={onReset} className="md3-state min-h-10 rounded-full px-3 text-label-large text-primary">
+            <button type="button" onClick={onReset} className="md3-button md3-button--text">
               {resetLabel}
             </button>
           )}
@@ -201,8 +201,8 @@ export default function BaseFilters({
       <div className="space-y-5">{children}</div>
 
       {hasActiveFilters && onReset && (
-        <button type="button" onClick={onReset} className="md3-state flex h-10 w-full items-center justify-center gap-2 rounded-full border border-outline-variant text-label-large text-primary">
-          <Icon name="close" className="h-[18px] w-[18px]" />
+        <button type="button" onClick={onReset} className="md3-button md3-button--outlined w-full">
+          <Icon name="close" className="" />
           {resetLabel}
         </button>
       )}

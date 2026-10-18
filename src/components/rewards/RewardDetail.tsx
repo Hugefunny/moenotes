@@ -92,7 +92,7 @@ function RewardDetailView({ locale, entry, serverSwitch, schedules }: { locale: 
           {entry.kind === "mission" && <MissionGroupView entry={entry} locale={locale} />}
           {entry.kind === "monthlyPass" && <MonthlyPassView entry={entry} locale={locale} />}
           <div className="flex justify-start">
-            <a href={localizePath(getRoutePathById("rewards"), locale)} className="md3-state inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
+            <a href={localizePath(getRoutePathById("rewards"), locale)} className="md3-button md3-button--tonal">
               {t(locale, "rewards.backToList")}
             </a>
           </div>
@@ -326,7 +326,7 @@ function NotFound({ locale }: { locale: AppLocale }) {
     <div className="md3-surface p-8 text-center sm:p-12">
       <h1 className="text-headline-small text-on-surface">{t(locale, "rewards.notFoundTitle")}</h1>
       <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "rewards.notFoundDescription")}</p>
-      <a href={localizePath(getRoutePathById("rewards"), locale)} className="md3-state mt-6 inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
+      <a href={localizePath(getRoutePathById("rewards"), locale)} className="md3-button md3-button--tonal mt-6">
         {t(locale, "rewards.backToList")}
       </a>
     </div>

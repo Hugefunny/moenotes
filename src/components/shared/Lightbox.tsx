@@ -230,7 +230,7 @@ export default function Lightbox({ locale, images, index, open, onClose, onIndex
   if (!mounted || !open || !image) return null;
 
   // M3 standard icon buttons on the dark stage (a state layer in white).
-  const controlButton = "md3-state grid h-12 w-12 place-items-center rounded-full bg-black/40 text-white disabled:cursor-default disabled:text-white/35";
+  const controlButton = "md3-icon-button bg-black/40 text-white disabled:text-white/35";
   const zoomed = view.scale > 1;
 
   return createPortal(
@@ -249,21 +249,21 @@ export default function Lightbox({ locale, images, index, open, onClose, onIndex
         </span>
         <div className="flex items-center gap-2">
           <button type="button" className={controlButton} onClick={() => zoomBy(1 / STEP)} disabled={!zoomed} aria-label={t(locale, "lightbox.zoomOut")} title={t(locale, "lightbox.zoomOut")}>
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M8 11h6M20 20l-4-4" /></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M8 11h6M20 20l-4-4" /></svg>
           </button>
           <button type="button" className={controlButton} onClick={() => zoomBy(STEP)} disabled={view.scale >= MAX_SCALE} aria-label={t(locale, "lightbox.zoomIn")} title={t(locale, "lightbox.zoomIn")}>
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M8 11h6M11 8v6M20 20l-4-4" /></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M8 11h6M11 8v6M20 20l-4-4" /></svg>
           </button>
           <button type="button" className={controlButton} onClick={() => setView(RESET)} disabled={!zoomed} aria-label={t(locale, "lightbox.reset")} title={t(locale, "lightbox.reset")}>
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 15v5h-5M4 4l6 6M20 20l-6-6" /></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 15v5h-5M4 4l6 6M20 20l-6-6" /></svg>
           </button>
           {image.downloadName ? (
             <a className={controlButton} href={image.src} download={image.downloadName} target="_blank" rel="noopener noreferrer" aria-label={t(locale, "lightbox.download")} title={t(locale, "lightbox.download")}>
-              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" /></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" /></svg>
             </a>
           ) : null}
           <button type="button" className={controlButton} onClick={close} aria-label={t(locale, "lightbox.close")} title={t(locale, "lightbox.close")}>
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden="true"><path d="M6 18L18 6M6 6l12 12" /></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden="true"><path d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
       </div>
@@ -300,10 +300,10 @@ export default function Lightbox({ locale, images, index, open, onClose, onIndex
         {canNavigate ? (
           <>
             <button type="button" className={`${controlButton} absolute left-3 top-1/2 -translate-y-1/2 sm:left-5`} onClick={() => go(-1)} disabled={!hasPrevious} aria-label={t(locale, "lightbox.previous")}>
-              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
             </button>
             <button type="button" className={`${controlButton} absolute right-3 top-1/2 -translate-y-1/2 sm:right-5`} onClick={() => go(1)} disabled={!hasNext} aria-label={t(locale, "lightbox.next")}>
-              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
             </button>
           </>
         ) : null}

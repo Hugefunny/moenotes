@@ -118,7 +118,7 @@ export default function NewsExplorer({ locale }: Props) {
           <button
             type="button"
             onClick={() => setAttempt((value) => value + 1)}
-            className="md3-state mt-5 rounded-full border border-outline-variant bg-primary px-6 py-2.5 text-label-large text-on-primary shadow-elevation-1"
+            className="md3-button md3-button--filled mt-5"
           >
             {t(locale, "news.retry")}
           </button>

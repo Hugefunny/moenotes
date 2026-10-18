@@ -243,7 +243,7 @@ function NoEventsOnServer({ locale, server, eventServers, onPick }: { locale: Ap
               key={entry}
               type="button"
               onClick={() => onPick(entry)}
-              className="md3-state flex items-center gap-2 rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-primary shadow-elevation-1"
+              className="md3-button md3-button--tonal"
             >
               <ServerFlag server={entry} className="h-5 w-5" />
               {t(locale, "events.showServer", { server: t(locale, `gameServer.names.${entry}`) })}
@@ -260,7 +260,7 @@ function EmptyState({ locale, onReset }: { locale: AppLocale; onReset: () => voi
     <div className="md3-surface p-8 text-center sm:p-12">
       <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "events.emptyTitle")}</h2>
       <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "events.emptyDescription")}</p>
-      <button type="button" onClick={onReset} className="md3-state mt-6 rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
+      <button type="button" onClick={onReset} className="md3-button md3-button--tonal mt-6">
         {t(locale, "events.reset")}
       </button>
     </div>

@@ -37,8 +37,8 @@ const searchPath = localizePath(getRoutePathById("search"), locale);
         </nav>
       </section>
       <div class="mt-5 flex flex-wrap items-center gap-3 text-body-medium">
-        <button type="button" onclick="window.location.reload()" class="md3-state h-10 rounded-full px-3 text-label-large text-primary">{t(locale, "actions.refresh")}</button>
-        <a href={siteConfig.contact.bugReportUrl} target="_blank" rel="noopener noreferrer" class="md3-state inline-flex h-10 items-center rounded-full px-3 text-label-large text-primary">{t(locale, "notFound.feedback")}</a>
+        <button type="button" onclick="window.location.reload()" class="md3-button md3-button--text">{t(locale, "actions.refresh")}</button>
+        <a href={siteConfig.contact.bugReportUrl} target="_blank" rel="noopener noreferrer" class="md3-button md3-button--text">{t(locale, "notFound.feedback")}</a>
       </div>
     </PageLayout>
   </div>

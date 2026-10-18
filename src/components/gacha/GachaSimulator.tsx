@@ -69,7 +69,6 @@ export default function GachaSimulator({ locale, gacha }: Props) {
 
   const rarities = Object.keys(tally.byRarity).map(Number).sort((a, b) => b - a);
   const ten = gacha.drawPlans.ten;
-  const buttonBase = " md3-state inline-flex items-center justify-center rounded-full border px-5 py-2 text-sm font-bold shadow-elevation-1";
 
   return (
     <div className="md3-surface overflow-hidden">
@@ -81,23 +80,23 @@ export default function GachaSimulator({ locale, gacha }: Props) {
               key={option.slot}
               type="button"
               onClick={() => run(drawOptionPlan(option), option)}
-              className={`${buttonBase} gap-1.5 border-outline-variant ${option.drawCount >= 10 ? "bg-primary text-on-primary" : "bg-surface-container-low text-on-surface"}`}
+              className={`md3-button ${option.drawCount >= 10 ? "md3-button--filled" : "md3-button--tonal"}`}
             >
               <DrawCurrencyIcon locale={locale} option={option} />
               {drawOptionName(locale, option)}
             </button>
           )) : (
             <>
-              <button type="button" onClick={() => run(gacha.drawPlans.single)} className={`${buttonBase} border-outline-variant bg-surface-container-low text-on-surface`}>
+              <button type="button" onClick={() => run(gacha.drawPlans.single)} className="md3-button md3-button--tonal">
                 {t(locale, "gacha.simulator.single")}
               </button>
-              <button type="button" onClick={() => run(ten)} className={`${buttonBase} border-outline-variant bg-primary text-on-primary`}>
+              <button type="button" onClick={() => run(ten)} className="md3-button md3-button--filled">
                 {t(locale, "gacha.simulator.ten")}
               </button>
             </>
           )}
           {tally.total > 0 && (
-            <button type="button" onClick={reset} className="rounded-full px-3 py-2 text-label-medium text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface">
+            <button type="button" onClick={reset} className="md3-button md3-button--text md3-button--small">
               {t(locale, "gacha.simulator.reset")}
             </button>
           )}

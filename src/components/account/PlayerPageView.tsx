@@ -27,8 +27,7 @@ type PageState =
   | { status: "unavailable" };
 
 const panel = "rounded-shape-lg border border-outline-variant bg-surface-container-low p-5 shadow-elevation-1 sm:p-6";
-const stampButton =
-  " md3-state inline-flex h-10 items-center rounded-shape-md border border-outline-variant bg-surface-container-low px-4 text-sm font-black text-on-surface shadow-elevation-1 hover:bg-surface-container-highest";
+const stampButton = "md3-button md3-button--tonal";
 
 /** A public player page, /u/{server}/{profileId}. Every player shares this page; it reads the player from the URL. */
 export default function PlayerPageView({ locale, cards }: Props) {

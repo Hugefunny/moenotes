@@ -32,7 +32,7 @@ interface Props {
 
 const panelHeader = "flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-6 py-4 sm:px-8";
 const panelTitle = "font-[var(--md-ref-typeface-brand)] text-xl text-on-surface sm:text-2xl";
-const backLink = " md3-state inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-sm font-bold text-on-surface shadow-elevation-1";
+const backLink = "md3-button md3-button--tonal";
 
 /** The shop as the page's server has it (docs/servers.md). */
 export default function ExchangeDetail({ locale, exchange: faceted, servers }: Props) {

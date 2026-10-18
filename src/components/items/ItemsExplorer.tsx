@@ -242,7 +242,7 @@ function EmptyState({ locale, onReset }: { locale: AppLocale; onReset: () => voi
       <button
         type="button"
         onClick={onReset}
-        className="md3-state mt-6 rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1"
+        className="md3-button md3-button--tonal mt-6"
       >
         {t(locale, "items.reset")}
       </button>

@@ -32,8 +32,7 @@ interface Props {
 }
 
 import { accountSection as panel } from "./ui-styles";
-const stampButton =
-  " md3-state inline-flex h-10 items-center rounded-shape-md border border-outline-variant bg-surface-container-low px-4 text-sm font-black text-on-surface shadow-elevation-1 hover:bg-surface-container-highest";
+const stampButton = "md3-button md3-button--tonal";
 
 export default function AccountPanel({ locale, bands, cards }: Props) {
   const account = useAccount();

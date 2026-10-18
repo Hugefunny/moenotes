@@ -119,9 +119,9 @@ export default function Live2DStage({ locale, manifestUrl, onReady }: Live2DStag
             onClick={toggleFullscreen}
             aria-label={t(locale, fullscreen ? "live2d.exitFullscreen" : "live2d.fullscreen")}
             title={t(locale, fullscreen ? "live2d.exitFullscreen" : "live2d.fullscreen")}
-            className="absolute right-3 top-3 z-20 grid h-9 w-9 place-items-center rounded-full bg-black/45 text-white/85 backdrop-blur-sm transition hover:bg-black/70 hover:text-white"
+            className="md3-icon-button md3-icon-button--tonal md3-icon-button--small absolute right-3 top-3 z-20"
           >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               {fullscreen
                 ? <path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" />
                 : <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />}
@@ -139,7 +139,7 @@ export default function Live2DStage({ locale, manifestUrl, onReady }: Live2DStag
               onClick={() => setView(IDENTITY_VIEW)}
               title={t(locale, "live2d.zoomReset")}
               aria-label={t(locale, "live2d.zoomReset")}
-              className="min-w-12 rounded-full px-2 py-1 text-center font-mono text-label-small transition hover:bg-white/15"
+              className="md3-button md3-button--text md3-button--small min-w-12 font-mono text-white/85"
             >
               {Math.round(view.zoom * 100)}%
             </button>
@@ -185,7 +185,7 @@ export default function Live2DStage({ locale, manifestUrl, onReady }: Live2DStag
                 <button
                   type="button"
                   onClick={() => setAttempt((value) => value + 1)}
-                  className="md3-state mt-4 rounded-full border border-outline-variant bg-surface-container-low px-5 py-2 text-label-large text-on-surface shadow-elevation-1"
+                  className="md3-button md3-button--tonal mt-4"
                 >
                   {t(locale, "live2d.retry")}
                 </button>
@@ -206,9 +206,9 @@ function ZoomButton({ label, disabled, onClick, children }: { label: string; dis
       disabled={disabled}
       title={label}
       aria-label={label}
-      className="grid h-7 w-7 place-items-center rounded-full transition hover:bg-white/15 disabled:opacity-35"
+      className="md3-icon-button md3-icon-button--small text-white/85 disabled:text-white/35"
     >
-      <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">{children}</svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">{children}</svg>
     </button>
   );
 }

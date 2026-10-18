@@ -24,8 +24,7 @@ function useTrackStatus(trackId: string): AudioStatus {
   );
 }
 
-const sizeClass = { sm: "h-8 w-8", md: "h-10 w-10", lg: "h-12 w-12" } as const;
-const iconClass = { sm: "h-3.5 w-3.5", md: "h-4.5 w-4.5", lg: "h-5 w-5" } as const;
+const sizeClass = { sm: "md3-icon-button--small", md: "", lg: "h-12 w-12" } as const;
 
 /** Play/pause one track through the site-wide player; starting it stops whatever else was playing. */
 export default function AudioPlayButton({ locale, track, size = "md", showLabel = false, className = "" }: AudioPlayButtonProps) {
@@ -36,13 +35,13 @@ export default function AudioPlayButton({ locale, track, size = "md", showLabel 
   const name = `${label}: ${track.title}`;
 
   const icon = status === "loading" ? (
-    <svg className={`${iconClass[size]} animate-spin`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9" /></svg>
+    <svg className="animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9" /></svg>
   ) : status === "playing" ? (
-    <svg className={iconClass[size]} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></svg>
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></svg>
   ) : status === "error" ? (
-    <svg className={iconClass[size]} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01" /><circle cx="12" cy="12" r="9" /></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01" /><circle cx="12" cy="12" r="9" /></svg>
   ) : (
-    <svg className={`${iconClass[size]} translate-x-[1px]`} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" /></svg>
+    <svg className="translate-x-[1px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" /></svg>
   );
 
   return (
@@ -52,13 +51,9 @@ export default function AudioPlayButton({ locale, track, size = "md", showLabel 
       aria-label={showLabel ? undefined : name}
       aria-pressed={active}
       title={name}
-      className={`md3-state inline-flex shrink-0 items-center justify-center gap-2 rounded-full transition-colors ${
-        status === "error"
-          ? "bg-error-container text-on-error-container"
-          : active
-            ? "bg-primary text-on-primary"
-            : "bg-secondary-container text-on-secondary-container"
-      } ${showLabel ? "h-10 px-4 text-label-large" : sizeClass[size]} ${className}`}
+      className={`${showLabel ? "md3-button md3-button--tonal" : `md3-icon-button md3-icon-button--tonal ${sizeClass[size]}`} ${
+        status === "error" ? "bg-error-container text-on-error-container" : ""
+      } ${className}`}
     >
       {icon}
       {showLabel ? <span>{label}</span> : null}

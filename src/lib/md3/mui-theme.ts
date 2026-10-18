@@ -143,7 +143,8 @@ function components(density: Md3Density): ThemeOptions["components"] {
       },
     },
 
-    // ── Common buttons (M3: 40dp, full shape, label-large) ──
+    // ── Common buttons, as MoeSekai draws them (and src/styles/md3/primitives.css outside MUI): 40dp, round, the
+    //    corners of a button with a container tightening while pressed ──
     MuiButton: {
       defaultProps: { variant: "filled", disableElevation: true, size: compact ? "small" : "medium" },
       styleOverrides: {
@@ -152,18 +153,20 @@ function components(density: Md3Density): ThemeOptions["components"] {
           position: "relative",
           minWidth: 48,
           minHeight: 40,
-          paddingInline: 24,
+          paddingInline: 16,
           paddingBlock: 0,
-          borderRadius: shape.full,
+          // Half the height, not full: a radius far past what shows cannot be interpolated into the pressed one.
+          borderRadius: 20,
           textTransform: "none",
           gap: 8,
-          transition: `box-shadow 200ms ${easing.standard}, background-color 200ms ${easing.standard}, color 200ms ${easing.standard}`,
+          transition: `border-radius 200ms ${easing.standard}, box-shadow 200ms ${easing.standard}, background-color 200ms ${easing.standard}, color 200ms ${easing.standard}`,
+          "&:active:not(.MuiButton-text, .Mui-disabled)": { borderRadius: shape.sm, boxShadow: "none" },
           ...stateLayer(),
           "& .MuiButton-startIcon, & .MuiButton-endIcon": { margin: 0, "& > *:nth-of-type(1)": { fontSize: 18 } },
           "& .MuiButton-startIcon svg, & .MuiButton-endIcon svg": { width: 18, height: 18 },
         },
-        sizeSmall: { minHeight: 32, paddingInline: 16, gap: 6 },
-        sizeLarge: { minHeight: 56, paddingInline: 32, ...font(TYPE.titleMedium) },
+        sizeSmall: { minHeight: 32, paddingInline: 12, gap: 6, borderRadius: 16 },
+        sizeLarge: { minHeight: 56, paddingInline: 24, borderRadius: 28, ...font(TYPE.titleMedium) },
       },
       variants: [
         // filled / contained
@@ -177,9 +180,9 @@ function components(density: Md3Density): ThemeOptions["components"] {
         ...PALETTE_COLORS.filter((color) => color !== "primary").map((color) => ({ props: { variant: "tonal" as const, color }, style: tonalColor(color) })),
         // elevated
         { props: { variant: "elevated" }, style: { backgroundColor: c("surface-container-low"), color: c("primary"), boxShadow: elevation(1), "@media (hover: hover)": { "&:hover": { boxShadow: elevation(2) } }, ...disabledFilled } },
-        // outlined
-        { props: { variant: "outlined" }, style: { paddingInline: 24, border: `1px solid ${c("outline-variant")}`, color: c("primary"), backgroundColor: "transparent", "&:hover": { border: `1px solid ${c("outline-variant")}`, backgroundColor: "transparent" }, "&.Mui-focusVisible": { borderColor: c("outline-variant") }, "&.Mui-disabled": { borderColor: ca("on-surface", DISABLED_CONTAINER), color: ca("on-surface", DISABLED_CONTENT) } } },
-        ...PALETTE_COLORS.map((color) => ({ props: { variant: "outlined" as const, color }, style: { color: c(color) } })),
+        // outlined: the label in on-surface, as MoeSekai sets it; other colors tint it
+        { props: { variant: "outlined" }, style: { border: `1px solid ${c("outline-variant")}`, color: c("on-surface"), backgroundColor: "transparent", "&:hover": { border: `1px solid ${c("outline-variant")}`, backgroundColor: "transparent" }, "&.Mui-focusVisible": { borderColor: c("outline-variant") }, "&.Mui-disabled": { borderColor: ca("on-surface", DISABLED_CONTAINER), color: ca("on-surface", DISABLED_CONTENT) } } },
+        ...PALETTE_COLORS.filter((color) => color !== "primary").map((color) => ({ props: { variant: "outlined" as const, color }, style: { color: c(color) } })),
         // text
         { props: { variant: "text" }, style: { paddingInline: 12, color: c("primary"), backgroundColor: "transparent", "&:hover": { backgroundColor: "transparent" }, ...disabledText } },
         ...PALETTE_COLORS.map((color) => ({ props: { variant: "text" as const, color }, style: { color: c(color) } })),
@@ -196,9 +199,9 @@ function components(density: Md3Density): ThemeOptions["components"] {
           width: 40,
           height: 40,
           padding: 8,
-          borderRadius: shape.full,
+          borderRadius: 20,
           color: c("on-surface-variant"),
-          transition: `background-color 200ms ${easing.standard}, color 200ms ${easing.standard}`,
+          transition: `border-radius 200ms ${easing.standard}, background-color 200ms ${easing.standard}, color 200ms ${easing.standard}`,
           "&:hover": { backgroundColor: "transparent" },
           ...stateLayer(),
           "& svg": { width: 24, height: 24 },
@@ -206,10 +209,13 @@ function components(density: Md3Density): ThemeOptions["components"] {
           '&[data-variant="filled"]': { ...filledColor("primary"), '&[aria-pressed="false"]': { backgroundColor: c("surface-container-highest"), color: c("primary") }, ...disabledFilled },
           '&[data-variant="tonal"]': { ...tonalColor("secondary"), '&[aria-pressed="false"]': { backgroundColor: c("surface-container-highest"), color: c("on-surface-variant") }, ...disabledFilled },
           '&[data-variant="outlined"]': { border: `1px solid ${c("outline-variant")}`, '&[aria-pressed="true"]': { border: 0, backgroundColor: c("inverse-surface"), color: c("inverse-on-surface") }, "&.Mui-disabled": { borderColor: ca("on-surface", DISABLED_CONTAINER) } },
+          // A selected toggle with a container squares its corners; pressing tightens them further.
+          '&[data-variant][aria-pressed="true"]': { borderRadius: shape.md },
+          "&[data-variant]:active:not(.Mui-disabled)": { borderRadius: shape.sm },
           ...disabledText,
         },
-        sizeSmall: { width: 32, height: 32, padding: 6, "& svg": { width: 20, height: 20 } },
-        sizeLarge: { width: 48, height: 48, padding: 12 },
+        sizeSmall: { width: 32, height: 32, padding: 6, borderRadius: 16, "& svg": { width: 20, height: 20 } },
+        sizeLarge: { width: 48, height: 48, padding: 12, borderRadius: 24 },
         colorPrimary: { color: c("primary") },
         colorInherit: { color: "inherit" },
       },

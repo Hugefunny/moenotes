@@ -103,7 +103,7 @@ function EventDetailView({ locale, server, event, serverSwitch, schedules }: { l
               <div className="px-6 pb-4 pt-2">
                 <a
                   href={getEventTrackerHref(locale, { server, event: String(event.id) })}
-                  className="md3-state inline-flex rounded-full border border-outline-variant bg-surface-container-low px-4 py-2 text-label-medium text-primary shadow-elevation-1"
+                  className="md3-button md3-button--tonal md3-button--small"
                 >
                   {t(locale, "eventTracker.openTracker")}
                 </a>
@@ -138,7 +138,7 @@ function EventDetailView({ locale, server, event, serverSwitch, schedules }: { l
           {event.live.length + event.challengeLive.length > 0 && <LiveRewardsPanel locale={locale} event={event} />}
 
           <div className="flex justify-start">
-            <a href={localizePath(getRoutePathById("event-list"), locale)} className="md3-state inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
+            <a href={localizePath(getRoutePathById("event-list"), locale)} className="md3-button md3-button--tonal">
               {t(locale, "events.backToList")}
             </a>
           </div>
@@ -588,7 +588,7 @@ function NotFound({ locale }: { locale: AppLocale }) {
     <div className="md3-surface p-8 text-center sm:p-12">
       <h1 className="text-headline-small text-on-surface">{t(locale, "events.notFoundTitle")}</h1>
       <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "events.notFoundDescription")}</p>
-      <a href={localizePath(getRoutePathById("event-list"), locale)} className="md3-state mt-6 inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
+      <a href={localizePath(getRoutePathById("event-list"), locale)} className="md3-button md3-button--tonal mt-6">
         {t(locale, "events.backToList")}
       </a>
     </div>

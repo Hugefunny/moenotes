@@ -186,7 +186,7 @@ function GachaDetailView({ locale, gacha, serverSwitch, schedules }: { locale: A
           </Panel>
 
           <div className="flex justify-start">
-            <a href={localizePath(getRoutePathById("gacha"), locale)} className="md3-state inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
+            <a href={localizePath(getRoutePathById("gacha"), locale)} className="md3-button md3-button--tonal">
               {t(locale, "gacha.backToList")}
             </a>
           </div>
@@ -284,10 +284,10 @@ function PoolRow({ locale, label, kind, rarities, onOpen }: { locale: AppLocale;
       <button
         type="button"
         onClick={onOpen}
-        className="md3-state inline-flex shrink-0 items-center gap-2 rounded-full border border-outline-variant bg-surface-container-low px-4 py-2 text-label-large text-primary shadow-elevation-1"
+        className="md3-button md3-button--tonal shrink-0"
       >
         {t(locale, "gacha.viewAllCards", { count: rarities.length })}
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3" /><path d="M9 4v16M4 12h5" /></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3" /><path d="M9 4v16M4 12h5" /></svg>
       </button>
     </div>
   );
@@ -456,7 +456,7 @@ function NotFound({ locale }: { locale: AppLocale }) {
     <div className="md3-surface p-8 text-center sm:p-12">
       <h1 className="text-headline-small text-on-surface">{t(locale, "gacha.notFoundTitle")}</h1>
       <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "gacha.notFoundDescription")}</p>
-      <a href={localizePath(getRoutePathById("gacha"), locale)} className="md3-state mt-6 inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
+      <a href={localizePath(getRoutePathById("gacha"), locale)} className="md3-button md3-button--tonal mt-6">
         {t(locale, "gacha.backToList")}
       </a>
     </div>

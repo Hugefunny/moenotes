@@ -184,7 +184,7 @@ export default function CalendarView({ locale, data, birthdays, servers, charact
           <button
             type="button"
             onClick={() => goMonth(monthOf(calendarDayAt(Date.now(), timeZone)))}
-            className="rounded-full border border-outline-variant bg-surface-container-low px-3 py-1.5 text-label-medium text-primary hover:border-primary hover:bg-secondary-container"
+            className="md3-button md3-button--outlined md3-button--small"
           >
             {t(locale, "calendar.today")}
           </button>
@@ -210,7 +210,7 @@ export default function CalendarView({ locale, data, birthdays, servers, charact
           <div className="mt-4 text-center text-body-medium text-on-surface-variant">
             <p>{t(locale, hasFilters ? "calendar.emptyFiltered" : "calendar.empty")}</p>
             {hasFilters && (
-              <button type="button" onClick={resetFilters} className="mt-3 rounded-full border border-outline-variant px-4 py-2 text-label-medium text-on-surface hover:bg-surface-container-highest">
+              <button type="button" onClick={resetFilters} className="md3-button md3-button--outlined md3-button--small mt-3">
                 {t(locale, "calendar.resetFilters")}
               </button>
             )}
@@ -232,9 +232,9 @@ function NavButton({ label, onClick, children }: { label: string; onClick: () =>
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="md3-state grid h-10 w-10 place-items-center rounded-full text-on-surface-variant hover:border-primary hover:bg-secondary-container hover:text-primary"
+      className="md3-icon-button"
     >
-      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
     </button>
   );
 }
@@ -389,7 +389,7 @@ function DayPanel({ locale, day, items, timeZone, onClose }: { locale: AppLocale
     <section className="md3-surface mt-4 p-3 sm:p-4" aria-label={label}>
       <div className="mb-2 flex items-center justify-between gap-2">
         <h3 className="font-[var(--md-ref-typeface-brand)] text-body-large text-on-surface">{label}</h3>
-        <button type="button" onClick={onClose} className="rounded-full px-3 py-1 text-label-medium text-on-surface-variant hover:bg-surface-container-highest">{t(locale, "calendar.closeDay")}</button>
+        <button type="button" onClick={onClose} className="md3-button md3-button--text md3-button--small">{t(locale, "calendar.closeDay")}</button>
       </div>
       {items.length === 0 ? (
         <p className="py-4 text-center text-body-medium text-on-surface-variant">{t(locale, "calendar.empty")}</p>

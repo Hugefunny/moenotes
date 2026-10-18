@@ -82,7 +82,7 @@ function ItemDetailView({ locale, detail, serverSwitch }: { locale: AppLocale; d
           <SourcesPanel locale={locale} sources={detail.sources} />
           <UsagesPanel locale={locale} usages={detail.usages} />
           <div className="flex justify-start">
-            <a href={localizePath(getRoutePathById("items"), locale)} className="md3-state inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
+            <a href={localizePath(getRoutePathById("items"), locale)} className="md3-button md3-button--tonal">
               {t(locale, "items.detail.backToList")}
             </a>
           </div>
@@ -216,7 +216,7 @@ function CollapsibleGroup({ locale, title, aside, count, limit, children }: { lo
       </div>
       {children(foldable && !expanded ? limit : count)}
       {foldable && (
-        <button type="button" onClick={() => setExpanded((value) => !value)} aria-expanded={expanded} className="mt-2 rounded-full border border-outline-variant bg-surface-container-low px-3 py-1 text-label-medium text-on-surface-variant transition hover:text-on-surface">
+        <button type="button" onClick={() => setExpanded((value) => !value)} aria-expanded={expanded} className="md3-button md3-button--outlined md3-button--small mt-2">
           {expanded ? t(locale, "items.detail.showLess") : t(locale, "items.detail.showAll", { count })}
         </button>
       )}

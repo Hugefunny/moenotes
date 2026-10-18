@@ -20,11 +20,11 @@ export default function StoryPlayerLink({ locale, advId, variant = "button" }: {
   }, [advId]);
   if (!available) return null;
   const className = variant === "compact"
-    ? " inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-primary px-3 text-xs font-bold text-white  hover:bg-primary"
-    : " md3-state mt-4 inline-flex w-fit items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-bold text-white shadow-elevation-1 hover:bg-primary";
+    ? "md3-button md3-button--filled md3-button--small"
+    : "md3-button md3-button--filled mt-4 w-fit";
   return (
     <a href={getStoryPlayerHref(locale, advId)} className={className}>
-      <svg className={variant === "compact" ? "h-3.5 w-3.5" : "h-4 w-4"} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l10-6.5z" /></svg>
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l10-6.5z" /></svg>
       {t(locale, "storyPlayer.openInPlayer")}
     </a>
   );

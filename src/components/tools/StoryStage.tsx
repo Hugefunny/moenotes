@@ -203,7 +203,7 @@ export default function StoryStage({ locale, manifest, language, title, simple, 
               <button
                 type="button"
                 onClick={() => setAttempt((value) => value + 1)}
-                className="md3-state mt-4 rounded-full border border-white/30 bg-white/10 px-5 py-2 text-label-large text-white hover:bg-white/20"
+                className="md3-button md3-button--tonal mt-4"
               >
                 {t(locale, "storyPlayer.retry")}
               </button>

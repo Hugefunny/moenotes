@@ -153,7 +153,7 @@ function CharacterDetailView({ locale, data, progression, extras, serverSwitch }
               <p className="text-label-large text-on-surface">
                 {t(locale, "characters.related.summary", { cards: visibleCards.length, supportCards: visibleExtras.supportCards.length, stories: extras.stories.length + extras.friendshipStories.length })}
               </p>
-              <button type="button" onClick={() => setSection("related")} className="md3-state rounded-full border border-outline-variant px-4 py-1.5 text-label-medium text-primary">
+              <button type="button" onClick={() => setSection("related")} className="md3-button md3-button--outlined md3-button--small">
                 {t(locale, "characters.related.open")}
               </button>
             </div>
@@ -161,7 +161,7 @@ function CharacterDetailView({ locale, data, progression, extras, serverSwitch }
             <RankRewardsPanel locale={locale} title={t(locale, "characters.rewards.rankTitle")} groups={progression?.rankRewards ?? []} />
           </>}
 
-          <a href={localizePath(getRoutePathById("characters"), locale)} className="md3-state inline-flex rounded-full border border-outline-variant px-6 py-2.5 text-label-large text-on-surface">
+          <a href={localizePath(getRoutePathById("characters"), locale)} className="md3-button md3-button--outlined">
             {t(locale, "characters.backToList")}
           </a>
         </section>

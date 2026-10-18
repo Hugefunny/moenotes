@@ -22,7 +22,8 @@
 .dc-composer .dc-blocker { color: var(--md-sys-color-on-surface-variant); font-size: var(--md-sys-typescale-body-small-size); line-height: var(--md-sys-typescale-body-small-line-height); text-align: center; }
 .dc-engine-note { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; padding: 8px 12px; border-radius: var(--md-sys-shape-corner-small); background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface-variant); font-size: var(--md-sys-typescale-body-small-size); line-height: var(--md-sys-typescale-body-small-line-height); }
 .dc-composer .dc-engine-note[role="alert"] { background: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container); }
-.dc-composer .dc-engine-note > button { min-height: 32px; padding: 0 8px; border: 0; border-radius: var(--md-sys-shape-corner-full); background: transparent; color: var(--md-sys-color-primary); font: inherit; font-weight: 500; cursor: pointer; }
+/* Retry: a small text button (the workspace's MD3 action button, deck-workspace.css), round while pressed */
+.dc-composer .dc-engine-note > button { --dw-button-height: 32px; --dw-button-label: var(--md-sys-color-primary); --dw-button-outline: transparent; padding: 0 12px; border-radius: 16px; }
 
 /* Card pool */
 .dc-pool { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 2px 12px; min-width: 0; }

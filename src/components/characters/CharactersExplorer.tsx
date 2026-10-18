@@ -154,7 +154,7 @@ export default function CharactersExplorer({ locale, servers, initialCharacters 
       {filtered.length === 0 ? (
         <div className="md3-surface p-8 text-center sm:p-12">
           <p className="text-body-medium text-on-surface-variant">{t(locale, "characters.list.empty")}</p>
-          <button type="button" onClick={resetFilters} className="md3-state mt-6 rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
+          <button type="button" onClick={resetFilters} className="md3-button md3-button--tonal mt-6">
             {t(locale, "characters.reset")}
           </button>
         </div>

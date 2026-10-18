@@ -153,7 +153,7 @@ function MusicDetailView({ locale, song, liveDetail, extras, serverSwitch }: { l
               {song.difficulties.map((diff) => {
                 const config = difficultyStyles[diff.difficulty];
                 const level = t(locale, `music.difficultyLevels.${diff.difficulty}`);
-                const previewButton = " md3-state inline-flex items-center gap-1 rounded-full border border-outline-variant bg-surface-container-low px-2.5 py-1 text-[10px] font-bold text-on-surface transition hover:border-primary hover:text-primary";
+                const previewButton = "md3-button md3-button--outlined md3-button--small";
 
                 return (
                   <div key={diff.difficulty} className={`p-3 border rounded-shape-lg flex flex-col items-center justify-between text-center gap-2 ${config.cardBg}`}>
@@ -174,7 +174,7 @@ function MusicDetailView({ locale, song, liveDetail, extras, serverSwitch }: { l
                         aria-label={t(locale, "music.preview2dLabel", { difficulty: level })}
                         className={previewButton}
                       >
-                        <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                           <rect x="4" y="3" width="16" height="18" rx="2" /><path d="M10 3v18M4 12h16" />
                         </svg>
                         {t(locale, "music.preview2d")}
@@ -184,7 +184,7 @@ function MusicDetailView({ locale, song, liveDetail, extras, serverSwitch }: { l
                         aria-label={t(locale, "music.preview3dLabel", { difficulty: level })}
                         className={previewButton}
                       >
-                        <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" /></svg>
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" /></svg>
                         {t(locale, "music.preview3d")}
                       </a>
                     </div>
@@ -202,7 +202,7 @@ function MusicDetailView({ locale, song, liveDetail, extras, serverSwitch }: { l
 
           {/* Back Action */}
           <div className="flex justify-start">
-            <a href={localizePath(getRoutePathById("music"), locale)} className="md3-state inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
+            <a href={localizePath(getRoutePathById("music"), locale)} className="md3-button md3-button--tonal">
               {t(locale, "music.backToList")}
             </a>
           </div>
@@ -396,11 +396,11 @@ function SongAudioPanel({ locale, song, title }: { locale: AppLocale; song: Musi
             type="button"
             onClick={() => download(item)}
             disabled={downloading !== null}
-            className="md3-state inline-flex items-center gap-2 rounded-full border border-outline-variant bg-surface-container-low px-4 py-2 text-label-medium text-on-surface shadow-elevation-1 disabled:opacity-60"
+            className="md3-button md3-button--tonal md3-button--small"
           >
             {downloading === item.kind
-              ? <SiriusIcon />
-              : <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4v11" /><path d="m7 10 5 5 5-5" /><path d="M5 20h14" /></svg>}
+              ? <SiriusIcon className="" />
+              : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4v11" /><path d="m7 10 5 5 5-5" /><path d="M5 20h14" /></svg>}
             {t(locale, "music.audio.download", { kind: t(locale, `music.audio.${item.kind}`) })}
           </button>
         ))}
@@ -490,15 +490,15 @@ function AudioPlayer({ locale, src, title, label }: { locale: AppLocale; src: st
         <button
           type="button"
           onClick={togglePlay}
-          className="md3-state flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-outline-variant bg-primary text-on-primary shadow-sm hover:scale-105 transition-all"
+          className="md3-icon-button md3-icon-button--filled shrink-0"
           aria-label={t(locale, isPlaying ? "music.audio.pause" : "music.audio.play")}
         >
           {isPlaying ? (
-            <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
+            <svg className="fill-current" viewBox="0 0 24 24">
               <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
             </svg>
           ) : (
-            <svg className="h-5 w-5 fill-current ml-0.5" viewBox="0 0 24 24">
+            <svg className="fill-current ml-0.5" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z" />
             </svg>
           )}

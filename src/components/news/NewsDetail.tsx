@@ -94,7 +94,7 @@ export default function NewsDetail({ locale }: Props) {
 
   const listHref = `${localizePath(getRoutePathById("news"), locale)}${target ? `?${new URLSearchParams({ server: target.server })}` : ""}`;
   const back = (
-    <a href={listHref} className="md3-state inline-flex rounded-full border border-outline-variant bg-surface-container-low px-5 py-2.5 text-label-large text-on-surface shadow-elevation-1">
+    <a href={listHref} className="md3-button md3-button--tonal">
       {t(locale, "news.backToList")}
     </a>
   );
@@ -118,7 +118,7 @@ export default function NewsDetail({ locale }: Props) {
           <button
             type="button"
             onClick={() => setAttempt((value) => value + 1)}
-            className="md3-state rounded-full border border-outline-variant bg-primary px-5 py-2.5 text-label-large text-on-primary shadow-elevation-1"
+            className="md3-button md3-button--filled"
           >
             {t(locale, "news.retry")}
           </button>

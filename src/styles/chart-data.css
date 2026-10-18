@@ -126,8 +126,18 @@ html[data-theme="dark"] .mn-cd {
 .mn-cd-skill-no { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 6px; background: var(--md-sys-color-surface-container-low); color: var(--md-sys-color-on-surface-variant); font-size: 11px; font-weight: 700; }
 .mn-cd-skill-unit { color: var(--md-sys-color-on-surface-variant); font-size: 12px; }
 .mn-cd-mean { padding: 0 4px; color: var(--md-sys-color-primary); font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; }
-.mn-cd-ghost { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border-radius: 10px; border: 1px solid var(--md-sys-color-outline-variant); background: none; color: var(--md-sys-color-on-surface-variant); font-size: 12px; font-weight: 500; }
-.mn-cd-ghost:hover { color: var(--md-sys-color-primary); border-color: var(--md-sys-color-primary); background: var(--md-sys-color-secondary-container); }
+/* Small outlined button, drawn like the site's MD3 buttons (src/styles/md3/primitives.css): 32px, label-large, round
+   corners that tighten while pressed, a state layer. The class is doubled to outrank `.mn-cd button` (font, color,
+   disabled opacity). */
+.mn-cd-ghost.mn-cd-ghost { position: relative; isolation: isolate; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 32px; padding: 0 12px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: 16px; background: transparent; color: var(--md-sys-color-on-surface); font-size: var(--md-sys-typescale-label-large-size); line-height: var(--md-sys-typescale-label-large-line-height); font-weight: 500; letter-spacing: var(--md-sys-typescale-label-large-tracking); -webkit-tap-highlight-color: transparent; transition: border-radius var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard), background-color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard), box-shadow var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard), color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard); }
+.mn-cd-ghost.mn-cd-ghost::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: currentColor; opacity: 0; pointer-events: none; transition: opacity var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard); }
+@media (hover: hover) { .mn-cd-ghost.mn-cd-ghost:hover:not(:disabled)::before { opacity: var(--md-sys-state-hover-opacity); } }
+.mn-cd-ghost.mn-cd-ghost:is(:focus-visible, :active):not(:disabled)::before { opacity: var(--md-sys-state-pressed-opacity); }
+.mn-cd-ghost.mn-cd-ghost:active:not(:disabled) { border-radius: var(--md-sys-shape-corner-small); box-shadow: none; }
+.mn-cd-ghost.mn-cd-ghost:disabled { opacity: 1; cursor: not-allowed; color: rgb(var(--md-sys-color-on-surface-rgb) / 0.38); border-color: rgb(var(--md-sys-color-on-surface-rgb) / 0.12); }
+/* The axis swap holds only an icon: a small outlined icon button */
+.mn-cd-axes > .mn-cd-ghost.mn-cd-ghost { width: 32px; padding: 0; }
+.mn-cd-axes > .mn-cd-ghost .mn-cd-ic { width: 20px; height: 20px; }
 
 /* ranking table */
 .mn-cd-count { margin: 2px 4px 8px; color: var(--md-sys-color-on-surface-variant); font-size: 12px; }
@@ -157,9 +167,12 @@ html[data-theme="dark"] .mn-cd {
 .mn-cd-song-title .t { max-width: 300px; overflow: hidden; text-overflow: ellipsis; }
 .mn-cd-song-band { display: flex; align-items: center; gap: 6px; color: var(--md-sys-color-on-surface-variant); font-size: 12px; }
 .mn-cd-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex: none; }
-.mn-cd-moe { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; color: var(--md-sys-color-on-surface-variant); }
+/* The song-page link beside a title: a standard (container-less) icon button kept at the row's 22px, with a state layer */
+.mn-cd-moe { position: relative; isolation: isolate; display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 11px; color: var(--md-sys-color-on-surface-variant); -webkit-tap-highlight-color: transparent; }
 .mn-cd-moe .mn-cd-ic { width: 14px; height: 14px; }
-.mn-cd-moe:hover { color: var(--md-sys-color-primary); background: var(--md-sys-color-secondary-container); }
+.mn-cd-moe::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: currentColor; opacity: 0; pointer-events: none; transition: opacity var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard); }
+@media (hover: hover) { .mn-cd-moe:hover::before { opacity: var(--md-sys-state-hover-opacity); } }
+.mn-cd-moe:is(:focus-visible, :active)::before { opacity: var(--md-sys-state-pressed-opacity); }
 .mn-cd-jk {
   --band: #8a93a6; position: relative; flex: none; display: grid; place-items: center; overflow: hidden;
   width: 40px; height: 40px; border-radius: var(--md-sys-shape-corner-small); border: 1px solid var(--md-sys-color-outline-variant);
@@ -272,13 +285,24 @@ html[data-theme="dark"] .mn-cd {
 .mn-cd-lv-tab[aria-current="true"] { background: var(--dc-bg); border-color: var(--dc-ink); color: var(--dc-ink); box-shadow: inset 0 -2px 0 var(--dc); }
 .mn-cd-lv-tab[aria-current="true"] b { color: var(--dc-ink); }
 .mn-cd-hero-links { display: flex; flex-wrap: wrap; gap: 8px; }
+/* Links drawn as the site's MD3 buttons (src/styles/md3/primitives.css): the song page filled, the 3D preview outlined */
 .mn-cd-moe-btn, .mn-cd-ghost-link {
-  display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border-radius: var(--mn-cd-cut-sm);
-  border: 1px solid var(--md-sys-color-outline-variant); text-decoration: none; font-size: 13px; font-weight: 500;
+  position: relative; isolation: isolate; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px;
+  border: 1px solid var(--md-sys-color-outline-variant); border-radius: 20px; text-decoration: none;
+  font-size: var(--md-sys-typescale-label-large-size); line-height: var(--md-sys-typescale-label-large-line-height); font-weight: 500; letter-spacing: var(--md-sys-typescale-label-large-tracking);
+  -webkit-tap-highlight-color: transparent;
+  transition: border-radius var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard), box-shadow var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
 }
-.mn-cd .mn-cd-moe-btn { background: var(--md-sys-color-primary); color: var(--md-sys-color-surface-container-low); }
-.mn-cd .mn-cd-ghost-link { background: var(--md-sys-color-surface-container-low); color: var(--md-sys-color-on-surface-variant); }
-.mn-cd-moe-btn:hover, .mn-cd-ghost-link:hover { transform: translateY(-1px); box-shadow: 0 6px 18px color-mix(in srgb, var(--md-sys-color-primary) 25%, transparent); }
+.mn-cd-moe-btn .mn-cd-ic, .mn-cd-ghost-link .mn-cd-ic { width: 20px; height: 20px; }
+.mn-cd .mn-cd-moe-btn { border-color: transparent; background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
+.mn-cd .mn-cd-ghost-link { background: transparent; color: var(--md-sys-color-on-surface); }
+:is(.mn-cd-moe-btn, .mn-cd-ghost-link)::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: currentColor; opacity: 0; pointer-events: none; transition: opacity var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard); }
+@media (hover: hover) {
+  :is(.mn-cd-moe-btn, .mn-cd-ghost-link):hover::before { opacity: var(--md-sys-state-hover-opacity); }
+  .mn-cd-moe-btn:hover:not(:active) { box-shadow: var(--md-sys-elevation-level1); }
+}
+:is(.mn-cd-moe-btn, .mn-cd-ghost-link):is(:focus-visible, :active)::before { opacity: var(--md-sys-state-pressed-opacity); }
+:is(.mn-cd-moe-btn, .mn-cd-ghost-link):active { border-radius: var(--md-sys-shape-corner-small); }
 .mn-cd-detail-body { padding: 4px 0 0; }
 .mn-cd-detail-body .mn-cd-sec-head { margin: 24px 0 12px; }
 .mn-cd-detail-body > .mn-cd-hint { margin: 10px 0 0; font-size: 12px; }
@@ -606,6 +630,10 @@ html[data-theme="dark"] .mn-cd {
 .mn-cd-snap-member-levels{flex:1;min-width:180px}
 .mn-cd-snap-member-levels .mn-cd-snap-filter-row{margin:.3rem 0}
 .mn-cd-snap-member-apply{margin-left:auto;white-space:nowrap}
+/* The picker's confirm action: a filled button at the standard 40px */
+.mn-cd-ghost.mn-cd-snap-member-apply{min-height:40px;padding:0 16px;border-color:transparent;border-radius:20px;background:var(--md-sys-color-primary);color:var(--md-sys-color-on-primary)}
+@media(hover:hover){.mn-cd-ghost.mn-cd-snap-member-apply:hover:not(:disabled,:active){box-shadow:var(--md-sys-elevation-level1)}}
+.mn-cd-ghost.mn-cd-snap-member-apply:disabled{border-color:transparent;background:rgb(var(--md-sys-color-on-surface-rgb) / 0.12)}
 .mn-cd-snap-summary{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin:.35rem 0 .7rem;font-size:.75rem}
 .mn-cd-snap-power{display:flex;align-items:center;gap:.5rem;color:var(--md-sys-color-on-surface-variant)}
 .mn-cd-snap-power input{width:8rem;padding:.25rem .45rem}
@@ -644,7 +672,7 @@ html[data-theme="dark"] .mn-cd {
 @container chart-view (max-width:600px){
   .mn-cd-snap-slots{grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem}
   .mn-cd-snap-heading{gap:.6rem;flex-wrap:wrap}
-  .mn-cd-snap-heading>.mn-cd-ghost{min-height:40px}
+  .mn-cd-snap-heading>.mn-cd-ghost{min-height:40px;padding:0 16px;border-radius:20px}
 }
 @container snap-picker (max-width:600px){
   .mn-cd-snap-options{grid-template-columns:1fr}

@@ -12,13 +12,13 @@
 
   /* ── State layer: hover / focus / pressed overlay in the content color (M3 interaction states) ── */
   .md3-state { position: relative; isolation: isolate; }
-  .md3-state::before {
+  :is(.md3-state, .md3-button, .md3-icon-button)::before {
     content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: currentColor; opacity: 0;
     pointer-events: none; transition: opacity var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
   }
-  @media (hover: hover) { .md3-state:hover::before { opacity: var(--md-sys-state-hover-opacity); } }
-  .md3-state:focus-visible::before, .md3-state:active::before { opacity: var(--md-sys-state-pressed-opacity); }
-  .md3-state:disabled::before, .md3-state[aria-disabled="true"]::before { opacity: 0; }
+  @media (hover: hover) { :is(.md3-state, .md3-button, .md3-icon-button):hover::before { opacity: var(--md-sys-state-hover-opacity); } }
+  :is(.md3-state, .md3-button, .md3-icon-button):is(:focus-visible, :active)::before { opacity: var(--md-sys-state-pressed-opacity); }
+  :is(.md3-state, .md3-button, .md3-icon-button):is(:disabled, [aria-disabled="true"])::before { opacity: 0; }
 
   /* ── List card: an item of a browse grid (cards, songs, events…). The card surface with a hairline; lifts on hover. ── */
   .md3-list-card,
@@ -122,6 +122,50 @@
   .md3-segment:disabled { cursor: default; color: rgb(var(--md-sys-color-on-surface-rgb) / 0.38); }
   .md3-segment svg { width: 18px; height: 18px; flex-shrink: 0; }
   html[data-density="compact"] .md3-segment { min-height: 28px; padding: 0 10px; }
+
+  /* ── Buttons outside MUI, as MoeSekai draws them (MUI's match in src/lib/md3/mui-theme.ts): 40px tall, round, the
+        corners tightening while a filled one is pressed. `md3-button` holds a label (and an svg), `md3-icon-button` an
+        svg alone. Fill: --filled (the main action), --tonal (secondary-container), --outlined, --text; an icon button
+        without one is standard. --small is 32px. A toggle sets aria-pressed, and its selected state squares the
+        corners and takes a stronger fill. ── */
+  .md3-button, .md3-icon-button {
+    position: relative; isolation: isolate; display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; gap: 8px;
+    height: 40px; border: 0; border-radius: 20px; background: transparent; color: var(--md-sys-color-primary);
+    font: inherit; font-size: var(--md-sys-typescale-label-large-size); line-height: var(--md-sys-typescale-label-large-line-height); font-weight: 500; letter-spacing: var(--md-sys-typescale-label-large-tracking);
+    white-space: nowrap; text-decoration: none; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
+    transition: border-radius var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard), background-color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard), box-shadow var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard), color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+  }
+  .md3-button { padding: 0 16px; }
+  .md3-button svg { width: 20px; height: 20px; flex-shrink: 0; }
+  .md3-icon-button { width: 40px; padding: 0; color: var(--md-sys-color-on-surface-variant); }
+  .md3-icon-button svg { width: 24px; height: 24px; flex-shrink: 0; }
+  .md3-button--small, .md3-icon-button--small { height: 32px; border-radius: 16px; }
+  .md3-button--small { gap: 6px; padding: 0 12px; }
+  .md3-button--small svg { width: 18px; height: 18px; }
+  .md3-icon-button--small { width: 32px; }
+  .md3-icon-button--small svg { width: 20px; height: 20px; }
+
+  .md3-button--filled, .md3-icon-button--filled { background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
+  .md3-button--tonal, .md3-icon-button--tonal { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
+  .md3-button--outlined, .md3-icon-button--outlined { border: 1px solid var(--md-sys-color-outline-variant); }
+  .md3-button--outlined { color: var(--md-sys-color-on-surface); }
+  .md3-button--text { padding-inline: 12px; }
+  @media (hover: hover) {
+    :is(.md3-button--filled, .md3-button--tonal, .md3-icon-button--filled, .md3-icon-button--tonal):hover:not(:disabled, [aria-disabled="true"]) { box-shadow: var(--md-sys-elevation-level1); }
+  }
+  :is(.md3-button--filled, .md3-button--tonal, .md3-button--outlined, .md3-icon-button--filled, .md3-icon-button--tonal, .md3-icon-button--outlined):active:not(:disabled, [aria-disabled="true"]) { border-radius: var(--md-sys-shape-corner-small); box-shadow: none; }
+
+  :is(.md3-button, .md3-icon-button)[aria-pressed="true"] { border-radius: var(--md-sys-shape-corner-medium); }
+  .md3-icon-button[aria-pressed="true"] { color: var(--md-sys-color-primary); }
+  .md3-button--tonal[aria-pressed="true"] { background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
+  .md3-icon-button--tonal[aria-pressed="true"] { background: var(--md-sys-color-secondary); color: var(--md-sys-color-on-secondary); }
+  .md3-icon-button--filled[aria-pressed="true"] { color: var(--md-sys-color-on-primary); }
+  .md3-icon-button--filled[aria-pressed="false"] { background: var(--md-sys-color-surface-container); color: var(--md-sys-color-primary); }
+  :is(.md3-button--outlined, .md3-icon-button--outlined)[aria-pressed="true"] { border-color: transparent; background: var(--md-sys-color-inverse-surface); color: var(--md-sys-color-inverse-on-surface); }
+
+  :is(.md3-button, .md3-icon-button):is(:disabled, [aria-disabled="true"]) { cursor: default; box-shadow: none; color: rgb(var(--md-sys-color-on-surface-rgb) / 0.38); }
+  :is(.md3-button--filled, .md3-button--tonal, .md3-icon-button--filled, .md3-icon-button--tonal):is(:disabled, [aria-disabled="true"]) { background: rgb(var(--md-sys-color-on-surface-rgb) / 0.12); }
+  :is(.md3-button--outlined, .md3-icon-button--outlined):is(:disabled, [aria-disabled="true"]) { border-color: rgb(var(--md-sys-color-on-surface-rgb) / 0.12); }
 
   /* ── Range input styled as an M3 slider (single thumb). Set --md3-range-progress for the active track. ── */
   .md3-range { height: 20px; margin: 0; background: transparent; cursor: pointer; -webkit-appearance: none; appearance: none; }

@@ -125,7 +125,7 @@ function MissionGroup({ locale, characterName, group, rewards }: { locale: AppLo
         ))}
       </ul>
       {rows.length > MISSION_PREVIEW_ROWS && (
-        <button type="button" onClick={() => setExpanded((value) => !value)} aria-expanded={expanded} className="mt-2 rounded-full px-3 py-1 text-label-medium text-primary hover:bg-secondary-container">
+        <button type="button" onClick={() => setExpanded((value) => !value)} aria-expanded={expanded} className="md3-button md3-button--text md3-button--small mt-2">
           {expanded ? t(locale, "characters.missions.collapse") : t(locale, "characters.missions.expand", { count: rows.length })}
         </button>
       )}

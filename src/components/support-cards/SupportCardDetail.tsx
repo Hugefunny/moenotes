@@ -265,7 +265,7 @@ function SupportCardDetailView({ locale, data, materials, serverSwitch }: { loca
           {materials && materials.groups.length > 0 && <CardMaterialsPanel locale={locale} groups={materials.groups} />}
 
           <div className="flex justify-start">
-            <a href={localizePath(getRoutePathById("support-cards"), locale)} className="md3-state inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
+            <a href={localizePath(getRoutePathById("support-cards"), locale)} className="md3-button md3-button--tonal">
               {t(locale, "supportCards.backToList")}
             </a>
           </div>

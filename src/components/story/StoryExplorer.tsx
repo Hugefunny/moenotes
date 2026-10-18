@@ -400,4 +400,4 @@ function StoryReader({ story, locale, characters, texts, onClose }: { story: Sto
   </Modal>;
 }
 
-function State({ text, action }: { text: string; action?: () => void }) { return <div className="grid min-h-64 place-items-center rounded-shape-lg border border-dashed border-outline-variant bg-surface-container-low p-8 text-center"><div><p className="font-bold text-on-surface-variant">{text}</p>{action && <button type="button" onClick={action} className="mt-4 rounded-full bg-primary px-5 py-2 text-label-large text-white">Retry</button>}</div></div>; }
+function State({ text, action }: { text: string; action?: () => void }) { return <div className="grid min-h-64 place-items-center rounded-shape-lg border border-dashed border-outline-variant bg-surface-container-low p-8 text-center"><div><p className="font-bold text-on-surface-variant">{text}</p>{action && <button type="button" onClick={action} className="md3-button md3-button--filled mt-4">Retry</button>}</div></div>; }
