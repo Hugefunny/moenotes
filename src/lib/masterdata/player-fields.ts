@@ -30,6 +30,10 @@ function ordered(rows: readonly Row[]): Row[] {
     return (first < second ? -1 : first > second ? 1 : 0) || Number(a.displayOrder ?? 0) - Number(b.displayOrder ?? 0) || decimal(a.id).localeCompare(decimal(b.id));
   });
 }
+/** Character ranks cover playable characters only. */
+function playable(rows: readonly Row[]): Row[] {
+  return rows.filter(row => row.isNonPlayable !== true);
+}
 function canonical(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
   if (value && typeof value === "object") {
@@ -45,8 +49,6 @@ async function hash(value: unknown): Promise<string> {
 
 /** Each server's catalogue is built from that server's Master tables and defines the accepted input values. */
 export async function buildPlayerCatalogue(server: GameServer, masterVersion: string, tables: PlayerMasterTables): Promise<PlayerFieldCatalogue | null> {
-  // Character ranks cover playable characters only; a table with non-playable rows has no catalogue.
-  if (tables.characters.some(row => row.isNonPlayable === true)) return null;
   if (!masterVersion) throw new Error("Player catalogue needs its actual master version");
   const texts = new Map(tables.texts.map(row => [row.id, row]));
   const [itemLevelsSha, ranksSha, vipSha] = await Promise.all([hash(tables.bandItemLevels), hash(tables.characterRanks), hash(tables.vip)]);
@@ -61,7 +63,7 @@ export async function buildPlayerCatalogue(server: GameServer, masterVersion: st
   });
   const ranks = [...new Set(tables.characterRanks.map(row => positive(row.rank)))].sort((a, b) => a - b);
   if (!ranks.length) throw new Error("Character rank has no legal rows");
-  for (const character of ordered(tables.characters)) {
+  for (const character of ordered(playable(tables.characters))) {
     const id = decimal(character.id), label = texts.get(String(character.nameTextID));
     if (!label) throw new Error("Character rank label is missing from MasterText");
     fields.push({ key: `characterRank.${id}`, kind: "character-rank", id, label, levels: ranks,
@@ -84,7 +86,7 @@ export async function buildPlayerCatalogue(server: GameServer, masterVersion: st
 
 async function profileCatalogue(server: GameServer, masterVersion: string, tables: PlayerMasterTables, texts: ReadonlyMap<string, MasterTextRow>): Promise<PlayerProfileCatalogue> {
   const color = (value: unknown): string => typeof value === "string" && /^#?[a-f0-9]{6}$/i.test(value) ? `#${value.replace(/^#/, "")}` : "";
-  const characters = ordered(tables.characters).map(row => ({ id: decimal(row.id), bandId: decimal(row.bandID), label: texts.get(String(row.nameTextID))!, color: color(row.mainColorCode), subColor: color(row.subColorCode) }));
+  const characters = ordered(playable(tables.characters)).map(row => ({ id: decimal(row.id), bandId: decimal(row.bandID), label: texts.get(String(row.nameTextID))!, color: color(row.mainColorCode), subColor: color(row.subColorCode) }));
   const bands = ordered(tables.bands ?? []).map(row => ({ id: decimal(row.id), label: texts.get(String(row.nameTextID)) ?? {}, color: color(row.mainColorCode), subColor: color(row.subColorCode) }));
   const fields: PlayerCatalogueField[] = [];
   const rows = async (data: readonly Row[] | undefined, role: string, key: string, targets?: PlayerCatalogueField["targets"]): Promise<void> => {

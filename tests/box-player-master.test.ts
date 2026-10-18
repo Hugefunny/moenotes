@@ -22,7 +22,9 @@ test("player catalogue uses matching master name keys, ordering and actual level
     expect(own?.server).toBe(server); expect(own?.fields.find(field => field.kind === "character-rank")?.levels).toEqual([1, 3]);
     expect(own?.sha256).not.toBe(result?.sha256);
   }
-  expect(await buildPlayerCatalogue("jp", "synthetic/1", { ...tables, characters: [{ ...tables.characters[0]!, isNonPlayable: true }] })).toBeNull();
+  const withNonPlayable = await buildPlayerCatalogue("jp", "synthetic/1", { ...tables, characters: [...tables.characters, { ...tables.characters[0]!, id: 1001, isNonPlayable: true }] });
+  expect(withNonPlayable?.fields.filter(field => field.kind === "character-rank").map(field => field.id)).toEqual(["1"]);
+  expect(withNonPlayable?.profile?.characters.map(character => character.id)).toEqual(["1"]);
   const newer = await buildPlayerCatalogue("jp", "synthetic/2", tables);
   expect(newer?.sha256).not.toBe(result?.sha256);
 });
