@@ -36,4 +36,15 @@ describe("story list", () => {
     expect(storyNeighbors(stories, 1).previous).toBeNull();
     expect(storyNeighbors(stories, 31).next).toBeNull();
   });
+
+  test("an event chapter opens with its event, before the chapter's own start", () => {
+    const chapter = { ...data.chapters[0]!, startAt: "2026/10/26 15:00:00" };
+    const opened = (eventStart: string) => normalizeStories({ ...data, chapters: [chapter], eventChapters: [{ chapterId: 5, eventId: 3, startAt: eventStart }] }, "en-US")
+      .find((story) => story.advId === 1);
+    expect(opened("2026/10/18 15:00:00")).toMatchObject({ category: "event", startAt: "2026/10/18 15:00:00" });
+    // An event starting after the chapter keeps the chapter's start.
+    expect(opened("2026/11/01 15:00:00")?.startAt).toBe("2026/10/26 15:00:00");
+    // A main-story chapter keeps its own start.
+    expect(normalizeStories({ ...data, chapters: [chapter] }, "en-US").find((story) => story.advId === 1)?.startAt).toBe("2026/10/26 15:00:00");
+  });
 });

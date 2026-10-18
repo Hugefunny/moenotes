@@ -8,6 +8,14 @@ import {
 } from "@/lib/cards/data";
 import { localizeMasterText } from "@/lib/masterdata/localize-text";
 import type { RewardResolver, RewardViewModel } from "@/lib/rewards/resources";
+import { parseMasterDate } from "@/lib/schedule";
+
+/** The earlier of two Master dates; an empty or unreadable one does not count. */
+function earliestStart(a: string, b: string): string {
+  const x = parseMasterDate(a), y = parseMasterDate(b);
+  if (x === null) return y === null ? a : b;
+  return y !== null && y < x ? b : a;
+}
 
 export type StoryCategory = "main" | "event" | "friendship" | "birthday" | "live-result" | "home" | "tutorial";
 /** A chapter's main episodes, its per-character another episodes and its extra episodes each number from 1. */
@@ -177,8 +185,11 @@ export interface StoryMasterData {
   characters: RawStoryCharacter[];
   bands: RawBand[];
   texts: RawText[];
-  /** Event story chapters (MasterEvent._storyChapterId) and the event they belong to; other chapters are main story. */
-  eventChapters?: Array<{ chapterId: number; eventId: number }>;
+  /**
+   * Event story chapters (MasterEvent._storyChapterId), the event they belong to and its start; other chapters are main
+   * story. An event chapter opens with its event, before its own (permanent) start.
+   */
+  eventChapters?: Array<{ chapterId: number; eventId: number; startAt: string }>;
   /** Login landings; the `Birthday/` ones mark birthday chapters (with isSpecialStory chapters). */
   loginLandings?: RawStoryLoginLanding[];
   playTimes?: RawAdvPlayTime[];
@@ -275,6 +286,7 @@ export function normalizeStories(data: StoryMasterData, locale: AppLocale): Stor
   const characterNames = (ids: number[]) => ids.map((id) => resolveText(characterMap.get(id)?.nameTextID ?? ""));
   const bandName = (id: number) => resolveText(bandMap.get(id)?.nameTextID ?? "");
   const eventChapterMap = new Map((data.eventChapters ?? []).map((entry) => [entry.chapterId, entry.eventId]));
+  const eventStartMap = new Map((data.eventChapters ?? []).map((entry) => [entry.chapterId, entry.startAt]));
   const birthdayChapters = birthdayChapterCharacters(data.chapters, data.loginLandings ?? []);
   const playTimeMap = new Map((data.playTimes ?? []).filter((entry) => entry.playTime > 0).map((entry) => [entry.id, entry.playTime]));
   const rewardsByGroup = groupStoryRewards(data.storyRewards ?? [], data.resolveReward);
@@ -335,7 +347,7 @@ export function normalizeStories(data: StoryMasterData, locale: AppLocale): Stor
         releaseChapterId: 0,
         releaseEpisodeId: 0,
       },
-      startAt: episode.startAt || chapter?.startAt || "",
+      startAt: earliestStart(episode.startAt || chapter?.startAt || "", eventStartMap.get(episode.chapterId) ?? ""),
       endAt: chapter?.endAt ?? "",
       banner: episode.banner,
       image: episode.image,

@@ -60,13 +60,13 @@ function StoryDetailView({ locale, advId, initialTitle, initialScript, initialCh
   const now = useNow();
   const { showSpoiler } = useSpoiler();
   const isUnreleased = Boolean(now !== null && story?.startAt && isSpoiler(story.startAt, now));
+  const [artworkFailed, setArtworkFailed] = useState(false);
+  const artworkUrl = useAssetUrl()(storyArtworkUrl(story, locale));
 
+  // Every hook runs before this return, so the notice can replace a page already rendered without it.
   if (!showSpoiler && isUnreleased) {
     return <SpoilerNotice locale={locale} />;
   }
-
-  const [artworkFailed, setArtworkFailed] = useState(false);
-  const artworkUrl = useAssetUrl()(storyArtworkUrl(story, locale));
   const isChapter = story?.category === "main" || story?.category === "event" || story?.category === "birthday";
   const playTime = formatPlayTime(story?.playTime);
   const unlocks = story ? storyUnlockLabels(locale, story) : [];
