@@ -19,8 +19,8 @@
 import { Blend, DynamicScheme, Hct, SchemeTonalSpot, TonalPalette, Variant, argbFromHex, hexFromArgb } from "@material/material-color-utilities";
 import { MD3_BASE_ROLES, MD3_CATEGORY_GROUPS, contrastRatio, type Md3CategoryGroup, type Md3Colors, type Md3Schemes } from "@/lib/md3/roles";
 
-/** The legacy brand accent-deep: the default theme keeps the MoeNotes blue. */
-export const MD3_DEFAULT_SEED = "#395EA8";
+/** The MoeNotes blue, light enough that its fill carries dark text, as MoeSekai's teal does. */
+export const MD3_DEFAULT_SEED = "#4C9DF0";
 
 /** Source hues of the category groups (tags and charts), harmonized toward the seed. */
 export const MD3_CATEGORY_SOURCES: Record<Md3CategoryGroup, string> = {
