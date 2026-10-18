@@ -6,6 +6,7 @@
 @import "./md3/colors.css";
 @import "./md3/tokens.css";
 @import "./md3/tailwind.css";
+@import "./md3/material.css";
 @import "./md3/mui-bridge.css";
 @import "./md3/primitives.css";
 @import "./tokens.css";

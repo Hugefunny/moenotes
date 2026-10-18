@@ -45,7 +45,7 @@ describe("material 3 shell", () => {
     const html = renderToString(<Sidebar locale="en-US" pathname="/cards" />);
     const current = html.match(/<a [^>]*aria-current="page"[^>]*>/g) ?? [];
     expect(current.length).toBe(1);
-    expect(current[0]).toContain("bg-secondary-container");
+    expect(current[0]).toContain("glass-selected");
     expect(html).toContain('aria-label="Main navigation"');
   });
 

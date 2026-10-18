@@ -1,6 +1,5 @@
 import { useState } from "react";
 import ButtonBase from "@mui/material/ButtonBase";
-import Divider from "@mui/material/Divider";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { accountApi, accountLoginUrl } from "@/config/account";
@@ -28,8 +27,7 @@ export default function SidebarAccount({ locale, pathname }: Props) {
   if (account?.status !== "signed-in") {
     if (account?.status !== "signed-out") return null;
     return (
-      <div className="shrink-0 px-3 pb-3">
-        <Divider className="!mx-4 !mb-2" />
+      <div className="shrink-0 border-t border-outline-variant p-2">
         <a href={accountLoginUrl(locale, pathname)} className="md3-state flex h-14 items-center gap-3 rounded-full px-4 text-label-large text-on-surface-variant hover:text-on-surface">
           <Icon name="user" />
           <span className="truncate">{t(locale, "account.signIn")}</span>
@@ -43,8 +41,7 @@ export default function SidebarAccount({ locale, pathname }: Props) {
   const open = Boolean(anchor);
 
   return (
-    <div className="shrink-0 px-3 pb-3">
-      <Divider className="!mx-4 !mb-2" />
+    <div className="shrink-0 border-t border-outline-variant p-2">
       <ButtonBase
         onClick={(event) => setAnchor(event.currentTarget)}
         aria-haspopup="menu"

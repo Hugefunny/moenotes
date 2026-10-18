@@ -1,0 +1,206 @@
+/* The shell's materials, as MoeSekai draws them: frosted glass for the chrome that floats over the page, the seed's
+   wash and shapes behind it (src/components/shell/BackgroundPattern.astro), and the highlighter under page titles. */
+
+:root {
+  /* Glass: a translucent tint over a blurred, saturated backdrop, a sheen on its upper part, a bright inner rim and a
+     hairline outer edge. */
+  --mn-glass-tint: rgb(255 255 255 / 0.42);
+  /* App bar capsules once content runs under them: busy art would show through the thin tint. */
+  --mn-glass-tint-raised: rgb(255 255 255 / 0.66);
+  --mn-glass-tint-thick: rgb(255 255 255 / 0.72);
+  --mn-glass-sheen: linear-gradient(180deg, rgb(255 255 255 / 0.3), rgb(255 255 255 / 0) 30%);
+  /* Selection on glass: the seed itself, thinned so on-surface text stays legible. */
+  --mn-glass-selected: color-mix(in srgb, var(--md-sys-color-primary-container) 55%, transparent);
+  /* Bright top and side rim, a faint shade along the bottom: the edge of a slab, not a sticker. */
+  --mn-glass-rim: inset 0 1px 0 0 rgb(255 255 255 / 0.95), inset 0 0 0 1px rgb(255 255 255 / 0.5), inset 0 -1px 0 0 rgb(20 26 38 / 0.05);
+  --mn-glass-edge: 0 0 0 1px rgb(20 26 38 / 0.09);
+  --mn-glass-lift: 0 2px 6px -2px rgb(20 26 38 / 0.08), 0 14px 36px -14px rgb(20 26 38 / 0.22);
+  --mn-glass-blur: blur(20px) saturate(170%);
+
+  /* The wash behind the page: the seed with its chroma capped, so a vivid band color tints rather than glares. */
+  --mn-brand-tint: var(--md-sys-color-primary-container);
+  --mn-brand-wash-alt: var(--mn-brand-tint);
+  --mn-brand-wash-strength: 42%;
+  --mn-brand-pattern-a: var(--mn-brand-tint);
+  --mn-brand-pattern-b: var(--md-sys-color-tertiary);
+  --mn-brand-pattern-facet: color-mix(in srgb, var(--md-sys-color-surface-container-lowest) 55%, transparent);
+  --mn-brand-pattern-tile: max(100vh, 62.5vw);
+}
+
+html[data-theme="dark"] {
+  --mn-glass-tint: rgb(36 38 42 / 0.58);
+  --mn-glass-tint-raised: rgb(36 38 42 / 0.76);
+  --mn-glass-tint-thick: rgb(30 32 35 / 0.86);
+  --mn-glass-sheen: linear-gradient(180deg, rgb(255 255 255 / 0.07), rgb(255 255 255 / 0) 36%);
+  --mn-glass-rim: inset 0 1px 0 0 rgb(255 255 255 / 0.14), inset 0 0 0 1px rgb(255 255 255 / 0.06);
+  --mn-glass-edge: 0 0 0 1px rgb(0 0 0 / 0.5);
+  --mn-glass-lift: 0 16px 40px -14px rgb(0 0 0 / 0.6);
+  --mn-glass-selected: color-mix(in srgb, var(--md-sys-color-primary-container) 30%, transparent);
+  --mn-brand-wash-strength: 24%;
+  --mn-brand-pattern-a: color-mix(in srgb, var(--mn-brand-tint) 60%, transparent);
+  --mn-brand-pattern-facet: color-mix(in srgb, var(--md-sys-color-surface-bright) 22%, transparent);
+}
+
+@supports (color: oklch(from red l c h)) {
+  :root {
+    --mn-brand-tint: oklch(from var(--md-sys-color-primary-container) l min(c, 0.1) h);
+    /* A neighbouring hue for the second glow, so the glass over it shows a gradient rather than one flat tint. */
+    --mn-brand-wash-alt: oklch(from var(--mn-brand-tint) l c calc(h - 40));
+    /* The opposite hue is an accent, softer than the seed's own. */
+    --mn-brand-pattern-b: oklch(from var(--mn-brand-tint) l calc(c * 0.7) calc(h + 180));
+  }
+  html[data-theme="dark"] {
+    --mn-brand-pattern-b: oklch(from var(--mn-brand-tint) l calc(c * 0.7) calc(h + 180) / 60%);
+  }
+  /* A vivid seed at full strength glares on light glass: cap its chroma. */
+  :root:not([data-theme="dark"]) {
+    --mn-glass-selected: color-mix(in srgb, oklch(from var(--md-sys-color-primary-container) l min(c, 0.13) h) 55%, transparent);
+  }
+}
+
+/* Blur cost grows with its radius: phones get a lighter one. */
+@media (max-width: 767px), (pointer: coarse) {
+  :root { --mn-glass-blur: blur(14px) saturate(160%); }
+}
+
+/* Solid panes where the backdrop cannot be blurred or the reader asked for less transparency. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root, html[data-theme="dark"] {
+    --mn-glass-tint: var(--md-sys-color-surface-card);
+    --mn-glass-tint-raised: var(--md-sys-color-surface-card);
+    --mn-glass-tint-thick: var(--md-sys-color-surface-card);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root, html[data-theme="dark"] {
+    --mn-glass-tint: var(--md-sys-color-surface-card);
+    --mn-glass-tint-raised: var(--md-sys-color-surface-card);
+    --mn-glass-tint-thick: var(--md-sys-color-surface-card);
+    --mn-glass-blur: none;
+  }
+}
+
+/* For the chrome that floats over content (app bar capsules, the navigation and filter panes, floating buttons), never
+   for the content itself. `glass` for panes and controls, `glass-thick` where text sits on it for long (modal drawers,
+   sheets). Each sets its own background and shadow: do not add bg-* or shadow-* next to it. */
+@utility glass {
+  background-color: var(--mn-glass-tint);
+  background-image: var(--mn-glass-sheen);
+  -webkit-backdrop-filter: var(--mn-glass-blur);
+  backdrop-filter: var(--mn-glass-blur);
+  box-shadow: var(--mn-glass-rim), var(--mn-glass-edge), var(--mn-glass-lift);
+}
+
+@utility glass-thick {
+  background-color: var(--mn-glass-tint-thick);
+  background-image: var(--mn-glass-sheen);
+  -webkit-backdrop-filter: var(--mn-glass-blur);
+  backdrop-filter: var(--mn-glass-blur);
+  box-shadow: var(--mn-glass-rim), var(--mn-glass-edge), var(--mn-glass-lift);
+}
+
+/* The selected item on a glass pane (the pale secondary-container vanishes on it). */
+@utility glass-selected {
+  background-color: var(--mn-glass-selected);
+}
+
+/* Content scrolling under the transparent app bar fades into the page instead of meeting a hard bar: a gradient, not a
+   blur, since it spans the full width and repaints on every scroll frame. Shown while [data-scrolled], when the glass
+   inside also thickens. */
+@utility scroll-edge {
+  &[data-scrolled] {
+    --mn-glass-tint: var(--mn-glass-tint-raised);
+  }
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 -1.5rem;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--md-sys-color-surface) 60%, transparent),
+      color-mix(in srgb, var(--md-sys-color-surface) 30%, transparent) 60%,
+      transparent
+    );
+    opacity: 0;
+    transition: opacity var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-standard);
+  }
+  &[data-scrolled]::before {
+    opacity: 1;
+  }
+}
+
+/* The seed's glow in the corners of the page. */
+.mn-brand-wash {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(64rem 52rem at 0% 0%, color-mix(in srgb, var(--mn-brand-tint) var(--mn-brand-wash-strength), transparent), transparent 72%),
+    radial-gradient(72rem 44rem at 62% -10%, color-mix(in srgb, var(--mn-brand-wash-alt) calc(var(--mn-brand-wash-strength) * 0.8), transparent), transparent 72%),
+    radial-gradient(68rem 52rem at 100% 100%, color-mix(in srgb, var(--mn-brand-tint) calc(var(--mn-brand-wash-strength) * 0.75), transparent), transparent 72%),
+    radial-gradient(56rem 44rem at 6% 100%, color-mix(in srgb, var(--mn-brand-wash-alt) calc(var(--mn-brand-wash-strength) * 0.7), transparent), transparent 72%);
+}
+
+/* Light shards over the wash, and three layers of shapes in the seed color and its opposite hue that drift as the page
+   scrolls. Each layer is two stacked tiles moved by transform only, so it is painted once. */
+.mn-brand-pattern {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
+.mn-brand-pattern-facets {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: var(--mn-brand-pattern-facet);
+}
+
+.mn-brand-pattern-layer {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: calc(var(--mn-brand-pattern-tile) * 2);
+  will-change: transform;
+}
+
+.mn-brand-pattern-tile {
+  display: block;
+  width: 100%;
+  height: var(--mn-brand-pattern-tile);
+}
+
+/* Filled shapes have no outline: an opaque edge around a translucent fill reads as a sticker. */
+.mn-brand-pattern-a { fill: var(--mn-brand-pattern-a); stroke: none; }
+.mn-brand-pattern-b { fill: var(--mn-brand-pattern-b); stroke: none; }
+.mn-brand-pattern-tile .mn-brand-pattern-a.mn-brand-pattern-stroke { stroke: var(--mn-brand-pattern-a); }
+.mn-brand-pattern-tile .mn-brand-pattern-b.mn-brand-pattern-stroke { stroke: var(--mn-brand-pattern-b); }
+.mn-brand-pattern-tile .mn-brand-pattern-stroke {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Pages that draw their own full-bleed scene (the story reader, Live2D) hide the backdrop. */
+html[data-backdrop="off"] :is(.mn-brand-wash, .mn-brand-pattern) {
+  display: none;
+}
+
+/* The seed as a highlighter stroke under heading text. The text stays on-surface so it reads on every seed; the stroke
+   carries the color that pale seeds cannot give light-mode text. --md-sys-color-brand-mark is generated per seed so
+   text over it stays at 4.5:1 (src/lib/md3/scheme.ts). */
+.mn-brand-mark {
+  padding-inline: 0.125em;
+  background-image: linear-gradient(transparent 50%, var(--md-sys-color-brand-mark) 50%, var(--md-sys-color-brand-mark) 88%, transparent 88%);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}

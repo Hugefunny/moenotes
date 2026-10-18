@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Collapse from "@mui/material/Collapse";
-import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import BrandLogo from "@/components/shared/BrandLogo";
@@ -27,9 +26,10 @@ interface SidebarProps {
 }
 
 /**
- * Material 3 navigation drawer. From `md` up it is a standard drawer docked beside the content (the top app bar's
- * navigation button folds it away); below `md` it is a modal drawer over a scrim. Groups expand in place, the current
- * page carries the active indicator (secondary-container), and the account pane sits at the foot.
+ * Material 3 navigation drawer, as MoeSekai draws it. From `md` up it is a glass pane floating in its rail beside the
+ * content (the top app bar's navigation button folds it away); below `md` it is a modal drawer of thick glass over a
+ * scrim. Groups expand in place, the current page carries the seed's tint on the glass, and the account sits at the
+ * foot.
  */
 function Sidebar({ locale, pathname, activePath }: SidebarProps) {
   const [desktopOpen] = useSidebarState();
@@ -45,12 +45,12 @@ function Sidebar({ locale, pathname, activePath }: SidebarProps) {
   return (
     <>
       <aside
-        className="mn-desktop-sidebar fixed bottom-0 top-[var(--md-app-bar-height,64px)] z-30 hidden w-[17rem] md:block"
+        className="mn-desktop-sidebar glass fixed bottom-3 top-[calc(var(--md-app-bar-height,64px)+0.75rem)] z-30 hidden w-[calc(17rem-1.5rem)] overflow-hidden rounded-shape-xl md:block"
         data-open={desktopOpen}
         data-ready={ready}
         inert={!desktopOpen}
         aria-hidden={!desktopOpen}
-        style={{ left: "max(0px, (100vw - var(--mn-layout-max-width, 120rem)) / 2)" }}
+        style={{ left: "calc(max(0px, (100vw - var(--mn-layout-max-width, 120rem)) / 2) + 0.75rem)" }}
       >
         <div className="flex h-full flex-col">
           <DrawerNav locale={locale} pathname={pathname} activePath={activePath} groups={groups} />
@@ -63,7 +63,7 @@ function Sidebar({ locale, pathname, activePath }: SidebarProps) {
         onClose={closeMobile}
         anchor="left"
         className="md:hidden"
-        slotProps={{ paper: { sx: { width: "min(22.5rem, calc(100vw - 56px))" }, "aria-label": t(locale, "shell.navigation") } }}
+        slotProps={{ paper: { className: "glass-thick", sx: { width: "min(22.5rem, calc(100vw - 56px))", borderRadius: "0 28px 28px 0" }, "aria-label": t(locale, "shell.navigation") } }}
         ModalProps={{ keepMounted: false }}
       >
         <div className="flex items-center justify-between px-4 pb-2 pt-3">
@@ -125,8 +125,8 @@ function DrawerNav({ locale, pathname, activePath, groups, onNavigate }: { local
 
   const home = stripLocaleFromPathname(current) === "/";
   return (
-    <nav ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-3 pb-3" aria-label={t(locale, "shell.navigation")}>
-      <NavItem href={localizePath("/", locale)} active={home} onNavigate={onNavigate} icon={<RouteGlyph icon="home" className="h-6 w-6" />}>
+    <nav ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2" aria-label={t(locale, "shell.navigation")}>
+      <NavItem href={localizePath("/", locale)} active={home} onNavigate={onNavigate} icon={<RouteGlyph icon="home" className="h-5 w-5" />}>
         {t(locale, "nav.home")}
       </NavItem>
       {groups.map((group) => (
@@ -146,68 +146,68 @@ function DrawerNav({ locale, pathname, activePath, groups, onNavigate }: { local
 
 function NavGroup({ group, locale, current, collapsed, onToggle, onNavigate }: { group: AppRoute; locale: AppLocale; current: string; collapsed: boolean; onToggle: () => void; onNavigate?: (() => void) | undefined }) {
   const children = getNavChildren(group);
-const headerActive = stripLocaleFromPathname(current) === normalizePathname(group.path);
-const listId = `nav-group-${group.id}`;
-// Paths nest (`/music` holds `/music/guess` and song details), so only the longest matching item is current.
-const activeItemId = children.filter((item) => isCurrentRoute(current, item.path))
-  .sort((a, b) => b.path.length - a.path.length)[0]?.id;
+  const headerActive = stripLocaleFromPathname(current) === normalizePathname(group.path);
+  const listId = `nav-group-${group.id}`;
+  // Paths nest (`/music` holds `/music/guess` and song details), so only the longest matching item is current.
+  const activeItemId = children.filter((item) => isCurrentRoute(current, item.path))
+    .sort((a, b) => b.path.length - a.path.length)[0]?.id;
   return (
-    <div className="pt-1">
-      <Divider className="!my-2 !mx-4" />
+    <div className="mt-1 border-t border-outline-variant pt-1">
+      {/* The group's name opens its hub page; the chevron beside it folds the group. */}
       <div className="relative">
-        <NavItem
+        <a
           href={localizePath(group.path, locale)}
-          active={headerActive}
-          onNavigate={onNavigate}
-          icon={<RouteGlyph icon={(group.nav && group.nav.icon ? group.nav.icon : "sparkles") as RouteIcon} routeId={group.id} className="h-6 w-6" />}
-          trailingSpace={children.length > 0}
+          onClick={onNavigate}
+          aria-current={headerActive ? "page" : undefined}
+          className={`md3-state flex h-12 items-center rounded-full px-3 text-title-small lg:h-9 ${children.length > 0 ? "pr-12" : ""} ${
+            headerActive ? "glass-selected text-on-surface" : "text-on-surface-variant hover:text-on-surface"
+          }`}
         >
-          {t(locale, group.labelKey)}
-        </NavItem>
+          <span className="min-w-0 truncate">{t(locale, group.labelKey)}</span>
+        </a>
         {children.length > 0 && (
           <IconButton
             size="small"
-            className="!absolute right-2 top-1/2 -translate-y-1/2"
+            className="!absolute right-1 top-1/2 -translate-y-1/2"
             aria-expanded={!collapsed}
             aria-controls={listId}
             aria-label={t(locale, group.labelKey)}
             onClick={onToggle}
           >
-            <Icon name="chevronDown" className={`h-5 w-5 transition-transform duration-200 ${collapsed ? "-rotate-90" : ""}`} />
+            <Icon name="chevronDown" className={`h-5 w-5 transition-transform duration-200 ${collapsed ? "" : "rotate-180"}`} />
           </IconButton>
         )}
       </div>
-{children.length > 0 && (
-  <Collapse in={!collapsed} timeout="auto">
-    <div id={listId} className="pb-1">
-      {children.map((item) => (
-        <NavItem
-          key={item.id}
-          href={localizePath(item.path, locale)}
-          active={item.id === activeItemId}
-          onNavigate={onNavigate}
-          nested
-          icon={<RouteGlyph icon={(item.nav && item.nav.icon ? item.nav.icon : "sparkles") as RouteIcon} routeId={item.id} className="h-5 w-5" />}
-        >
-          {t(locale, item.labelKey)}
-        </NavItem>
-      ))}
-    </div>
-  </Collapse>
+      {children.length > 0 && (
+        <Collapse in={!collapsed} timeout="auto">
+          <div id={listId} className="pb-1">
+            {children.map((item) => (
+              <NavItem
+                key={item.id}
+                href={localizePath(item.path, locale)}
+                active={item.id === activeItemId}
+                onNavigate={onNavigate}
+                icon={<RouteGlyph icon={(item.nav && item.nav.icon ? item.nav.icon : "sparkles") as RouteIcon} routeId={item.id} className="h-5 w-5" />}
+              >
+                {t(locale, item.labelKey)}
+              </NavItem>
+            ))}
+          </div>
+        </Collapse>
       )}
     </div>
   );
 }
 
-/** One drawer destination: 56dp (48dp nested) pill, active indicator in secondary-container. */
-function NavItem({ href, active, onNavigate, icon, nested = false, trailingSpace = false, children }: { href: string; active: boolean; onNavigate?: (() => void) | undefined; icon: ReactNode; nested?: boolean; trailingSpace?: boolean; children: ReactNode }) {
+/** One drawer destination: a compact pill (48dp, 40dp with a fine pointer); the current page in the seed's glass tint. */
+function NavItem({ href, active, onNavigate, icon, children }: { href: string; active: boolean; onNavigate?: (() => void) | undefined; icon: ReactNode; children: ReactNode }) {
   return (
     <a
       href={href}
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
-      className={`md3-state mn-nav-layer flex items-center gap-3 rounded-full ${nested ? "h-12 pl-10 pr-4 text-body-medium" : "h-14 px-4 text-label-large"} ${trailingSpace ? "pr-12" : ""} ${
-        active ? "bg-secondary-container text-on-secondary-container" : "text-on-surface-variant hover:text-on-surface"
+      className={`md3-state mn-nav-layer flex h-12 items-center gap-3 rounded-full px-3 text-label-large lg:h-10 ${
+        active ? "glass-selected text-on-surface" : "text-on-surface-variant hover:text-on-surface"
       }`}
     >
       <span className="flex shrink-0 items-center">{icon}</span>
