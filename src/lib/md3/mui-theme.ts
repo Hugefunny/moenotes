@@ -544,9 +544,14 @@ function components(density: Md3Density): ThemeOptions["components"] {
     MuiToggleButtonGroup: {
       styleOverrides: {
         // MoeSekai's segmented buttons: a surface-container-high trough, the selected segment filled with the seed.
-        root: { borderRadius: shape.md, gap: 2, padding: 4, backgroundColor: c("surface-container-high") },
-        grouped: {
-          "&&": { margin: 0, border: 0, borderRadius: shape.sm },
+        // Every segment keeps its own rounded corners: the doubled class outranks MUI's first / middle / last button
+        // rules, which square the inner corners and pull the borders together.
+        root: {
+          borderRadius: shape.md,
+          gap: 2,
+          padding: 4,
+          backgroundColor: c("surface-container-high"),
+          "& .MuiToggleButtonGroup-grouped.MuiToggleButtonGroup-grouped": { margin: 0, border: 0, borderRadius: shape.sm },
         },
       },
     },
