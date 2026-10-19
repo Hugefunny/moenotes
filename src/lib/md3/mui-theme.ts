@@ -344,13 +344,13 @@ function components(density: Md3Density): ThemeOptions["components"] {
     MuiDialogContentText: { styleOverrides: { root: { color: c("on-surface-variant") } } },
     MuiDialogActions: { styleOverrides: { root: { padding: "0 24px 24px", gap: 8, "& > :not(style) ~ :not(style)": { marginLeft: 0 } } } },
 
-    // ── Menus, popovers, tooltips ──
+    // ── Menus, popovers, tooltips (menus take M3 Expressive's large corners, as MoeSekai's do) ──
     MuiPopover: {
-      styleOverrides: { paper: { borderRadius: shape.xs, backgroundColor: c("surface-container"), boxShadow: elevation(2) } },
+      styleOverrides: { paper: { borderRadius: shape.lg, backgroundColor: c("surface-container"), boxShadow: elevation(2) } },
     },
     MuiMenu: {
       styleOverrides: {
-        paper: { borderRadius: shape.xs, backgroundColor: c("surface-container"), boxShadow: elevation(2), minWidth: 112 },
+        paper: { borderRadius: shape.lg, backgroundColor: c("surface-container"), boxShadow: elevation(2), minWidth: 112 },
         list: { paddingBlock: 8 },
       },
     },
@@ -436,7 +436,13 @@ function components(density: Md3Density): ThemeOptions["components"] {
     MuiTabs: {
       styleOverrides: {
         root: { minHeight: 48, borderBottom: `1px solid ${c("surface-container-highest")}` },
-        indicator: { height: 3, borderRadius: "3px 3px 0 0", backgroundColor: c("primary") },
+        // M3 primary tabs: the indicator spans the tab's content, so it is inset by the tab's padding (exact for tabs
+        // sized to their labels; src/components/shared/PrimaryTabs.tsx measures equal-width tabs).
+        indicator: {
+          height: 3,
+          backgroundColor: "transparent",
+          "&::before": { content: '""', position: "absolute", inset: "0 16px", borderRadius: "3px 3px 0 0", backgroundColor: c("primary") },
+        },
         scrollButtons: { color: c("on-surface-variant"), "&.Mui-disabled": { opacity: 0.38 } },
       },
     },
@@ -620,7 +626,7 @@ function components(density: Md3Density): ThemeOptions["components"] {
     MuiSelect: { defaultProps: { MenuProps: { slotProps: { paper: { elevation: 0 } } } } },
     MuiAutocomplete: {
       styleOverrides: {
-        paper: { borderRadius: shape.xs, backgroundColor: c("surface-container"), boxShadow: elevation(2) },
+        paper: { borderRadius: shape.lg, backgroundColor: c("surface-container"), boxShadow: elevation(2) },
         option: { ...font(TYPE.bodyLarge), minHeight: 48, '&[aria-selected="true"]': { backgroundColor: `${c("secondary-container")} !important` } },
       },
     },

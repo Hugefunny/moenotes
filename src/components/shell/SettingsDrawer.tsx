@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode, type SyntheticEvent } from "react";
+import { useCallback, useEffect, useId, useState, type KeyboardEvent, type ReactNode, type SyntheticEvent } from "react";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -10,6 +10,7 @@ import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { Icon, type IconName } from "@/components/shared/icons";
+import PrimaryTabs, { rovingStep } from "@/components/shared/PrimaryTabs";
 import { withMd3 } from "@/components/md3/Md3Provider";
 import type { AppLocale } from "@/config/locales";
 import { LOCALE_LABELS, SUPPORTED_LOCALES, flagIconSrc } from "@/config/locales";
@@ -70,17 +71,6 @@ const SIDE_SHEET_SX = {
 };
 const BOTTOM_SHEET_SX = { "& > .MuiDrawer-paper": { maxHeight: "92dvh" } };
 
-/**
- * The next index of a roving-focus group (tabs, radios) for an arrow / Home / End key, wrapping around; null for any
- * other key.
- */
-function rovingStep(key: string, index: number, count: number): number | null {
-  if (key === "Home") return 0;
-  if (key === "End") return count - 1;
-  const step = key === "ArrowRight" || key === "ArrowDown" ? 1 : key === "ArrowLeft" || key === "ArrowUp" ? -1 : 0;
-  return step === 0 ? null : (Math.max(index, 0) + step + count) % count;
-}
-
 /** Settings as a Material 3 modal sheet: floating at the side on wide screens, a bottom sheet on phones. */
 function SettingsDrawer({ locale, pathname, bands = [] }: SettingsDrawerProps) {
   const { isOpen, close } = useOverlay("settings");
@@ -127,7 +117,15 @@ function SettingsDrawer({ locale, pathname, bands = [] }: SettingsDrawerProps) {
       ) : (
         <div className="flex h-[72px] shrink-0 items-center gap-2 pl-6 pr-3">{header}</div>
       )}
-      <SettingsTabs locale={locale} idPrefix={id} value={tab} onChange={setTab} />
+      <PrimaryTabs
+        tabs={SETTINGS_TABS.map(({ key, icon }) => ({ value: key, label: t(locale, `settings.tabs.${key}`), icon: <Icon name={icon} /> }))}
+        value={tab}
+        onChange={setTab}
+        label={t(locale, "settings.tabs.label")}
+        tabId={(key) => `${id}-${key}-tab`}
+        panelId={`${id}-panel`}
+        className="shrink-0"
+      />
       <div
         role="tabpanel"
         id={`${id}-panel`}
@@ -139,75 +137,6 @@ function SettingsDrawer({ locale, pathname, bands = [] }: SettingsDrawerProps) {
         </div>
       </div>
     </SwipeableDrawer>
-  );
-}
-
-/**
- * Primary tabs with icons, as MoeSekai sets them: equal widths, 64px tall, the indicator only as wide as the chosen
- * tab's icon and label, sliding from tab to tab.
- */
-function SettingsTabs({ locale, idPrefix, value, onChange }: { locale: AppLocale; idPrefix: string; value: SettingsTab; onChange: (tab: SettingsTab) => void }) {
-  const listRef = useRef<HTMLDivElement>(null);
-  const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null);
-
-  useLayoutEffect(() => {
-    const list = listRef.current;
-    const content = list?.querySelector<HTMLElement>('[aria-selected="true"] [data-tab-content]');
-    if (!list || !content) return;
-    const update = () => {
-      const listRect = list.getBoundingClientRect();
-      const rect = content.getBoundingClientRect();
-      setIndicator({ left: rect.left - listRect.left, width: rect.width });
-    };
-    update();
-    const observer = new ResizeObserver(update);
-    observer.observe(list);
-    observer.observe(content);
-    return () => observer.disconnect();
-  }, [value]);
-
-  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    const next = rovingStep(event.key, SETTINGS_TABS.findIndex((tab) => tab.key === value), SETTINGS_TABS.length);
-    if (next === null) return;
-    event.preventDefault();
-    const tab = SETTINGS_TABS[next]!.key;
-    onChange(tab);
-    listRef.current?.querySelector<HTMLElement>(`[data-tab="${tab}"]`)?.focus();
-  };
-
-  return (
-    <div ref={listRef} role="tablist" aria-label={t(locale, "settings.tabs.label")} onKeyDown={onKeyDown} className="md3-tabs relative shrink-0">
-      {SETTINGS_TABS.map(({ key, icon }) => {
-        const selected = key === value;
-        return (
-          <button
-            key={key}
-            type="button"
-            role="tab"
-            id={`${idPrefix}-${key}-tab`}
-            data-tab={key}
-            aria-selected={selected}
-            aria-controls={`${idPrefix}-panel`}
-            tabIndex={selected ? 0 : -1}
-            onClick={() => onChange(key)}
-            // The tab row scrolls (clips), so the focus ring is drawn inside the tab; the indicator is the span below.
-            className="md3-tab md3-state h-16 flex-1 after:hidden focus-visible:outline-offset-[-3px]"
-          >
-            <span data-tab-content className="flex flex-col items-center gap-1">
-              <Icon name={icon} />
-              {t(locale, `settings.tabs.${key}`)}
-            </span>
-          </button>
-        );
-      })}
-      {indicator && (
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute bottom-0 h-[3px] rounded-t-[3px] bg-primary transition-[left,width] duration-300 ease-emphasized"
-          style={indicator}
-        />
-      )}
-    </div>
   );
 }
 
