@@ -68,13 +68,13 @@ function GachaDetailView({ locale, gacha, serverSwitch, schedules }: { locale: A
   const assetUrl = useAssetUrl();
   const now = useNow();
   const timeZone = useDisplayTimeZone();
+  const { showSpoiler } = useSpoiler();
   const [openPool, setOpenPool] = useState<PoolKind | null>(null);
   const pickupMembers = useMemo(() => new Set(gacha?.pickupMemberIds), [gacha]);
   const pickupSupports = useMemo(() => new Set(gacha?.pickupSupportIds), [gacha]);
 
   if (!gacha) return <NotFound locale={locale} />;
 
-  const { showSpoiler } = useSpoiler();
   const isUnreleased = Boolean(now !== null && scheduleStatus(gacha.startAt, gacha.endAt, now) === "upcoming");
   if (isUnreleased && !showSpoiler) {
     return <SpoilerNotice locale={locale} />;
