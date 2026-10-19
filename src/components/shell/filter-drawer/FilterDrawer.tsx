@@ -10,9 +10,10 @@ import { safeGetSessionStorage, safeSetSessionStorage } from "@/lib/storage/safe
 
 export const FILTER_DRAWER_ID = "filter-drawer";
 
-/** Left edge of the content column: past the layout's side gutter and the docked navigation drawer. */
-export const FILTER_DOCK_LEFT = "calc(max(0px, (100vw - var(--mn-layout-max-width, 120rem)) / 2) + var(--mn-sidebar-offset, 17rem))";
-/** Width of the docked filter sheet; the content shifts by --mn-filter-offset (src/lib/filter/quick-filter-store.ts). */
+/** Left edge of the content column: past the layout's side gutter and the docked navigation drawer, or with that drawer
+ * folded away, inset from the window as the drawer is (src/components/shell/Sidebar.tsx). */
+export const FILTER_DOCK_LEFT = "calc(max(0px, (100vw - var(--mn-layout-max-width, 120rem)) / 2) + max(var(--mn-sidebar-offset, 17rem), 0.75rem))";
+/** Width of the docked filter sheet; the content shifts by --mn-filter-offset (src/styles/tokens.css). */
 export const FILTER_SHEET_WIDTH = "20rem";
 
 interface FilterDrawerProps {
