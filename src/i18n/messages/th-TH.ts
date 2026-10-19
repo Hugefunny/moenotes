@@ -1644,9 +1644,6 @@ export const thTH = {
     expand: "ขยาย",
     count: "{filtered} / {total}",
     openQuickFilter: "เปิดตัวกรอง",
-    drawerHintTitle: "ย้ายตัวกรองไปไว้ที่แถบด้านข้างแล้ว",
-    drawerHintBody: "คลิกแท็บทางด้านซ้ายเพื่อเปิดหรือซ่อนตัวกรองได้ตลอดเวลา",
-    drawerHintDismiss: "เข้าใจแล้ว"
   },
   browserNotice: {
     title: "เบราว์เซอร์นี้อาจแสดงผลเว็บไซต์ได้ไม่สมบูรณ์",

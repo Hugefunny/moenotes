@@ -24,7 +24,7 @@ export default function FilterTabHandle({ locale }: FilterTabHandleProps) {
     <Zoom in={visible} unmountOnExit>
       <Fab
         variant="extended"
-        color="secondary"
+        color="primary"
         onClick={toggle}
         aria-controls={FILTER_DRAWER_ID}
         aria-expanded={isOpen}

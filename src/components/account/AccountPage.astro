@@ -17,6 +17,6 @@ const [bands, cards] = await Promise.all([getAvatarBands(locale), getProfileCard
 ---
 
 <PageLayout locale={locale} titleKey="account.title" descriptionKey="account.description">
-  <a href={localizePath(getRoutePathById("card-box"), locale)} class="inline-flex mb-5 rounded-shape-md border border-outline-variant px-4 py-2 font-semibold text-primary">{t(locale, "deckWorkspace.boxTitle")}</a>
+  <a href={localizePath(getRoutePathById("card-box"), locale)} class="md3-button md3-button--outlined mb-5">{t(locale, "deckWorkspace.boxTitle")}</a>
   <AccountPanel client:load locale={locale} bands={bands} cards={cards} />
 </PageLayout>

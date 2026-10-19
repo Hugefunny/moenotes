@@ -20,8 +20,11 @@ describe("material 3 shell", () => {
 
     const landing = buildHeaderCrumbs("/database", "en-US");
     expect(landing.at(-1)!.picker).toBe(true);
+    expect(landing.at(-1)!.current).toBe(false);
     expect(landing.at(-1)!.options.length).toBeGreaterThan(0);
-    expect(landing.at(-2)!.current).toBe(false);
+    expect(landing.at(-2)!.current).toBe(true);
+    // The picker is named by its visible text, not an icon.
+    expect(renderToString(<TopAppBar locale="en-US" homeHref="/en" crumbs={landing} />)).toContain(">Choose a page<");
   });
 
   test("the top app bar renders the trail, localized labels and the actions", () => {
@@ -42,7 +45,7 @@ describe("material 3 shell", () => {
     const html = renderToString(<Sidebar locale="en-US" pathname="/cards" />);
     const current = html.match(/<a [^>]*aria-current="page"[^>]*>/g) ?? [];
     expect(current.length).toBe(1);
-    expect(current[0]).toContain("bg-secondary-container");
+    expect(current[0]).toContain("glass-selected");
     expect(html).toContain('aria-label="Main navigation"');
   });
 

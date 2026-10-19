@@ -44,9 +44,9 @@ export default function HomeLayoutEditor({ locale }: Props) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 rounded-full border border-outline-variant bg-surface-container-low px-3 py-1.5 text-label-medium text-on-surface-variant hover:border-primary hover:bg-secondary-container hover:text-primary"
+        className="md3-button md3-button--outlined md3-button--small"
       >
-        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" /><circle cx="16" cy="6" r="2" /><circle cx="10" cy="12" r="2" /><circle cx="18" cy="18" r="2" /></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" /><circle cx="16" cy="6" r="2" /><circle cx="10" cy="12" r="2" /><circle cx="18" cy="18" r="2" /></svg>
         {t(locale, "home.layout.customize")}
       </button>
       <Modal isOpen={open} onClose={() => setOpen(false)} title={t(locale, "home.layout.title")} closeLabel={t(locale, "actions.close")} size="sm">
@@ -70,7 +70,7 @@ export default function HomeLayoutEditor({ locale }: Props) {
             type="button"
             disabled={isDefaultHomeLayout(layout)}
             onClick={() => update(defaultHomeLayout())}
-            className="rounded-full border border-outline-variant bg-surface-container-low px-4 py-2 text-label-large text-on-surface hover:bg-surface-container-highest disabled:cursor-not-allowed disabled:opacity-50"
+            className="md3-button md3-button--outlined"
           >
             {t(locale, "home.layout.reset")}
           </button>
@@ -90,7 +90,7 @@ function ModuleRow({ locale, id, hidden, first, last, onMove, onToggle }: {
   onToggle: () => void;
 }) {
   const name = t(locale, `home.layout.modules.${id}`);
-  const arrow = " grid h-8 w-8 place-items-center rounded-full border border-outline-variant bg-surface-container-low text-on-surface-variant hover:border-primary hover:text-primary disabled:opacity-30";
+  const arrow = "md3-icon-button md3-icon-button--outlined md3-icon-button--small";
   return (
     <li className={`flex items-center gap-2 rounded-shape-lg border border-outline-variant px-3 py-2 ${hidden ? "bg-surface-container-highest" : "bg-surface-container-high"}`}>
       <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-3">
@@ -98,10 +98,10 @@ function ModuleRow({ locale, id, hidden, first, last, onMove, onToggle }: {
         <span className={`truncate text-label-large ${hidden ? "text-on-surface-variant line-through" : "text-on-surface"}`}>{name}</span>
       </label>
       <button type="button" className={arrow} disabled={first} onClick={() => onMove(-1)} aria-label={t(locale, "home.layout.moveUp", { name })} title={t(locale, "home.layout.moveUp", { name })}>
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6" /></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6" /></svg>
       </button>
       <button type="button" className={arrow} disabled={last} onClick={() => onMove(1)} aria-label={t(locale, "home.layout.moveDown", { name })} title={t(locale, "home.layout.moveDown", { name })}>
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
       </button>
     </li>
   );

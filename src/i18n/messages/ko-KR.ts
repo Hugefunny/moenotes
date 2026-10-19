@@ -2954,11 +2954,9 @@ export const koKR = {
     reset: "필터 초기화",
     collapse: "접기",
     expand: "펼치기",
-    count: "{filtered} / {total}",
+    count: "{total}개 중 {filtered}개",
+    total: "{total}개",
     openQuickFilter: "필터 열기",
-    drawerHintTitle: "필터가 사이드로 이동했습니다",
-    drawerHintBody: "필터 버튼으로 언제든 필터를 열거나 접을 수 있습니다.",
-    drawerHintDismiss: "확인",
     dateRange: "기간", dateFrom: "시작", dateTo: "종료", dateClear: "지우기",
   },
   browserNotice: {
@@ -3092,7 +3090,7 @@ export const koKR = {
   },
   // ── W1 foundation ──
   audio: { play: "재생", pause: "일시정지", loading: "불러오는 중", retry: "재생 실패, 다시 시도", previous: "이전 곡", next: "다음 곡", modes: { sequential: "순서대로 재생", "repeat-all": "전체 반복", "repeat-one": "한 곡 반복", shuffle: "셔플" }, dock: { label: "오디오 플레이어", seek: "재생 위치", volume: "음량", mute: "음소거", unmute: "음소거 해제", queue: "재생 대기열", queueEmpty: "대기열이 비어 있습니다.", remove: "대기열에서 {title} 제거", close: "플레이어 닫기", mode: "재생 모드: {mode}", expand: "대기열 보기", collapse: "대기열 숨기기" } },
-  lightbox: { label: "이미지 뷰어", counter: "{current} / {total}", previous: "이전 이미지", next: "다음 이미지", zoomIn: "확대", zoomOut: "축소", reset: "확대 초기화", download: "다운로드", close: "닫기", loading: "이미지를 불러오는 중…", failed: "이미지를 불러올 수 없습니다" },
+  lightbox: { label: "이미지 뷰어", images: "이미지", open: "{name} 크게 보기", counter: "{current} / {total}", previous: "이전 이미지", next: "다음 이미지", zoomIn: "확대", zoomOut: "축소", reset: "확대 초기화", download: "다운로드", close: "닫기", loading: "이미지를 불러오는 중…", failed: "이미지를 불러올 수 없습니다" },
   detailNav: { label: "항목 탐색", previous: "이전", next: "다음", backToList: "목록으로" },
   collectionView: { label: "보기 방식", grid: "그리드", list: "목록", table: "표", card: "카드", square: "아이콘", nameSeparator: ", " },
   // ── pack G ──

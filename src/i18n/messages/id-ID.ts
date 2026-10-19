@@ -1651,9 +1651,6 @@ export const idID = {
     expand: "Bentangkan",
     count: "{filtered} / {total}",
     openQuickFilter: "Buka filter",
-    drawerHintTitle: "Filter dipindahkan ke samping",
-    drawerHintBody: "Klik tab di sebelah kiri untuk membuka atau menutup filter kapan saja.",
-    drawerHintDismiss: "Mengerti"
   },
   browserNotice: {
     title: "Browser ini mungkin tidak menampilkan situs dengan benar",

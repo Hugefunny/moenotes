@@ -2999,11 +2999,9 @@ export const jaJP = {
     reset: "フィルターをリセット",
     collapse: "折りたたむ",
     expand: "展開",
-    count: "{filtered} / {total}",
+    count: "{total} 件中 {filtered} 件",
+    total: "{total} 件",
     openQuickFilter: "フィルターを開く",
-    drawerHintTitle: "フィルターがサイドに移動しました",
-    drawerHintBody: "「フィルター」ボタンでいつでもフィルターを開いたり閉じたりできます。",
-    drawerHintDismiss: "了解",
     dateRange: "期間", dateFrom: "開始", dateTo: "終了", dateClear: "クリア",
   },
   browserNotice: {
@@ -3137,7 +3135,7 @@ export const jaJP = {
   },
   // ── W1 foundation ──
   audio: { play: "再生", pause: "一時停止", loading: "読み込み中", retry: "再生に失敗しました。再試行", previous: "前の曲", next: "次の曲", modes: { sequential: "順番に再生", "repeat-all": "全曲リピート", "repeat-one": "1曲リピート", shuffle: "シャッフル" }, dock: { label: "オーディオプレーヤー", seek: "再生位置", volume: "音量", mute: "ミュート", unmute: "ミュート解除", queue: "再生キュー", queueEmpty: "キューは空です。", remove: "{title} をキューから削除", close: "プレーヤーを閉じる", mode: "再生モード：{mode}", expand: "キューを表示", collapse: "キューを隠す" } },
-  lightbox: { label: "画像ビューアー", counter: "{current} / {total}", previous: "前の画像", next: "次の画像", zoomIn: "拡大", zoomOut: "縮小", reset: "ズームをリセット", download: "ダウンロード", close: "閉じる", loading: "画像を読み込み中…", failed: "画像を読み込めませんでした" },
+  lightbox: { label: "画像ビューアー", images: "画像", open: "{name}を拡大表示", counter: "{current} / {total}", previous: "前の画像", next: "次の画像", zoomIn: "拡大", zoomOut: "縮小", reset: "ズームをリセット", download: "ダウンロード", close: "閉じる", loading: "画像を読み込み中…", failed: "画像を読み込めませんでした" },
   detailNav: { label: "項目ナビゲーション", previous: "前へ", next: "次へ", backToList: "一覧に戻る" },
   collectionView: { label: "表示", grid: "グリッド", list: "リスト", table: "テーブル", card: "カード", square: "アイコン", nameSeparator: "、" },
   // ── pack G ──

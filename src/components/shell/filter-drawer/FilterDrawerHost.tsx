@@ -3,7 +3,6 @@ import { withMd3 } from "@/components/md3/Md3Provider";
 import type { AppLocale } from "@/config/locales";
 import FilterDrawer from "./FilterDrawer";
 import FilterTabHandle from "./FilterTabHandle";
-import FilterDrawerGuide from "./FilterDrawerGuide";
 
 interface FilterDrawerHostProps {
   locale: AppLocale;
@@ -40,7 +39,6 @@ function FilterDrawerHost({ locale, pathname }: FilterDrawerHostProps) {
     <FilterErrorBoundary>
       <FilterDrawer locale={locale} pathname={pathname} />
       <FilterTabHandle locale={locale} />
-      <FilterDrawerGuide locale={locale} />
     </FilterErrorBoundary>
   );
 }

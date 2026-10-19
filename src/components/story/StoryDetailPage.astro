@@ -10,7 +10,7 @@ const { locale, advId } = Astro.props;
 const [detail, servers] = await Promise.all([getBuildStoryDetail(locale, advId), getBuildServers()]);
 ---
 
-<PageLayout locale={locale} titleKey="seo.storyDetail.title" descriptionKey="seo.storyDetail.description">
+<PageLayout locale={locale} titleKey="seo.storyDetail.title" descriptionKey="seo.storyDetail.description" hideHeader>
   <StoryDetail
     client:load
     locale={locale}

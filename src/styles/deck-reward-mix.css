@@ -71,7 +71,8 @@
 .dc-composer .rm-mix .rm-rate input[type="number"]:focus { border-color: var(--rm-color); }
 .dc-composer .rm-mix .rm-rate input[type="number"][aria-invalid="true"] { border-color: var(--md-sys-color-error); background: color-mix(in oklab, var(--md-sys-color-error) 6%, var(--md-sys-color-surface-container-low)); }
 .rm-tie { grid-template-columns: minmax(0, 1fr) auto; align-items: center; color: var(--md-sys-color-on-surface-variant); font-size: 12px; line-height: 1.5; }
-.dc-composer .rm-mix .rm-tie button { min-height: 30px; padding: 4px 10px; font-size: 12px; white-space: nowrap; }
+/* A small outlined button (the workspace's MD3 action button, deck-workspace.css) */
+.dc-composer .rm-mix .rm-tie button { --dw-button-height: 32px; padding: 0 12px; white-space: nowrap; }
 
 .dc-composer .rm-formula, .rm-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; margin: 0; }
 .dc-composer .rm-formula { padding: 9px 10px; border-radius: 11px; background: var(--dc-tint); }

@@ -90,7 +90,7 @@ function SliderSwitch({ label, value, options, formatOption = String, formatValu
           <path d="M12 5v14M5 12h14" />
         </RoundButton>
         {maxLabel ? (
-          <button type="button" disabled={index >= last} onClick={() => pick(last)} className="md3-state h-10 shrink-0 rounded-full px-3 text-label-large text-primary disabled:text-on-surface/40">
+          <button type="button" disabled={index >= last} onClick={() => pick(last)} className="md3-button md3-button--text">
             {maxLabel}
           </button>
         ) : null}
@@ -108,9 +108,9 @@ export function RoundButton({ label, disabled, onClick, children }: { label: str
       title={label}
       disabled={disabled}
       onClick={onClick}
-      className="md3-state grid h-10 w-10 shrink-0 place-items-center rounded-full bg-secondary-container text-on-secondary-container disabled:bg-on-surface/10 disabled:text-on-surface/40"
+      className="md3-icon-button md3-icon-button--tonal"
     >
-      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true">
         {children}
       </svg>
     </button>

@@ -1663,9 +1663,6 @@ export const esES = {
     expand: "Expandir",
     count: "{filtered} / {total}",
     openQuickFilter: "Abrir filtros",
-    drawerHintTitle: "Filtros en la barra lateral",
-    drawerHintBody: "Haz clic en la pestaña de la izquierda para desplegar o contraer los filtros en cualquier momento.",
-    drawerHintDismiss: "Entendido"
   },
   browserNotice: {
     title: "Este navegador podría no mostrar el sitio correctamente",

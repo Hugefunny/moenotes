@@ -57,17 +57,26 @@ export const MD3_BASE_ROLES = [
   "shadow",
 ] as const;
 
-/** Extended color groups harmonized toward the seed (M3 "custom colors"): color / on / container / on-container. */
-export const MD3_EXTENDED_GROUPS = ["success", "warning", "category1", "category2", "category3", "category4", "category5"] as const;
+/** Category hues for tags and charts, harmonized toward the seed. */
+export const MD3_CATEGORY_GROUPS = ["category1", "category2", "category3", "category4", "category5"] as const;
 
-export type Md3ExtendedGroup = (typeof MD3_EXTENDED_GROUPS)[number];
+export type Md3CategoryGroup = (typeof MD3_CATEGORY_GROUPS)[number];
+
+/** Extended color groups (M3 "custom colors"): color / on / container / on-container. Status colors keep fixed hues. */
+export const MD3_EXTENDED_GROUPS = ["success", "warning", ...MD3_CATEGORY_GROUPS] as const;
 
 export const MD3_EXTENDED_ROLES = MD3_EXTENDED_GROUPS.flatMap((group) => {
   const cap = group.charAt(0).toUpperCase() + group.slice(1);
   return [group, `on${cap}`, `${group}Container`, `on${cap}Container`];
 });
 
-export const MD3_ROLES: readonly string[] = [...MD3_BASE_ROLES, ...MD3_EXTENDED_ROLES];
+/**
+ * Beyond M3: the card surface (white on the light page, a step above it in dark mode) and the highlighter ink under
+ * page titles (`.mn-brand-mark`), the seed thinned until on-surface text over it reads.
+ */
+export const MD3_SURFACE_ROLES = ["surfaceCard", "brandMark"] as const;
+
+export const MD3_ROLES: readonly string[] = [...MD3_BASE_ROLES, ...MD3_EXTENDED_ROLES, ...MD3_SURFACE_ROLES];
 
 export type Md3BaseRole = (typeof MD3_BASE_ROLES)[number];
 

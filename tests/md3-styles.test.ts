@@ -19,7 +19,8 @@ describe("material 3 stylesheets", () => {
     expect(tokens).toMatch(/--md-ref-typeface-brand:\s*var\(--mn-font-display\)/);
     expect(tokens).toMatch(/--md-ref-typeface-plain:\s*var\(--mn-font-body\)/);
     const base = readFileSync("src/styles/tokens.css", "utf8");
-    expect(base).toMatch(/--mn-font-display:\s*"Inter"/);
-    expect(base).toMatch(/--mn-font-body:\s*"Inter"/);
+    expect(base).toMatch(/--mn-font-latin:\s*"Roboto Flex Variable"/);
+    expect(base).toMatch(/--mn-font-display:\s*var\(--mn-font-latin\), var\(--mn-font-cjk\)/);
+    expect(base).toMatch(/--mn-font-body:\s*var\(--mn-font-latin\), var\(--mn-font-cjk\)/);
   });
 });

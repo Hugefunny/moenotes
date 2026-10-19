@@ -100,8 +100,7 @@ export default function SnapPairedMemberControls({ locale, members, value, onCha
           {picker.sorted.length === 0 ? (
             <div className="md3-surface p-8 text-center">
               <p className="font-[var(--md-ref-typeface-brand)] text-lg text-[var(--md-sys-color-on-surface)]">{tr("memberEmpty")}</p>
-              <button type="button" onClick={picker.reset}
-                className="md3-state mt-4 rounded-full border-[1.5px] border-[var(--md-sys-color-outline-variant)] bg-[var(--md-sys-color-surface-container-low)] px-5 py-2 text-xs font-bold text-[var(--md-sys-color-on-surface)] shadow-[var(--md-sys-elevation-level1)]">
+              <button type="button" onClick={picker.reset} className="md3-button md3-button--outlined mt-4">
                 {t(locale, "filter.reset")}
               </button>
             </div>

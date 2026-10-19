@@ -158,6 +158,15 @@ describe("week layout", () => {
     expect(layout.laneCount).toBe(2);
   });
 
+  test("a rank lets short items keep rows that week-long ones would take", () => {
+    // Three bars that run all week and one event on Wednesday: by length the event is hidden, by rank it shows.
+    const items = [span("pass", "2026-09-01", "2026-10-31"), span("bonus", "2026-09-01", "2026-10-31"), span("mission", "2026-09-01", "2026-10-31"), span("event", "2026-10-07", "2026-10-07")];
+    expect(layoutWeekLimited(items, week, 3).visible.some((segment) => segment.item.id === "event")).toBe(false);
+    const ranked = layoutWeekLimited(items, week, 3, (item) => (item.id === "event" ? 0 : 1));
+    expect(ranked.visible.find((segment) => segment.item.id === "event")?.lane).toBe(0);
+    expect(ranked.hiddenByColumn[3]).toBe(2);
+  });
+
   test("days with exactly the limit show every bar", () => {
     const items = [span("a", "2026-10-05", "2026-10-05"), span("b", "2026-10-05", "2026-10-05"), span("c", "2026-10-05", "2026-10-05")];
     const layout = layoutWeekLimited(items, week, 3);

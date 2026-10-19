@@ -1654,9 +1654,6 @@ export const viVN = {
     expand: "Mở rộng",
     count: "{filtered} / {total}",
     openQuickFilter: "Mở bộ lọc",
-    drawerHintTitle: "Bộ lọc đã chuyển sang thanh bên",
-    drawerHintBody: "Nhấp vào tab bên trái để mở hoặc thu gọn bộ lọc bất cứ lúc nào.",
-    drawerHintDismiss: "Đã hiểu"
   },
   browserNotice: {
     title: "Trình duyệt này có thể không hiển thị đúng trang web",

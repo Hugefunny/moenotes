@@ -6,34 +6,34 @@
   .md3-card-filled { border-radius: var(--md-sys-shape-corner-medium); background: var(--md-sys-color-surface-container-highest); color: var(--md-sys-color-on-surface); }
   .md3-card-elevated { border-radius: var(--md-sys-shape-corner-medium); background: var(--md-sys-color-surface-container-low); color: var(--md-sys-color-on-surface); box-shadow: var(--md-sys-elevation-level1); }
   .md3-card-outlined { border-radius: var(--md-sys-shape-corner-medium); border: 1px solid var(--md-sys-color-outline-variant); background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); }
-  /* A section panel on the page: tonal, no outline (M3 surface-container-low). */
-  .md3-surface { position: relative; border-radius: var(--md-sys-shape-corner-large); background: var(--md-sys-color-surface-container-low); color: var(--md-sys-color-on-surface); }
+  /* A section panel on the page: the card surface (white on the light page, a step above it in dark mode) with a
+     hairline, so panels separate from the background without a stack of near-identical greys. */
+  .md3-surface { position: relative; border-radius: var(--md-sys-shape-corner-large); border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 70%, transparent); background: var(--md-sys-color-surface-card); color: var(--md-sys-color-on-surface); }
 
   /* ── State layer: hover / focus / pressed overlay in the content color (M3 interaction states) ── */
   .md3-state { position: relative; isolation: isolate; }
-  .md3-state::before {
+  :is(.md3-state, .md3-button, .md3-icon-button)::before {
     content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: currentColor; opacity: 0;
     pointer-events: none; transition: opacity var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
   }
-  @media (hover: hover) { .md3-state:hover::before { opacity: var(--md-sys-state-hover-opacity); } }
-  .md3-state:focus-visible::before, .md3-state:active::before { opacity: var(--md-sys-state-pressed-opacity); }
-  .md3-state:disabled::before, .md3-state[aria-disabled="true"]::before { opacity: 0; }
+  @media (hover: hover) { :is(.md3-state, .md3-button, .md3-icon-button):hover::before { opacity: var(--md-sys-state-hover-opacity); } }
+  :is(.md3-state, .md3-button, .md3-icon-button):is(:focus-visible, :active)::before { opacity: var(--md-sys-state-pressed-opacity); }
+  :is(.md3-state, .md3-button, .md3-icon-button):is(:disabled, [aria-disabled="true"])::before { opacity: 0; }
 
-  /* ── List card: an item of a browse grid (cards, songs, events…). Filled M3 card; elevation on hover. ── */
+  /* ── List card: an item of a browse grid (cards, songs, events…). The card surface with a hairline; lifts on hover. ── */
   .md3-list-card,
   .mn-list-card {
     position: relative;
     border-radius: var(--md-sys-shape-corner-medium);
-    background-color: var(--md-sys-color-surface-container-low);
+    background-color: var(--md-sys-color-surface-card);
     color: var(--md-sys-color-on-surface);
-    border: 1px solid var(--md-sys-color-outline-variant);
+    border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 70%, transparent);
     transition: box-shadow var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard), background-color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard), border-color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
   }
   @media (hover: hover) {
     :is(a, button, [role="button"]):is(.md3-list-card, .mn-list-card):hover,
     :is(.md3-list-card, .mn-list-card):has(> a:hover) {
-      background-color: var(--md-sys-color-surface-container);
-      box-shadow: var(--md-sys-elevation-level1);
+      box-shadow: var(--md-sys-elevation-level2);
     }
   }
   :is(.md3-list-card, .mn-list-card):focus-visible { outline: 3px solid var(--md-sys-color-secondary); outline-offset: 2px; }
@@ -42,15 +42,17 @@
   .mn-list-caption { border-radius: var(--md-sys-shape-corner-small); }
 
   /* ── Headings (M3 type scale; no decoration) ── */
-  .md3-page-heading { margin: 0 0 24px; padding: 8px 0 0; }
-  .md3-page-heading h1 { min-width: 0; margin: 0; font-family: var(--md-ref-typeface-brand); font-size: var(--md-sys-typescale-headline-large-size); line-height: var(--md-sys-typescale-headline-large-line-height); font-weight: 400; color: var(--md-sys-color-on-surface); overflow-wrap: anywhere; }
-  .md3-page-heading p { max-width: 76ch; margin: 8px 0 0; color: var(--md-sys-color-on-surface-variant); font-size: var(--md-sys-typescale-body-large-size); line-height: var(--md-sys-typescale-body-large-line-height); letter-spacing: var(--md-sys-typescale-body-large-tracking); }
+  /* Page header, as MoeSekai sets it: a compact title row and one line of description, so the content stays above the
+     fold. */
+  .md3-page-heading { margin: 0 0 24px; }
+  .md3-page-heading h1 { min-width: 0; margin: 0; font-family: var(--md-ref-typeface-brand); font-size: var(--md-sys-typescale-headline-medium-size); line-height: var(--md-sys-typescale-headline-medium-line-height); font-weight: var(--md-sys-typescale-weight-semibold); color: var(--md-sys-color-on-surface); overflow-wrap: anywhere; }
+  .md3-page-heading p { max-width: 48rem; margin: 4px 0 0; color: var(--md-sys-color-on-surface-variant); font-size: var(--md-sys-typescale-body-medium-size); line-height: var(--md-sys-typescale-body-medium-line-height); letter-spacing: var(--md-sys-typescale-body-medium-tracking); }
   @media (max-width: 600px) {
-    .md3-page-heading h1 { font-size: var(--md-sys-typescale-headline-medium-size); line-height: var(--md-sys-typescale-headline-medium-line-height); }
-    .md3-page-heading p { font-size: var(--md-sys-typescale-body-medium-size); line-height: var(--md-sys-typescale-body-medium-line-height); }
+    .md3-page-heading { margin-bottom: 16px; }
+    .md3-page-heading h1 { font-size: var(--md-sys-typescale-headline-small-size); line-height: var(--md-sys-typescale-headline-small-line-height); }
   }
   .md3-section-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 16px; min-width: 0; }
-  .md3-section-heading h2 { flex: 1 1 auto; min-width: 0; margin: 0; font-family: var(--md-ref-typeface-brand); font-size: var(--md-sys-typescale-title-large-size); line-height: var(--md-sys-typescale-title-large-line-height); font-weight: 400; color: var(--md-sys-color-on-surface); overflow-wrap: anywhere; }
+  .md3-section-heading h2 { flex: 1 1 auto; min-width: 0; margin: 0; font-family: var(--md-ref-typeface-brand); font-size: var(--md-sys-typescale-title-large-size); line-height: var(--md-sys-typescale-title-large-line-height); font-weight: var(--md-sys-typescale-weight-semibold); color: var(--md-sys-color-on-surface); overflow-wrap: anywhere; }
 
   /* ── Placeholder art (missing banners/thumbnails): a tonal tile instead of the old orbit texture ── */
   .md3-placeholder {
@@ -65,18 +67,18 @@
     background-size: 16px 16px;
   }
 
-  /* ── Filter chip (M3): outlined small shape; selected fills with secondary-container ── */
+  /* ── Filter chip (M3), as MoeSekai fills it: solid surface-container-high (a panel of outlined boxes reads flat), and
+        the seed's solid primary-container when selected ── */
   .md3-filter-chip {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    min-height: 32px; padding: 0 16px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: var(--md-sys-shape-corner-small);
-    background: transparent; color: var(--md-sys-color-on-surface-variant);
+    min-height: 32px; padding: 0 16px; border: 0; border-radius: var(--md-sys-shape-corner-small);
+    background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface-variant);
     font: inherit; font-size: var(--md-sys-typescale-label-large-size); line-height: var(--md-sys-typescale-label-large-line-height); letter-spacing: var(--md-sys-typescale-label-large-tracking); font-weight: 500;
     cursor: pointer; transition: background-color var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard), color var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
   }
-  .md3-filter-chip[aria-pressed="true"] { padding-left: 8px; border-color: transparent; background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
-  .md3-filter-chip:disabled { cursor: default; color: rgb(var(--md-sys-color-on-surface-rgb) / 0.38); border-color: rgb(var(--md-sys-color-on-surface-rgb) / 0.12); }
+  .md3-filter-chip[aria-pressed="true"] { background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); }
+  .md3-filter-chip:disabled { cursor: default; color: rgb(var(--md-sys-color-on-surface-rgb) / 0.38); background: rgb(var(--md-sys-color-on-surface-rgb) / 0.12); }
   html[data-density="compact"] .md3-filter-chip { min-height: 28px; padding-inline: 12px; }
-  html[data-density="compact"] .md3-filter-chip[aria-pressed="true"] { padding-left: 6px; }
 
   /* ── Outlined text field (M3) for plain inputs (search boxes in filter panels) ── */
   .md3-text-field {
@@ -106,21 +108,64 @@
   .md3-switch--on { border-color: var(--md-sys-color-primary); background: var(--md-sys-color-primary); }
   .md3-switch--on .md3-switch__thumb { width: 24px; height: 24px; transform: translateX(16px); background: var(--md-sys-color-on-primary); color: var(--md-sys-color-on-primary-container); }
 
-  /* ── Segmented buttons (M3): outlined full-shape group; the selected segment fills with secondary-container and
-        leads with a check. Use with aria-pressed buttons inside role="group". ── */
-  .md3-segmented { display: inline-flex; flex-wrap: wrap; max-width: 100%; border: 1px solid var(--md-sys-color-outline); border-radius: var(--md-sys-shape-corner-full); overflow: hidden; }
+  /* ── Segmented buttons, as MoeSekai draws them: a surface-container-high trough, the selected segment filled with the
+        seed's primary-container. Use with aria-pressed buttons inside role="group". ── */
+  .md3-segmented { display: inline-flex; flex-wrap: wrap; gap: 2px; max-width: 100%; padding: 4px; border-radius: var(--md-sys-shape-corner-medium); background: var(--md-sys-color-surface-container-high); }
   .md3-segment {
-    display: inline-flex; flex: 1 0 auto; align-items: center; justify-content: center; gap: 8px; min-width: 48px; min-height: 40px; padding: 0 12px;
-    border: 0; border-inline-start: 1px solid var(--md-sys-color-outline); background: transparent; color: var(--md-sys-color-on-surface);
+    position: relative; display: inline-flex; flex: 1 0 auto; align-items: center; justify-content: center; gap: 6px; min-width: 40px; min-height: 32px; padding: 0 12px;
+    border: 0; border-radius: var(--md-sys-shape-corner-small); background: transparent; color: var(--md-sys-color-on-surface-variant);
     font: inherit; font-size: var(--md-sys-typescale-label-large-size); line-height: var(--md-sys-typescale-label-large-line-height); font-weight: 500; letter-spacing: var(--md-sys-typescale-label-large-tracking);
     cursor: pointer; transition: background-color var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
   }
-  .md3-segment:first-child { border-inline-start: 0; }
-  .md3-segment[aria-pressed="true"], .md3-segment[aria-checked="true"], .md3-segment[aria-selected="true"], .md3-segment[aria-current="page"] { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
+  .md3-segment[aria-pressed="true"], .md3-segment[aria-checked="true"], .md3-segment[aria-selected="true"], .md3-segment[aria-current="page"] { background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); }
   .md3-segment[aria-pressed="true"]::after { content: none; }
   .md3-segment:disabled { cursor: default; color: rgb(var(--md-sys-color-on-surface-rgb) / 0.38); }
   .md3-segment svg { width: 18px; height: 18px; flex-shrink: 0; }
-  html[data-density="compact"] .md3-segment { min-height: 32px; padding: 0 10px; }
+  html[data-density="compact"] .md3-segment { min-height: 28px; padding: 0 10px; }
+
+  /* ── Buttons outside MUI, as MoeSekai draws them (MUI's match in src/lib/md3/mui-theme.ts): 40px tall, round, the
+        corners tightening while a filled one is pressed. `md3-button` holds a label (and an svg), `md3-icon-button` an
+        svg alone. Fill: --filled (the main action), --tonal (secondary-container), --outlined, --text; an icon button
+        without one is standard. --small is 32px. A toggle sets aria-pressed, and its selected state squares the
+        corners and takes a stronger fill. ── */
+  .md3-button, .md3-icon-button {
+    position: relative; isolation: isolate; display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; gap: 8px;
+    height: 40px; border: 0; border-radius: 20px; background: transparent; color: var(--md-sys-color-primary);
+    font: inherit; font-size: var(--md-sys-typescale-label-large-size); line-height: var(--md-sys-typescale-label-large-line-height); font-weight: 500; letter-spacing: var(--md-sys-typescale-label-large-tracking);
+    white-space: nowrap; text-decoration: none; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
+    transition: border-radius var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard), background-color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard), box-shadow var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard), color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+  }
+  .md3-button { padding: 0 16px; }
+  .md3-button svg { width: 20px; height: 20px; flex-shrink: 0; }
+  .md3-icon-button { width: 40px; padding: 0; color: var(--md-sys-color-on-surface-variant); }
+  .md3-icon-button svg { width: 24px; height: 24px; flex-shrink: 0; }
+  .md3-button--small, .md3-icon-button--small { height: 32px; border-radius: 16px; }
+  .md3-button--small { gap: 6px; padding: 0 12px; }
+  .md3-button--small svg { width: 18px; height: 18px; }
+  .md3-icon-button--small { width: 32px; }
+  .md3-icon-button--small svg { width: 20px; height: 20px; }
+
+  .md3-button--filled, .md3-icon-button--filled { background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
+  .md3-button--tonal, .md3-icon-button--tonal { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
+  .md3-button--outlined, .md3-icon-button--outlined { border: 1px solid var(--md-sys-color-outline-variant); }
+  .md3-button--outlined { color: var(--md-sys-color-on-surface); }
+  .md3-button--text { padding-inline: 12px; }
+  @media (hover: hover) {
+    :is(.md3-button--filled, .md3-button--tonal, .md3-icon-button--filled, .md3-icon-button--tonal):hover:not(:disabled, [aria-disabled="true"]) { box-shadow: var(--md-sys-elevation-level1); }
+  }
+  :is(.md3-button--filled, .md3-button--tonal, .md3-button--outlined, .md3-icon-button--filled, .md3-icon-button--tonal, .md3-icon-button--outlined):active:not(:disabled, [aria-disabled="true"]) { border-radius: var(--md-sys-shape-corner-small); box-shadow: none; }
+
+  :is(.md3-button, .md3-icon-button)[aria-pressed="true"] { border-radius: var(--md-sys-shape-corner-medium); }
+  .md3-icon-button[aria-pressed="true"] { color: var(--md-sys-color-primary); }
+  .md3-button--tonal[aria-pressed="true"] { background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
+  .md3-icon-button--tonal[aria-pressed="true"] { background: var(--md-sys-color-secondary); color: var(--md-sys-color-on-secondary); }
+  .md3-icon-button--filled[aria-pressed="true"] { color: var(--md-sys-color-on-primary); }
+  .md3-icon-button--filled[aria-pressed="false"] { background: var(--md-sys-color-surface-container); color: var(--md-sys-color-primary); }
+  :is(.md3-button--outlined, .md3-icon-button--outlined)[aria-pressed="true"] { border-color: transparent; background: var(--md-sys-color-inverse-surface); color: var(--md-sys-color-inverse-on-surface); }
+
+  :is(.md3-button, .md3-icon-button):is(:disabled, [aria-disabled="true"]) { cursor: default; box-shadow: none; color: rgb(var(--md-sys-color-on-surface-rgb) / 0.38); }
+  :is(.md3-button--filled, .md3-button--tonal, .md3-icon-button--filled, .md3-icon-button--tonal):is(:disabled, [aria-disabled="true"]) { background: rgb(var(--md-sys-color-on-surface-rgb) / 0.12); }
+  :is(.md3-button--outlined, .md3-icon-button--outlined):is(:disabled, [aria-disabled="true"]) { border-color: rgb(var(--md-sys-color-on-surface-rgb) / 0.12); }
 
   /* ── Range input styled as an M3 slider (single thumb). Set --md3-range-progress for the active track. ── */
   .md3-range { height: 20px; margin: 0; background: transparent; cursor: pointer; -webkit-appearance: none; appearance: none; }

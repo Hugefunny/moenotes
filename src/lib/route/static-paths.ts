@@ -11,12 +11,14 @@ import {
   getBuildEvents,
   getBuildExchangeSummaries,
   getBuildGachas,
+  getBuildItems,
   getBuildMusic,
   getBuildRewardEntries,
   getBuildStories,
   getBuildSupportCards,
 } from "@/lib/masterdata/build-data";
 import { getBuildHelpTopics } from "@/lib/masterdata/build-help";
+import { getBuildShops } from "@/lib/masterdata/build-shop";
 
 export interface StaticLocalizedPathProps {
   locale: AppLocale;
@@ -78,6 +80,8 @@ const detailLabelLoaders: Record<string, (locale: AppLocale) => Promise<Map<stri
     const ancestors = [findRouteById("events"), findRouteById("event-list")].filter(Boolean) as AppRoute[];
     return byId(await getBuildEvents(locale), (event) => event.id, (event) => ({ label: event.name, ancestors }));
   },
+  "item-detail": async (locale) => byId(await getBuildItems(locale), (item) => item.id, (item) => label(item.name)),
+  "shop-detail": async (locale) => byId(await getBuildShops(locale), (shop) => shop.id, (shop) => label(shop.name)),
   "help-detail": async (locale) => byId(await getBuildHelpTopics(locale), (topic) => topic.id, (topic) => label(topic.title)),
   "story-detail": async (locale) => {
     const storyRoute = findRouteById("story");

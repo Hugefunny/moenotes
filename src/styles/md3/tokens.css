@@ -1,5 +1,5 @@
 /* Material 3 system tokens other than color (colors: ./colors.css, generated). Values follow the M3 baseline
-   (m3.material.io): shape scale, type scale, elevation, state layers and motion. Type families keep the app's font
+   (m3.material.io): shape scale, type scale, elevation, state layers and motion. Type families are the app's font
    stacks so CJK text uses its dedicated faces. */
 :root {
   /* ── Shape ── */
@@ -32,14 +32,24 @@
   --md-sys-typescale-body-small-size: 12px;      --md-sys-typescale-body-small-line-height: 16px;      --md-sys-typescale-body-small-tracking: 0.4px;
   --md-sys-typescale-weight-regular: 400;
   --md-sys-typescale-weight-medium: 500;
+  /* Beyond the M3 baseline (all regular above the titles): headings carry weight so a page reads as a hierarchy, not
+     one even grey. Display is bold, headlines and the large title semibold; body and labels keep the baseline. */
+  --md-sys-typescale-weight-semibold: 600;
+  --md-sys-typescale-weight-bold: 700;
 
-  /* ── Elevation (shadow part; the tonal part comes from the surface-container roles) ── */
+  /* ── Elevation (shadow part; the tonal part comes from the surface-container roles) ──
+     Edge, contact and ambient, as MoeSekai draws them: the hairline edge keeps a white card crisp on the light page,
+     the contact shadow is tight and faint, and the ambient one is offset down and pulled in (negative spread) so the
+     lift reads below the element instead of as a grey halo. M3's stock pair (30% + 15% black with positive spread)
+     smudges every card edge. In dark mode a faint light edge carries the lift. */
+  --mn-shadow-ink: 20 26 38;
+  --mn-shadow-edge: rgb(20 26 38 / 0.06);
   --md-sys-elevation-level0: none;
-  --md-sys-elevation-level1: 0 1px 2px 0 rgb(var(--md-sys-color-shadow-rgb) / 0.3), 0 1px 3px 1px rgb(var(--md-sys-color-shadow-rgb) / 0.15);
-  --md-sys-elevation-level2: 0 1px 2px 0 rgb(var(--md-sys-color-shadow-rgb) / 0.3), 0 2px 6px 2px rgb(var(--md-sys-color-shadow-rgb) / 0.15);
-  --md-sys-elevation-level3: 0 1px 3px 0 rgb(var(--md-sys-color-shadow-rgb) / 0.3), 0 4px 8px 3px rgb(var(--md-sys-color-shadow-rgb) / 0.15);
-  --md-sys-elevation-level4: 0 2px 3px 0 rgb(var(--md-sys-color-shadow-rgb) / 0.3), 0 6px 10px 4px rgb(var(--md-sys-color-shadow-rgb) / 0.15);
-  --md-sys-elevation-level5: 0 4px 4px 0 rgb(var(--md-sys-color-shadow-rgb) / 0.3), 0 8px 12px 6px rgb(var(--md-sys-color-shadow-rgb) / 0.15);
+  --md-sys-elevation-level1: 0 0 0 1px var(--mn-shadow-edge), 0 1px 2px 0 rgb(var(--mn-shadow-ink) / 0.06), 0 4px 12px -4px rgb(var(--mn-shadow-ink) / 0.16);
+  --md-sys-elevation-level2: 0 0 0 1px var(--mn-shadow-edge), 0 2px 4px -1px rgb(var(--mn-shadow-ink) / 0.08), 0 10px 22px -8px rgb(var(--mn-shadow-ink) / 0.22);
+  --md-sys-elevation-level3: 0 0 0 1px var(--mn-shadow-edge), 0 4px 8px -2px rgb(var(--mn-shadow-ink) / 0.1), 0 16px 32px -10px rgb(var(--mn-shadow-ink) / 0.22);
+  --md-sys-elevation-level4: 0 0 0 1px var(--mn-shadow-edge), 0 6px 12px -3px rgb(var(--mn-shadow-ink) / 0.1), 0 22px 44px -12px rgb(var(--mn-shadow-ink) / 0.26);
+  --md-sys-elevation-level5: 0 0 0 1px var(--mn-shadow-edge), 0 8px 16px -4px rgb(var(--mn-shadow-ink) / 0.12), 0 30px 60px -14px rgb(var(--mn-shadow-ink) / 0.3);
 
   /* ── State layers ── */
   --md-sys-state-hover-opacity: 0.08;
@@ -68,4 +78,25 @@
   --md-sys-motion-duration-long2: 500ms;
   --md-sys-motion-duration-long3: 550ms;
   --md-sys-motion-duration-long4: 600ms;
+}
+
+html[data-theme="dark"] {
+  --mn-shadow-ink: 0 0 0;
+  --mn-shadow-edge: rgb(255 255 255 / 0.06);
+}
+
+/* CJK is set solid: positive tracking opens gaps between ideographs, and the denser glyphs need more leading than Latin
+   body text. */
+:root:is([data-locale="zh-CN"], [data-locale="zh-TW"], [data-locale="ja-JP"], [data-locale="ko-KR"]) {
+  --md-sys-typescale-display-large-tracking: 0px;
+  --md-sys-typescale-title-medium-tracking: 0px;
+  --md-sys-typescale-title-small-tracking: 0px;
+  --md-sys-typescale-label-large-tracking: 0px;
+  --md-sys-typescale-label-medium-tracking: 0px;
+  --md-sys-typescale-label-small-tracking: 0px;
+  --md-sys-typescale-body-large-tracking: 0px;
+  --md-sys-typescale-body-medium-tracking: 0px;
+  --md-sys-typescale-body-small-tracking: 0px;
+  --md-sys-typescale-body-large-line-height: 26px;
+  --md-sys-typescale-body-medium-line-height: 22px;
 }

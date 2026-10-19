@@ -117,7 +117,7 @@ export default function MusicRanking({ locale, musicId, cards }: Props) {
             <button
               type="button"
               onClick={() => setAttempt((value) => value + 1)}
-              className="md3-state mt-4 rounded-full border border-outline-variant bg-surface-container-low px-5 py-2 text-label-medium text-on-surface shadow-elevation-1"
+              className="md3-button md3-button--tonal md3-button--small mt-4"
             >
               {t(locale, "music.ranking.retry")}
             </button>

@@ -1,5 +1,6 @@
 ---
 import AssetCacheBootstrap from "@/components/shell/AssetCacheBootstrap.astro";
+import BackgroundPattern from "@/components/shell/BackgroundPattern.astro";
 import CommandPalette from "@/components/shell/CommandPalette";
 import KeyboardShortcutsHelp from "@/components/shell/KeyboardShortcutsHelp";
 import OverlayHost from "@/components/shell/OverlayHost";
@@ -31,6 +32,7 @@ const themeBands = await getBuildThemeBands(locale);
 ---
 
 <AssetCacheBootstrap />
+<BackgroundPattern />
 <TopAppBar client:load locale={locale} homeHref={localizePath("/", locale)} crumbs={crumbs} />
 <Sidebar client:load locale={locale} pathname={pathname} activePath={activePath} />
 <FilterDrawerHost client:load locale={locale} pathname={pathname} />

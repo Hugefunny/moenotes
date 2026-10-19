@@ -3008,11 +3008,9 @@ export const zhTW = {
     reset: "重置篩選",
     collapse: "收起",
     expand: "展開",
-    count: "{filtered} / {total}",
+    count: "{filtered} / {total} 項",
+    total: "共 {total} 項",
     openQuickFilter: "開啟篩選器",
-    drawerHintTitle: "篩選器已移至側邊",
-    drawerHintBody: "隨時點選「篩選」按鈕，即可開啟或收合篩選面板。",
-    drawerHintDismiss: "知道了",
     dateRange: "日期範圍", dateFrom: "開始", dateTo: "結束", dateClear: "清除",
   },
   browserNotice: {
@@ -3148,7 +3146,7 @@ export const zhTW = {
   },
   // ── W1 foundation ──
   audio: { play: "播放", pause: "暫停", loading: "載入中", retry: "播放失敗，重試", previous: "上一首", next: "下一首", modes: { sequential: "依序播放", "repeat-all": "清單循環", "repeat-one": "單曲循環", shuffle: "隨機播放" }, dock: { label: "音訊播放器", seek: "播放進度", volume: "音量", mute: "靜音", unmute: "取消靜音", queue: "播放佇列", queueEmpty: "佇列是空的。", remove: "從佇列移除 {title}", close: "關閉播放器", mode: "播放模式：{mode}", expand: "顯示佇列", collapse: "隱藏佇列" } },
-  lightbox: { label: "圖片檢視器", counter: "{current} / {total}", previous: "上一張", next: "下一張", zoomIn: "放大", zoomOut: "縮小", reset: "還原縮放", download: "下載", close: "關閉", loading: "圖片載入中…", failed: "圖片載入失敗" },
+  lightbox: { label: "圖片檢視器", images: "圖片", open: "查看{name}大圖", counter: "{current} / {total}", previous: "上一張", next: "下一張", zoomIn: "放大", zoomOut: "縮小", reset: "還原縮放", download: "下載", close: "關閉", loading: "圖片載入中…", failed: "圖片載入失敗" },
   detailNav: { label: "條目導覽", previous: "上一個", next: "下一個", backToList: "返回列表" },
   collectionView: { label: "顯示方式", grid: "網格", list: "列表", table: "表格", card: "卡片", square: "圖示", nameSeparator: "、" },
   // ── pack G ──

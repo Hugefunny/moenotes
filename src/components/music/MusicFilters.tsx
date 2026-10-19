@@ -134,6 +134,7 @@ export default function MusicFilters({ locale, controller, variant = "plain", on
   }) }), [sort]);
   return (
     <BaseFilters
+      locale={locale}
       sort={panelSort}
       variant={variant}
       title={t(locale, "music.filterTitle")}
@@ -265,7 +266,7 @@ function CreditFilter({ locale, title, options, selected, onChange }: {
             type="button"
             onClick={() => setExpanded((value) => !value)}
             aria-expanded={expanded}
-            className="rounded-shape-sm px-2 py-1.5 text-label-medium text-primary hover:underline"
+            className="md3-button md3-button--text md3-button--small"
           >
             {expanded ? t(locale, "music.filters.showFewer") : t(locale, "music.filters.showAll", { count: options.length })}
           </button>

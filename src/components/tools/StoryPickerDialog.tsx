@@ -120,7 +120,7 @@ export default function StoryPickerDialog({ locale, entries, open, onClose, curr
                 <button
                   type="button"
                   onClick={() => { setQuery(""); setOthers([]); }}
-                  className="mt-3 rounded-full border border-outline-variant bg-surface-container-low px-4 py-1.5 text-label-medium text-on-surface hover:border-primary"
+                  className="md3-button md3-button--outlined md3-button--small mt-3"
                 >
                   {t(locale, "filter.reset")}
                 </button>

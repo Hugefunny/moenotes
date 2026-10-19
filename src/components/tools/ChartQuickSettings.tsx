@@ -101,7 +101,7 @@ export default function ChartQuickSettings({ locale, player }: { locale: AppLoca
           setBusy(true);
           void player.setSettings(defaults).catch(() => undefined).finally(() => setBusy(false));
         }}
-        className="md3-state rounded-full border border-outline-variant bg-surface-container-low px-4 py-1.5 text-label-medium text-on-surface"
+        className="md3-button md3-button--outlined md3-button--small"
       >
         {t(locale, "chartPreview3d.quick.reset")}
       </button>

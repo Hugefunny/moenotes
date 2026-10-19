@@ -55,7 +55,7 @@ export default function CharacterVoicesSection({ locale, characterId, characterN
     return (
       <div className="md3-surface p-8 text-center" role="alert">
         <p className="text-body-medium text-on-surface-variant">{t(locale, "characters.voices.loadError")}</p>
-        <button type="button" onClick={() => setAttempt((value) => value + 1)} className="md3-state mt-4 rounded-full border border-outline-variant bg-surface-container-low px-5 py-2 text-label-large text-on-surface">
+        <button type="button" onClick={() => setAttempt((value) => value + 1)} className="md3-button md3-button--outlined mt-4">
           {t(locale, "cards.retry")}
         </button>
       </div>
@@ -109,9 +109,9 @@ function VoiceGroupPanel({ locale, group, payload, characterId, characterNames, 
     <button
       type="button"
       onClick={() => setQueue(queue)}
-      className="md3-state inline-flex items-center gap-1.5 rounded-full border border-outline-variant bg-surface-container-low px-3.5 py-1.5 text-label-medium text-on-surface transition hover:border-primary hover:text-primary"
+      className="md3-button md3-button--outlined md3-button--small"
     >
-      <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" /></svg>
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" /></svg>
       {t(locale, "characters.voices.playAll", { count: queue.length })}
     </button>
   ) : null;

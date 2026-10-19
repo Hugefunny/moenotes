@@ -1636,9 +1636,6 @@ export const deDE = {
     expand: "Ausklappen",
     count: "{filtered} / {total}",
     openQuickFilter: "Filter öffnen",
-    drawerHintTitle: "Filter in die Seitenleiste verschoben",
-    drawerHintBody: "Klicken Sie auf den linken Reiter, um die Filter jederzeit ein- oder auszuklappen.",
-    drawerHintDismiss: "Verstanden"
   },
   browserNotice: {
     title: "Dieser Browser kann die Website möglicherweise nicht fehlerfrei anzeigen",

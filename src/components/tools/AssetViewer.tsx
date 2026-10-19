@@ -48,7 +48,8 @@ const PAGE_SIZE = 50;
 const ROOT: Location = { directory: "", page: 0 };
 const buttonClass = " rounded-shape-sm p-2 text-on-surface-variant transition hover:bg-secondary-container hover:text-on-surface disabled:cursor-not-allowed disabled:opacity-30";
 
-function Icon({ name, className = "" }: { name: IconName; className?: string }) {
+/** `fit` leaves the size to the enclosing md3 button, which sizes its svg itself. */
+function Icon({ name, className = "", fit = false }: { name: IconName; className?: string; fit?: boolean }) {
   const paths: Record<IconName, ReactNode> = {
     folder: (
       <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />
@@ -159,7 +160,7 @@ function Icon({ name, className = "" }: { name: IconName; className?: string }) 
 
   const hasWidth = /\bw-/.test(className);
   const hasHeight = /\bh-/.test(className);
-  const sizeClasses = `${hasWidth ? "" : "w-4"} ${hasHeight ? "" : "h-4"}`;
+  const sizeClasses = fit ? "" : `${hasWidth ? "" : "w-4"} ${hasHeight ? "" : "h-4"}`;
   const finalClass = `${sizeClasses} shrink-0 ${className}`.trim();
 
   return (
@@ -182,14 +183,14 @@ function ToolButton({ icon, label, onClick, disabled = false, active = false }: 
   return (
     <button
       type="button"
-      className={`${buttonClass} ${active ? "bg-secondary-container text-primary" : ""}`}
+      className="md3-icon-button md3-icon-button--small"
       title={label}
       aria-label={label}
       aria-pressed={icon === "list" || icon === "grid" || icon === "sidebar" ? active : undefined}
       disabled={disabled}
       onClick={onClick}
     >
-      <Icon name={icon} />
+      <Icon name={icon} fit />
     </button>
   );
 }
@@ -417,6 +418,7 @@ export default function AssetViewer({ locale }: Props) {
 
   const filterContent = (
     <BaseFilters
+      locale={locale}
       sort={{
         label: t(locale, "assetBrowser.sort"), value: sort,
         defaultOption: { value: "default", label: t(locale, "sorting.default") },
@@ -489,12 +491,12 @@ export default function AssetViewer({ locale }: Props) {
             ))}
             <button
               type="button"
-              className={`${buttonClass} ml-1 shrink-0 p-1.5`}
+              className="md3-icon-button md3-icon-button--small ml-1"
               title={t(locale, copiedPath ? "assetBrowser.copied" : "assetBrowser.copy")}
               aria-label={t(locale, copiedPath ? "assetBrowser.copied" : "assetBrowser.copy")}
               onClick={copyCurrentPath}
             >
-              <Icon name={copiedPath ? "check" : "copy"} className={copiedPath ? "text-emerald-500" : ""} />
+              <Icon name={copiedPath ? "check" : "copy"} className={copiedPath ? "text-emerald-500" : ""} fit />
             </button>
           </div>
 
@@ -549,7 +551,7 @@ export default function AssetViewer({ locale }: Props) {
                   <Icon name="folder" className="text-amber-500" />
                   <span>{t(locale, "assetBrowser.directoryTree")}</span>
                 </span>
-                <button type="button" onClick={() => navigate(ROOT)} className="shrink-0 text-label-small font-normal hover:text-primary">
+                <button type="button" onClick={() => navigate(ROOT)} className="md3-button md3-button--text md3-button--small -my-1.5">
                   {t(locale, "assetBrowser.root")}
                 </button>
               </div>
@@ -596,7 +598,7 @@ export default function AssetViewer({ locale }: Props) {
               <div role="alert" className="my-auto space-y-3 p-12 text-center">
                 <p className="font-bold">{t(locale, "assetBrowser.loadError")}</p>
                 <p className="text-body-medium text-on-surface-variant">{t(locale, failed.error instanceof AssetBrowserError && failed.error.status === 404 ? "assetBrowser.notAvailable" : "assetBrowser.loadErrorHint")}</p>
-                <button type="button" className={`${buttonClass} border border-outline-variant`} onClick={failed.reload}>{t(locale, "assetBrowser.retry")}</button>
+                <button type="button" className="md3-button md3-button--outlined" onClick={failed.reload}>{t(locale, "assetBrowser.retry")}</button>
               </div>
             ) : loading ? (
               <SiriusLoader locale={locale} label={t(locale, "assetBrowser.loading")} className="my-auto min-h-72 text-on-surface-variant" />
@@ -604,7 +606,7 @@ export default function AssetViewer({ locale }: Props) {
               <div className="my-auto flex min-h-72 flex-col items-center justify-center gap-3 p-8 text-center text-body-medium text-on-surface-variant">
                 <Icon name="folder" className="h-10 w-10 text-amber-500 opacity-40" />
                 <p>{t(locale, emptyMessage)}</p>
-                {hasFilters && <button type="button" className={`${buttonClass} border border-outline-variant`} onClick={resetFilters}>{t(locale, "filter.reset")}</button>}
+                {hasFilters && <button type="button" className="md3-button md3-button--outlined" onClick={resetFilters}>{t(locale, "filter.reset")}</button>}
               </div>
             ) : view === "list" ? (
               /* Single Unified Table: Subfolders + Files together vertically */
@@ -757,8 +759,8 @@ export default function AssetViewer({ locale }: Props) {
               {fileCount > PAGE_SIZE && (
                 <nav aria-label={t(locale, "assetBrowser.pagination")} className="flex items-center gap-2">
                   <span>{t(locale, "assetBrowser.range", { from: page * PAGE_SIZE + 1, to: Math.min((page + 1) * PAGE_SIZE, fileCount), total: fileCount })}</span>
-                  <button type="button" className={buttonClass} disabled={page === 0} onClick={() => changePage(page - 1)}>{t(locale, "assetBrowser.previous")}</button>
-                  <button type="button" className={buttonClass} disabled={page >= pageCount - 1} onClick={() => changePage(page + 1)}>{t(locale, "assetBrowser.next")}</button>
+                  <button type="button" className="md3-button md3-button--text md3-button--small" disabled={page === 0} onClick={() => changePage(page - 1)}>{t(locale, "assetBrowser.previous")}</button>
+                  <button type="button" className="md3-button md3-button--text md3-button--small" disabled={page >= pageCount - 1} onClick={() => changePage(page + 1)}>{t(locale, "assetBrowser.next")}</button>
                 </nav>
               )}
             </div>
@@ -908,39 +910,37 @@ function ContentDetails({
             {preview?.type === "image" ? (
               <div className="space-y-3">
                 <img src={preview.url} alt={file.path} className="max-h-80 max-w-full rounded-shape-sm object-contain mx-auto shadow-sm" />
-                <div className="flex items-center justify-center gap-4 text-label-medium">
+                <div className="flex items-center justify-center gap-1">
                   <button
                     type="button"
                     disabled={downloading}
-                    className="inline-flex items-center gap-1.5 text-primary hover:underline disabled:opacity-50"
+                    className="md3-button md3-button--text md3-button--small"
                     onClick={() => handleDownload(preview.url, previewFileName || "image.webp")}
                   >
-                    <Icon name="download" className="h-4 w-4" />
+                    <Icon name="download" fit />
                     <span>{t(locale, downloading ? "assetBrowser.downloading" : "assetBrowser.download")}</span>
                   </button>
-                  <span aria-hidden="true" className="text-on-surface-variant">·</span>
                   <a
                     href={preview.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-primary hover:underline"
+                    className="md3-button md3-button--text md3-button--small"
                   >
-                    <span>{t(locale, "assetBrowser.openImage")}</span>
-                    <span aria-hidden="true">↗</span>
+                    {t(locale, "assetBrowser.openImage")} ↗
                   </a>
                 </div>
               </div>
             ) : preview?.type === "audio" ? (
               <div className="space-y-3">
                 <audio controls src={preview.url} className="w-full" />
-                <div className="flex items-center justify-center text-label-medium">
+                <div className="flex items-center justify-center">
                   <button
                     type="button"
                     disabled={downloading}
-                    className="inline-flex items-center gap-1.5 text-primary hover:underline disabled:opacity-50"
+                    className="md3-button md3-button--text md3-button--small"
                     onClick={() => handleDownload(preview.url, previewFileName || "audio.m4a")}
                   >
-                    <Icon name="download" className="h-4 w-4" />
+                    <Icon name="download" fit />
                     <span>{t(locale, downloading ? "assetBrowser.downloading" : "assetBrowser.download")}</span>
                   </button>
                 </div>
@@ -963,18 +963,18 @@ function ContentDetails({
                 <button
                   type="button"
                   disabled={downloading}
-                  className="flex items-center justify-center gap-2 rounded-shape-sm bg-primary px-4 py-2 text-label-medium text-on-primary shadow-xs transition hover:opacity-90 disabled:opacity-50"
+                  className="md3-button md3-button--filled"
                   onClick={() => handleDownload(preview.url, previewFileName)}
                 >
-                  <Icon name="download" className="h-4 w-4" />
+                  <Icon name="download" fit />
                   <span>{t(locale, downloading ? "assetBrowser.downloading" : "assetBrowser.download")}</span>
                 </button>
                 <button
                   type="button"
-                  className={`${buttonClass} border border-outline-variant text-body-small flex items-center justify-center gap-1.5 py-2`}
+                  className="md3-button md3-button--outlined"
                   onClick={copyPath}
                 >
-                  <Icon name={copyPathState ? "check" : "copy"} className={copyPathState ? "text-emerald-500" : ""} />
+                  <Icon name={copyPathState ? "check" : "copy"} className={copyPathState ? "text-emerald-500" : ""} fit />
                   <span>{t(locale, copyPathState ? "assetBrowser.copied" : "assetBrowser.copy")}</span>
                 </button>
               </div>
@@ -982,10 +982,10 @@ function ContentDetails({
               <div>
                 <button
                   type="button"
-                  className={`${buttonClass} w-full border border-outline-variant text-body-small flex items-center justify-center gap-1.5 py-2`}
+                  className="md3-button md3-button--outlined w-full"
                   onClick={copyPath}
                 >
-                  <Icon name={copyPathState ? "check" : "copy"} className={copyPathState ? "text-emerald-500" : ""} />
+                  <Icon name={copyPathState ? "check" : "copy"} className={copyPathState ? "text-emerald-500" : ""} fit />
                   <span>{t(locale, copyPathState ? "assetBrowser.copied" : "assetBrowser.copy")}</span>
                 </button>
                 <p className="mt-2 text-center text-label-small text-on-surface-variant">

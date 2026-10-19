@@ -287,13 +287,13 @@ export default function StoryControls({ locale, player, surface, simple, fullscr
           <div className="min-w-0">
             <p className="font-[var(--md-ref-typeface-brand)] text-body-large text-white @2xl:text-headline-small">{label("ended")}</p>
             <div className="mt-3 flex flex-wrap justify-center gap-2 @2xl:mt-4">
-              <button type="button" onClick={() => seekLine(0)} className={`${GLASS_PILL} bg-white/12 hover:bg-white/22`}>
-                <ReplayIcon className="h-4 w-4" />
+              <button type="button" onClick={() => seekLine(0)} className="md3-button md3-button--tonal">
+                <ReplayIcon className="" />
                 {label("replay")}
               </button>
               {nextEpisode && (
-                <button type="button" onClick={onNextEpisode} className={`${GLASS_PILL} max-w-full bg-primary hover:bg-primary`}>
-                  <NextLineIcon className="h-4 w-4 shrink-0" />
+                <button type="button" onClick={onNextEpisode} className="md3-button md3-button--filled max-w-full">
+                  <NextLineIcon className="" />
                   <span className="shrink-0">{label("nextEpisode")}</span>
                   <span className="min-w-0 truncate font-semibold opacity-80">{nextEpisode}</span>
                 </button>
@@ -308,11 +308,11 @@ export default function StoryControls({ locale, player, surface, simple, fullscr
           <div className="rounded-shape-lg border border-white/15 bg-black/80 p-4 text-center text-white shadow-xl backdrop-blur-md">
             <p className="text-label-large">{label("skipConfirm")}</p>
             <div className="mt-3 flex justify-center gap-2">
-              <button type="button" onClick={confirmSkip} autoFocus className={`${GLASS_PILL} bg-primary hover:bg-primary`}>
-                <SkipIcon className="h-4 w-4" />
+              <button type="button" onClick={confirmSkip} autoFocus className="md3-button md3-button--filled">
+                <SkipIcon className="" />
                 {label("skip")}
               </button>
-              <button type="button" onClick={() => changePanel("none")} className={`${GLASS_PILL} bg-white/12 hover:bg-white/22`}>{label("cancel")}</button>
+              <button type="button" onClick={() => changePanel("none")} className="md3-button md3-button--tonal">{label("cancel")}</button>
             </div>
           </div>
         </div>
@@ -340,9 +340,9 @@ export default function StoryControls({ locale, player, surface, simple, fullscr
           onClick={wake}
           aria-label={label("show")}
           title={label("show")}
-          className="absolute right-2 top-2 z-20 grid h-9 w-9 place-items-center rounded-full bg-black/40 text-white/80 backdrop-blur-sm [@media(hover:hover)]:hidden"
+          className="md3-icon-button md3-icon-button--tonal md3-icon-button--small absolute right-2 top-2 z-20 [@media(hover:hover)]:hidden"
         >
-          <ControlsIcon className="h-4 w-4" />
+          <ControlsIcon className="" />
         </button>
       )}
 
@@ -402,35 +402,35 @@ export default function StoryControls({ locale, player, surface, simple, fullscr
 
           <div className="mt-0.5 flex items-center gap-0.5 @2xl:mt-1 @2xl:gap-1">
             <BarButton label={label(!state.started || state.paused ? "play" : "pause")} disabled={!state.live} onClick={(event) => { togglePlay(); refocus(event); }}>
-              {!state.started || state.paused ? <PlayIcon /> : <PauseIcon />}
+              {!state.started || state.paused ? <PlayIcon className="" /> : <PauseIcon className="" />}
             </BarButton>
             <BarButton label={label("next")} disabled={!state.live} onClick={(event) => { nextLine(); refocus(event); }}>
-              <NextLineIcon />
+              <NextLineIcon className="" />
             </BarButton>
             {!simple && (
               <>
                 <BarButton label={label("auto")} pressed={state.auto} disabled={!state.live} onClick={(event) => { toggleAuto(); refocus(event); }}>
-                  <AutoIcon />
+                  <AutoIcon className="" />
                 </BarButton>
-                <BarButton label={`${label("fastForward")} ${storySpeedLabel(state.speed)}`} pressed={state.speed !== 10} disabled={!state.live} onClick={(event) => { fastForward(); refocus(event); }}>
-                  <FastForwardIcon />
+                <BarButton label={`${label("fastForward")} ${storySpeedLabel(state.speed)}`} pressed={state.speed !== 10} wide={state.speed !== 10} disabled={!state.live} onClick={(event) => { fastForward(); refocus(event); }}>
+                  <FastForwardIcon className="" />
                   {state.speed !== 10 && <span className="font-mono text-label-small tabular-nums">{storySpeedLabel(state.speed)}</span>}
                 </BarButton>
               </>
             )}
             <BarButton label={label("skip")} disabled={!state.live} onClick={() => changePanel("skip")}>
-              <SkipIcon />
+              <SkipIcon className="" />
             </BarButton>
             {state.lineCount > 0 && (
               <span className="ml-1.5 hidden font-mono text-label-small tabular-nums text-white/70 @md:inline">{lineValue + 1} / {state.lineCount}</span>
             )}
             <span className="flex-1" />
             <BarButton label={label("settings")} pressed={panel === "settings"} onClick={() => changePanel(panel === "settings" ? "none" : "settings")}>
-              <SettingsIcon />
+              <SettingsIcon className="" />
             </BarButton>
             {onFullscreen && (
               <BarButton label={t(locale, fullscreen ? "storyPlayer.exitFullscreen" : "storyPlayer.fullscreen")} onClick={onFullscreen}>
-                <FullscreenIcon exit={fullscreen} />
+                <FullscreenIcon className="" exit={fullscreen} />
               </BarButton>
             )}
           </div>
@@ -459,8 +459,8 @@ function SettingsPanel({ locale, simple, volumes, speed, onVolume, onSpeed, onCl
     >
       <div className="flex items-center justify-between gap-2">
         <p className="text-label-large">{title}</p>
-        <button type="button" onClick={onClose} aria-label={t(locale, "actions.close")} title={t(locale, "actions.close")} className="grid h-7 w-7 place-items-center rounded-full text-white/75 hover:bg-white/15 hover:text-white">
-          <CloseIcon className="h-4 w-4" />
+        <button type="button" onClick={onClose} aria-label={t(locale, "actions.close")} title={t(locale, "actions.close")} className="md3-icon-button md3-icon-button--small text-white/75">
+          <CloseIcon className="" />
         </button>
       </div>
 
@@ -478,9 +478,9 @@ function SettingsPanel({ locale, simple, volumes, speed, onVolume, onSpeed, onCl
                 aria-pressed={volume.muted}
                 aria-label={toggle}
                 title={toggle}
-                className={`grid h-8 w-8 shrink-0 place-items-center rounded-full transition ${volume.muted ? "bg-white/10 text-white/45" : "text-white/85 hover:bg-white/15"}`}
+                className={`md3-icon-button md3-icon-button--small ${volume.muted ? "bg-white/10 text-white/45" : "text-white/85"}`}
               >
-                {volume.muted ? <SpeakerIcon muted className="h-4 w-4" /> : <VolumeCategoryIcon category={category} className="h-4 w-4" />}
+                {volume.muted ? <SpeakerIcon muted className="" /> : <VolumeCategoryIcon category={category} className="" />}
               </button>
               <label className="flex min-w-0 flex-1 items-center gap-2">
                 <span className="w-12 shrink-0 truncate text-label-medium">{name}</span>
@@ -524,10 +524,12 @@ function SettingsPanel({ locale, simple, volumes, speed, onVolume, onSpeed, onCl
   );
 }
 
-function BarButton({ label, pressed, disabled = false, onClick, children }: {
+function BarButton({ label, pressed, wide = false, disabled = false, onClick, children }: {
   label: string;
   /** Set for the toggles (auto, fast-forward, the settings panel). */
   pressed?: boolean;
+  /** Holds a short label beside the icon (the fast-forward speed). */
+  wide?: boolean;
   disabled?: boolean;
   onClick: (event: ReactMouseEvent<HTMLButtonElement>) => void;
   children: ReactNode;
@@ -540,14 +542,13 @@ function BarButton({ label, pressed, disabled = false, onClick, children }: {
       aria-pressed={pressed}
       disabled={disabled}
       onClick={onClick}
-      className={`inline-flex h-8 min-w-8 shrink-0 items-center justify-center gap-1 rounded-full px-1.5 transition disabled:cursor-default disabled:opacity-35 @2xl:h-9 @2xl:min-w-9 ${ pressed ? "bg-primary text-white" : "text-white/85 enabled:hover:bg-white/15 enabled:hover:text-white" }`}
+      className={`md3-icon-button md3-icon-button--small ${pressed ? "md3-icon-button--filled" : "text-white/85 disabled:text-white/35"} ${wide ? "w-auto gap-1 px-1.5" : ""}`}
     >
       {children}
     </button>
   );
 }
 
-const GLASS_PILL = " inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold text-white transition @2xl:text-sm";
 const RANGE = "h-1.5 min-w-0 flex-1 cursor-pointer accent-primary disabled:cursor-default disabled:opacity-40";
 
 /** The player's state for the controls; `refresh` after a call that emits no event (auto, speed). */
