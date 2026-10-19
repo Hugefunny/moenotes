@@ -80,7 +80,7 @@ export default function FilterDrawer({ locale, pathname }: FilterDrawerProps) {
       <aside
         id={FILTER_DRAWER_ID}
         aria-labelledby={titleId}
-        className="glass fixed bottom-3 top-[calc(var(--md-app-bar-height,64px)+0.75rem)] z-30 flex flex-col overflow-hidden rounded-shape-xl transition-[left] duration-300 ease-[var(--md-sys-motion-easing-emphasized)]"
+        className="mn-shell-offset glass fixed bottom-3 top-[calc(var(--md-app-bar-height,64px)+0.75rem)] z-30 flex flex-col overflow-hidden rounded-shape-xl transition-[left] duration-300 ease-[var(--md-sys-motion-easing-emphasized)]"
         style={{ left: FILTER_DOCK_LEFT, width: `calc(${FILTER_SHEET_WIDTH} - 0.75rem)` }}
       >
         {sheet}

@@ -29,7 +29,7 @@ export default function FilterTabHandle({ locale }: FilterTabHandleProps) {
         aria-controls={FILTER_DRAWER_ID}
         aria-expanded={isOpen}
         title={t(locale, "filter.openQuickFilter")}
-        className="mn-filter-fab !fixed bottom-6 z-30"
+        className="mn-filter-fab mn-shell-offset !fixed bottom-6 z-30"
         style={{ left }}
       >
         <Icon name="filter" />

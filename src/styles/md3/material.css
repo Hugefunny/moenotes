@@ -149,7 +149,10 @@ html[data-theme="dark"] {
    scrolls. Each layer is two stacked tiles moved by transform only, so it is painted once. */
 .mn-brand-pattern {
   position: fixed;
-  inset: 0;
+  /* As wide as the window, not the viewport less a classic scrollbar: when a dialog locks the page's scroll the
+     scrollbar goes, and a layer that widened with it would make WebKit repaint the blurred shapes (a long stall). */
+  inset: 0 auto 0 0;
+  width: 100vw;
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
@@ -176,6 +179,16 @@ html[data-theme="dark"] {
   display: block;
   width: 100%;
   height: var(--mn-brand-pattern-tile);
+}
+
+/* WebKit paints SVG-filtered shapes again, blurring them on the CPU, whenever it recalculates the page's style (a rule
+   inserted as a dialog first opens, a custom property changed on the root): a stall of a few hundred milliseconds at
+   the start of every such animation. There a blurred layer blurs itself in the compositor instead (--mn-brand-pattern-blur
+   is the blur per pixel of tile height; the tile is scaled to its height). Other engines keep the blur baked into the
+   paint: a filter on the moving layer would blur again on every frame of the glide. */
+@supports (font: -apple-system-body) {
+  .mn-brand-pattern-tile g { filter: none; }
+  .mn-brand-pattern-layer[data-blur] { filter: blur(calc(var(--mn-brand-pattern-tile) * var(--mn-brand-pattern-blur))); }
 }
 
 /* Filled shapes have no outline: an opaque edge around a translucent fill reads as a sticker. */

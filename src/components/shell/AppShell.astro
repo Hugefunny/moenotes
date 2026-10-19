@@ -36,7 +36,7 @@ const themeBands = await getBuildThemeBands(locale);
 <TopAppBar client:load locale={locale} homeHref={localizePath("/", locale)} crumbs={crumbs} />
 <Sidebar client:load locale={locale} pathname={pathname} activePath={activePath} />
 <FilterDrawerHost client:load locale={locale} pathname={pathname} />
-<main id="content" class="mx-auto min-h-screen max-w-[var(--mn-layout-max-width,120rem)] px-4 pb-16 pt-[calc(var(--md-app-bar-height,64px)+1rem)] transition-[padding] duration-300 ease-[var(--md-sys-motion-easing-emphasized)] md:pl-[calc(var(--mn-sidebar-offset,17rem)+var(--mn-filter-offset,0rem)+1.5rem)] md:pr-6 md:pt-[calc(var(--md-app-bar-height,64px)+1.5rem)]">
+<main id="content" class="mn-shell-offset mx-auto min-h-screen max-w-[var(--mn-layout-max-width,120rem)] px-4 pb-16 pt-[calc(var(--md-app-bar-height,64px)+1rem)] transition-[padding] duration-300 ease-[var(--md-sys-motion-easing-emphasized)] md:pl-[calc(var(--mn-sidebar-offset,17rem)+var(--mn-filter-offset,0rem)+1.5rem)] md:pr-6 md:pt-[calc(var(--md-app-bar-height,64px)+1.5rem)]">
   <slot />
 </main>
 <Footer locale={locale} />

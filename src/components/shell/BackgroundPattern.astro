@@ -18,10 +18,15 @@ const speeds = PATTERN_LAYERS.map((layer) => layer.speed).join(",");
     <polygon points="120,900 1040,250 1600,380 1600,900" fill-opacity="0.75"></polygon>
   </svg>
   {PATTERN_LAYERS.map((layer, index) => (
-    <div class="mn-brand-pattern-layer">
+    <div
+      class="mn-brand-pattern-layer"
+      data-blur={layer.blur > 0 ? "" : undefined}
+      style={layer.blur > 0 ? `--mn-brand-pattern-blur: ${layer.blur / PATTERN_TILE_H}` : undefined}
+    >
       {[0, 1].map((copy) => (
         <svg viewBox={`0 0 ${PATTERN_TILE_W} ${PATTERN_TILE_H}`} preserveAspectRatio="xMidYMid slice" class="mn-brand-pattern-tile">
-          {/* Baked into the layer's single paint, so the blur costs nothing while scrolling. */}
+          {/* Baked into the layer's single paint, so the blur costs nothing while scrolling (not in WebKit, which blurs
+              the layer instead: src/styles/md3/material.css). */}
           {layer.blur > 0 && (
             <filter id={`mn-brand-pattern-blur-${index}-${copy}`} filterUnits="userSpaceOnUse" x="0" y="0" width={PATTERN_TILE_W} height={PATTERN_TILE_H}>
               <feGaussianBlur stdDeviation={layer.blur} />

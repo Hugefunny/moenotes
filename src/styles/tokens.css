@@ -4,7 +4,7 @@
   --mn-layout-max-width: 120rem;
   --mn-filter-drawer-w: 20rem;
   --mn-filter-offset: 0rem;
-  /* Width the docked navigation drawer takes (0 when folded; src/lib/sidebar/sidebar-store.ts). */
+  /* Width the docked navigation drawer takes (0 when folded, below). */
   --mn-sidebar-offset: 17rem;
   /* Height of the top app bar (M3 small top app bar: 64dp). */
   --md-app-bar-height: 64px;
@@ -25,6 +25,13 @@
   --mn-font-display: var(--mn-font-latin), var(--mn-font-cjk), var(--mn-font-system);
   --mn-font-body: var(--mn-font-latin), var(--mn-font-cjk), var(--mn-font-system);
 }
+
+/* The drawers' offsets change on the elements that clear them (.mn-shell-offset), never on the root: when an inherited
+   custom property changes there, WebKit repaints every element, the backdrop's blurred shapes included, and folding the
+   sidebar stalls Safari for a few hundred milliseconds. The states are set by src/lib/sidebar/sidebar-store.ts and
+   src/lib/filter/quick-filter-store.ts. */
+:root[data-sidebar="closed"] .mn-shell-offset { --mn-sidebar-offset: 0rem; }
+:root[data-filter-drawer="open"] .mn-shell-offset { --mn-filter-offset: var(--mn-filter-drawer-w); }
 
 :root[data-locale="ja-JP"] {
   --mn-font-cjk: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo UI", "Meiryo", "Noto Sans CJK JP", "Source Han Sans JP";

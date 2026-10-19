@@ -63,9 +63,8 @@ function persistSidebarState(open: boolean): void {
 
 export function applySidebarToDocument(open: boolean): void {
   const root = document.documentElement;
+  // Folded away the docked navigation drawer takes no room: src/styles/tokens.css zeroes --mn-sidebar-offset.
   root.dataset.sidebar = open ? "open" : "closed";
-  // The docked navigation drawer is 17rem wide (src/components/shell/Sidebar.tsx); folded away it takes no room.
-  root.style.setProperty("--mn-sidebar-offset", open ? "17rem" : "0rem");
 }
 
 function emitSidebarStateChanged(open: boolean): void {
