@@ -38,9 +38,12 @@
   --breakpoint-5xl: 2200px;
 }
 
-* {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
+/* In the base layer, under MUI's: an input that sizes its own content box (a text field's 1.4375em) keeps it. */
+@layer base {
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 html {

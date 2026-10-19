@@ -537,10 +537,18 @@ function components(density: Md3Density): ThemeOptions["components"] {
     MuiFormControlLabel: { styleOverrides: { label: { ...font(TYPE.bodyMedium), color: c("on-surface") } } },
     MuiSlider: {
       styleOverrides: {
-        root: { color: c("primary"), height: 4 },
-        rail: { backgroundColor: c("secondary-container"), opacity: 1 },
+        // MoeSekai's slider: a 6px track on surface-container-highest, a raised round handle.
+        root: { color: c("primary"), height: 6 },
+        rail: { backgroundColor: c("surface-container-highest"), opacity: 1 },
         track: { border: 0 },
-        thumb: { width: 20, height: 20, backgroundColor: c("primary"), "&:hover, &.Mui-focusVisible": { boxShadow: `0 0 0 8px ${ca("primary", HOVER)}` }, "&.Mui-active": { boxShadow: `0 0 0 10px ${ca("primary", PRESSED)}` } },
+        thumb: {
+          width: 20,
+          height: 20,
+          backgroundColor: c("primary"),
+          boxShadow: elevation(1),
+          "&:hover, &.Mui-focusVisible": { boxShadow: `${elevation(1)}, 0 0 0 8px ${ca("primary", HOVER)}` },
+          "&.Mui-active": { boxShadow: `${elevation(1)}, 0 0 0 10px ${ca("primary", PRESSED)}` },
+        },
         valueLabel: { ...font(TYPE.labelLarge), backgroundColor: c("inverse-surface"), color: c("inverse-on-surface"), borderRadius: shape.full },
         mark: { backgroundColor: c("on-secondary-container"), width: 4, height: 4, borderRadius: "50%" },
         markActive: { backgroundColor: c("on-primary") },

@@ -86,7 +86,6 @@ export default function DailyLeaderboard({ locale, api, today, tiers, tier, onTi
         <ToggleButtonGroup exclusive size="small" value={tier} onChange={(_, next: DailyTierId | null) => next && onTierChange(next)} aria-label={tr("results.difficulty")} className="gm-segmented">
           {tiers.map((id) => (
             <ToggleButton key={id} value={id}>
-              {id === tier && <GuessIcon name="check" size={18} />}
               {tr(`daily.tiers.${id}`)}
             </ToggleButton>
           ))}

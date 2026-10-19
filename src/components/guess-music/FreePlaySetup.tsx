@@ -42,13 +42,12 @@ export interface FreePlaySetupProps {
   onShare: () => void;
 }
 
-/** M3 single-select segmented buttons; the selected segment leads with a check. */
+/** M3 single-select segmented buttons, as MoeSekai sets them: the filled segment marks the choice, with no check. */
 function Segmented<T extends string | number>({ label, value, options, onChange }: { label: string; value: T; options: ReadonlyArray<{ value: T; label: string }>; onChange: (value: T) => void }) {
   return (
     <ToggleButtonGroup exclusive value={value} onChange={(_, next: T | null) => next !== null && onChange(next)} aria-label={label} className="gm-segmented">
       {options.map((option) => (
         <ToggleButton key={option.value} value={option.value}>
-          {option.value === value && <GuessIcon name="check" size={18} />}
           {option.label}
         </ToggleButton>
       ))}
