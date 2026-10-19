@@ -8,7 +8,7 @@ import Modal from "@/components/shared/Modal";
 import Popover from "@/components/shared/Popover";
 import { useQuickFilter } from "@/lib/filter/use-quick-filter";
 import { useAssetBrowserQuery } from "@/components/tools/use-asset-browser-query";
-import { AssetBrowserError, assetBrowserUrl, defaultCatalog, fetchAssetBrowser } from "@/lib/assets/browser-client";
+import { AssetBrowserError, assetBrowserUrl, defaultCatalog, downloadAssetFile, fetchAssetBrowser } from "@/lib/assets/browser-client";
 import { getAssetBrowserPreview } from "@/lib/assets/preview";
 import { serverOfAssetRegion } from "@/lib/assets/release";
 import { PRIMARY_SERVER, type GameServer } from "@/config/servers";
@@ -879,29 +879,10 @@ function ContentDetails({
     }
   };
 
-  const downloadFile = async (url: string, filename: string) => {
+  const handleDownload = async (url: string, filename: string) => {
     setDownloading(true);
     try {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const blob = await res.blob();
-      const objectUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = objectUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(objectUrl);
-    } catch {
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      a.target = "_blank";
-      a.rel = "noreferrer";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      await downloadAssetFile(url, filename);
     } finally {
       setDownloading(false);
     }
@@ -932,7 +913,7 @@ function ContentDetails({
                     type="button"
                     disabled={downloading}
                     className="inline-flex items-center gap-1.5 text-primary hover:underline disabled:opacity-50"
-                    onClick={() => downloadFile(preview.url, previewFileName || "image.webp")}
+                    onClick={() => handleDownload(preview.url, previewFileName || "image.webp")}
                   >
                     <Icon name="download" className="h-4 w-4" />
                     <span>{t(locale, downloading ? "assetBrowser.downloading" : "assetBrowser.download")}</span>
@@ -957,7 +938,7 @@ function ContentDetails({
                     type="button"
                     disabled={downloading}
                     className="inline-flex items-center gap-1.5 text-primary hover:underline disabled:opacity-50"
-                    onClick={() => downloadFile(preview.url, previewFileName || "audio.m4a")}
+                    onClick={() => handleDownload(preview.url, previewFileName || "audio.m4a")}
                   >
                     <Icon name="download" className="h-4 w-4" />
                     <span>{t(locale, downloading ? "assetBrowser.downloading" : "assetBrowser.download")}</span>
@@ -983,7 +964,7 @@ function ContentDetails({
                   type="button"
                   disabled={downloading}
                   className="flex items-center justify-center gap-2 rounded-shape-sm bg-primary px-4 py-2 text-label-medium text-on-primary shadow-xs transition hover:opacity-90 disabled:opacity-50"
-                  onClick={() => downloadFile(preview.url, previewFileName)}
+                  onClick={() => handleDownload(preview.url, previewFileName)}
                 >
                   <Icon name="download" className="h-4 w-4" />
                   <span>{t(locale, downloading ? "assetBrowser.downloading" : "assetBrowser.download")}</span>
