@@ -64,7 +64,7 @@ export default function HelpExplorer({ locale, servers, categories: allCategorie
 
   return (
     <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer}>
-      <div className="md3-tabs" role="tablist" aria-label={t(locale, "help.tabsLabel")}>
+      <div className="md3-tabs mb-4" role="tablist" aria-label={t(locale, "help.tabsLabel")}>
         {TABS.map((value) => (
           <button
             key={value}
@@ -89,7 +89,7 @@ export default function HelpExplorer({ locale, servers, categories: allCategorie
               onChange={(event) => setQuery(event.target.value)}
               placeholder={t(locale, "help.searchPlaceholder")}
               aria-label={t(locale, "filter.search")}
-              className="w-full rounded-full border border-outline-variant bg-surface-container-low px-4 py-2 text-body-medium text-on-surface placeholder:text-on-surface-variant"
+              className="md3-text-field md3-search-field !h-12 !px-5"
             />
             {needle ? (
               searchHits.length === 0 ? <Empty text={t(locale, "help.noResults")} /> : <TopicList locale={locale} topics={searchHits} showCategory />
@@ -102,7 +102,8 @@ export default function HelpExplorer({ locale, servers, categories: allCategorie
                       type="button"
                       onClick={() => pickCategory(category.id)}
                       aria-current={category.id === activeCategory?.id ? "true" : undefined}
-                      className={`shrink-0 rounded-shape-lg border px-3 py-2 text-left text-label-large transition ${category.id === activeCategory?.id ? "border-primary bg-secondary-container text-on-surface" : "border-outline-variant bg-surface-container-low text-on-surface-variant hover:text-on-surface"}`}
+                      // The sidebar's pills: a borderless list from lg, filled chips while the row scrolls sideways.
+                      className={`md3-state shrink-0 rounded-full px-4 py-2 text-left text-label-large ${category.id === activeCategory?.id ? "bg-secondary-container text-on-secondary-container" : "text-on-surface-variant hover:text-on-surface max-lg:bg-surface-container-high"}`}
                     >
                       {category.title}
                       <span className="ml-1.5 text-label-small tabular-nums opacity-70">{category.topicIds.length}</span>
