@@ -1,6 +1,7 @@
 ---
 import type { AppLocale } from "@/config/locales";
 import { t } from "@/i18n";
+import { splitTitleHighlight, titleHighlightId } from "@/lib/format/title-highlight";
 
 interface Props {
   locale: AppLocale;
@@ -12,12 +13,13 @@ interface Props {
 }
 
 const { locale, titleKey, descriptionKey, showDescription = true, hideHeader = false } = Astro.props;
+const title = splitTitleHighlight(t(locale, titleKey), t(locale, `pageTitleHighlights.${titleHighlightId(titleKey)}`));
 ---
 
 {!hideHeader && <header class="md3-page-heading">
   <div class="flex flex-wrap items-center gap-3">
-    {/* The page's one accent: the seed as a highlighter under the title (MoeSekai's page header). */}
-    <h1><span class="mn-brand-mark">{t(locale, titleKey)}</span></h1>
+    {/* The page's one accent: the seed as a highlighter under a word of the title (MoeSekai's page header). */}
+    <h1>{title.before}<span class="mn-brand-mark">{title.mark}</span>{title.after}</h1>
     <slot name="title-badge" />
   </div>
   {showDescription ? <p>{t(locale, descriptionKey)}</p> : null}
