@@ -38,6 +38,12 @@
   border-radius: var(--md-sys-shape-corner-extra-small);
   box-shadow: none;
 }
+/* Native selects (the tools' dense forms keep their own size and shape): the M3 select's chevron in place of the
+   platform's. The :not()s lift it over a page's `.form select` rules, which set the background shorthand. */
+select:not([multiple]):not([size]) {
+  -webkit-appearance: none; appearance: none; padding-right: 32px;
+  background-image: var(--md3-select-chevron); background-repeat: no-repeat; background-position: right 8px center; background-size: 18px 18px;
+}
 /* Segmented buttons (M3): outlined pill, secondary-container when selected. */
 .mn-segmented { border: 1px solid var(--md-sys-color-outline); border-radius: var(--md-sys-shape-corner-full); padding: 0; overflow: hidden; box-shadow: none; background: transparent; }
 .mn-segmented button { border-radius: 0; box-shadow: none; }

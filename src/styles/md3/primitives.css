@@ -82,7 +82,7 @@
 
   /* ── Outlined text field (M3) for plain inputs (search boxes in filter panels) ── */
   .md3-text-field {
-    width: 100%; min-width: 0; height: 56px; padding: 0 16px; border: 1px solid var(--md-sys-color-outline); border-radius: var(--md-sys-shape-corner-extra-small);
+    width: 100%; min-width: 0; height: 56px; padding: 0 16px; border: 1px solid var(--md-sys-color-outline); border-radius: var(--md-sys-shape-corner-medium);
     background: transparent; color: var(--md-sys-color-on-surface);
     font: inherit; font-size: var(--md-sys-typescale-body-large-size); line-height: var(--md-sys-typescale-body-large-line-height); letter-spacing: var(--md-sys-typescale-body-large-tracking);
   }
@@ -167,16 +167,40 @@
   :is(.md3-button--filled, .md3-button--tonal, .md3-icon-button--filled, .md3-icon-button--tonal):is(:disabled, [aria-disabled="true"]) { background: rgb(var(--md-sys-color-on-surface-rgb) / 0.12); }
   :is(.md3-button--outlined, .md3-icon-button--outlined):is(:disabled, [aria-disabled="true"]) { border-color: rgb(var(--md-sys-color-on-surface-rgb) / 0.12); }
 
-  /* ── Range input styled as an M3 slider (single thumb). Set --md3-range-progress for the active track. ── */
-  .md3-range { height: 20px; margin: 0; background: transparent; cursor: pointer; -webkit-appearance: none; appearance: none; }
-  .md3-range::-webkit-slider-runnable-track { height: 4px; border-radius: 999px; background: linear-gradient(to right, var(--md-sys-color-primary) var(--md3-range-progress, 0%), var(--md-sys-color-secondary-container) var(--md3-range-progress, 0%)); }
-  .md3-range::-moz-range-track { height: 4px; border-radius: 999px; background: var(--md-sys-color-secondary-container); }
-  .md3-range::-moz-range-progress { height: 4px; border-radius: 999px; background: var(--md-sys-color-primary); }
-  .md3-range::-webkit-slider-thumb { width: 20px; height: 20px; margin-top: -8px; border: 0; border-radius: 50%; background: var(--md-sys-color-primary); -webkit-appearance: none; appearance: none; }
-  .md3-range::-moz-range-thumb { width: 20px; height: 20px; border: 0; border-radius: 50%; background: var(--md-sys-color-primary); }
+  /* ── Range input styled as the site's slider (MoeSekai's: a 6px track, a raised round handle; the theme's MuiSlider).
+        Set --md3-range-progress for the active track. ── */
+  .md3-range { height: 20px; margin: 0; background: transparent; cursor: pointer; -webkit-appearance: none; appearance: none; accent-color: auto; }
+  .md3-range::-webkit-slider-runnable-track { height: 6px; border-radius: 999px; background: linear-gradient(to right, var(--md-sys-color-primary) var(--md3-range-progress, 0%), var(--md-sys-color-surface-container-highest) var(--md3-range-progress, 0%)); }
+  .md3-range::-moz-range-track { height: 6px; border-radius: 999px; background: var(--md-sys-color-surface-container-highest); }
+  .md3-range::-moz-range-progress { height: 6px; border-radius: 999px; background: var(--md-sys-color-primary); }
+  .md3-range::-webkit-slider-thumb { width: 20px; height: 20px; margin-top: -7px; border: 0; border-radius: 50%; background: var(--md-sys-color-primary); box-shadow: var(--md-sys-elevation-level1); -webkit-appearance: none; appearance: none; }
+  .md3-range::-moz-range-thumb { width: 20px; height: 20px; border: 0; border-radius: 50%; background: var(--md-sys-color-primary); box-shadow: var(--md-sys-elevation-level1); }
+  .md3-range:disabled { opacity: 0.38; cursor: not-allowed; }
   .md3-range:focus-visible { outline: none; }
-  .md3-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 8px rgb(var(--md-sys-color-primary-rgb) / 0.12); }
-  .md3-range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 8px rgb(var(--md-sys-color-primary-rgb) / 0.12); }
+  .md3-range:focus-visible::-webkit-slider-thumb { box-shadow: var(--md-sys-elevation-level1), 0 0 0 8px rgb(var(--md-sys-color-primary-rgb) / 0.12); }
+  .md3-range:focus-visible::-moz-range-thumb { box-shadow: var(--md-sys-elevation-level1), 0 0 0 8px rgb(var(--md-sys-color-primary-rgb) / 0.12); }
+
+  /* ── Checkbox (M3) for a native input: an 18dp box with a 2dp on-surface-variant outline, filled with primary and
+        checked when on. The check is an image, so its color is set per theme (on-primary is white in light, dark in dark). ── */
+  .md3-checkbox {
+    -webkit-appearance: none; appearance: none; display: inline-block; flex: none; width: 18px; height: 18px; margin: 3px; vertical-align: middle;
+    border: 2px solid var(--md-sys-color-on-surface-variant); border-radius: 2px; background: transparent no-repeat center / 14px 14px; cursor: pointer;
+    transition: background-color var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard), border-color var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+  }
+  .md3-checkbox:checked { border-color: var(--md-sys-color-primary); background-color: var(--md-sys-color-primary); background-image: var(--md3-checkbox-check); }
+  .md3-checkbox:disabled { opacity: 0.38; cursor: not-allowed; }
+
+  /* ── Select (M3 outlined, as MoeSekai's): a native select with the medium shape and its own chevron. ── */
+  .md3-select {
+    -webkit-appearance: none; appearance: none; min-width: 0; height: 40px; padding: 0 36px 0 12px;
+    border: 1px solid var(--md-sys-color-outline); border-radius: var(--md-sys-shape-corner-medium);
+    background: transparent var(--md3-select-chevron) no-repeat right 10px center / 18px 18px; color: var(--md-sys-color-on-surface);
+    font: inherit; font-size: var(--md-sys-typescale-body-medium-size); line-height: var(--md-sys-typescale-body-medium-line-height); cursor: pointer;
+  }
+  .md3-select:hover { border-color: var(--md-sys-color-on-surface); }
+  .md3-select:focus-visible { outline: none; border-color: var(--md-sys-color-primary); box-shadow: inset 0 0 0 1px var(--md-sys-color-primary); }
+  .md3-select:disabled { opacity: 0.38; cursor: not-allowed; }
+  html[data-density="compact"] .md3-select { height: 36px; }
 
   /* ── Primary tabs (M3) for role="tablist" groups that are not MUI Tabs: label-large, 3dp indicator ── */
   .md3-tabs { display: flex; max-width: 100%; overflow-x: auto; border-bottom: 1px solid var(--md-sys-color-surface-container-highest); scrollbar-width: none; }

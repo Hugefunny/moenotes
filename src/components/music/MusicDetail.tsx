@@ -516,14 +516,8 @@ function AudioPlayer({ locale, src, title, label }: { locale: AppLocale; src: st
           max={duration || 100}
           value={currentTime}
           onChange={handleSeek}
-          className="flex-1 h-1.5 rounded-shape-sm appearance-none cursor-pointer bg-surface-container-highest accent-primary focus:outline-none"
-          style={{
-            background: `linear-gradient(to right, var(--md-sys-color-primary) 0%, var(--md-sys-color-primary) ${
-              duration ? (currentTime / duration) * 100 : 0
-            }%, var(--md-sys-color-surface-container-highest) ${
-              duration ? (currentTime / duration) * 100 : 0
-            }%, var(--md-sys-color-surface-container-highest) 100%)`,
-          }}
+          className="md3-range min-w-0 flex-1"
+          style={{ "--md3-range-progress": `${duration ? (currentTime / duration) * 100 : 0}%` } as React.CSSProperties}
         />
         <span className="font-mono text-label-small text-on-surface-variant shrink-0 w-8 text-right">
           {formatTime(duration)}

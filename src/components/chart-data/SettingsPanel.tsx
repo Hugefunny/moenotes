@@ -1,4 +1,4 @@
-import { startTransition, useEffect, useState } from "react";
+import { startTransition, useEffect, useState, type CSSProperties } from "react";
 import { X_MAX, meanSkill } from "@/lib/chart-data/ranking";
 import { RANGES, RANK_MAX, type ScenarioId } from "@/lib/chart-data/scenario";
 import { MAX_POWER, SKILL_SLOTS } from "@/lib/chart-data/query";
@@ -49,7 +49,7 @@ function AccuracySlider({ label, value, disabled = false, onValue, max = 100, st
   const [draft, setDraft] = useState(value);
   useEffect(() => setDraft(value), [value]);
   const commit = (input: HTMLInputElement) => { const next = Number(input.value); if (next !== value) startTransition(() => onValue(next)); };
-  return <label className="mn-cd-field"><span>{label}</span><input type="range" min={0} max={max} step={step} value={draft} disabled={disabled} aria-label={label} onChange={event => setDraft(Number(event.target.value))} onPointerUp={event => commit(event.currentTarget)} onPointerCancel={event => commit(event.currentTarget)} onKeyUp={event => commit(event.currentTarget)} onBlur={event => commit(event.currentTarget)} /><output>{format(draft)}</output></label>;
+  return <label className="mn-cd-field"><span>{label}</span><input type="range" className="md3-range" style={{ "--md3-range-progress": `${max > 0 ? (draft / max) * 100 : 0}%` } as CSSProperties} min={0} max={max} step={step} value={draft} disabled={disabled} aria-label={label} onChange={event => setDraft(Number(event.target.value))} onPointerUp={event => commit(event.currentTarget)} onPointerCancel={event => commit(event.currentTarget)} onKeyUp={event => commit(event.currentTarget)} onBlur={event => commit(event.currentTarget)} /><output>{format(draft)}</output></label>;
 }
 
 /**
@@ -157,7 +157,7 @@ export default function SettingsPanel({ ctx, event = false, frontier = false, ap
       ) : null}
       {frontier ? (
         <label className="mn-cd-check" title={ctx.snap?.active ? tr("snap.frontierUnavailable") : undefined}>
-          <input type="checkbox" checked={state.frontier} disabled={ctx.snap?.active} onChange={(e) => update({ frontier: e.target.checked })} />
+          <input type="checkbox" className="md3-checkbox" checked={state.frontier} disabled={ctx.snap?.active} onChange={(e) => update({ frontier: e.target.checked })} />
           {tr("frontier")}
         </label>
       ) : null}

@@ -219,7 +219,8 @@ function BandItemCard({ item, locale, onOpen }: { item: BandItemViewModel; local
               max={maxLevel}
               value={level}
               onChange={(event) => setLevel(Number(event.target.value))}
-              className="mt-2 w-full accent-primary"
+              className="md3-range mt-2 w-full"
+              style={{ "--md3-range-progress": `${maxLevel > 1 ? ((level - 1) / (maxLevel - 1)) * 100 : 0}%` } as React.CSSProperties}
               aria-label={t(locale, "bandItems.level", { level })}
             />
           </div>

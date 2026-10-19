@@ -52,7 +52,7 @@ export default function SnapRankingPanel({ ctx, catalogue, measurement, loading,
   const status = invalidMembers.length ? "invalidMember" : catalogueStatus ?? (current && measurement.status === "error" ? "calculationError"
     : current && measurement.status === "needs-context" ? "needsContext" : current && measurement.status === "unsupported" ? "unsupportedScenario" : null);
   return <ContentServerProvider server={server} servers={[server]}><div className="mn-cd-snap-area">
-    <div className="mn-cd-box-read"><label><input type="checkbox" checked={!!filter} disabled={collection.busy || !filterBox} onChange={event => setBoxOnly(event.target.checked)} />{boxTr("useBox")}</label>
+    <div className="mn-cd-box-read"><label><input type="checkbox" className="md3-checkbox" checked={!!filter} disabled={collection.busy || !filterBox} onChange={event => setBoxOnly(event.target.checked)} />{boxTr("useBox")}</label>
       <a href={localizePath(getRoutePathById("card-box"), locale)}>{boxTr("boxTitle")}</a>
       <p className="mn-cd-note">{boxTr(!collection.box ? "boxFilterMissing" : saveStatus === "loading" ? "boxSaveLoading"
         : saveStatus === "changed" || saveStatus === "error" ? "boxSaveUnavailable" : "boxFilterNote")}</p>

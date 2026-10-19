@@ -94,7 +94,7 @@ function ModuleRow({ locale, id, hidden, first, last, onMove, onToggle }: {
   return (
     <li className={`flex items-center gap-2 rounded-shape-lg border border-outline-variant px-3 py-2 ${hidden ? "bg-surface-container-highest" : "bg-surface-container-high"}`}>
       <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-3">
-        <input type="checkbox" checked={!hidden} onChange={onToggle} className="h-4 w-4 shrink-0 accent-primary" />
+        <input type="checkbox" checked={!hidden} onChange={onToggle} className="md3-checkbox" />
         <span className={`truncate text-label-large ${hidden ? "text-on-surface-variant line-through" : "text-on-surface"}`}>{name}</span>
       </label>
       <button type="button" className={arrow} disabled={first} onClick={() => onMove(-1)} aria-label={t(locale, "home.layout.moveUp", { name })} title={t(locale, "home.layout.moveUp", { name })}>

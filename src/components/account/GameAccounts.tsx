@@ -358,7 +358,7 @@ function ProfilePanel({
             checked={account.public}
             disabled={busy}
             onChange={(event) => onPublic(event.target.checked)}
-            className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+            className="md3-checkbox -mt-px"
           />
           <span className="min-w-0">
             <span className="block text-label-large text-on-surface">{t(locale, "account.profile.public")}</span>

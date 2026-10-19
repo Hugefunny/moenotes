@@ -390,7 +390,7 @@ function ControlGroup({ title, children }: { title: string; children: ReactNode 
 function Toggle({ label, checked, onChange, disabled = false }: { label: string; checked: boolean; onChange: (checked: boolean) => void; disabled?: boolean }) {
   return (
     <label className={`flex items-center gap-2 text-label-large text-on-surface ${disabled ? "opacity-45" : "cursor-pointer"}`}>
-      <input type="checkbox" className="h-4 w-4 accent-primary" checked={checked} disabled={disabled} onChange={(event) => onChange(event.target.checked)} />
+      <input type="checkbox" className="md3-checkbox" checked={checked} disabled={disabled} onChange={(event) => onChange(event.target.checked)} />
       {label}
     </label>
   );

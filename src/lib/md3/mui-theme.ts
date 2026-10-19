@@ -602,8 +602,9 @@ function components(density: Md3Density): ThemeOptions["components"] {
     },
     MuiOutlinedInput: {
       styleOverrides: {
+        // MoeSekai's text fields and selects take the medium shape (12px), not M3 baseline's extra-small.
         root: {
-          borderRadius: shape.xs,
+          borderRadius: shape.md,
           "& .MuiOutlinedInput-notchedOutline": { borderColor: c("outline") },
           "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: c("on-surface") },
           "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: c("primary"), borderWidth: 2 },

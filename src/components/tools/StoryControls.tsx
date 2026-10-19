@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 import type { StoryPlayer } from "ournotes-player/story";
 import type { AppLocale } from "@/config/locales";
 import { t } from "@/i18n";
@@ -376,6 +376,7 @@ export default function StoryControls({ locale, player, surface, simple, fullscr
               onKeyUp={commitDrag}
               onBlur={commitDrag}
               className={RANGE}
+              style={rangeProgress(lineValue, lastLine)}
             />
             {video && (
               <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -395,6 +396,7 @@ export default function StoryControls({ locale, player, surface, simple, fullscr
                   onKeyUp={commitDrag}
                   onBlur={commitDrag}
                   className={RANGE}
+                  style={rangeProgress(videoValue, video.duration)}
                 />
               </div>
             )}
@@ -492,6 +494,7 @@ function SettingsPanel({ locale, simple, volumes, speed, onVolume, onSpeed, onCl
                   value={volume.level}
                   onChange={(event) => onVolume(category, { level: Number(event.target.value), muted: false })}
                   className={RANGE}
+                  style={rangeProgress(volume.level, 1)}
                 />
               </label>
               <span className="w-9 shrink-0 text-right font-mono text-label-small tabular-nums text-white/60">{storyVolumeLevel(volume) === 0 ? 0 : Math.round(volume.level * 100)}%</span>
@@ -549,7 +552,9 @@ function BarButton({ label, pressed, wide = false, disabled = false, onClick, ch
   );
 }
 
-const RANGE = "h-1.5 min-w-0 flex-1 cursor-pointer accent-primary disabled:cursor-default disabled:opacity-40";
+const RANGE = "md3-range min-w-0 flex-1 disabled:cursor-default";
+/** The active track of a `md3-range` (src/styles/md3/primitives.css) at `value` of `max`. */
+const rangeProgress = (value: number, max: number) => ({ "--md3-range-progress": `${max > 0 ? Math.min(100, (value / max) * 100) : 0}%` }) as CSSProperties;
 
 /** The player's state for the controls; `refresh` after a call that emits no event (auto, speed). */
 function usePlayerState(player: StoryPlayer): [PlayerState, () => void] {
