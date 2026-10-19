@@ -191,4 +191,17 @@
   .md3-tab[aria-selected="true"]::after, .md3-tab[aria-pressed="true"]::after, .md3-tab[aria-current="page"]::after {
     content: ""; position: absolute; left: 16px; right: 16px; bottom: 0; height: 3px; border-radius: 3px 3px 0 0; background: var(--md-sys-color-primary);
   }
+
+  /* ── Menu item (M3) for menus that are not MUI Menus (src/components/shared/Popover.tsx): a full-width row as the
+     theme's MenuItem draws it, label-large, the chosen one on secondary-container. Pair with md3-state. ── */
+  .md3-menu-item {
+    display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 0 12px;
+    border: 0; border-radius: 0; background: transparent; color: var(--md-sys-color-on-surface); text-align: left;
+    font: inherit; font-size: var(--md-sys-typescale-label-large-size); line-height: var(--md-sys-typescale-label-large-line-height); font-weight: 500; letter-spacing: var(--md-sys-typescale-label-large-tracking);
+    cursor: pointer;
+  }
+  html[data-density="compact"] .md3-menu-item { min-height: 40px; }
+  .md3-menu-item:focus-visible { outline-offset: -3px; }
+  .md3-menu-item:is([aria-checked="true"], [aria-pressed="true"], [aria-current="true"]) { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
+  .md3-menu-item:disabled { opacity: 0.38; cursor: not-allowed; }
 }

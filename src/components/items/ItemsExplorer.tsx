@@ -112,7 +112,7 @@ export default function ItemsExplorer({ locale, servers, initialItems }: Props) 
               <button
                 ref={ref as React.Ref<HTMLButtonElement>}
                 type="button"
-                className="md3-state flex w-full items-center justify-between rounded-full border border-outline-variant bg-surface-container px-5 py-2.5 text-label-large text-on-surface shadow-elevation-1 cursor-pointer"
+                className="md3-state flex w-full items-center justify-between rounded-full bg-surface-container-high px-5 py-2.5 text-label-large text-on-surface cursor-pointer"
                 onClick={onClick}
                 {...aria}
               >
@@ -124,10 +124,12 @@ export default function ItemsExplorer({ locale, servers, initialItems }: Props) 
             )}
           >
             {({ close: closePopover }) => (
-              <div className="flex flex-col gap-0.5">
+              <div>
                 <button
                   type="button"
-                  className={`text-left block w-full rounded-full px-4 py-2 text-label-large transition hover:bg-surface-container-highest cursor-pointer ${selectedGroups.length === 0 ? "bg-secondary-container text-primary" : "text-on-surface-variant hover:text-on-surface"}`}
+                  role="menuitemradio"
+                  aria-checked={selectedGroups.length === 0}
+                  className="md3-menu-item md3-state"
                   onClick={() => {
                     setSelectedGroups([]);
                     closePopover();
@@ -139,7 +141,9 @@ export default function ItemsExplorer({ locale, servers, initialItems }: Props) 
                   <button
                     key={value}
                     type="button"
-                    className={`text-left block w-full rounded-full px-4 py-2 text-label-large transition hover:bg-surface-container-highest cursor-pointer ${selectedGroups.includes(value) ? "bg-secondary-container text-primary" : "text-on-surface-variant hover:text-on-surface"}`}
+                    role="menuitemradio"
+                    aria-checked={selectedGroups.includes(value)}
+                    className="md3-menu-item md3-state"
                     onClick={() => {
                       setSelectedGroups([value]);
                       closePopover();

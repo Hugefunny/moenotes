@@ -200,7 +200,7 @@ function ScopeSelect({ title, value, options, onChange }: { title: string; value
   return (
     <FilterSection title={title}>
       <Popover matchTriggerWidth trigger={({ ref, onClick, ...aria }) => (
-        <button ref={ref} type="button" onClick={onClick} {...aria} disabled={!options.length} aria-label={`${title}: ${options.find((option) => option.value === value)?.label ?? ""}`} className="md3-state flex w-full items-center justify-between gap-2 rounded-shape-md border border-outline-variant bg-surface-container-low px-3 py-2.5 text-left text-label-large disabled:opacity-50">
+        <button ref={ref} type="button" onClick={onClick} {...aria} disabled={!options.length} aria-label={`${title}: ${options.find((option) => option.value === value)?.label ?? ""}`} className="md3-state flex w-full items-center justify-between gap-2 rounded-full bg-surface-container-high px-5 py-2.5 text-left text-label-large disabled:opacity-50">
           <span className="flex min-w-0 items-center gap-2">
             {selected?.flag && <ServerFlag server={selected.flag} className="h-4 w-4" />}
             <span className="min-w-0 truncate">{selected?.label ?? "—"}</span>
@@ -209,9 +209,9 @@ function ScopeSelect({ title, value, options, onChange }: { title: string; value
         </button>
       )}>
         {({ close }) => (
-          <div className="space-y-1" role="group" aria-label={title}>
+          <div role="group" aria-label={title}>
             {options.map((option) => (
-              <button key={option.value} type="button" aria-pressed={option.value === value} className={`flex w-full items-center gap-2 rounded-shape-sm px-3 py-2 text-left text-body-medium ${option.value === value ? "bg-secondary-container font-bold text-primary" : "hover:bg-surface-container"}`} onClick={() => { onChange(option.value); close(); }}>
+              <button key={option.value} type="button" aria-pressed={option.value === value} className="md3-menu-item md3-state" onClick={() => { onChange(option.value); close(); }}>
                 {option.flag && <ServerFlag server={option.flag} className="h-4 w-4" />}
                 {option.label}
               </button>

@@ -61,16 +61,13 @@
 .cb-coverage>label{align-items:center;min-height:40px;cursor:pointer;font-size:12px;gap:8px}
 .cb-coverage input{width:16px;height:16px;accent-color:var(--md-sys-color-primary)}
 .cb-coverage>p{flex-basis:100%;font-size:12px;color:var(--md-sys-color-on-surface-variant);margin:0;max-width:72ch;line-height:1.6}
-.cb-action-popover{z-index:230;color:var(--md-sys-color-on-surface);background:var(--md-sys-color-surface-container-low);border:1px solid var(--md-sys-color-outline-variant);border-radius: var(--md-sys-shape-corner-medium);box-shadow:var(--md-sys-elevation-level1);overscroll-behavior:contain}
-.cb-action-menu{padding:8px;display:grid;font-family:var(--md-ref-typeface-plain);font-size:13px}
-.cb-action-menu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;min-height:44px;padding:10px 12px;border:0;border-radius: var(--md-sys-shape-corner-small);background:transparent;color:var(--md-sys-color-on-surface);font:inherit;cursor:pointer;touch-action:manipulation}
-.cb-action-menu button:hover{background:var(--md-sys-color-secondary-container);color:var(--md-sys-color-primary)}
-.cb-action-menu button:focus-visible{outline:2px solid var(--md-sys-color-primary);outline-offset:-2px;background:var(--md-sys-color-secondary-container)}
-.cb-action-menu button:disabled{opacity:.5;cursor:not-allowed}
+/* The box menu: the shared menu panel (.mn-popover-panel) and rows (.md3-menu-item). */
+.cb-action-popover{z-index:230;overscroll-behavior:contain}
+.cb-action-menu{display:grid}
 .cb-action-menu button>svg{flex-shrink:0}
 .cb-menu-label{margin:8px 12px 4px;padding-top:12px;border-top:1px solid var(--md-sys-color-outline-variant);font-size:11px;font-weight:500;color:var(--md-sys-color-on-surface-variant)}
 .cb-action-menu>p{font-size:11px;line-height:1.6;color:var(--md-sys-color-on-surface-variant);margin:6px 12px 12px}
-.cb-action-menu>.cb-delete-action{margin-top:4px;border-top:1px solid var(--md-sys-color-outline-variant);border-radius:0;color:var(--md-sys-color-error)}
+.cb-action-menu>.cb-delete-action{margin-top:4px;border-top:1px solid var(--md-sys-color-outline-variant);color:var(--md-sys-color-error)}
 .cb-empty-collection{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:40px;padding:40px 16px 48px;border-top:1px solid var(--md-sys-color-outline-variant);min-width:0}
 .cb-empty-copy{max-width:42ch;min-width:0}
 .cb-empty-copy h2{font-size:23px;font-weight:500;line-height:1.45;margin:0 0 12px;text-wrap:balance}

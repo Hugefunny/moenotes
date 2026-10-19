@@ -25,13 +25,13 @@ export default function CollectionActionMenu({ locale, busy, onAdd, onExport, on
         if (next === null) return;
         event.preventDefault(); entries[next]!.focus();
       }}>
-        {onAdd && <button type="button" role="menuitem" disabled={busy} onClick={() => finish(onAdd)}><CollectionIcon name="add" />{label("add")}</button>}
+        {onAdd && <button type="button" role="menuitem" className="md3-menu-item md3-state" disabled={busy} onClick={() => finish(onAdd)}><CollectionIcon name="add" />{label("add")}</button>}
         <div className="cb-menu-label">{label("backup")}</div>
-        {onExport && <button type="button" role="menuitem" disabled={busy} onClick={() => finish(onExport)}><CollectionIcon name="export" />{label("export")}</button>}
-        {onImport && <button type="button" role="menuitem" disabled={busy} onClick={() => finish(onImport)}><CollectionIcon name="import" />{label("import")}</button>}
+        {onExport && <button type="button" role="menuitem" className="md3-menu-item md3-state" disabled={busy} onClick={() => finish(onExport)}><CollectionIcon name="export" />{label("export")}</button>}
+        {onImport && <button type="button" role="menuitem" className="md3-menu-item md3-state" disabled={busy} onClick={() => finish(onImport)}><CollectionIcon name="import" />{label("import")}</button>}
         <p>{label("backupNote")}</p>
-        {onStorage && <button type="button" role="menuitem" disabled={busy} onClick={() => finish(onStorage)}><CollectionIcon name="storage" />{label("storage")}</button>}
-        {onDelete && <button type="button" role="menuitem" className="cb-delete-action" disabled={busy} onClick={() => finish(onDelete)}><CollectionIcon name="delete" />{label("delete")}</button>}
+        {onStorage && <button type="button" role="menuitem" className="md3-menu-item md3-state" disabled={busy} onClick={() => finish(onStorage)}><CollectionIcon name="storage" />{label("storage")}</button>}
+        {onDelete && <button type="button" role="menuitem" className="md3-menu-item md3-state cb-delete-action" disabled={busy} onClick={() => finish(onDelete)}><CollectionIcon name="delete" />{label("delete")}</button>}
       </div>;
     }}
   </Popover>;

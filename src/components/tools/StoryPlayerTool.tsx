@@ -352,7 +352,7 @@ function LanguageSelect({ locale, languages, value, busy, onChange }: {
             onChange(code);
             close();
           }}
-          className={`w-full rounded-shape-md px-4 py-2 text-left text-label-large transition hover:bg-surface-container-highest ${code === value ? "bg-secondary-container text-primary" : "text-on-surface-variant hover:text-on-surface"}`}
+          className="md3-menu-item md3-state"
         >
           {t(locale, `storyPlayer.languages.${code}`)}
         </button>

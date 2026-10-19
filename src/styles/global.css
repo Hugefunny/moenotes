@@ -76,10 +76,14 @@ body {
   min-width: 0;
 }
 
-/* Focus: one M3 focus indicator everywhere (3px secondary ring, 2px gap). */
-:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
-  outline: 3px solid var(--md-sys-color-secondary);
-  outline-offset: 2px;
+/* Focus: one M3 focus indicator everywhere (3px secondary ring, 2px gap). In the components layer: above MUI's, so it
+   replaces MUI's `outline: 0`, and below the utilities, so a control can move the ring (inside a clipping row) or
+   draw its own (a text field's border). */
+@layer components {
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 3px solid var(--md-sys-color-secondary);
+    outline-offset: 2px;
+  }
 }
 :where(button):disabled { cursor: not-allowed; }
 
