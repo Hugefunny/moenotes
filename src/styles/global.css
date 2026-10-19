@@ -3,6 +3,9 @@
    so `className` utilities can adjust a MUI component. */
 @layer theme, base, mui, components, utilities;
 @import "tailwindcss";
+/* `dark:` follows the site's color scheme, as the M3 colors do (`data-theme` on <html>, set before the first paint by
+   src/lib/settings/apply-theme.ts), not the system's: the two differ whenever the settings pin light or dark. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 @import "./md3/colors.css";
 @import "./md3/tokens.css";
 @import "./md3/tailwind.css";
