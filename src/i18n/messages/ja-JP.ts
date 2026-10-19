@@ -799,6 +799,8 @@ export const jaJP = {
     noFilesHere: "このフォルダーには直接のファイルがありません。",
     preview: "プレビュー",
     openImage: "画像を開く",
+    download: "ダウンロード",
+    downloading: "ダウンロード中…",
   },
   notFound: {"metaTitle": "ページが見つかりません", "title": "この信号は星図の外へ。", "description": "アドレスが変わったか、ページを準備中です。ホームに戻って探索を続けましょう。", "note": "有効なリンクのはずであれば、開発者にお知らせください。", "home": "ホームに戻る", "feedback": "リンクを報告"},
   nav: {

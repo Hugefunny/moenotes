@@ -810,6 +810,8 @@ export const enUS = {
     noFilesHere: "No files directly in this folder.",
     preview: "Preview",
     openImage: "Open original image",
+    download: "Download",
+    downloading: "Downloading…",
   },
   notFound: {"metaTitle": "Page not found", "title": "This signal drifted beyond our star chart.", "description": "The address may have changed, or this page is still being prepared. Return home to keep exploring.", "note": "If this link should work, send it to the developers so we can find our way back.", "home": "Back to home", "feedback": "Report this link"},
   nav: {

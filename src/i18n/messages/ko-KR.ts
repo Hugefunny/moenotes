@@ -800,6 +800,8 @@ export const koKR = {
     noFilesHere: "이 폴더에는 직접 파일이 없습니다.",
     preview: "미리보기",
     openImage: "원본 이미지 열기",
+    download: "다운로드",
+    downloading: "다운로드 중…",
   },
   notFound: {"metaTitle": "페이지를 찾을 수 없습니다", "title": "이 신호가 별지도 밖으로 떠났어요.", "description": "주소가 바뀌었거나 페이지를 준비 중입니다. 홈으로 돌아가 탐색을 계속해 보세요.", "note": "유효한 링크라면 개발자에게 알려 주세요.", "home": "홈으로 돌아가기", "feedback": "링크 신고"},
   nav: {

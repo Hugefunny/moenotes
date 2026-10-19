@@ -802,6 +802,8 @@ export const zhCN = {
     noFilesHere: "当前目录下无直接文件。",
     preview: "预览",
     openImage: "查看原图",
+    download: "下载",
+    downloading: "正在下载…",
   },
   notFound: {"metaTitle": "页面未找到", "title": "这段讯号，漂出了星图。", "description": "地址可能已经改变，或页面仍在准备中。回到首页，继续探索我们的星空吧。", "note": "如果这个链接本应有效，欢迎反馈给开发者，帮助我们找回这段讯号。", "home": "返回首页", "feedback": "反馈这个链接"},
   nav: {

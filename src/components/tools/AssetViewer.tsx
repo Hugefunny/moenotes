@@ -39,7 +39,8 @@ type IconName =
   | "copy"
   | "check"
   | "search"
-  | "close";
+  | "close"
+  | "download";
 
 type FileCategory = "all" | "folder" | "image" | "audio" | "video" | "data";
 
@@ -147,6 +148,13 @@ function Icon({ name, className = "" }: { name: IconName; className?: string }) 
       </>
     ),
     close: <path d="M18 6 6 18M6 6l12 12" />,
+    download: (
+      <>
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="7 10 12 15 17 10" />
+        <line x1="12" x2="12" y1="15" y2="3" />
+      </>
+    ),
   };
 
   const hasWidth = /\bw-/.test(className);
@@ -857,6 +865,7 @@ function ContentDetails({
   server,
 }: Props & { isOpen: boolean; file: BundleContent | null; onClose: () => void; server: GameServer }) {
   const [copyPathState, setCopyPathState] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const preview = file ? getAssetBrowserPreview(file.path, locale, server) : null;
 
   const copyPath = async () => {
@@ -870,6 +879,45 @@ function ContentDetails({
     }
   };
 
+  const downloadFile = async (url: string, filename: string) => {
+    setDownloading(true);
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(objectUrl);
+    } catch {
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.target = "_blank";
+      a.rel = "noreferrer";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const previewFileName = useMemo(() => {
+    if (!preview?.url) return "";
+    try {
+      const urlObj = new URL(preview.url);
+      const name = urlObj.pathname.split("/").filter(Boolean).pop();
+      return name || "download";
+    } catch {
+      return preview.url.split("/").pop() || "download";
+    }
+  }, [preview?.url]);
+
   return (
     <Modal isOpen={isOpen && Boolean(file)} onClose={onClose} title={t(locale, "assetBrowser.fileDetails")} closeLabel={t(locale, "actions.close")} size="lg">
       {file && (
@@ -877,19 +925,45 @@ function ContentDetails({
           {/* Large Preview */}
           <div className="rounded-shape-md border border-outline-variant bg-surface-container p-4 text-center">
             {preview?.type === "image" ? (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <img src={preview.url} alt={file.path} className="max-h-80 max-w-full rounded-shape-sm object-contain mx-auto shadow-sm" />
-                <a
-                  href={preview.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-block text-label-medium text-primary hover:underline"
-                >
-                  {t(locale, "assetBrowser.openImage")} ↗
-                </a>
+                <div className="flex items-center justify-center gap-4 text-label-medium">
+                  <button
+                    type="button"
+                    disabled={downloading}
+                    className="inline-flex items-center gap-1.5 text-primary hover:underline disabled:opacity-50"
+                    onClick={() => downloadFile(preview.url, previewFileName || "image.webp")}
+                  >
+                    <Icon name="download" className="h-4 w-4" />
+                    <span>{t(locale, downloading ? "assetBrowser.downloading" : "assetBrowser.download")}</span>
+                  </button>
+                  <span aria-hidden="true" className="text-on-surface-variant">·</span>
+                  <a
+                    href={preview.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 text-primary hover:underline"
+                  >
+                    <span>{t(locale, "assetBrowser.openImage")}</span>
+                    <span aria-hidden="true">↗</span>
+                  </a>
+                </div>
               </div>
             ) : preview?.type === "audio" ? (
-              <audio controls src={preview.url} className="w-full" />
+              <div className="space-y-3">
+                <audio controls src={preview.url} className="w-full" />
+                <div className="flex items-center justify-center text-label-medium">
+                  <button
+                    type="button"
+                    disabled={downloading}
+                    className="inline-flex items-center gap-1.5 text-primary hover:underline disabled:opacity-50"
+                    onClick={() => downloadFile(preview.url, previewFileName || "audio.m4a")}
+                  >
+                    <Icon name="download" className="h-4 w-4" />
+                    <span>{t(locale, downloading ? "assetBrowser.downloading" : "assetBrowser.download")}</span>
+                  </button>
+                </div>
+              </div>
             ) : (
               <div className="flex items-center gap-3 py-4">
                 <Icon name={fileIcon(file)} className="h-8 w-8 text-primary shrink-0" />
@@ -901,16 +975,43 @@ function ContentDetails({
             )}
           </div>
 
-          {/* Quick Copy Path */}
+          {/* Quick Actions: Download + Copy Path */}
           <div>
-            <button
-              type="button"
-              className={`${buttonClass} w-full border border-outline-variant text-body-small flex items-center justify-center gap-1.5 py-2`}
-              onClick={copyPath}
-            >
-              <Icon name={copyPathState ? "check" : "copy"} className={copyPathState ? "text-emerald-500" : ""} />
-              <span>{t(locale, copyPathState ? "assetBrowser.copied" : "assetBrowser.copy")}</span>
-            </button>
+            {preview ? (
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  disabled={downloading}
+                  className="flex items-center justify-center gap-2 rounded-shape-sm bg-primary px-4 py-2 text-label-medium text-on-primary shadow-xs transition hover:opacity-90 disabled:opacity-50"
+                  onClick={() => downloadFile(preview.url, previewFileName)}
+                >
+                  <Icon name="download" className="h-4 w-4" />
+                  <span>{t(locale, downloading ? "assetBrowser.downloading" : "assetBrowser.download")}</span>
+                </button>
+                <button
+                  type="button"
+                  className={`${buttonClass} border border-outline-variant text-body-small flex items-center justify-center gap-1.5 py-2`}
+                  onClick={copyPath}
+                >
+                  <Icon name={copyPathState ? "check" : "copy"} className={copyPathState ? "text-emerald-500" : ""} />
+                  <span>{t(locale, copyPathState ? "assetBrowser.copied" : "assetBrowser.copy")}</span>
+                </button>
+              </div>
+            ) : (
+              <div>
+                <button
+                  type="button"
+                  className={`${buttonClass} w-full border border-outline-variant text-body-small flex items-center justify-center gap-1.5 py-2`}
+                  onClick={copyPath}
+                >
+                  <Icon name={copyPathState ? "check" : "copy"} className={copyPathState ? "text-emerald-500" : ""} />
+                  <span>{t(locale, copyPathState ? "assetBrowser.copied" : "assetBrowser.copy")}</span>
+                </button>
+                <p className="mt-2 text-center text-label-small text-on-surface-variant">
+                  {t(locale, "assetBrowser.previewUnavailable")}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Clean Property List (No technical IDs) */}

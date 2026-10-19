@@ -801,6 +801,8 @@ export const zhTW = {
     noFilesHere: "目前目錄下無直接檔案。",
     preview: "預覽",
     openImage: "檢視原圖",
+    download: "下載",
+    downloading: "正在下載…",
   },
   notFound: {"metaTitle": "找不到頁面", "title": "這段訊號，漂出了星圖。", "description": "網址可能已經改變，或頁面仍在準備中。回到首頁，繼續探索我們的星空吧。", "note": "如果這個連結本應有效，歡迎回報給開發者，幫助我們找回這段訊號。", "home": "返回首頁", "feedback": "回報這個連結"},
   nav: {
