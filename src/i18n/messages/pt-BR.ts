@@ -304,7 +304,7 @@ export const ptBR = {
     gameServer: "Servidor de jogo padrão",
     gameServerAuto: "Automático ({server})",
     options: { system: "Sistema", light: "Claro", dark: "Escuro" },
-    tabs: { label: "Seções de configurações", general: "Geral", data: "Dados" },
+    tabs: { label: "Seções de configurações", data: "Dados" },
     data: {
       cacheTitle: "Cache de download",
       total: "Em cache",

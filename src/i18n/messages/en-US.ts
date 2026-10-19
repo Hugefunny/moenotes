@@ -1005,7 +1005,7 @@ export const enUS = {
       light: "Light",
       dark: "Dark",
     },
-    tabs: { label: "Settings sections", general: "General", data: "Data" },
+    tabs: { label: "Settings sections", appearance: "Appearance", content: "Content", data: "Data" },
     accent: { title: "Theme color", default: "Default" },
     density: { title: "Density", comfortable: "Comfortable", compact: "Compact" },
     songTitles: { title: "Song titles", forceJapanese: "Always show Japanese titles", hint: "Show every song under its original Japanese title, whatever the site language." },

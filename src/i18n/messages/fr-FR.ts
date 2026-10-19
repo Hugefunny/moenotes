@@ -304,7 +304,7 @@ export const frFR = {
     gameServer: "Serveur de jeu par défaut",
     gameServerAuto: "Automatique ({server})",
     options: { system: "Système", light: "Clair", dark: "Sombre" },
-    tabs: { label: "Sections des paramètres", general: "Général", data: "Données" },
+    tabs: { label: "Sections des paramètres", data: "Données" },
     data: {
       cacheTitle: "Cache de téléchargement",
       total: "Mis en cache",

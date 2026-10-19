@@ -304,7 +304,7 @@ export const ruRU = {
     gameServer: "Игровой сервер по умолчанию",
     gameServerAuto: "Авто ({server})",
     options: { system: "Системная", light: "Светлая", dark: "Тёмная" },
-    tabs: { label: "Категории настроек", general: "Общие", data: "Данные" },
+    tabs: { label: "Категории настроек", data: "Данные" },
     data: {
       cacheTitle: "Кэш загрузок",
       total: "В кэше",

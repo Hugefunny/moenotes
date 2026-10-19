@@ -1039,7 +1039,7 @@ export const jaJP = {
       light: "ライト",
       dark: "ダーク",
     },
-    tabs: { label: "設定の分類", general: "一般", data: "データ" },
+    tabs: { label: "設定の分類", appearance: "外観", content: "コンテンツ", data: "データ" },
     accent: { title: "テーマカラー", default: "デフォルト" },
     density: { title: "表示密度", comfortable: "ゆったり", compact: "コンパクト" },
     songTitles: { title: "楽曲名", forceJapanese: "常に日本語の曲名を表示", hint: "サイトの言語にかかわらず、楽曲を日本語の原題で表示します。" },

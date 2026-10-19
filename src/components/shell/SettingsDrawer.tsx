@@ -48,9 +48,11 @@ interface SettingsDrawerProps {
   bands?: ThemeBandColor[];
 }
 
-type SettingsTab = "general" | "data";
+/** MoeSekai's grouping: how the site looks, what it shows, what the browser keeps. */
+type SettingsTab = "appearance" | "content" | "data";
 const SETTINGS_TABS: readonly { key: SettingsTab; icon: IconName }[] = [
-  { key: "general", icon: "tune" },
+  { key: "appearance", icon: "palette" },
+  { key: "content", icon: "tune" },
   { key: "data", icon: "database" },
 ];
 
@@ -74,7 +76,7 @@ const BOTTOM_SHEET_SX = { "& > .MuiDrawer-paper": { maxHeight: "92dvh" } };
 /** Settings as a Material 3 modal sheet: floating at the side on wide screens, a bottom sheet on phones. */
 function SettingsDrawer({ locale, pathname, bands = [] }: SettingsDrawerProps) {
   const { isOpen, close } = useOverlay("settings");
-  const [tab, setTab] = useState<SettingsTab>("general");
+  const [tab, setTab] = useState<SettingsTab>("appearance");
   const id = useId();
   const titleId = `${id}-title`;
   const isTop = useOverlayLayer(`settings-${id}`, isOpen, close);
@@ -133,22 +135,21 @@ function SettingsDrawer({ locale, pathname, bands = [] }: SettingsDrawerProps) {
         className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-5"
       >
         <div key={tab} className="mn-tab-enter">
-          {tab === "general" ? <GeneralSettings locale={locale} pathname={pathname} bands={bands} /> : <DataSettings locale={locale} />}
+          {tab === "appearance" ? <AppearanceSettings locale={locale} pathname={pathname} bands={bands} />
+            : tab === "content" ? <ContentSettings locale={locale} />
+            : <DataSettings locale={locale} />}
         </div>
       </div>
     </SwipeableDrawer>
   );
 }
 
-function GeneralSettings({ locale, pathname, bands = [] }: SettingsDrawerProps) {
+const flag = (src: string) => <img src={src} alt="" aria-hidden="true" loading="lazy" decoding="async" className="h-5 w-5 shrink-0 rounded-full" />;
+
+/** How the site looks: color scheme, theme color, density, and the interface language. */
+function AppearanceSettings({ locale, pathname, bands = [] }: SettingsDrawerProps) {
   const { settings, updateSettings } = useSettings();
   const update = (patch: Partial<AppSettings>) => updateSettings(patch);
-  const flag = (src: string) => <img src={src} alt="" aria-hidden="true" loading="lazy" decoding="async" className="h-5 w-5 shrink-0 rounded-full" />;
-  const serverFlag = (value: AppSettings["gameServer"]) => flag(serverFlagIconSrc(value === "auto" ? defaultGameServer(locale) : value));
-  const serverLabel = (value: AppSettings["gameServer"]) =>
-    value === "auto"
-      ? t(locale, "settings.gameServerAuto", { server: t(locale, `gameServer.names.${defaultGameServer(locale)}`) })
-      : t(locale, `gameServer.names.${value}`);
   const assetUrl = useAssetUrl();
   const accents: AccentOption[] = [
     { key: DEFAULT_ACCENT, label: t(locale, "settings.accent.default"), color: MD3_DEFAULT_SEED },
@@ -158,32 +159,6 @@ function GeneralSettings({ locale, pathname, bands = [] }: SettingsDrawerProps) 
 
   return (
     <div className="space-y-6">
-      <Section title={t(locale, "settings.language")}>
-        <TextField
-          select
-          fullWidth
-          size="small"
-          value={locale}
-          onChange={(event) => {
-            const next = event.target.value as AppLocale;
-            if (next !== locale) window.location.href = switchLocalePath(pathname, next);
-          }}
-          sx={SELECT_SX}
-          slotProps={{
-            select: { IconComponent: SelectChevron, renderValue: (value) => <span className="flex items-center gap-3">{flag(flagIconSrc(value as AppLocale))}{LOCALE_LABELS[value as AppLocale]}</span> },
-            htmlInput: { "aria-label": t(locale, "settings.language") },
-          }}
-        >
-          {SUPPORTED_LOCALES.map((item) => (
-            <MenuItem key={item} value={item} lang={item}>
-              <ListItemIcon>{flag(flagIconSrc(item))}</ListItemIcon>
-              {LOCALE_LABELS[item]}
-            </MenuItem>
-          ))}
-        </TextField>
-        <p className="mt-2 text-body-small text-on-surface-variant">{t(locale, "settings.machineTranslationNotice")}</p>
-      </Section>
-
       <Section title={t(locale, "settings.colorScheme")}>
         <Segmented
           label={t(locale, "settings.colorScheme")}
@@ -217,21 +192,53 @@ function GeneralSettings({ locale, pathname, bands = [] }: SettingsDrawerProps) 
         />
       </Section>
 
-      <Section title={t(locale, "settings.songTitles.title")}>
-        <JapaneseTitlesToggle locale={locale} />
+      <Section title={t(locale, "settings.language")}>
+        <TextField
+          select
+          fullWidth
+          size="small"
+          value={locale}
+          onChange={(event) => {
+            const next = event.target.value as AppLocale;
+            if (next !== locale) window.location.href = switchLocalePath(pathname, next);
+          }}
+          sx={SELECT_SX}
+          slotProps={{
+            select: { IconComponent: SelectChevron, renderValue: (value) => <span className="flex items-center gap-3">{flag(flagIconSrc(value as AppLocale))}{LOCALE_LABELS[value as AppLocale]}</span> },
+            htmlInput: { "aria-label": t(locale, "settings.language") },
+          }}
+        >
+          {SUPPORTED_LOCALES.map((item) => (
+            <MenuItem key={item} value={item} lang={item}>
+              <ListItemIcon>{flag(flagIconSrc(item))}</ListItemIcon>
+              {LOCALE_LABELS[item]}
+            </MenuItem>
+          ))}
+        </TextField>
+        <p className="mt-2 text-body-small text-on-surface-variant">{t(locale, "settings.machineTranslationNotice")}</p>
       </Section>
+    </div>
+  );
+}
 
-      <Section title={t(locale, "settings.spoiler.title")}>
-        <SpoilerToggle locale={locale} />
-      </Section>
+/** What the site shows: the default game server, song titles, and spoilers. */
+function ContentSettings({ locale }: { locale: AppLocale }) {
+  const { settings, updateSettings } = useSettings();
+  const serverFlag = (value: AppSettings["gameServer"]) => flag(serverFlagIconSrc(value === "auto" ? defaultGameServer(locale) : value));
+  const serverLabel = (value: AppSettings["gameServer"]) =>
+    value === "auto"
+      ? t(locale, "settings.gameServerAuto", { server: t(locale, `gameServer.names.${defaultGameServer(locale)}`) })
+      : t(locale, `gameServer.names.${value}`);
 
+  return (
+    <div className="space-y-6">
       <Section title={t(locale, "settings.gameServer")}>
         <TextField
           select
           fullWidth
           size="small"
           value={settings.gameServer}
-          onChange={(event) => update({ gameServer: event.target.value as AppSettings["gameServer"] })}
+          onChange={(event) => updateSettings({ gameServer: event.target.value as AppSettings["gameServer"] })}
           sx={SELECT_SX}
           slotProps={{
             select: { IconComponent: SelectChevron, renderValue: (value) => <span className="flex items-center gap-3">{serverFlag(value as AppSettings["gameServer"])}{serverLabel(value as AppSettings["gameServer"])}</span> },
@@ -245,6 +252,14 @@ function GeneralSettings({ locale, pathname, bands = [] }: SettingsDrawerProps) 
             </MenuItem>
           ))}
         </TextField>
+      </Section>
+
+      <Section title={t(locale, "settings.songTitles.title")}>
+        <JapaneseTitlesToggle locale={locale} />
+      </Section>
+
+      <Section title={t(locale, "settings.spoiler.title")}>
+        <SpoilerToggle locale={locale} />
       </Section>
     </div>
   );

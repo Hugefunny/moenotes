@@ -304,7 +304,7 @@ export const esES = {
     gameServer: "Servidor del juego predeterminado",
     gameServerAuto: "Automático ({server})",
     options: { system: "Sistema", light: "Claro", dark: "Oscuro" },
-    tabs: { label: "Secciones de ajustes", general: "General", data: "Datos" },
+    tabs: { label: "Secciones de ajustes", data: "Datos" },
     data: {
       cacheTitle: "Caché de descargas",
       total: "En caché",

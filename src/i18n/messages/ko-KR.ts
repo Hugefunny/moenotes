@@ -994,7 +994,7 @@ export const koKR = {
       light: "라이트",
       dark: "다크",
     },
-    tabs: { label: "설정 분류", general: "일반", data: "데이터" },
+    tabs: { label: "설정 분류", appearance: "화면", content: "콘텐츠", data: "데이터" },
     accent: { title: "테마 색상", default: "기본" },
     density: { title: "화면 밀도", comfortable: "여유 있게", compact: "촘촘하게" },
     songTitles: { title: "곡 제목", forceJapanese: "항상 일본어 곡 제목 표시", hint: "사이트 언어와 관계없이 모든 곡을 일본어 원제로 표시합니다." },

@@ -309,7 +309,7 @@ export const thTH = {
     gameServer: "เซิร์ฟเวอร์เกมเริ่มต้น",
     gameServerAuto: "อัตโนมัติ ({server})",
     options: { system: "ระบบ", light: "สว่าง", dark: "มืด" },
-    tabs: { label: "หมวดหมู่การตั้งค่า", general: "ทั่วไป", data: "ข้อมูล" },
+    tabs: { label: "หมวดหมู่การตั้งค่า", data: "ข้อมูล" },
     data: {
       cacheTitle: "แคชดาวน์โหลด",
       total: "แคชแล้ว",

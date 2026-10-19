@@ -304,7 +304,7 @@ export const deDE = {
     gameServer: "Standard-Server",
     gameServerAuto: "Automatisch ({server})",
     options: { system: "System", light: "Hell", dark: "Dunkel" },
-    tabs: { label: "Einstellungskategorien", general: "Allgemein", data: "Daten" },
+    tabs: { label: "Einstellungskategorien", data: "Daten" },
     data: {
       cacheTitle: "Download-Cache",
       total: "Zwischengespeichert",

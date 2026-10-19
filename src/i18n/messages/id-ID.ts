@@ -304,7 +304,7 @@ export const idID = {
     gameServer: "Server game default",
     gameServerAuto: "Otomatis ({server})",
     options: { system: "Sistem", light: "Terang", dark: "Gelap" },
-    tabs: { label: "Kategori pengaturan", general: "Umum", data: "Data" },
+    tabs: { label: "Kategori pengaturan", data: "Data" },
     data: {
       cacheTitle: "Cache unduhan",
       total: "Tercache",

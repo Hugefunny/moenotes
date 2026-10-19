@@ -304,7 +304,7 @@ export const viVN = {
     gameServer: "Máy chủ game mặc định",
     gameServerAuto: "Tự động ({server})",
     options: { system: "Hệ thống", light: "Sáng", dark: "Tối" },
-    tabs: { label: "Phân loại cài đặt", general: "Chung", data: "Dữ liệu" },
+    tabs: { label: "Phân loại cài đặt", data: "Dữ liệu" },
     data: {
       cacheTitle: "Bộ nhớ đệm tải xuống",
       total: "Đã lưu đệm",
