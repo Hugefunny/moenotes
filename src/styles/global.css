@@ -130,6 +130,12 @@ html[data-theme="dark"] .mn-brand .mn-brand-starlight, .mn-brand.mn-brand-light 
 }
 .mn-draw-reveal { animation: mn-draw-reveal var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-emphasized-decelerate) both; }
 
+/* A tab panel's content as its tab is chosen. */
+@keyframes mn-tab-enter {
+  from { opacity: 0; transform: translateY(4px); }
+}
+.mn-tab-enter { animation: mn-tab-enter var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard); }
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after {
