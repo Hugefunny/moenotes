@@ -105,7 +105,7 @@ function GachaDetailView({ locale, gacha, serverSwitch, schedules }: { locale: A
       <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(22rem,2fr)_3fr] lg:items-start">
         {/* Left column: banner and rates stay in view while the pool is browsed. */}
         <aside className="flex w-full flex-col gap-6 lg:sticky lg:top-24">
-          <div className="relative rounded-shape-lg border border-outline-variant bg-surface-container-low p-4 shadow-elevation-1">
+          <div className="md3-surface p-4">
             <BannerImage
               eager
               className="rounded-shape-md border border-outline-variant"

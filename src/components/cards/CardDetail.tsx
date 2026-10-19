@@ -303,7 +303,7 @@ function SkillCard({
   const current = pickSkillLevel(skill, level);
   const assetUrl = useAssetUrl();
   return (
-    <article className="rounded-shape-lg border border-outline-variant bg-surface-container-high p-5 shadow-elevation-1">
+    <article className="rounded-shape-lg bg-surface-container p-5">
       <div className="flex items-start gap-4">
         {skill.iconUrl ? <img className="h-14 w-14 shrink-0 rounded-shape-lg border border-outline-variant bg-surface-container-low object-contain p-1" src={assetUrl(skill.iconUrl)} alt="" aria-hidden="true" /> : null}
         <div className="min-w-0"><p className="text-label-medium text-primary">{t(locale, `cards.skillKinds.${skill.kind}`)}</p><h3 className="mt-1 text-title-medium leading-6 text-on-surface">{skill.name}</h3><p className="mt-1 text-body-small text-on-surface-variant">{t(locale, "cards.skillMeta", { level: current.level, id: skill.id })}</p></div>

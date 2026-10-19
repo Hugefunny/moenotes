@@ -466,7 +466,7 @@ function AudioPlayer({ locale, src, title, label }: { locale: AppLocale; src: st
   };
 
   return (
-    <div className="md3-surface overflow-hidden border border-outline-variant bg-surface-container-low p-4 shadow-elevation-1 flex flex-col gap-3">
+    <div className="md3-surface overflow-hidden p-4 flex flex-col gap-3">
       <audio
         ref={audioRef}
         src={src}

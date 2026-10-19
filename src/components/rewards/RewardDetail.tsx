@@ -74,7 +74,7 @@ function RewardDetailView({ locale, entry, serverSwitch, schedules }: { locale: 
 
       <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(22rem,2fr)_3fr] lg:items-start">
         <aside className="flex w-full flex-col gap-6 lg:sticky lg:top-24">
-          <div className="rounded-shape-lg border border-outline-variant bg-surface-container-low p-4 shadow-elevation-1">
+          <div className="md3-surface p-4">
             <BannerImage eager className="rounded-shape-md border border-outline-variant" src={entry.bannerUrl} alt={entry.title} fallback={entry.title} imageClassName={rewardBannerCrop(entry.kind)} />
           </div>
           <div className="md3-surface overflow-hidden">

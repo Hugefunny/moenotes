@@ -309,7 +309,7 @@ function SkillCard({ skill, level, locale }: { skill: SkillViewModel; level: num
   const current = pickSkillLevel(skill, level);
   const assetUrl = useAssetUrl();
   return (
-    <article className="rounded-shape-lg border border-outline-variant bg-surface-container-high p-5 shadow-elevation-1">
+    <article className="rounded-shape-lg bg-surface-container p-5">
       <div className="flex items-start gap-4">
         {skill.iconUrl ? (
           <img

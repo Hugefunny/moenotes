@@ -92,7 +92,7 @@ function ShopDetailView({ locale, shop, serverSwitch, schedules }: { locale: App
 
       <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(22rem,2fr)_3fr] lg:items-start">
         <aside className="flex w-full flex-col gap-6 lg:sticky lg:top-24">
-          <div className="rounded-shape-lg border border-outline-variant bg-surface-container-low p-4 shadow-elevation-1">
+          <div className="md3-surface p-4">
             <ShopThumbnail eager className="rounded-shape-md" src={shop.thumbnailUrl} alt={shop.name} fallback={shop.name} />
           </div>
           <div className="md3-surface overflow-hidden">

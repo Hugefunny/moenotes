@@ -84,7 +84,7 @@ function ExchangeDetailView({ locale, exchange, serverSwitch, schedules }: { loc
       <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(22rem,2fr)_3fr] lg:items-start">
         <aside className="flex w-full flex-col gap-6 lg:sticky lg:top-24">
           {/* The shop banners are 420×180: kept at most at their own width rather than blown up across the column. */}
-          <div className="rounded-shape-lg border border-outline-variant bg-surface-container-low p-4 shadow-elevation-1">
+          <div className="md3-surface p-4">
             <BannerImage eager className="mx-auto max-w-[420px] rounded-shape-md border border-outline-variant" src={exchange.bannerUrl} alt={exchange.name} fallback={exchange.name} />
           </div>
           <div className="md3-surface overflow-hidden">

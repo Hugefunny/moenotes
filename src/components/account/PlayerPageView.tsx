@@ -26,7 +26,7 @@ type PageState =
   | { status: "not-found" }
   | { status: "unavailable" };
 
-const panel = "rounded-shape-lg border border-outline-variant bg-surface-container-low p-5 shadow-elevation-1 sm:p-6";
+const panel = "md3-surface p-5 sm:p-6";
 const stampButton = "md3-button md3-button--tonal";
 
 /** A public player page, /u/{server}/{profileId}. Every player shares this page; it reads the player from the URL. */
