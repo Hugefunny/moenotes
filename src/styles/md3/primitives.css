@@ -190,11 +190,12 @@
   .md3-checkbox:checked { border-color: var(--md-sys-color-primary); background-color: var(--md-sys-color-primary); background-image: var(--md3-checkbox-check); }
   .md3-checkbox:disabled { opacity: 0.38; cursor: not-allowed; }
 
-  /* ── Select (M3 outlined, as MoeSekai's): a native select with the medium shape and its own chevron. ── */
+  /* ── Select (M3 outlined, as MoeSekai's): a native select with the medium shape. Its chevron comes from the rule for
+        every native select (src/styles/components.css). ── */
   .md3-select {
-    -webkit-appearance: none; appearance: none; min-width: 0; height: 40px; padding: 0 36px 0 12px;
+    min-width: 0; height: 40px; padding: 0 32px 0 12px;
     border: 1px solid var(--md-sys-color-outline); border-radius: var(--md-sys-shape-corner-medium);
-    background: transparent var(--md3-select-chevron) no-repeat right 10px center / 18px 18px; color: var(--md-sys-color-on-surface);
+    background-color: transparent; color: var(--md-sys-color-on-surface);
     font: inherit; font-size: var(--md-sys-typescale-body-medium-size); line-height: var(--md-sys-typescale-body-medium-line-height); cursor: pointer;
   }
   .md3-select:hover { border-color: var(--md-sys-color-on-surface); }

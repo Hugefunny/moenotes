@@ -174,7 +174,7 @@ export default function NewsDetail({ locale }: Props) {
           <label className="flex flex-wrap items-center gap-2 text-label-medium text-on-surface">
             <span>{t(locale, "news.history")}</span>
             <select
-              className="rounded-full border border-outline-variant bg-surface-container-low px-3 py-1.5 text-label-medium"
+              className="md3-select"
               value={revision ?? revisions[0]}
               onChange={(event) => pickRevision(event.target.value)}
             >

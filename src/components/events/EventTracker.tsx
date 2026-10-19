@@ -153,7 +153,7 @@ export default function EventTracker({ locale, events, songs, deckCards, servers
           <label className="flex min-w-0 items-center gap-2 text-label-medium text-on-surface-variant">
             <span className="shrink-0">{t(locale, "eventTracker.eventLabel")}</span>
             <select
-              className="min-w-0 max-w-[18rem] truncate rounded-full border border-outline-variant bg-surface-container-low px-3 py-1.5 text-label-medium text-on-surface"
+              className="md3-select max-w-[18rem] truncate"
               value={pinned ?? ""}
               onChange={(change) => pickEvent(change.target.value || null)}
             >
