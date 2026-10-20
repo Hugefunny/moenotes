@@ -829,6 +829,17 @@ export const routeRegistry = [
         keywords: ["deck", "card box", "formation"],
       },
       {
+        // A room's players and their teams, by room code, from the room query service (src/config/room-check.ts).
+        id: "room-check",
+        path: "/tools/room-check",
+        labelKey: "nav.items.roomCheck",
+        component: "room-check",
+        seo: { titleKey: "seo.roomCheck.title", descriptionKey: "seo.roomCheck.description", indexable: false },
+        nav: { order: 45, icon: "users" },
+        searchable: true,
+        keywords: ["room", "room code", "multi live", "team", "formation"],
+      },
+      {
         // What a deck recommendation optimizes, what "proven optimal" means and how the search proves it.
         id: "deck-guide",
         path: "/tools/deck/guide",

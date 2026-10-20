@@ -159,6 +159,7 @@ export const viVN = {
       news: "Thông báo game",
       eventTracker: "Theo dõi sự kiện",
       musicRanking: "Bảng xếp hạng bài hát",
+      roomCheck: "Kiểm tra phòng",
       chartData: "Meta bài hát"
     }
   },
@@ -1116,6 +1117,178 @@ export const viVN = {
       notReturned: "Lần này chưa trả về: {ranks}"
     }
   },
+  roomCheck: {
+    alpha: "Alpha",
+    alphaHint: "Bản thử nghiệm: bố cục và số liệu vẫn có thể thay đổi.",
+    difficulty: {
+      "0": "Easy",
+      "1": "Normal",
+      "2": "Hard",
+      "3": "Expert",
+      "4": "Master"
+    },
+    form: {
+      label: "Mã phòng",
+      placeholder: "Mã phòng 7 chữ số, hoặc dán tin nhắn có chứa mã",
+      submit: "Xem",
+      hint: "Dán một tin nhắn sẽ thêm mọi mã phòng có trong đó.",
+      notes: {
+        added: "Đã thêm phòng: {n}",
+        invalid: "Hãy nhập mã phòng 7 chữ số.",
+        known: "Đã có trong danh sách."
+      }
+    },
+    list: {
+      title: "Phòng",
+      clear: "Xóa hết",
+      empty: "Những phòng bạn xem sẽ xuất hiện ở đây. Chỉ mã phòng được lưu, trong trình duyệt này.",
+      remove: "Xóa phòng {code}",
+      humans: "Đã có {n}/{capacity} người",
+      unknownSong: "Bài hát {id}",
+      status: {
+        idle: "Chưa đọc",
+        queued: "Đang chờ",
+        loading: "Đang đọc…",
+        ready: "Đã đọc",
+        error: {
+          room_not_found: "Không tìm thấy",
+          room_full: "Đã đầy",
+          cooldown: "Đợi",
+          busy: "Bận",
+          bad_code: "Mã không hợp lệ",
+          network: "Thất bại",
+          invalid: "Không đọc được"
+        }
+      }
+    },
+    fresh: {
+      justNow: "vừa xong",
+      secondsAgo: "{n} giây trước",
+      readAgo: "Đọc lúc {time}",
+      live: "Trực tiếp",
+      source: {
+        live: "Đọc riêng cho bạn",
+        cache: "Kết quả đọc gần đây được chia sẻ"
+      },
+      stopped: {
+        full: "Đã dừng cập nhật trực tiếp: phòng đã có bốn người chơi.",
+        lease: "Đã dừng cập nhật trực tiếp sau 10 phút.",
+        closed: "Đã dừng cập nhật trực tiếp: phòng đã đóng.",
+        error: "Đã dừng cập nhật trực tiếp."
+      },
+      refresh: "Làm mới",
+      refreshIn: "Có thể làm mới sau {n} giây",
+      refreshInShort: "{n} giây",
+      liveToggle: "Cập nhật trực tiếp"
+    },
+    room: {
+      song: "Bài hát của phòng",
+      unknownSong: "Bài hát {id}",
+      noSong: "Chưa chọn bài hát",
+      missions: "Nhiệm vụ Gekisou",
+      copy: "Sao chép",
+      copyCode: "Sao chép mã phòng {code}",
+      copied: "Đã sao chép",
+      votes: "Bài hát được chọn",
+      voteCount: "{n} người chọn"
+    },
+    player: {
+      title: "Người chơi",
+      joinOrder: "Vào phòng thứ {n}",
+      host: "Chủ phòng",
+      unnamed: "Người chơi không tên",
+      status: {
+        waiting: "Chưa sẵn sàng",
+        ready: "Sẵn sàng",
+        playing: "Đang live"
+      },
+      picked: "Đã chọn {title}",
+      characterRank: "Xếp hạng nhân vật",
+      averageLevel: "Lv trung bình",
+      shareLabel: "{n}% tổng xếp hạng nhân vật cao nhất của phòng",
+      unknownTeam: "Không xem được đội hình",
+      expandAll: "Hiện tất cả đội hình",
+      collapseAll: "Hiện đội hình đã chọn",
+      emptySeat: "Ghế trống"
+    },
+    formation: {
+      leader: "Đội trưởng",
+      slot: "Vị trí {n}",
+      noSupport: "Không có Snap",
+      unknownCard: "Thẻ bài {id}",
+      rankValue: "Rank {n}",
+      supportSkills: "Kỹ năng Snap",
+      supportGekisouSkills: "Kỹ năng Gekisou của Snap",
+      totalCharacterRank: "Tổng xếp hạng nhân vật",
+      vipRank: "Xếp hạng T.G.W CARD",
+      level: "Cấp độ",
+      awake: "Huấn luyện",
+      rank: "Rank",
+      skills: {
+        live: "Kỹ năng live",
+        leader: "Kỹ năng đội trưởng",
+        gekisou: "Kỹ năng Gekisou"
+      },
+      characterRank: "Xếp hạng nhân vật",
+      bandItem: "Trang bị ban nhạc",
+      bandItemTitle: "Trang bị ban nhạc: Performance {performance}, Technique {technique}, Visual {visual}",
+      order: "Thứ tự biểu diễn",
+      caption: "Đội hình của {name}",
+      orderShort: "Biểu diễn thứ {n}",
+      short: {
+        awake: "Huấn luyện",
+        characterRank: "Nhân vật",
+        live: "Live",
+        gekisou: "Gekisou",
+        leader: "Đội trưởng",
+        rank: "Rank",
+        snapSkills: "Kỹ năng",
+        snapGekisou: "Gekisou"
+      }
+    },
+    states: {
+      loading: "Đang đọc phòng {code}…",
+      retry: "Thử lại",
+      retryIn: "Thử lại sau {n} giây",
+      intro: {
+        title: "Ngó vào một phòng",
+        body: "Nhập mã phòng để xem ai đang ở trong phòng, mỗi người chọn bài hát nào và đội hình của từng người chơi. Dán một tin nhắn để kiểm tra nhiều phòng cùng lúc."
+      },
+      room_not_found: {
+        title: "Không tìm thấy phòng {code}",
+        body: "Phòng có thể đã đóng, hoặc mã chưa đúng. Phòng sẽ đóng khi mọi người rời đi."
+      },
+      room_full: {
+        title: "Phòng {code} đã đầy",
+        body: "Phòng đã có năm người chơi nên hiện không thể xem được."
+      },
+      cooldown: {
+        title: "Phòng {code} vừa được đọc",
+        body: "Mỗi phòng chỉ được đọc tối đa một lần trong vài giây; trước đó kết quả lần đọc gần nhất vẫn được hiển thị."
+      },
+      busy: {
+        title: "Đang có nhiều phòng được đọc",
+        body: "Dịch vụ đang bận. Hãy thử lại sau giây lát."
+      },
+      bad_code: {
+        title: "{code} không phải mã phòng",
+        body: "Mã phòng gồm bảy chữ số."
+      },
+      network: {
+        title: "Không đọc được phòng {code}",
+        body: "Hãy kiểm tra kết nối rồi thử lại."
+      },
+      invalid: {
+        title: "Không đọc được kết quả của phòng {code}",
+        body: "Hãy thử lại sau."
+      }
+    },
+    host: {
+      title: "Tạo phòng",
+      body: "Tạo phòng chỉ cho những người chơi đáp ứng điều kiện của bạn tham gia.",
+      badge: "Sắp ra mắt"
+    }
+  },
   musicRanking: {
     changeSong: "Đổi bài hát",
     chooseSong: "Chọn bài hát",
@@ -1467,6 +1640,10 @@ export const viVN = {
     eventTracker: {
       title: "Theo dõi sự kiện",
       description: "Bảng xếp hạng thời gian thực của sự kiện BanG Dream! Our Notes đang diễn ra trên từng máy chủ: bảng xếp hạng bài hát thử thách kèm đội hình, mốc điểm thưởng, bảng xếp hạng điểm sự kiện và thời gian còn lại."
+    },
+    roomCheck: {
+      title: "Kiểm tra phòng",
+      description: "Nhập mã phòng của BanG Dream! Our Notes để xem ai đang ở trong phòng, mỗi người chọn bài hát nào và đội hình của từng người chơi."
     },
     musicRanking: {
       title: "Bảng xếp hạng bài hát",

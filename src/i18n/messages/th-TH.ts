@@ -159,6 +159,7 @@ export const thTH = {
       news: "ประกาศเกม",
       eventTracker: "ตัวติดตามอีเวนต์",
       musicRanking: "อันดับเพลง",
+      roomCheck: "ตรวจห้อง",
       chartData: "เมตาข้อมูลเพลง"
     }
   },
@@ -1115,6 +1116,178 @@ export const thTH = {
       notReturned: "ไม่ได้รับข้อมูลอันดับในรอบนี้: {ranks}"
     }
   },
+  roomCheck: {
+    alpha: "Alpha",
+    alphaHint: "เวอร์ชันเริ่มต้น: เลย์เอาต์และตัวเลขอาจยังเปลี่ยนแปลงได้",
+    difficulty: {
+      "0": "Easy",
+      "1": "Normal",
+      "2": "Hard",
+      "3": "Expert",
+      "4": "Master"
+    },
+    form: {
+      label: "รหัสห้อง",
+      placeholder: "รหัสห้อง 7 หลัก หรือวางข้อความที่มีรหัสห้อง",
+      submit: "ดู",
+      hint: "การวางข้อความจะเพิ่มรหัสห้องทั้งหมดในข้อความนั้น",
+      notes: {
+        added: "เพิ่มแล้ว {n} ห้อง",
+        invalid: "กรอกรหัสห้อง 7 หลัก",
+        known: "อยู่ในรายการแล้ว"
+      }
+    },
+    list: {
+      title: "ห้อง",
+      clear: "ล้าง",
+      empty: "ห้องที่คุณตรวจจะปรากฏที่นี่ เก็บเฉพาะรหัสห้องไว้ในเบราว์เซอร์นี้",
+      remove: "ลบห้อง {code}",
+      humans: "มีผู้เล่น {n} จากทั้งหมด {capacity} ที่นั่ง",
+      unknownSong: "เพลง {id}",
+      status: {
+        idle: "ยังไม่ได้อ่าน",
+        queued: "กำลังรอ",
+        loading: "กำลังอ่าน…",
+        ready: "อ่านแล้ว",
+        error: {
+          room_not_found: "ไม่พบ",
+          room_full: "เต็ม",
+          cooldown: "รอสักครู่",
+          busy: "ไม่ว่าง",
+          bad_code: "รหัสไม่ถูกต้อง",
+          network: "ล้มเหลว",
+          invalid: "อ่านไม่ได้"
+        }
+      }
+    },
+    fresh: {
+      justNow: "เมื่อสักครู่",
+      secondsAgo: "{n} วินาทีที่แล้ว",
+      readAgo: "อ่านเมื่อ {time}",
+      live: "สด",
+      source: {
+        live: "อ่านให้คุณโดยเฉพาะ",
+        cache: "ผลอ่านล่าสุดที่แชร์จากคนอื่น"
+      },
+      stopped: {
+        full: "หยุดอัปเดตสดแล้ว: ห้องนี้มีผู้เล่น 4 คน",
+        lease: "หยุดอัปเดตสดหลัง 10 นาที",
+        closed: "หยุดอัปเดตสดแล้ว: ห้องปิดแล้ว",
+        error: "หยุดอัปเดตสดแล้ว"
+      },
+      refresh: "รีเฟรช",
+      refreshIn: "รีเฟรชได้ในอีก {n} วินาที",
+      refreshInShort: "{n} วินาที",
+      liveToggle: "อัปเดตสด"
+    },
+    room: {
+      song: "เพลงของห้อง",
+      unknownSong: "เพลง {id}",
+      noSong: "ยังไม่ได้เลือกเพลง",
+      missions: "ภารกิจ Gekisou",
+      copy: "คัดลอก",
+      copyCode: "คัดลอกรหัสห้อง {code}",
+      copied: "คัดลอกแล้ว",
+      votes: "เพลงที่เลือก",
+      voteCount: "{n} คนเลือก"
+    },
+    player: {
+      title: "ผู้เล่น",
+      joinOrder: "เข้าห้องเป็นคนที่ {n}",
+      host: "โฮสต์",
+      unnamed: "ผู้เล่นไม่มีชื่อ",
+      status: {
+        waiting: "ยังไม่พร้อม",
+        ready: "พร้อม",
+        playing: "กำลังเล่นไลฟ์"
+      },
+      picked: "เลือก {title}",
+      characterRank: "แรงค์ตัวละคร",
+      averageLevel: "Lv เฉลี่ย",
+      shareLabel: "{n}% ของผลรวมแรงค์ตัวละครที่สูงที่สุดในห้อง",
+      unknownTeam: "ไม่สามารถดูทีมได้",
+      expandAll: "แสดงทุกทีม",
+      collapseAll: "แสดงทีมที่เลือก",
+      emptySeat: "ที่นั่งว่าง"
+    },
+    formation: {
+      leader: "ลีดเดอร์",
+      slot: "ช่อง {n}",
+      noSupport: "ไม่มี Snap",
+      unknownCard: "การ์ด {id}",
+      rankValue: "Rank {n}",
+      supportSkills: "สกิล Snap",
+      supportGekisouSkills: "สกิล Gekisou ของ Snap",
+      totalCharacterRank: "ผลรวมแรงค์ตัวละคร",
+      vipRank: "แรงค์ T.G.W CARD",
+      level: "เลเวล",
+      awake: "ฝึกพิเศษ",
+      rank: "Rank",
+      skills: {
+        live: "สกิลไลฟ์",
+        leader: "สกิลลีดเดอร์",
+        gekisou: "สกิล Gekisou"
+      },
+      characterRank: "แรงค์ตัวละคร",
+      bandItem: "อุปกรณ์วง",
+      bandItemTitle: "อุปกรณ์วง: Performance {performance}, Technique {technique}, Visual {visual}",
+      order: "ลำดับการแสดง",
+      caption: "ทีมของ {name}",
+      orderShort: "แสดงเป็นคนที่ {n}",
+      short: {
+        awake: "ฝึกพิเศษ",
+        characterRank: "ตัวละคร",
+        live: "Live",
+        gekisou: "Gekisou",
+        leader: "ลีดเดอร์",
+        rank: "Rank",
+        snapSkills: "สกิล",
+        snapGekisou: "Gekisou"
+      }
+    },
+    states: {
+      loading: "กำลังอ่านห้อง {code}…",
+      retry: "ลองอีกครั้ง",
+      retryIn: "ลองอีกครั้งในอีก {n} วินาที",
+      intro: {
+        title: "แอบดูในห้อง",
+        body: "กรอกรหัสห้องเพื่อดูว่าใครอยู่ในห้อง แต่ละคนเลือกเพลงอะไร และทีมของทุกคนในห้อง วางข้อความเพื่อตรวจหลายห้องพร้อมกันได้"
+      },
+      room_not_found: {
+        title: "ไม่พบห้อง {code}",
+        body: "ห้องอาจปิดแล้ว หรือรหัสอาจไม่ถูกต้อง ห้องจะปิดเมื่อทุกคนออกไป"
+      },
+      room_full: {
+        title: "ห้อง {code} เต็มแล้ว",
+        body: "ห้องนี้มีผู้เล่น 5 คน จึงไม่สามารถตรวจได้ในตอนนี้"
+      },
+      cooldown: {
+        title: "เพิ่งตรวจห้อง {code} ไปเมื่อสักครู่",
+        body: "แต่ละห้องตรวจได้ไม่เกินหนึ่งครั้งทุกสองสามวินาที จนถึงตอนนั้นจะแสดงผลลัพธ์ครั้งล่าสุด"
+      },
+      busy: {
+        title: "มีห้องที่กำลังถูกตรวจจำนวนมาก",
+        body: "บริการไม่ว่าง โปรดลองอีกครั้งในอีกสักครู่"
+      },
+      bad_code: {
+        title: "{code} ไม่ใช่รหัสห้อง",
+        body: "รหัสห้องมี 7 หลัก"
+      },
+      network: {
+        title: "ไม่สามารถตรวจห้อง {code} ได้",
+        body: "โปรดตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง"
+      },
+      invalid: {
+        title: "ไม่สามารถอ่านผลลัพธ์ของห้อง {code} ได้",
+        body: "โปรดลองอีกครั้งในภายหลัง"
+      }
+    },
+    host: {
+      title: "สร้างห้อง",
+      body: "สร้างห้องที่รับเฉพาะผู้เล่นที่ตรงตามเงื่อนไขของคุณ",
+      badge: "เร็วๆ นี้"
+    }
+  },
   musicRanking: {
     changeSong: "เปลี่ยนเพลง",
     chooseSong: "เลือกเพลง",
@@ -1469,6 +1642,10 @@ export const thTH = {
     eventTracker: {
       title: "ตัวติดตามอีเวนต์",
       description: "อันดับสดของอีเวนต์ปัจจุบันใน BanG Dream! Our Notes ทุกเซิร์ฟเวอร์: ลีดเดอร์บอร์ดเพลงชาเลนจ์พร้อมทีม เกณฑ์คะแนนรับรางวัล อันดับแต้มอีเวนต์ และเวลาที่เหลือ"
+    },
+    roomCheck: {
+      title: "ตรวจห้อง",
+      description: "กรอกรหัสห้องของ BanG Dream! Our Notes เพื่อดูว่าใครอยู่ในห้อง แต่ละคนเลือกเพลงอะไร และทีมของทุกคนในห้อง"
     },
     musicRanking: {
       title: "อันดับเพลง",

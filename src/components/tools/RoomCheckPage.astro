@@ -1,0 +1,29 @@
+---
+import RoomCheckTool from "@/components/room-check/RoomCheckTool";
+import type { RoomSong } from "@/components/room-check/songs";
+import PageLayout from "@/layouts/PageLayout.astro";
+import type { AppLocale } from "@/config/locales";
+import { PRIMARY_SERVER } from "@/config/servers";
+import { t } from "@/i18n";
+import { moveReleaseUrls } from "@/lib/assets/release";
+import { getBuildDeckCardLookup, getBuildMusic } from "@/lib/masterdata/build-data";
+import { entityServer } from "@/lib/servers/facets";
+import "@/styles/room-check.css";
+
+interface Props {
+  locale: AppLocale;
+}
+
+const { locale } = Astro.props;
+const [music, cards] = await Promise.all([getBuildMusic(locale), getBuildDeckCardLookup(locale)]);
+// The island only needs each song's title, jacket and band.
+const songs: RoomSong[] = music.map((song) => {
+  const { id, title, jacketUrl, bandName } = moveReleaseUrls(song, entityServer(song, PRIMARY_SERVER));
+  return { id, title, jacketUrl, bandName };
+});
+---
+
+<PageLayout locale={locale} titleKey="seo.roomCheck.title" descriptionKey="seo.roomCheck.description">
+  <span slot="title-badge" class="rounded-full border border-outline-variant px-2 py-0.5 text-body-small text-on-surface-variant" title={t(locale, "roomCheck.alphaHint")}>{t(locale, "roomCheck.alpha")}</span>
+  <RoomCheckTool client:load locale={locale} songs={songs} cards={cards} />
+</PageLayout>

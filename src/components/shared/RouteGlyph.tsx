@@ -75,6 +75,8 @@ const routePaths: Record<string, ReactNode> = {
   "story-player": <><rect x="2.5" y="5" width="19" height="12" rx="2.5"/><path d="m10 8.5 4.5 2.5-4.5 2.5z"/><path d="M6 20.5h12"/></>,
   // A formation of five card slots: the deck builder.
   deck: <><rect x="2.5" y="3.5" width="5.5" height="7.5" rx="1.2"/><rect x="9.25" y="3.5" width="5.5" height="7.5" rx="1.2"/><rect x="16" y="3.5" width="5.5" height="7.5" rx="1.2"/><rect x="5.75" y="13" width="5.5" height="7.5" rx="1.2"/><rect x="12.75" y="13" width="5.5" height="7.5" rx="1.2"/></>,
+  // A doorway with a magnifier: looking into a room by its code.
+  "room-check": <><path d="M4 21V4.5A1.5 1.5 0 0 1 5.5 3h8A1.5 1.5 0 0 1 15 4.5V9"/><path d="M2.5 21h9"/><path d="M11 12h.01"/><circle cx="16.5" cy="15.5" r="3.5"/><path d="m19 18 2.5 2.5"/></>,
 };
 
 interface Props {
