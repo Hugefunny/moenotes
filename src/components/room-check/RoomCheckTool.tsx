@@ -188,6 +188,9 @@ function RoomCheckTool({ locale, songs, cards }: Props) {
 
   const remove = (key: string) => {
     controllers.current.get(key)?.abort();
+    // A room this page opened is abandoned with its watch, so the observer leaves instead of holding its seat.
+    const removed = rooms.find((entry) => entryKey(entry) === key);
+    if (removed?.created && removed.watchId) api.stopCreated({ code: removed.code, region: removed.region, watchId: removed.watchId });
     const next = rooms.filter((entry) => entryKey(entry) !== key);
     const first = next[0];
     setRooms(key === selected && first?.status === "idle" ? next.map((entry) => (entry === first ? { ...entry, status: "queued" } : entry)) : next);
@@ -200,6 +203,9 @@ function RoomCheckTool({ locale, songs, cards }: Props) {
 
   const clear = () => {
     controllers.current.forEach((controller) => controller.abort());
+    for (const entry of rooms) {
+      if (entry.created && entry.watchId) api.stopCreated({ code: entry.code, region: entry.region, watchId: entry.watchId });
+    }
     setLive({ status: "off" });
     setAtFour(null);
     setRooms([]);

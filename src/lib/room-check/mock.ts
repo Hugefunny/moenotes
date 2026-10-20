@@ -222,5 +222,13 @@ export function createMockRoomApi(pool: MockPool): RoomApi {
       for (const watch of [...state.watchers]) watch("kicked");
       return { ok: true };
     },
+    stopCreated(createdRoom) {
+      const state = created.get(key(createdRoom));
+      if (!state || state.room.watchId !== createdRoom.watchId) return;
+      created.delete(key(createdRoom));
+      // The observer is gone, so the room holds one player fewer from now on.
+      reads.set(`${state.room.region}:${state.room.code}`, room(state.room.code, state.room.region, pool, Date.now(), state.extra, Math.max(0, state.humans - 1)));
+      for (const watch of [...state.watchers]) watch("kicked");
+    },
   };
 }

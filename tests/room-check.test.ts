@@ -205,6 +205,14 @@ describe("leaving a room this page opened", () => {
     stubFetch(() => ({ status: 409, body: { error: "not_at_four" } }));
     expect(await httpRoomApi.kick(room)).toEqual({ ok: false, error: { code: "not_at_four", retryAfterMs: null, snapshot: null } });
   });
+
+  test("abandoning the room ends its watch, so the observer leaves", () => {
+    const calls = stubFetch(() => ({ body: {} }));
+    httpRoomApi.stopCreated(room);
+    expect(calls[0]!.url).toContain("/v1/rooms/7654321/watch/watch-9");
+    expect(calls[0]!.url).toContain("region=kr");
+    expect(calls[0]!.init?.method).toBe("DELETE");
+  });
 });
 
 describe("the saved rooms", () => {

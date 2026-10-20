@@ -34,6 +34,8 @@ export interface RoomApi {
   watchCreated(room: CreatedRoom, handlers: CreatedWatchHandlers): () => void;
   /** Asks the observer of a room this page opened to leave, once four players are in. */
   kick(room: CreatedRoom): Promise<KickReply>;
+  /** Abandons a room this page opened: the observer leaves at once and the room closes. */
+  stopCreated(room: CreatedRoom): void;
 }
 
 const failure = (code: RoomError["code"], retryAfterMs: number | null = null): RoomReply => ({ ok: false, error: { code, retryAfterMs, snapshot: null } });
@@ -173,6 +175,11 @@ export const httpRoomApi: RoomApi = {
     }
     if (response.ok) return { ok: true };
     return { ok: false, error: refusal(response, await readJson(response)) };
+  },
+
+  stopCreated(room) {
+    // Ending the watch sends the observer out, which closes the room it opened. The request may outlive the page.
+    void fetch(roomCheckUrl(room.code, room.region, ["watch", room.watchId]), { method: "DELETE", keepalive: true }).catch(() => undefined);
   },
 };
 
