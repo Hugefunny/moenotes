@@ -22,7 +22,8 @@
 .dc-composer .dc-blocker { color: var(--md-sys-color-on-surface-variant); font-size: var(--md-sys-typescale-body-small-size); line-height: var(--md-sys-typescale-body-small-line-height); text-align: center; }
 .dc-engine-note { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; padding: 8px 12px; border-radius: var(--md-sys-shape-corner-small); background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface-variant); font-size: var(--md-sys-typescale-body-small-size); line-height: var(--md-sys-typescale-body-small-line-height); }
 .dc-composer .dc-engine-note[role="alert"] { background: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container); }
-.dc-composer .dc-engine-note > button { min-height: 32px; padding: 0 8px; border: 0; border-radius: var(--md-sys-shape-corner-full); background: transparent; color: var(--md-sys-color-primary); font: inherit; font-weight: 500; cursor: pointer; }
+/* Retry: a small text button (the workspace's MD3 action button, deck-workspace.css), round while pressed */
+.dc-composer .dc-engine-note > button { --dw-button-height: 32px; --dw-button-label: var(--md-sys-color-primary); --dw-button-outline: transparent; padding: 0 12px; border-radius: 16px; }
 
 /* Card pool */
 .dc-pool { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 2px 12px; min-width: 0; }
@@ -60,7 +61,7 @@
   font: inherit; font-size: var(--md-sys-typescale-body-medium-size); line-height: var(--md-sys-typescale-body-medium-line-height); font-weight: 400;
 }
 .dc-composer :is(select, input:not([type="checkbox"]):not([type="radio"]):not([type="range"])):focus { outline: none; border-color: var(--md-sys-color-primary); box-shadow: inset 0 0 0 1px var(--md-sys-color-primary); }
-.dc-composer input[type="checkbox"] { width: 18px; height: 18px; flex-shrink: 0; margin: 0; accent-color: var(--md-sys-color-primary); }
+.dc-composer input[type="checkbox"] { flex-shrink: 0; margin: 0; }
 .dc-composer .md3-range { display: block; width: 100%; margin: 6px 0; }
 .dc-field-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; min-width: 0; }
 .dc-composer .dc-song-button { display: flex; align-items: center; gap: 12px; width: 100%; min-width: 0; min-height: 56px; padding: 8px 8px 8px 8px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: var(--md-sys-shape-corner-medium); background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); font: inherit; text-align: left; cursor: pointer; }
@@ -250,7 +251,7 @@
 .dc-constraint-info small { display: block; color: var(--md-sys-color-on-surface-variant); font-size: var(--md-sys-typescale-body-small-size); }
 .dc-constraint-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 0 16px; min-width: 0; }
 .dc-options .dc-constraint-actions label { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; font-size: var(--md-sys-typescale-body-medium-size); font-weight: 400; white-space: nowrap; }
-.dc-constraint-actions input[type="checkbox"] { width: 18px; height: 18px; flex: 0 0 18px; margin: 0; accent-color: var(--md-sys-color-primary); }
+.dc-constraint-actions input[type="checkbox"] { flex: 0 0 18px; margin: 0; }
 
 /* Wide containers: the setup stays in view beside the results */
 @container deck-composer (min-width: 860px) {

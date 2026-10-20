@@ -6,6 +6,7 @@ import Live2DViewerPage from "@/components/tools/Live2DViewerPage.astro";
 import StoryPlayerPage from "@/components/tools/StoryPlayerPage.astro";
 import GuessMusicPage from "@/components/guess-music/GuessMusicPage.astro";
 import MusicRankingPage from "@/components/tools/MusicRankingPage.astro";
+import RoomCheckPage from "@/components/tools/RoomCheckPage.astro";
 import ChartDataPage from "@/components/tools/ChartDataPage.astro";
 import DeckWorkspacePage from "@/components/deck/DeckWorkspacePage.astro";
 import DeckGuidePage from "@/components/deck/DeckGuidePage.astro";
@@ -160,6 +161,8 @@ const component = match.item.component ?? "page";
     <GuessMusicPage locale={locale} />
   ) : component === "music-ranking" ? (
     <MusicRankingPage locale={locale} />
+  ) : component === "room-check" ? (
+    <RoomCheckPage locale={locale} />
   ) : component === "chart-data" ? (
     <ChartDataPage locale={locale} />
   ) : component === "open-platform" ? (

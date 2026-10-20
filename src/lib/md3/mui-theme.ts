@@ -47,14 +47,15 @@ const font = (t: Type, family = "var(--md-ref-typeface-plain)"): FontStyle => ({
   letterSpacing: t.tracking,
   fontWeight: t.weight,
 });
+// Weights as in src/styles/md3/tokens.css: display bold, headlines and the large title semibold.
 const TYPE = {
-  displayLarge: typeScale("display-large", 400),
-  displayMedium: typeScale("display-medium", 400),
-  displaySmall: typeScale("display-small", 400),
-  headlineLarge: typeScale("headline-large", 400),
-  headlineMedium: typeScale("headline-medium", 400),
-  headlineSmall: typeScale("headline-small", 400),
-  titleLarge: typeScale("title-large", 400),
+  displayLarge: typeScale("display-large", 700),
+  displayMedium: typeScale("display-medium", 700),
+  displaySmall: typeScale("display-small", 700),
+  headlineLarge: typeScale("headline-large", 600),
+  headlineMedium: typeScale("headline-medium", 600),
+  headlineSmall: typeScale("headline-small", 600),
+  titleLarge: typeScale("title-large", 600),
   titleMedium: typeScale("title-medium", 500),
   titleSmall: typeScale("title-small", 500),
   labelLarge: typeScale("label-large", 500),
@@ -142,7 +143,8 @@ function components(density: Md3Density): ThemeOptions["components"] {
       },
     },
 
-    // ── Common buttons (M3: 40dp, full shape, label-large) ──
+    // ── Common buttons, as MoeSekai draws them (and src/styles/md3/primitives.css outside MUI): 40dp, round, the
+    //    corners of a button with a container tightening while pressed ──
     MuiButton: {
       defaultProps: { variant: "filled", disableElevation: true, size: compact ? "small" : "medium" },
       styleOverrides: {
@@ -151,18 +153,20 @@ function components(density: Md3Density): ThemeOptions["components"] {
           position: "relative",
           minWidth: 48,
           minHeight: 40,
-          paddingInline: 24,
+          paddingInline: 16,
           paddingBlock: 0,
-          borderRadius: shape.full,
+          // Half the height, not full: a radius far past what shows cannot be interpolated into the pressed one.
+          borderRadius: 20,
           textTransform: "none",
           gap: 8,
-          transition: `box-shadow 200ms ${easing.standard}, background-color 200ms ${easing.standard}, color 200ms ${easing.standard}`,
+          transition: `border-radius 200ms ${easing.standard}, box-shadow 200ms ${easing.standard}, background-color 200ms ${easing.standard}, color 200ms ${easing.standard}`,
+          "&:active:not(.MuiButton-text, .Mui-disabled)": { borderRadius: shape.sm, boxShadow: "none" },
           ...stateLayer(),
           "& .MuiButton-startIcon, & .MuiButton-endIcon": { margin: 0, "& > *:nth-of-type(1)": { fontSize: 18 } },
           "& .MuiButton-startIcon svg, & .MuiButton-endIcon svg": { width: 18, height: 18 },
         },
-        sizeSmall: { minHeight: 32, paddingInline: 16, gap: 6 },
-        sizeLarge: { minHeight: 56, paddingInline: 32, ...font(TYPE.titleMedium) },
+        sizeSmall: { minHeight: 32, paddingInline: 12, gap: 6, borderRadius: 16 },
+        sizeLarge: { minHeight: 56, paddingInline: 24, borderRadius: 28, ...font(TYPE.titleMedium) },
       },
       variants: [
         // filled / contained
@@ -176,9 +180,9 @@ function components(density: Md3Density): ThemeOptions["components"] {
         ...PALETTE_COLORS.filter((color) => color !== "primary").map((color) => ({ props: { variant: "tonal" as const, color }, style: tonalColor(color) })),
         // elevated
         { props: { variant: "elevated" }, style: { backgroundColor: c("surface-container-low"), color: c("primary"), boxShadow: elevation(1), "@media (hover: hover)": { "&:hover": { boxShadow: elevation(2) } }, ...disabledFilled } },
-        // outlined
-        { props: { variant: "outlined" }, style: { paddingInline: 24, border: `1px solid ${c("outline-variant")}`, color: c("primary"), backgroundColor: "transparent", "&:hover": { border: `1px solid ${c("outline-variant")}`, backgroundColor: "transparent" }, "&.Mui-focusVisible": { borderColor: c("outline-variant") }, "&.Mui-disabled": { borderColor: ca("on-surface", DISABLED_CONTAINER), color: ca("on-surface", DISABLED_CONTENT) } } },
-        ...PALETTE_COLORS.map((color) => ({ props: { variant: "outlined" as const, color }, style: { color: c(color) } })),
+        // outlined: the label in on-surface, as MoeSekai sets it; other colors tint it
+        { props: { variant: "outlined" }, style: { border: `1px solid ${c("outline-variant")}`, color: c("on-surface"), backgroundColor: "transparent", "&:hover": { border: `1px solid ${c("outline-variant")}`, backgroundColor: "transparent" }, "&.Mui-focusVisible": { borderColor: c("outline-variant") }, "&.Mui-disabled": { borderColor: ca("on-surface", DISABLED_CONTAINER), color: ca("on-surface", DISABLED_CONTENT) } } },
+        ...PALETTE_COLORS.filter((color) => color !== "primary").map((color) => ({ props: { variant: "outlined" as const, color }, style: { color: c(color) } })),
         // text
         { props: { variant: "text" }, style: { paddingInline: 12, color: c("primary"), backgroundColor: "transparent", "&:hover": { backgroundColor: "transparent" }, ...disabledText } },
         ...PALETTE_COLORS.map((color) => ({ props: { variant: "text" as const, color }, style: { color: c(color) } })),
@@ -195,9 +199,9 @@ function components(density: Md3Density): ThemeOptions["components"] {
           width: 40,
           height: 40,
           padding: 8,
-          borderRadius: shape.full,
+          borderRadius: 20,
           color: c("on-surface-variant"),
-          transition: `background-color 200ms ${easing.standard}, color 200ms ${easing.standard}`,
+          transition: `border-radius 200ms ${easing.standard}, background-color 200ms ${easing.standard}, color 200ms ${easing.standard}`,
           "&:hover": { backgroundColor: "transparent" },
           ...stateLayer(),
           "& svg": { width: 24, height: 24 },
@@ -205,10 +209,13 @@ function components(density: Md3Density): ThemeOptions["components"] {
           '&[data-variant="filled"]': { ...filledColor("primary"), '&[aria-pressed="false"]': { backgroundColor: c("surface-container-highest"), color: c("primary") }, ...disabledFilled },
           '&[data-variant="tonal"]': { ...tonalColor("secondary"), '&[aria-pressed="false"]': { backgroundColor: c("surface-container-highest"), color: c("on-surface-variant") }, ...disabledFilled },
           '&[data-variant="outlined"]': { border: `1px solid ${c("outline-variant")}`, '&[aria-pressed="true"]': { border: 0, backgroundColor: c("inverse-surface"), color: c("inverse-on-surface") }, "&.Mui-disabled": { borderColor: ca("on-surface", DISABLED_CONTAINER) } },
+          // A selected toggle with a container squares its corners; pressing tightens them further.
+          '&[data-variant][aria-pressed="true"]': { borderRadius: shape.md },
+          "&[data-variant]:active:not(.Mui-disabled)": { borderRadius: shape.sm },
           ...disabledText,
         },
-        sizeSmall: { width: 32, height: 32, padding: 6, "& svg": { width: 20, height: 20 } },
-        sizeLarge: { width: 48, height: 48, padding: 12 },
+        sizeSmall: { width: 32, height: 32, padding: 6, borderRadius: 16, "& svg": { width: 20, height: 20 } },
+        sizeLarge: { width: 48, height: 48, padding: 12, borderRadius: 24 },
         colorPrimary: { color: c("primary") },
         colorInherit: { color: "inherit" },
       },
@@ -296,13 +303,13 @@ function components(density: Md3Density): ThemeOptions["components"] {
     MuiPaper: {
       defaultProps: { elevation: 0 },
       styleOverrides: {
-        root: { backgroundImage: "none", backgroundColor: c("surface-container-low"), color: c("on-surface") },
+        root: { backgroundImage: "none", backgroundColor: c("surface-card"), color: c("on-surface") },
         rounded: { borderRadius: shape.md },
-        outlined: { border: `1px solid ${c("outline-variant")}`, backgroundColor: c("surface") },
+        outlined: { border: `1px solid ${ca("outline-variant", 0.7)}`, backgroundColor: c("surface-card") },
       },
       variants: [
         { props: { variant: "filled" }, style: { backgroundColor: c("surface-container-highest") } },
-        { props: { variant: "elevated" }, style: { backgroundColor: c("surface-container-low"), boxShadow: elevation(1) } },
+        { props: { variant: "elevated" }, style: { backgroundColor: c("surface-card"), boxShadow: elevation(1) } },
       ],
     },
     MuiCard: {
@@ -337,13 +344,13 @@ function components(density: Md3Density): ThemeOptions["components"] {
     MuiDialogContentText: { styleOverrides: { root: { color: c("on-surface-variant") } } },
     MuiDialogActions: { styleOverrides: { root: { padding: "0 24px 24px", gap: 8, "& > :not(style) ~ :not(style)": { marginLeft: 0 } } } },
 
-    // ── Menus, popovers, tooltips ──
+    // ── Menus, popovers, tooltips (menus take M3 Expressive's large corners, as MoeSekai's do) ──
     MuiPopover: {
-      styleOverrides: { paper: { borderRadius: shape.xs, backgroundColor: c("surface-container"), boxShadow: elevation(2) } },
+      styleOverrides: { paper: { borderRadius: shape.lg, backgroundColor: c("surface-container"), boxShadow: elevation(2) } },
     },
     MuiMenu: {
       styleOverrides: {
-        paper: { borderRadius: shape.xs, backgroundColor: c("surface-container"), boxShadow: elevation(2), minWidth: 112 },
+        paper: { borderRadius: shape.lg, backgroundColor: c("surface-container"), boxShadow: elevation(2), minWidth: 112 },
         list: { paddingBlock: 8 },
       },
     },
@@ -429,7 +436,13 @@ function components(density: Md3Density): ThemeOptions["components"] {
     MuiTabs: {
       styleOverrides: {
         root: { minHeight: 48, borderBottom: `1px solid ${c("surface-container-highest")}` },
-        indicator: { height: 3, borderRadius: "3px 3px 0 0", backgroundColor: c("primary") },
+        // M3 primary tabs: the indicator spans the tab's content, so it is inset by the tab's padding (exact for tabs
+        // sized to their labels; src/components/shared/PrimaryTabs.tsx measures equal-width tabs).
+        indicator: {
+          height: 3,
+          backgroundColor: "transparent",
+          "&::before": { content: '""', position: "absolute", inset: "0 16px", borderRadius: "3px 3px 0 0", backgroundColor: c("primary") },
+        },
         scrollButtons: { color: c("on-surface-variant"), "&.Mui-disabled": { opacity: 0.38 } },
       },
     },
@@ -524,10 +537,18 @@ function components(density: Md3Density): ThemeOptions["components"] {
     MuiFormControlLabel: { styleOverrides: { label: { ...font(TYPE.bodyMedium), color: c("on-surface") } } },
     MuiSlider: {
       styleOverrides: {
-        root: { color: c("primary"), height: 4 },
-        rail: { backgroundColor: c("secondary-container"), opacity: 1 },
+        // MoeSekai's slider: a 6px track on surface-container-highest, a raised round handle.
+        root: { color: c("primary"), height: 6 },
+        rail: { backgroundColor: c("surface-container-highest"), opacity: 1 },
         track: { border: 0 },
-        thumb: { width: 20, height: 20, backgroundColor: c("primary"), "&:hover, &.Mui-focusVisible": { boxShadow: `0 0 0 8px ${ca("primary", HOVER)}` }, "&.Mui-active": { boxShadow: `0 0 0 10px ${ca("primary", PRESSED)}` } },
+        thumb: {
+          width: 20,
+          height: 20,
+          backgroundColor: c("primary"),
+          boxShadow: elevation(1),
+          "&:hover, &.Mui-focusVisible": { boxShadow: `${elevation(1)}, 0 0 0 8px ${ca("primary", HOVER)}` },
+          "&.Mui-active": { boxShadow: `${elevation(1)}, 0 0 0 10px ${ca("primary", PRESSED)}` },
+        },
         valueLabel: { ...font(TYPE.labelLarge), backgroundColor: c("inverse-surface"), color: c("inverse-on-surface"), borderRadius: shape.full },
         mark: { backgroundColor: c("on-secondary-container"), width: 4, height: 4, borderRadius: "50%" },
         markActive: { backgroundColor: c("on-primary") },
@@ -536,11 +557,15 @@ function components(density: Md3Density): ThemeOptions["components"] {
     // Segmented buttons (M3): outlined pill group, secondary-container when selected.
     MuiToggleButtonGroup: {
       styleOverrides: {
-        root: { borderRadius: shape.full, gap: 0, "& .MuiToggleButtonGroup-grouped": { borderColor: c("outline") } },
-        grouped: {
-          "&:not(:first-of-type)": { marginLeft: -1, borderLeftColor: c("outline") },
-          "&:first-of-type": { borderTopLeftRadius: shape.full, borderBottomLeftRadius: shape.full },
-          "&:last-of-type": { borderTopRightRadius: shape.full, borderBottomRightRadius: shape.full },
+        // MoeSekai's segmented buttons: a surface-container-high trough, the selected segment filled with the seed.
+        // Every segment keeps its own rounded corners: the doubled class outranks MUI's first / middle / last button
+        // rules, which square the inner corners and pull the borders together.
+        root: {
+          borderRadius: shape.md,
+          gap: 2,
+          padding: 4,
+          backgroundColor: c("surface-container-high"),
+          "& .MuiToggleButtonGroup-grouped.MuiToggleButtonGroup-grouped": { margin: 0, border: 0, borderRadius: shape.sm },
         },
       },
     },
@@ -549,20 +574,20 @@ function components(density: Md3Density): ThemeOptions["components"] {
         root: {
           ...font(TYPE.labelLarge),
           position: "relative",
-          minHeight: compact ? 32 : 40,
-          paddingInline: compact ? 12 : 16,
-          gap: 8,
+          minHeight: compact ? 28 : 32,
+          paddingInline: compact ? 10 : 12,
+          gap: 6,
           textTransform: "none",
-          border: `1px solid ${c("outline")}`,
-          borderRadius: 0,
-          color: c("on-surface"),
-          "&:hover": { backgroundColor: "transparent" },
+          border: 0,
+          borderRadius: shape.sm,
+          color: c("on-surface-variant"),
+          "&:hover": { backgroundColor: "transparent", color: c("on-surface") },
           ...stateLayer(),
-          "&.Mui-selected, &.Mui-selected:hover": { backgroundColor: c("secondary-container"), color: c("on-secondary-container") },
+          "&.Mui-selected, &.Mui-selected:hover": { backgroundColor: c("primary-container"), color: c("on-primary-container") },
           "&.Mui-disabled": { color: ca("on-surface", DISABLED_CONTENT), borderColor: ca("on-surface", DISABLED_CONTAINER) },
           "& svg": { width: 18, height: 18 },
         },
-        sizeSmall: { minHeight: 32, paddingInline: 12 },
+        sizeSmall: { minHeight: 28, paddingInline: 10 },
       },
     },
 
@@ -577,8 +602,9 @@ function components(density: Md3Density): ThemeOptions["components"] {
     },
     MuiOutlinedInput: {
       styleOverrides: {
+        // MoeSekai's text fields and selects take the medium shape (12px), not M3 baseline's extra-small.
         root: {
-          borderRadius: shape.xs,
+          borderRadius: shape.md,
           "& .MuiOutlinedInput-notchedOutline": { borderColor: c("outline") },
           "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: c("on-surface") },
           "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: c("primary"), borderWidth: 2 },
@@ -609,7 +635,7 @@ function components(density: Md3Density): ThemeOptions["components"] {
     MuiSelect: { defaultProps: { MenuProps: { slotProps: { paper: { elevation: 0 } } } } },
     MuiAutocomplete: {
       styleOverrides: {
-        paper: { borderRadius: shape.xs, backgroundColor: c("surface-container"), boxShadow: elevation(2) },
+        paper: { borderRadius: shape.lg, backgroundColor: c("surface-container"), boxShadow: elevation(2) },
         option: { ...font(TYPE.bodyLarge), minHeight: 48, '&[aria-selected="true"]': { backgroundColor: `${c("secondary-container")} !important` } },
       },
     },

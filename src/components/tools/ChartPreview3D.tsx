@@ -148,9 +148,9 @@ function ChartHeader({ locale, song, difficulty, onDifficulty, onChangeSong }: {
         <button
           type="button"
           onClick={onChangeSong}
-          className="md3-state inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full border border-outline-variant bg-surface-container-low px-4 py-2.5 text-label-large text-on-surface shadow-elevation-1 transition hover:border-primary hover:text-primary"
+          className="md3-button md3-button--tonal"
         >
-          <MusicGlyph className="h-4 w-4" />
+          <MusicGlyph />
           {t(locale, "chartPreview3d.changeSong")}
         </button>
       </div>
@@ -169,9 +169,9 @@ function StageEmpty({ locale, onChooseSong }: { locale: AppLocale; onChooseSong:
         <button
           type="button"
           onClick={onChooseSong}
-          className="md3-state mt-5 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-label-large text-white shadow-elevation-1 hover:bg-primary"
+          className="md3-button md3-button--filled mt-5"
         >
-          <MusicGlyph className="h-4 w-4" />
+          <MusicGlyph />
           {t(locale, "chartPreview3d.chooseSong")}
         </button>
       </div>
@@ -179,7 +179,7 @@ function StageEmpty({ locale, onChooseSong }: { locale: AppLocale; onChooseSong:
   );
 }
 
-function MusicGlyph({ className }: { className: string }) {
+function MusicGlyph({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M9 18V6l10-2v12" /><circle cx="6" cy="18" r="3" /><circle cx="16" cy="16" r="3" />

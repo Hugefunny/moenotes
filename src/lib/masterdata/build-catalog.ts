@@ -1,4 +1,15 @@
 import type { AppLocale } from "@/config/locales";
+import { PRIMARY_SERVER, type GameServer } from "@/config/servers";
+import { serverAssetUrl } from "@/lib/assets/release";
+import { getImageAssetUrl } from "@/lib/assets/url";
+import { getCardThumbnailUrl, getCharacterThumbnailUrl } from "@/lib/cards/assets";
+import { getItemIconUrl } from "@/lib/items/assets";
+import { getBandItemIconUrl } from "@/lib/band-items/assets";
+import { latestStarted } from "@/lib/schedule";
+import { entityServer } from "@/lib/servers/facets";
+import { getStoryArtworkUrl } from "@/lib/story/assets";
+import { getSupportCardThumbnailUrl } from "@/lib/support-cards/assets";
+import { getBuildShops } from "@/lib/masterdata/build-shop";
 import {
   getBuildBackgrounds,
   getBuildBandItems,
@@ -46,6 +57,9 @@ const COUNTERS: Readonly<Record<string, Counter>> = {
   "main-story": stories("main"),
   "event-story": stories("event"),
   "friendship-story": stories("friendship"),
+  "birthday-story": stories("birthday"),
+  "other-story": stories("other"),
+  shop: length(getBuildShops),
 };
 
 /** Entry counts by route id; a counter whose tables fail to load is left out rather than failing the page. */
@@ -59,5 +73,109 @@ export function getBuildCatalogCounts(locale: AppLocale): Promise<Record<string,
       }
     }));
     return Object.fromEntries(counts.filter((entry): entry is readonly [string, number] => entry !== null));
+  });
+}
+
+/** A collection page's picture on its group's landing page: art fills the tile, icons and stickers sit whole in it. */
+export interface CatalogCover {
+  url: string;
+  fit: "cover" | "contain";
+}
+
+type CoverPicker = (locale: AppLocale, now: number) => Promise<CatalogCover | null>;
+
+/** The entry's file in the catalog of a server that has it. */
+function cover(entry: { servers: readonly GameServer[] } | undefined, url: string | undefined, fit: CatalogCover["fit"] = "cover"): CatalogCover | null {
+  return entry && url ? { url: serverAssetUrl(url, entityServer(entry, PRIMARY_SERVER)), fit } : null;
+}
+
+const newestStory = (category: string): CoverPicker => async (locale, now) => {
+  const story = latestStarted((await getBuildStories(locale)).filter((entry) => entry.category === category && getStoryArtworkUrl(entry, locale)), now);
+  return cover(story, story && getStoryArtworkUrl(story, locale));
+};
+
+const COVERS: Readonly<Record<string, CoverPicker>> = {
+  characters: async (locale, now) => {
+    // The character of the newest card, so the tile changes with releases.
+    const card = latestStarted(await getBuildCards(locale), now);
+    return cover(card, card && getCharacterThumbnailUrl(card.characterId));
+  },
+  cards: async (locale, now) => {
+    const card = latestStarted(await getBuildCards(locale), now);
+    return cover(card, card && getCardThumbnailUrl(card.assetId));
+  },
+  "support-cards": async (locale, now) => {
+    const card = latestStarted(await getBuildSupportCards(locale), now);
+    return cover(card, card && getSupportCardThumbnailUrl(card.assetId));
+  },
+  stamps: async (locale, now) => {
+    const stamp = latestStarted(await getBuildStamps(locale), now);
+    return cover(stamp, stamp?.imageUrl, "contain");
+  },
+  titles: async (locale, now) => {
+    const title = latestStarted(await getBuildDegrees(locale), now);
+    return cover(title, title?.imageUrl, "contain");
+  },
+  backgrounds: async (locale, now) => {
+    const background = latestStarted(await getBuildBackgrounds(locale), now);
+    return cover(background, background?.thumbnailUrl);
+  },
+  comics: async (locale, now) => {
+    const comic = latestStarted(await getBuildComics(locale), now);
+    return cover(comic, comic?.imageUrl);
+  },
+  "band-items": async (locale, now) => {
+    const item = latestStarted(await getBuildBandItems(locale), now);
+    return cover(item, item && getBandItemIconUrl(item, locale), "contain");
+  },
+  items: async (locale) => {
+    // Star gems, the currency every player knows.
+    const item = (await getBuildItems(locale)).find((entry) => entry.id === 1);
+    return cover(item, item && getItemIconUrl(item.imagePath, locale), "contain");
+  },
+  music: async (locale, now) => {
+    const song = latestStarted(await getBuildMusic(locale), now);
+    return cover(song, song?.jacketUrl);
+  },
+  "event-list": async (locale, now) => {
+    const event = latestStarted(await getBuildEvents(locale), now);
+    return cover(event, event && (event.bannerUrl || event.backgroundUrl));
+  },
+  rewards: async (locale, now) => {
+    const entry = latestStarted((await getBuildRewardEntries(locale)).filter((reward) => reward.bannerUrl), now);
+    return cover(entry, entry?.bannerUrl);
+  },
+  exchange: async (locale, now) => {
+    const exchange = latestStarted((await getBuildExchangeSummaries(locale)).filter((entry) => entry.bannerUrl), now);
+    return cover(exchange, exchange?.bannerUrl);
+  },
+  shop: async (locale, now) => {
+    const pack = latestStarted((await getBuildShops(locale)).filter((entry) => entry.thumbnailUrl), now);
+    return cover(pack, pack?.thumbnailUrl);
+  },
+  gacha: async (locale, now) => {
+    const gacha = latestStarted((await getBuildGachas(locale)).filter((entry) => entry.bannerPath), now);
+    return cover(gacha, gacha && getImageAssetUrl(gacha.bannerPath, locale));
+  },
+  "main-story": newestStory("main"),
+  "event-story": newestStory("event"),
+  "friendship-story": newestStory("friendship"),
+  "birthday-story": newestStory("birthday"),
+  "other-story": newestStory("other"),
+};
+
+/** Covers by route id for the group landing pages; a picker whose tables fail to load is left out. */
+export function getBuildCatalogCovers(locale: AppLocale): Promise<Record<string, CatalogCover>> {
+  return memo(`catalog-covers:${locale}`, async () => {
+    const now = Date.now();
+    const covers = await Promise.all(Object.entries(COVERS).map(async ([routeId, pick]) => {
+      try {
+        const found = await pick(locale, now);
+        return found ? ([routeId, found] as const) : null;
+      } catch {
+        return null;
+      }
+    }));
+    return Object.fromEntries(covers.filter((entry): entry is readonly [string, CatalogCover] => entry !== null));
   });
 }

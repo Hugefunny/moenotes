@@ -159,6 +159,7 @@ export const esES = {
       news: "Noticias",
       eventTracker: "Seguimiento de eventos",
       musicRanking: "Clasificación de canciones",
+      roomCheck: "Consulta de salas",
       chartData: "Metadatos de canciones"
     }
   },
@@ -304,7 +305,7 @@ export const esES = {
     gameServer: "Servidor del juego predeterminado",
     gameServerAuto: "Automático ({server})",
     options: { system: "Sistema", light: "Claro", dark: "Oscuro" },
-    tabs: { label: "Secciones de ajustes", general: "General", data: "Datos" },
+    tabs: { label: "Secciones de ajustes", data: "Datos" },
     data: {
       cacheTitle: "Caché de descargas",
       total: "En caché",
@@ -1118,6 +1119,178 @@ export const esES = {
       notReturned: "No devuelto esta vez: {ranks}"
     }
   },
+  roomCheck: {
+    alpha: "Alpha",
+    alphaHint: "Versión preliminar: el diseño y las cifras aún pueden cambiar.",
+    difficulty: {
+      "0": "Easy",
+      "1": "Normal",
+      "2": "Hard",
+      "3": "Expert",
+      "4": "Master"
+    },
+    form: {
+      label: "Código de sala",
+      placeholder: "Código de sala de 7 dígitos, o pega un mensaje con códigos",
+      submit: "Consultar",
+      hint: "Al pegar un mensaje se añaden todos los códigos de sala que contenga.",
+      notes: {
+        added: "Salas añadidas: {n}",
+        invalid: "Introduce un código de sala de 7 dígitos.",
+        known: "Ya está en la lista."
+      }
+    },
+    list: {
+      title: "Salas",
+      clear: "Vaciar",
+      empty: "Las salas que consultes aparecerán aquí. Solo se guardan sus códigos, en este navegador.",
+      remove: "Quitar la sala {code}",
+      humans: "{n} de {capacity} asientos ocupados",
+      unknownSong: "Canción {id}",
+      status: {
+        idle: "Sin leer",
+        queued: "En espera",
+        loading: "Leyendo…",
+        ready: "Leída",
+        error: {
+          room_not_found: "No encontrada",
+          room_full: "Llena",
+          cooldown: "Espera",
+          busy: "Ocupado",
+          bad_code: "Código no válido",
+          network: "Error",
+          invalid: "Ilegible"
+        }
+      }
+    },
+    fresh: {
+      justNow: "ahora mismo",
+      secondsAgo: "hace {n} s",
+      readAgo: "Leída {time}",
+      live: "En vivo",
+      source: {
+        live: "Leída solo para ti",
+        cache: "Compartida por alguien que acaba de mirar"
+      },
+      stopped: {
+        full: "Las actualizaciones en vivo se detuvieron: hay cuatro jugadores en la sala.",
+        lease: "Las actualizaciones en vivo se detuvieron tras 10 minutos.",
+        closed: "Las actualizaciones en vivo se detuvieron: la sala se cerró.",
+        error: "Las actualizaciones en vivo se detuvieron."
+      },
+      refresh: "Actualizar",
+      refreshIn: "Podrás actualizar en {n} s",
+      refreshInShort: "{n} s",
+      liveToggle: "Actualizaciones en vivo"
+    },
+    room: {
+      song: "Canción de la sala",
+      unknownSong: "Canción {id}",
+      noSong: "Aún no hay canción",
+      missions: "Misiones de Gekisou",
+      copy: "Copiar",
+      copyCode: "Copiar el código de sala {code}",
+      copied: "Copiado",
+      votes: "Canciones elegidas",
+      voteCount: "{n} la eligieron"
+    },
+    player: {
+      title: "Jugadores",
+      joinOrder: "Entró en {n}.º lugar",
+      host: "Anfitrión",
+      unnamed: "Jugador sin nombre",
+      status: {
+        waiting: "No listo",
+        ready: "Listo",
+        playing: "En live"
+      },
+      picked: "Eligió {title}",
+      characterRank: "Rango de personaje",
+      averageLevel: "Nv. medio",
+      shareLabel: "{n}% del mayor total de rango de personaje de la sala",
+      unknownTeam: "Equipo no disponible",
+      expandAll: "Ver todos los equipos",
+      collapseAll: "Ver el equipo elegido",
+      emptySeat: "Asiento libre"
+    },
+    formation: {
+      leader: "Líder",
+      slot: "Puesto {n}",
+      noSupport: "Sin Snap",
+      unknownCard: "Carta {id}",
+      rankValue: "Rango {n}",
+      supportSkills: "Habilidades de Snap",
+      supportGekisouSkills: "Habilidades de Gekisou de Snap",
+      totalCharacterRank: "Total de rango de personaje",
+      vipRank: "Rango de T.G.W CARD",
+      level: "Nivel",
+      awake: "Entrenamiento",
+      rank: "Rango",
+      skills: {
+        live: "Habilidad de live",
+        leader: "Habilidad de líder",
+        gekisou: "Habilidad de Gekisou"
+      },
+      characterRank: "Rango de personaje",
+      bandItem: "Equipamiento de banda",
+      bandItemTitle: "Equipamiento de banda: Performance {performance}, Technique {technique}, Visual {visual}",
+      order: "Orden de actuación",
+      caption: "Equipo de {name}",
+      orderShort: "Actúa {n}.º",
+      short: {
+        awake: "Entren.",
+        characterRank: "Pers.",
+        live: "Live",
+        gekisou: "Gekisou",
+        leader: "Líder",
+        rank: "Rango",
+        snapSkills: "Habilid.",
+        snapGekisou: "Gekisou"
+      }
+    },
+    states: {
+      loading: "Leyendo la sala {code}…",
+      retry: "Reintentar",
+      retryIn: "Reintentar en {n} s",
+      intro: {
+        title: "Asómate a una sala",
+        body: "Introduce un código de sala para ver quién está en la sala, la canción que eligió cada jugador y el equipo de cada uno. Pega un mensaje para consultar varias salas a la vez."
+      },
+      room_not_found: {
+        title: "No se encontró la sala {code}",
+        body: "Puede que la sala se haya cerrado o que el código sea erróneo. Una sala se cierra cuando todos salen."
+      },
+      room_full: {
+        title: "La sala {code} está llena",
+        body: "Hay cinco jugadores en la sala, así que ahora mismo no se puede consultar."
+      },
+      cooldown: {
+        title: "La sala {code} se acaba de leer",
+        body: "Cada sala se lee como mucho una vez cada pocos segundos; hasta entonces se muestra la última lectura."
+      },
+      busy: {
+        title: "Se están leyendo muchas salas",
+        body: "El servicio está ocupado. Vuelve a intentarlo en un momento."
+      },
+      bad_code: {
+        title: "{code} no es un código de sala",
+        body: "Los códigos de sala tienen siete dígitos."
+      },
+      network: {
+        title: "No se pudo leer la sala {code}",
+        body: "Comprueba la conexión y vuelve a intentarlo."
+      },
+      invalid: {
+        title: "No se pudo leer la respuesta de la sala {code}",
+        body: "Vuelve a intentarlo más tarde."
+      }
+    },
+    host: {
+      title: "Crear una sala",
+      body: "Crea una sala en la que solo entren los jugadores que cumplan tus condiciones.",
+      badge: "Próximamente"
+    }
+  },
   musicRanking: {
     changeSong: "Cambiar de canción",
     chooseSong: "Elegir una canción",
@@ -1477,6 +1650,10 @@ export const esES = {
       title: "Seguimiento de eventos",
       description: "Clasificaciones en tiempo real del evento actual de BanG Dream! Our Notes en cada servidor: tablas de canciones de desafío con equipos, notas de corte de recompensas, clasificación de puntos del evento y tiempo restante."
     },
+    roomCheck: {
+      title: "Consulta de salas",
+      description: "Introduce un código de sala de BanG Dream! Our Notes para ver quién está en la sala, la canción que eligió cada jugador y el equipo de cada uno."
+    },
     musicRanking: {
       title: "Clasificación de canciones",
       description: "Clasificación de puntuación máxima de cada canción en cada servidor de BanG Dream! Our Notes: jugadores, puntuaciones y equipos."
@@ -1663,9 +1840,6 @@ export const esES = {
     expand: "Expandir",
     count: "{filtered} / {total}",
     openQuickFilter: "Abrir filtros",
-    drawerHintTitle: "Filtros en la barra lateral",
-    drawerHintBody: "Haz clic en la pestaña de la izquierda para desplegar o contraer los filtros en cualquier momento.",
-    drawerHintDismiss: "Entendido"
   },
   browserNotice: {
     title: "Este navegador podría no mostrar el sitio correctamente",

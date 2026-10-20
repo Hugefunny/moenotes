@@ -91,14 +91,23 @@
 .pp-section-global .pp-value { text-align: left; font-size: 21px; }
 .pp-footer { display: grid; gap: 9px; justify-items: start; margin-top: 14px; padding-top: 13px; border-top: 1px solid var(--md-sys-color-outline-variant); min-width: 0; }
 .pp-footer label { display: flex; gap: 8px; align-items: start; font-size: 12px; min-height: 40px; }
-.pp-footer input[type="checkbox"] { min-height: 0; width: 17px; height: 17px; flex: 0 0 17px; margin-top: 2px; accent-color: var(--pp-blue); }
-.pp-profile .pp-footer > button, .pp-profile .pp-events-actions button { min-height: 40px; max-width: 100%; padding: 8px 12px; border: 1px solid var(--pp-blue); border-radius: 7px; background: #fff; color: var(--pp-blue); font-size: 12px; font-weight: 750; line-height: 1.5; }
-.pp-profile .pp-footer > button:hover:not(:disabled), .pp-profile .pp-events-actions button:hover:not(:disabled) { background: #eef2fb; }
-.pp-profile .pp-events-actions button[aria-pressed="true"] { background: var(--pp-blue); color: #fff; }
+.pp-footer input[type="checkbox"] { min-height: 0; margin-top: 2px; }
+/* Actions, drawn like the site's MD3 buttons (src/styles/md3/primitives.css): label-large, round corners that tighten
+   while pressed, a state layer. The footer's is outlined; the event buttons sit on the blue game panel, so they are
+   tonal, and the pressed toggle is filled with squarer corners. */
+.pp-profile :is(.pp-footer > button, .pp-events-actions button) { position: relative; isolation: isolate; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; max-width: 100%; padding: 0 16px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: 20px; background: transparent; color: var(--md-sys-color-on-surface); font-size: var(--md-sys-typescale-label-large-size); font-weight: 500; line-height: var(--md-sys-typescale-label-large-line-height); letter-spacing: var(--md-sys-typescale-label-large-tracking); -webkit-tap-highlight-color: transparent; transition: border-radius var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard), background-color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard), color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard); }
+.pp-profile .pp-events-actions button { border-color: transparent; background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
+.pp-profile .pp-events-actions button[aria-pressed="true"] { border-radius: var(--md-sys-shape-corner-medium); background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
+.pp-profile :is(.pp-footer > button, .pp-events-actions button)::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: currentColor; opacity: 0; pointer-events: none; transition: opacity var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard); }
+@media (hover: hover) { .pp-profile :is(.pp-footer > button, .pp-events-actions button):hover:not(:disabled)::before { opacity: var(--md-sys-state-hover-opacity); } }
+.pp-profile :is(.pp-footer > button, .pp-events-actions button):is(:focus-visible, :active):not(:disabled)::before { opacity: var(--md-sys-state-pressed-opacity); }
+.pp-profile :is(.pp-footer > button, .pp-events-actions button):active:not(:disabled) { border-radius: var(--md-sys-shape-corner-small); }
+.pp-profile :is(.pp-footer > button, .pp-events-actions button):disabled { opacity: 1; color: rgb(var(--md-sys-color-on-surface-rgb) / 0.38); border-color: rgb(var(--md-sys-color-on-surface-rgb) / 0.12); }
+.pp-profile .pp-events-actions button:disabled { border-color: transparent; background: rgb(var(--md-sys-color-on-surface-rgb) / 0.12); }
 .pp-events-editor { display: grid; gap: 8px; width: 100%; min-width: 0; }
 .pp-events-actions { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
 .pp-events-editor > label { display: flex; align-items: start; gap: 8px; min-height: 40px; font-size: 12px; line-height: 1.5; }
-.pp-events-editor input[type="checkbox"] { min-height: 0; width: 17px; height: 17px; flex: 0 0 17px; margin: 2px 0 0; accent-color: #8ba4d1; }
+.pp-events-editor input[type="checkbox"] { min-height: 0; margin: 2px 0 0; }
 
 @container player-profile (max-width: 620px) {
   .pp-header { margin-bottom: 12px; }

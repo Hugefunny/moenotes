@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Tab from "@mui/material/Tab";
-import Tabs from "@mui/material/Tabs";
 import { withMd3 } from "@/components/md3/Md3Provider";
+import PrimaryTabs from "@/components/shared/PrimaryTabs";
 import type { AppLocale } from "@/config/locales";
 import type { GameServer } from "@/config/servers";
 import { t } from "@/i18n";
@@ -61,11 +60,14 @@ function GuessMusicTool({ locale, songs, servers }: GuessMusicToolProps) {
   return (
     <div className="gm-root">
       {!playing && (
-        <Tabs value={tab} onChange={(_, next: GuessTab) => choose(next)} variant="fullWidth" aria-label={tr("tabs.label")}>
-          {TABS.map(({ id, icon }) => (
-            <Tab key={id} value={id} id={`gm-tab-${id}`} aria-controls="gm-tab-panel" icon={<GuessIcon name={icon} size={20} />} iconPosition="start" label={tr(`tabs.${id}`)} />
-          ))}
-        </Tabs>
+        <PrimaryTabs
+          tabs={TABS.map(({ id, icon }) => ({ value: id, label: tr(`tabs.${id}`), icon: <GuessIcon name={icon} size={24} /> }))}
+          value={tab}
+          onChange={choose}
+          label={tr("tabs.label")}
+          tabId={(id) => `gm-tab-${id}`}
+          panelId="gm-tab-panel"
+        />
       )}
       <div id="gm-tab-panel" role="tabpanel" aria-labelledby={`gm-tab-${tab}`} className="gm-stack" style={{ gap: 16 }}>
         {tab === "daily" ? (

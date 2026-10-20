@@ -26,10 +26,10 @@ export function SectionLink({ href, label }: LinkProps) {
   return (
     <a
       href={href}
-      className="md3-state inline-flex min-h-10 items-center gap-2 rounded-full px-3 text-label-large text-primary"
+      className="md3-button md3-button--text"
     >
       {label}
-      <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m13 6 6 6-6 6" /></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m13 6 6 6-6 6" /></svg>
     </a>
   );
 }

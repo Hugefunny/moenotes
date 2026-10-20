@@ -155,7 +155,7 @@ function AudioDock({ locale }: Props) {
   return (
     <section
       aria-label={t(locale, "audio.dock.label")}
-      className="mn-audio-dock fixed inset-x-2 bottom-2 z-40 mx-auto max-w-3xl overflow-hidden rounded-shape-lg bg-surface-container-high text-on-surface shadow-elevation-3 md:left-[calc(var(--mn-sidebar-offset,17rem)+1rem)]"
+      className="mn-audio-dock mn-shell-offset fixed inset-x-2 bottom-2 z-40 mx-auto max-w-3xl overflow-hidden rounded-shape-lg bg-surface-container-high text-on-surface shadow-elevation-3 md:left-[calc(var(--mn-sidebar-offset,17rem)+1rem)]"
     >
       {showQueue && (
         <div className="max-h-[40vh] overflow-y-auto border-b border-outline-variant py-2">

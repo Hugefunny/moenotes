@@ -304,7 +304,7 @@ export default function ScreenshotImport({ locale, server, source, sourceIssue, 
             const conflict = card.identity.status === "conflict" || CARD_FIELDS.some(field => card.fields[field].status === "conflict");
             const crop = card.identity.value === null ? tileCrops.get(card.key) : undefined, candidate = crop ? candidateName(card) : null;
             return <article className={`dw-recognition-card ${excluded.includes(card.key) ? " is-excluded" : ""}`} key={card.key} data-card-key={card.key} data-card-id={card.identity.value ?? ""} data-card-kind={card.kind}>
-              <label className="dw-recognition-choice"><input type="checkbox" checked={!excluded.includes(card.key)} disabled={stale || saving} aria-label={tr("selectRecognizedCard", { n: index + 1 })}
+              <label className="dw-recognition-choice"><input type="checkbox" className="md3-checkbox" checked={!excluded.includes(card.key)} disabled={stale || saving} aria-label={tr("selectRecognizedCard", { n: index + 1 })}
                 onChange={event => setExcluded(previous => event.target.checked ? previous.filter(key => key !== card.key) : [...previous, card.key])} /><span>{index + 1}</span>{conflict && <span className="dw-tag dw-warning">{tr("conflict")}</span>}{crop && <span className="dw-tag dw-warning">{tr("unidentifiedCard")}</span>}</label>
               {crop ? <ScreenshotTile crop={crop} /> : <BoxArtwork card={card} catalog={catalog} locale={locale} />}
               <strong className="dw-recognized-name">{crop ? tr("unidentifiedCard") : cardTitle(card, catalog)}</strong><span className="dw-card-subtitle">{crop ? candidate ? tr("unidentifiedCandidate", { name: candidate }) : "" : cardSubtitle(card, catalog)}</span>

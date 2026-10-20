@@ -31,7 +31,8 @@ export interface PopoverProps {
 
 /**
  * Material 3 menu surface anchored to a trigger (MUI Popover: portal, kept inside the viewport, Escape and outside
- * click close it, focus returns to the trigger). The panel is surface-container with the extra-small shape.
+ * click close it, focus returns to the trigger). The panel is surface-container with the large shape; its rows are
+ * `md3-menu-item md3-state` buttons.
  */
 export default function Popover({
   trigger,

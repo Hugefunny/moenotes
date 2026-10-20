@@ -1,7 +1,7 @@
 /**
  * The top app bar's breadcrumb trail (src/components/shell/TopAppBar.tsx), computed when the page is built: each crumb
- * with the sibling pages its menu offers. A group landing page (e.g. /database) ends with a "choose a page" crumb
- * listing the group's pages.
+ * with the sibling pages its menu offers. A group landing page (e.g. /database) is the current crumb, followed by a
+ * "choose a page" menu listing the group's pages.
  */
 import type { AppLocale } from "@/config/locales";
 import { t } from "@/i18n";
@@ -53,12 +53,11 @@ export function buildHeaderCrumbs(pathname: string, locale: AppLocale, detail?: 
     groupMenu: groups.some((group) => group.id === crumb.id),
   }));
 
+  // The group stays the current crumb (it is the page); the picker after it only opens the menu of its pages.
   if (match?.isGroupLanding) {
     const children = getNavChildren(match.item);
     if (children.length > 0) {
-      const last = crumbs[crumbs.length - 1];
-      if (last) last.current = false;
-      crumbs.push({ id: "__picker__", label: "", href: "", current: true, picker: true, options: toOptions(children, null), groupMenu: false });
+      crumbs.push({ id: "__picker__", label: "", href: "", current: false, picker: true, options: toOptions(children, null), groupMenu: false });
     }
   }
   return crumbs;

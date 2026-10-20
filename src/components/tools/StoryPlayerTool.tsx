@@ -270,22 +270,22 @@ function StoryHeader({ locale, entry, languages, language, switching, onLanguage
       <div className="flex flex-wrap items-center gap-1.5">
         <div className="inline-flex gap-1">
           <IconButton label={previous ? `${t(locale, "storyPlayer.previous")}: ${previous.title}` : t(locale, "storyPlayer.previous")} disabled={!previous} onClick={() => previous && onChoose(previous.advId)}>
-            <ChevronIcon direction="left" className="h-4 w-4" />
+            <ChevronIcon direction="left" className="" />
           </IconButton>
           <IconButton label={next ? `${t(locale, "storyPlayer.next")}: ${next.title}` : t(locale, "storyPlayer.next")} disabled={!next} onClick={() => next && onChoose(next.advId)}>
-            <ChevronIcon direction="right" className="h-4 w-4" />
+            <ChevronIcon direction="right" className="" />
           </IconButton>
         </div>
         {languages.length > 0 && <LanguageSelect locale={locale} languages={languages} value={language} busy={switching} onChange={onLanguage} />}
         <IconButton label={t(locale, "storyPlayer.info.title")} onClick={onInfo}>
-          <InfoIcon className="h-4 w-4" />
+          <InfoIcon className="" />
         </IconButton>
         <button
           type="button"
           onClick={onPick}
-          className="md3-state inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-primary px-4 text-label-large text-white shadow-elevation-1 hover:bg-primary"
+          className="md3-button md3-button--filled"
         >
-          <StoryListIcon className="h-4 w-4" />
+          <StoryListIcon className="" />
           {t(locale, "storyPlayer.chooseStory")}
         </button>
       </div>
@@ -332,13 +332,13 @@ function LanguageSelect({ locale, languages, value, busy, onChange }: {
           aria-busy={busy}
           aria-label={name}
           title={name}
-          className={`${PILL} gap-1.5 px-3 disabled:cursor-default`}
+          className="md3-button md3-button--outlined"
         >
-          <LanguageIcon className="h-4 w-4 shrink-0 text-primary" />
+          <LanguageIcon className="text-primary" />
           <span>{label}</span>
           {busy
-            ? <SiriusIcon className="h-3.5 w-3.5" />
-            : languages.length > 1 && <ChevronIcon direction="down" className="h-3.5 w-3.5 opacity-60" />}
+            ? <SiriusIcon className="" />
+            : languages.length > 1 && <ChevronIcon direction="down" className="opacity-60" />}
         </button>
       )}
     >
@@ -352,7 +352,7 @@ function LanguageSelect({ locale, languages, value, busy, onChange }: {
             onChange(code);
             close();
           }}
-          className={`w-full rounded-shape-md px-4 py-2 text-left text-label-large transition hover:bg-surface-container-highest ${code === value ? "bg-secondary-container text-primary" : "text-on-surface-variant hover:text-on-surface"}`}
+          className="md3-menu-item md3-state"
         >
           {t(locale, `storyPlayer.languages.${code}`)}
         </button>
@@ -454,7 +454,7 @@ function StageEmpty({ locale, site, onChoose, onInfo, onRetry }: { locale: AppLo
         {site.kind === "error" && (
           <>
             <p className="text-label-large text-error">{t(locale, "storyPlayer.listError")}</p>
-            <button type="button" onClick={onRetry} className={`${PILL} mt-4 px-4`}>{t(locale, "storyPlayer.retry")}</button>
+            <button type="button" onClick={onRetry} className="md3-button md3-button--outlined mt-4">{t(locale, "storyPlayer.retry")}</button>
           </>
         )}
         {empty && <p className="text-label-large text-on-surface-variant">{t(locale, "storyPlayer.listEmpty")}</p>}
@@ -466,13 +466,13 @@ function StageEmpty({ locale, site, onChoose, onInfo, onRetry }: { locale: AppLo
               <button
                 type="button"
                 onClick={onChoose}
-                className="md3-state inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-label-large text-white shadow-elevation-1 hover:bg-primary"
+                className="md3-button md3-button--filled"
               >
-                <StoryListIcon className="h-4 w-4" />
+                <StoryListIcon className="" />
                 {t(locale, "storyPlayer.chooseStory")}
               </button>
-              <button type="button" onClick={onInfo} className={`${PILL} gap-1.5 px-4`}>
-                <InfoIcon className="h-4 w-4" />
+              <button type="button" onClick={onInfo} className="md3-button md3-button--outlined">
+                <InfoIcon className="" />
                 {t(locale, "storyPlayer.info.title")}
               </button>
             </div>
@@ -485,13 +485,12 @@ function StageEmpty({ locale, site, onChoose, onInfo, onRetry }: { locale: AppLo
 
 function IconButton({ label, disabled = false, onClick, children }: { label: string; disabled?: boolean; onClick: () => void; children: ReactNode }) {
   return (
-    <button type="button" aria-label={label} title={label} disabled={disabled} onClick={onClick} className={`${PILL} w-9 justify-center disabled:opacity-40`}>
+    <button type="button" aria-label={label} title={label} disabled={disabled} onClick={onClick} className="md3-icon-button md3-icon-button--outlined">
       {children}
     </button>
   );
 }
 
-const PILL = " inline-flex h-9 shrink-0 items-center rounded-full border border-outline-variant bg-surface-container-low text-xs font-bold text-on-surface transition enabled:hover:border-primary enabled:hover:text-primary";
 
 /**
  * Replaces the address of the current history entry. A closing modal leaves its own entry with `history.back()`,

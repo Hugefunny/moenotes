@@ -74,7 +74,7 @@ export default function RankingList({ locale, rows, cards, assetUrl, boundaries 
           <button
             type="button"
             onClick={() => setExpanded((value) => !value)}
-            className="md3-state rounded-full border border-outline-variant bg-surface-container-low px-5 py-2 text-label-medium text-on-surface shadow-elevation-1"
+            className="md3-button md3-button--tonal md3-button--small"
           >
             {expanded ? t(locale, "music.ranking.showLess") : t(locale, "music.ranking.showAll", { count: rows.length })}
           </button>

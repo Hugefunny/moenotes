@@ -159,6 +159,7 @@ export const deDE = {
       news: "Neuigkeiten",
       eventTracker: "Event-Tracker",
       musicRanking: "Song-Rangliste",
+      roomCheck: "Raum-Check",
       chartData: "Song-Meta"
     }
   },
@@ -304,7 +305,7 @@ export const deDE = {
     gameServer: "Standard-Server",
     gameServerAuto: "Automatisch ({server})",
     options: { system: "System", light: "Hell", dark: "Dunkel" },
-    tabs: { label: "Einstellungskategorien", general: "Allgemein", data: "Daten" },
+    tabs: { label: "Einstellungskategorien", data: "Daten" },
     data: {
       cacheTitle: "Download-Cache",
       total: "Zwischengespeichert",
@@ -1110,6 +1111,178 @@ export const deDE = {
       notReturned: "Diesmal nicht zurückgegeben: {ranks}"
     }
   },
+  roomCheck: {
+    alpha: "Alpha",
+    alphaHint: "Frühe Version: Layout und Zahlen können sich noch ändern.",
+    difficulty: {
+      "0": "Easy",
+      "1": "Normal",
+      "2": "Hard",
+      "3": "Expert",
+      "4": "Master"
+    },
+    form: {
+      label: "Raumcode",
+      placeholder: "7-stelliger Raumcode oder eine Nachricht mit Codes einfügen",
+      submit: "Nachsehen",
+      hint: "Eine eingefügte Nachricht fügt alle enthaltenen Raumcodes hinzu.",
+      notes: {
+        added: "Räume hinzugefügt: {n}",
+        invalid: "Gib einen 7-stelligen Raumcode ein.",
+        known: "Steht bereits in der Liste."
+      }
+    },
+    list: {
+      title: "Räume",
+      clear: "Leeren",
+      empty: "Räume, in die du schaust, erscheinen hier. Nur ihre Codes werden gespeichert, in diesem Browser.",
+      remove: "Raum {code} entfernen",
+      humans: "{n} von {capacity} Plätzen belegt",
+      unknownSong: "Song {id}",
+      status: {
+        idle: "Nicht gelesen",
+        queued: "Wartet",
+        loading: "Wird gelesen…",
+        ready: "Gelesen",
+        error: {
+          room_not_found: "Nicht gefunden",
+          room_full: "Voll",
+          cooldown: "Warten",
+          busy: "Ausgelastet",
+          bad_code: "Ungültiger Code",
+          network: "Fehlgeschlagen",
+          invalid: "Unlesbar"
+        }
+      }
+    },
+    fresh: {
+      justNow: "gerade eben",
+      secondsAgo: "vor {n} s",
+      readAgo: "Gelesen {time}",
+      live: "Live",
+      source: {
+        live: "Nur für dich gelesen",
+        cache: "Geteilt von jemandem, der gerade geschaut hat"
+      },
+      stopped: {
+        full: "Live-Aktualisierung gestoppt: Es sind vier Spieler im Raum.",
+        lease: "Live-Aktualisierung nach 10 Minuten gestoppt.",
+        closed: "Live-Aktualisierung gestoppt: Der Raum wurde geschlossen.",
+        error: "Live-Aktualisierung gestoppt."
+      },
+      refresh: "Aktualisieren",
+      refreshIn: "Aktualisierung in {n} s möglich",
+      refreshInShort: "{n} s",
+      liveToggle: "Live-Aktualisierung"
+    },
+    room: {
+      song: "Raum-Song",
+      unknownSong: "Song {id}",
+      noSong: "Noch kein Song",
+      missions: "Gekisou-Missionen",
+      copy: "Kopieren",
+      copyCode: "Raumcode {code} kopieren",
+      copied: "Kopiert",
+      votes: "Song-Auswahl",
+      voteCount: "{n} haben gewählt"
+    },
+    player: {
+      title: "Spieler",
+      joinOrder: "Als {n}. beigetreten",
+      host: "Host",
+      unnamed: "Unbenannter Spieler",
+      status: {
+        waiting: "Nicht bereit",
+        ready: "Bereit",
+        playing: "Im Live"
+      },
+      picked: "{title} gewählt",
+      characterRank: "Charakterrang",
+      averageLevel: "Ø Lv.",
+      shareLabel: "{n} % der höchsten Charakterrang-Summe im Raum",
+      unknownTeam: "Team nicht verfügbar",
+      expandAll: "Alle Teams anzeigen",
+      collapseAll: "Gewähltes Team anzeigen",
+      emptySeat: "Freier Platz"
+    },
+    formation: {
+      leader: "Leader",
+      slot: "Slot {n}",
+      noSupport: "Kein Snap",
+      unknownCard: "Karte {id}",
+      rankValue: "Rang {n}",
+      supportSkills: "Snap-Skills",
+      supportGekisouSkills: "Snap-Gekisou-Skills",
+      totalCharacterRank: "Charakterrang gesamt",
+      vipRank: "T.G.W CARD-Rang",
+      level: "Level",
+      awake: "Training",
+      rank: "Rang",
+      skills: {
+        live: "Live-Skill",
+        leader: "Leader-Skill",
+        gekisou: "Gekisou-Skill"
+      },
+      characterRank: "Charakterrang",
+      bandItem: "Band-Ausrüstung",
+      bandItemTitle: "Band-Ausrüstung: Performance {performance}, Technique {technique}, Visual {visual}",
+      order: "Auftrittsreihenfolge",
+      caption: "Team von {name}",
+      orderShort: "Tritt als {n}. auf",
+      short: {
+        awake: "Training",
+        characterRank: "Char.",
+        live: "Live",
+        gekisou: "Gekisou",
+        leader: "Leader",
+        rank: "Rang",
+        snapSkills: "Skills",
+        snapGekisou: "Gekisou"
+      }
+    },
+    states: {
+      loading: "Raum {code} wird gelesen…",
+      retry: "Erneut versuchen",
+      retryIn: "Erneut versuchen in {n} s",
+      intro: {
+        title: "Einen Blick in den Raum werfen",
+        body: "Gib einen Raumcode ein, um zu sehen, wer im Raum ist, welchen Song jede Person gewählt hat und welches Team alle spielen. Füge eine Nachricht ein, um mehrere Räume auf einmal zu prüfen."
+      },
+      room_not_found: {
+        title: "Raum {code} wurde nicht gefunden",
+        body: "Vielleicht wurde der Raum geschlossen, oder der Code stimmt nicht. Ein Raum schließt, wenn alle ihn verlassen."
+      },
+      room_full: {
+        title: "Raum {code} ist voll",
+        body: "Es sind fünf Spieler im Raum, deshalb kann er gerade nicht angesehen werden."
+      },
+      cooldown: {
+        title: "Raum {code} wurde gerade gelesen",
+        body: "Ein Raum wird höchstens alle paar Sekunden gelesen; bis dahin bleibt die letzte Lesung sichtbar."
+      },
+      busy: {
+        title: "Es werden viele Räume gelesen",
+        body: "Der Dienst ist ausgelastet. Versuch es gleich noch einmal."
+      },
+      bad_code: {
+        title: "{code} ist kein Raumcode",
+        body: "Raumcodes haben sieben Ziffern."
+      },
+      network: {
+        title: "Raum {code} konnte nicht gelesen werden",
+        body: "Prüfe die Verbindung und versuch es noch einmal."
+      },
+      invalid: {
+        title: "Die Antwort für Raum {code} konnte nicht gelesen werden",
+        body: "Versuch es später noch einmal."
+      }
+    },
+    host: {
+      title: "Raum erstellen",
+      body: "Erstelle einen Raum, in den nur Spieler kommen, die deine Bedingungen erfüllen.",
+      badge: "Demnächst"
+    }
+  },
   musicRanking: {
     changeSong: "Song wechseln",
     chooseSong: "Song auswählen",
@@ -1462,6 +1635,10 @@ export const deDE = {
       title: "Event-Tracker",
       description: "Live-Ranglisten des aktuellen BanG Dream! Our Notes-Events auf allen Servern: Challenge-Song-Ranglisten mit Decks, Belohnungs-Grenzwerte, Event-Punkte-Rangliste und verbleibende Zeit."
     },
+    roomCheck: {
+      title: "Raum-Check",
+      description: "Gib einen Raumcode von BanG Dream! Our Notes ein, um zu sehen, wer im Raum ist, welchen Song jede Person gewählt hat und welches Team alle spielen."
+    },
     musicRanking: {
       title: "Song-Ranglisten",
       description: "Die Highscore-Rangliste jedes Songs auf allen Servern von BanG Dream! Our Notes: Spieler, Scores und Decks."
@@ -1636,9 +1813,6 @@ export const deDE = {
     expand: "Ausklappen",
     count: "{filtered} / {total}",
     openQuickFilter: "Filter öffnen",
-    drawerHintTitle: "Filter in die Seitenleiste verschoben",
-    drawerHintBody: "Klicken Sie auf den linken Reiter, um die Filter jederzeit ein- oder auszuklappen.",
-    drawerHintDismiss: "Verstanden"
   },
   browserNotice: {
     title: "Dieser Browser kann die Website möglicherweise nicht fehlerfrei anzeigen",

@@ -22,11 +22,11 @@ export default function GameServerSwitch({ locale, value, onChange, servers = GA
           onClick={() => onChange(server)}
           aria-pressed={server === value}
           title={t(locale, `gameServer.names.${server}`)}
-          aria-label={t(locale, `gameServer.names.${server}`)}
-          className={`md3-segment md3-state ${server === value ? "" : "[&>img]:opacity-60"}`}
+          className="md3-segment md3-state"
         >
-          {/* The flag alone marks the server; the name is in the title and the accessible label. */}
-          <ServerFlag server={server} />
+          {/* The short name says which server; the flag only helps the eye, so phones drop it to keep one row. */}
+          <ServerFlag server={server} className="hidden h-4 w-4 sm:block" />
+          <span>{t(locale, `gameServer.short.${server}`)}</span>
         </button>
       ))}
     </div>

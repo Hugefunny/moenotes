@@ -24,18 +24,25 @@
 }
 .mn-overlay-heading button:hover, .mn-icon-button:hover { background: rgb(var(--md-sys-color-on-surface-rgb) / 0.08); color: var(--md-sys-color-on-surface); }
 .mn-overlay-body { padding: 0 24px 24px; }
-/* Menu panel (M3 menu: surface-container, extra-small shape). */
+/* Menu panel (M3 Expressive menu, as MoeSekai's: surface-container, large shape; rows are .md3-menu-item). */
 .mn-popover-panel {
   border: 0;
-  border-radius: var(--md-sys-shape-corner-extra-small);
+  border-radius: var(--md-sys-shape-corner-large);
   background: var(--md-sys-color-surface-container);
   color: var(--md-sys-color-on-surface);
   box-shadow: var(--md-sys-elevation-level2);
 }
-.mn-overlay-panel :is(input:not([type="checkbox"]):not([type="range"]):not([type="radio"]), select, textarea), .mn-control {
+/* Bare fields in a dialog; fields drawn by an M3 primitive or MUI keep their own shape (a tonal pill search field). */
+.mn-overlay-panel :is(input:not([type="checkbox"]):not([type="range"]):not([type="radio"]), select, textarea):not(.md3-text-field, .MuiInputBase-input), .mn-control {
   border: 1px solid var(--md-sys-color-outline);
   border-radius: var(--md-sys-shape-corner-extra-small);
   box-shadow: none;
+}
+/* Native selects (the tools' dense forms keep their own size and shape): the M3 select's chevron in place of the
+   platform's. The :not()s lift it over a page's `.form select` rules, which set the background shorthand. */
+select:not([multiple]):not([size]) {
+  -webkit-appearance: none; appearance: none; padding-right: 32px;
+  background-image: var(--md3-select-chevron); background-repeat: no-repeat; background-position: right 8px center; background-size: 18px 18px;
 }
 /* Segmented buttons (M3): outlined pill, secondary-container when selected. */
 .mn-segmented { border: 1px solid var(--md-sys-color-outline); border-radius: var(--md-sys-shape-corner-full); padding: 0; overflow: hidden; box-shadow: none; background: transparent; }
@@ -118,3 +125,17 @@ html[data-audio-dock="open"] .mn-toaster { bottom: calc(6rem + env(safe-area-ins
   .mn-toast[data-icon="update"] .mn-toast-icon svg { animation: none; }
   .mn-toast-action { transition: none; }
 }
+
+/* Detail page heading (DetailHero `strap`): a strap in the entry's main and sub color (a character's, a card's
+   character's) runs down beside the name. The hairline keeps a white sub color visible on the light theme. */
+.mn-detail-hero { position: relative; }
+.mn-detail-hero::before {
+  content: ""; position: absolute; inset-block: 2px; left: 0; width: 6px; border-radius: 3px;
+  background: linear-gradient(to bottom, var(--mn-strap-main) 0 64%, var(--mn-strap-sub) 64% 100%);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--md-sys-color-outline-variant) 60%, transparent);
+}
+
+/* Group landing tiles (GroupLanding.astro): the picture answers hover with a ring, the tile takes the focus ring. */
+.mn-hub-cover::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px var(--md-sys-color-outline-variant); pointer-events: none; }
+.mn-hub-tile:hover .mn-hub-cover::after { box-shadow: inset 0 0 0 2px var(--md-sys-color-primary); }
+.mn-hub-tile:focus-visible { outline: 3px solid var(--md-sys-color-secondary); outline-offset: 4px; }

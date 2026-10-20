@@ -170,9 +170,10 @@ export interface WeekSegment<T extends DaySpan> {
 
 /**
  * The bars of one week (seven consecutive days): every item overlapping it, cut to the week, each given the lowest row
- * free over all its columns. Longer and earlier bars claim rows first so they stay on top across the week.
+ * free over all its columns. Items of a lower `rank` claim rows first; within a rank, longer and earlier bars do, so
+ * they stay on top across the week.
  */
-export function layoutWeek<T extends DaySpan>(items: readonly T[], week: readonly CalendarDate[]): WeekSegment<T>[] {
+export function layoutWeek<T extends DaySpan>(items: readonly T[], week: readonly CalendarDate[], rank: (item: T) => number = () => 0): WeekSegment<T>[] {
   if (week.length === 0) return [];
   const first = week[0]!;
   const last = week[week.length - 1]!;
@@ -184,7 +185,7 @@ export function layoutWeek<T extends DaySpan>(items: readonly T[], week: readonl
     const column = calendarDaysBetween(first, from);
     segments.push({ item, column, span: calendarDaysBetween(from, to) + 1, continuesBefore: item.start < first, continuesAfter: item.end > last });
   }
-  segments.sort((a, b) => a.column - b.column || b.span - a.span || (a.item.start < b.item.start ? -1 : a.item.start > b.item.start ? 1 : 0) || (a.item.id < b.item.id ? -1 : a.item.id > b.item.id ? 1 : 0));
+  segments.sort((a, b) => rank(a.item) - rank(b.item) || a.column - b.column || b.span - a.span || (a.item.start < b.item.start ? -1 : a.item.start > b.item.start ? 1 : 0) || (a.item.id < b.item.id ? -1 : a.item.id > b.item.id ? 1 : 0));
   // rows[lane][column] = taken
   const rows: boolean[][] = [];
   return segments.map((segment) => {
@@ -216,10 +217,11 @@ export interface WeekLayout<T extends DaySpan> {
 
 /**
  * A week with at most `maxLanes` rows of bars; when a day has more items than fit, its last row gives way to the
- * "+N more" line, so that day lists `maxLanes - 1` bars and counts the rest.
+ * "+N more" line, so that day lists `maxLanes - 1` bars and counts the rest. `rank` decides which items keep a row
+ * (see layoutWeek).
  */
-export function layoutWeekLimited<T extends DaySpan>(items: readonly T[], week: readonly CalendarDate[], maxLanes: number): WeekLayout<T> {
-  const segments = layoutWeek(items, week);
+export function layoutWeekLimited<T extends DaySpan>(items: readonly T[], week: readonly CalendarDate[], maxLanes: number, rank?: (item: T) => number): WeekLayout<T> {
+  const segments = layoutWeek(items, week, rank);
   const perColumn = Array<number>(week.length).fill(0);
   for (const segment of segments) for (let column = segment.column; column < segment.column + segment.span; column += 1) perColumn[column]! += 1;
   // A column that overflows keeps one row free for its "+N" line.

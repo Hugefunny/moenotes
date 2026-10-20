@@ -9,6 +9,19 @@ interface Props {
   locale: AppLocale;
 }
 
+/** The band's logo beside its name in a detail page heading (DetailHero `eyebrow`); nothing when the artwork is missing. */
+export function BandLogoMark({ bandId, locale }: { bandId: number; locale: AppLocale }) {
+  const [failed, setFailed] = useState(false);
+  const assetUrl = useAssetUrl();
+  if (!bandId || failed) return null;
+  return (
+    <>
+      <img className="block h-6 w-auto object-contain dark:hidden" src={assetUrl(getBandLogoUrl(bandId, locale))} alt="" aria-hidden="true" onError={() => setFailed(true)} />
+      <img className="hidden h-6 w-auto object-contain dark:block" src={assetUrl(getBandLogoWhiteUrl(bandId, locale))} alt="" aria-hidden="true" onError={() => setFailed(true)} />
+    </>
+  );
+}
+
 /** Band logo for list-card footers; falls back to the band name when the artwork is missing. */
 export default function BandLogo({ bandId, bandName, locale }: Props) {
   const [failed, setFailed] = useState(false);

@@ -116,10 +116,10 @@ function Carousel({ locale, slides }: { locale: AppLocale; slides: HomeSlide[] }
           {href && (
             <a
               href={href}
-              className="md3-state inline-flex w-fit items-center gap-2 rounded-full border border-outline-variant bg-primary px-5 py-2.5 text-label-large text-on-primary shadow-elevation-1"
+              className="md3-button md3-button--filled w-fit"
             >
               {t(locale, active.link?.routeId === "gacha" ? "home.viewGacha" : active.link?.routeId === "main-story" ? "home.viewStory" : active.link?.routeId === "exchange" ? "home.viewExchange" : "home.viewDetail")}
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m13 6 6 6-6 6" /></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m13 6 6 6-6 6" /></svg>
             </a>
           )}
           {count > 1 && (
@@ -177,9 +177,9 @@ function IconButton({ label, onClick, pressed, children }: { label: string; onCl
       aria-label={label}
       title={label}
       {...(pressed === undefined ? {} : { "aria-pressed": pressed })}
-      className="md3-state grid h-10 w-10 place-items-center rounded-full text-on-surface-variant hover:border-primary hover:bg-secondary-container hover:text-primary"
+      className="md3-icon-button"
     >
-      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
     </button>
   );
 }
@@ -189,7 +189,7 @@ function EmptyState({ locale }: { locale: AppLocale }) {
     <section className="md3-surface p-8 text-center sm:p-12" aria-label={t(locale, "home.carousel")}>
       <h3 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "home.noCurrentTitle")}</h3>
       <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "home.noCurrentDescription")}</p>
-      <a href={localizePath(getRoutePathById("gacha"), locale)} className="md3-state mt-6 inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
+      <a href={localizePath(getRoutePathById("gacha"), locale)} className="md3-button md3-button--tonal mt-6">
         {t(locale, "home.viewAllGacha")}
       </a>
     </section>

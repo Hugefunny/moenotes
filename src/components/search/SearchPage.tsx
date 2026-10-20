@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { AppLocale } from "@/config/locales";
 import { t } from "@/i18n";
+import { Icon } from "@/components/shared/icons";
 import { stripLocaleFromPathname } from "@/i18n/routing";
 import { searchContent, type ContentSearchResult } from "@/lib/search/client";
 import { CONTENT_KIND_ORDER, KIND_LABEL_KEY } from "@/lib/search/kinds";
@@ -59,14 +60,17 @@ export default function SearchPage({ locale }: Props) {
 
   return (
     <div>
-      <input
-        type="search"
-        value={query}
-        onChange={(event) => setQuery(event.currentTarget.value)}
-        placeholder={t(locale, "search.placeholder")}
-        aria-label={t(locale, "search.placeholder")}
-        className="w-full rounded-shape-lg border border-outline-variant bg-surface-container-high px-5 py-3.5 text-title-large text-on-surface outline-none placeholder:text-on-surface-variant"
-      />
+      <div className="relative">
+        <Icon name="search" className="pointer-events-none absolute left-5 top-1/2 h-6 w-6 -translate-y-1/2 text-on-surface-variant" />
+        <input
+          type="search"
+          value={query}
+          onChange={(event) => setQuery(event.currentTarget.value)}
+          placeholder={t(locale, "search.placeholder")}
+          aria-label={t(locale, "search.placeholder")}
+          className="md3-text-field md3-search-field !h-14 !pl-14 !pr-5 text-title-medium"
+        />
+      </div>
 
       {q && presentKinds.length > 0 ? (
         <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label={t(locale, "search.filterByKind")}>
@@ -74,7 +78,7 @@ export default function SearchPage({ locale }: Props) {
             type="button"
             onClick={() => setKind("all")}
             aria-pressed={activeKind === "all"}
-            className={`rounded-full border-2 px-4 py-1.5 text-label-large ${activeKind === "all" ? "border-outline-variant bg-surface-container-highest" : "border-transparent text-on-surface-variant"}`}
+            className="md3-filter-chip md3-state"
           >
             {t(locale, "search.kinds.all")}
           </button>
@@ -84,7 +88,7 @@ export default function SearchPage({ locale }: Props) {
               type="button"
               onClick={() => setKind(kind)}
               aria-pressed={activeKind === kind}
-              className={`rounded-full border-2 px-4 py-1.5 text-label-large ${activeKind === kind ? "border-outline-variant bg-surface-container-highest" : "border-transparent text-on-surface-variant"}`}
+              className="md3-filter-chip md3-state"
             >
               {t(locale, KIND_LABEL_KEY[kind])}
             </button>

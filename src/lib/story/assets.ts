@@ -1,6 +1,14 @@
 import { DEFAULT_LOCALE, type AppLocale } from "@/config/locales";
 import { releaseFileUrl } from "@/lib/assets/release";
 import { getAssetUrl } from "@/lib/assets/url";
+import type { StoryViewModel } from "@/lib/story/data";
+
+/** Main episodes have an illustration; bond stories only a banner. Banners carry lettering, so they follow the locale. */
+export function getStoryArtworkUrl(story: Pick<StoryViewModel, "category" | "assets">, locale: AppLocale): string {
+  if ((story.category === "main" || story.category === "event" || story.category === "birthday") && story.assets.image) return getAssetUrl({ path: `Story/Image/Episode/${story.assets.image}.png`, type: "raw", locale });
+  if (story.assets.banner) return getAssetUrl({ path: `Story/Banner/Episode/${story.assets.banner}.png`, type: "raw", locale });
+  return "";
+}
 
 export type StoryScriptTable = "Episode" | "Sound" | "SoundCueSheet" | "Text" | "Video";
 

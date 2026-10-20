@@ -266,9 +266,9 @@ export default function ChartStage({ locale, manifestUrl, onPlayer }: ChartStage
                 type="button"
                 onClick={() => setLocked(false)}
                 onFocus={revealUnlock}
-                className={`absolute bottom-3 right-3 z-30 inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3.5 py-2 text-label-medium text-white backdrop-blur-sm transition-opacity duration-300 hover:opacity-100 ${unlockShown ? "opacity-100" : "opacity-40"}`}
+                className={`md3-button md3-button--tonal md3-button--small absolute bottom-3 right-3 z-30 transition-opacity duration-300 hover:opacity-100 ${unlockShown ? "opacity-100" : "opacity-40"}`}
               >
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <rect x="4" y="11" width="16" height="10" rx="2" />
                   <path d="M8 11V7a4 4 0 0 1 8 0v4" />
                 </svg>
@@ -313,7 +313,7 @@ export default function ChartStage({ locale, manifestUrl, onPlayer }: ChartStage
                   <button
                     type="button"
                     onClick={() => setAttempt((value) => value + 1)}
-                    className="md3-state mt-4 rounded-full border border-white/30 bg-white/10 px-5 py-2 text-label-large text-white hover:bg-white/20"
+                    className="md3-button md3-button--tonal mt-4"
                   >
                     {t(locale, "chartPreview3d.retry")}
                   </button>

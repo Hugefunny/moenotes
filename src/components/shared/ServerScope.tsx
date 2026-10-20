@@ -46,6 +46,21 @@ export default function ServerScope({ locale, servers, server, onChange, entityS
   );
 }
 
+/**
+ * The server switch for a page heading that holds it (DetailHero `aside`, with ServerScope `hideSwitch`), with the note
+ * on which servers have the entry. Nothing when the build has one server.
+ */
+export function HeadingServerSwitch({ locale, servers, server, onChange, entityServers }: Omit<Props, "hideSwitch" | "actions" | "children">) {
+  if (servers.length < 2) return null;
+  const source = entityServers ? entityServer({ servers: entityServers }, server) : server;
+  return (
+    <div className="flex flex-col items-start gap-1.5 sm:items-end">
+      <GameServerSwitch locale={locale} value={server} onChange={onChange} servers={servers} />
+      {entityServers && <AvailabilityNote locale={locale} servers={servers} server={server} source={source} entityServers={entityServers} />}
+    </div>
+  );
+}
+
 function AvailabilityNote({ locale, servers, server, source, entityServers }: {
   locale: AppLocale;
   servers: readonly GameServer[];

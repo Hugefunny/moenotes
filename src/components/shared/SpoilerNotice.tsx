@@ -20,7 +20,7 @@ export function SpoilerNotice({ locale, onBack }: SpoilerNoticeProps) {
   };
 
   return (
-    <div className="md3-surface mx-auto my-12 max-w-xl rounded-shape-xl border border-outline-variant p-8 text-center shadow-elevation-1">
+    <div className="md3-surface mx-auto my-12 max-w-xl rounded-shape-xl p-8 text-center">
       <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-surface-container-highest text-on-surface-variant">
         <Icon name="lock" className="h-8 w-8" />
       </div>

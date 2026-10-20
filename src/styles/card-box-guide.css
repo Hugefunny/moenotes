@@ -2,7 +2,7 @@
 .cgb-guide *, .cgb-guide *::before, .cgb-guide *::after { box-sizing: border-box; }
 .cgb-guide :where(button) { font: inherit; cursor: pointer; }
 .cgb-guide button:focus-visible { outline: 3px solid var(--md-sys-color-primary); outline-offset: 3px; }
-.cgb-guide button:disabled { opacity: .45; cursor: not-allowed; }
+.cgb-guide button:not(.cgb-button):disabled { opacity: .45; cursor: not-allowed; }
 .cgb-guide ::selection { background: var(--md-sys-color-primary); color: var(--md-sys-color-surface-container-low); }
 .cgb-glyph { display: block; flex: 0 0 auto; width: 20px; height: 20px; }
 .cgb-navigation { margin-bottom: 24px; }
@@ -53,11 +53,17 @@
 .cgb-copy li { padding-left: 4px; }
 .cgb-copy li::marker { color: var(--md-sys-color-primary); }
 .cgb-footer { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; margin-top: 25px; padding-top: 18px; border-top: 1px solid var(--md-sys-color-outline-variant); }
-.cgb-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 44px; padding: 9px 15px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: 9px; background: var(--md-sys-color-surface-container-low); color: var(--md-sys-color-on-surface); font-size: 14px; font-weight: 750; line-height: 1.4; }
-.cgb-button .cgb-glyph { width: 16px; height: 16px; }
-.cgb-button:hover:not(:disabled) { background: var(--md-sys-color-surface-container-highest); }
-.cgb-primary { border-color: var(--md-sys-color-primary); background: var(--md-sys-color-primary); color: var(--md-sys-color-surface-container-low); }
-.cgb-primary:hover:not(:disabled) { background: color-mix(in oklab, var(--md-sys-color-primary) 88%, var(--md-sys-color-on-surface)); }
+/* Footer actions, drawn like the site's MD3 buttons (src/styles/md3/primitives.css): outlined, and filled for the step
+   forward; label-large, round corners that tighten while pressed, a state layer. */
+.cgb-button { position: relative; isolation: isolate; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: 20px; background: transparent; color: var(--md-sys-color-on-surface); font-size: var(--md-sys-typescale-label-large-size); line-height: var(--md-sys-typescale-label-large-line-height); font-weight: 500; letter-spacing: var(--md-sys-typescale-label-large-tracking); -webkit-tap-highlight-color: transparent; transition: border-radius var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard), background-color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard), box-shadow var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard), color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard); }
+.cgb-button::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: currentColor; opacity: 0; pointer-events: none; transition: opacity var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard); }
+@media (hover: hover) { .cgb-button:hover:not(:disabled)::before { opacity: var(--md-sys-state-hover-opacity); } }
+.cgb-button:is(:focus-visible, :active):not(:disabled)::before { opacity: var(--md-sys-state-pressed-opacity); }
+.cgb-button:active:not(:disabled) { border-radius: var(--md-sys-shape-corner-small); }
+.cgb-primary { border-color: transparent; background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
+@media (hover: hover) { .cgb-primary:hover:not(:disabled, :active) { box-shadow: var(--md-sys-elevation-level1); } }
+.cgb-button:disabled { cursor: not-allowed; color: rgb(var(--md-sys-color-on-surface-rgb) / 0.38); border-color: rgb(var(--md-sys-color-on-surface-rgb) / 0.12); }
+.cgb-primary:disabled { border-color: transparent; background: rgb(var(--md-sys-color-on-surface-rgb) / 0.12); }
 .cgb-progress { margin: 0; color: var(--md-sys-color-on-surface-variant); text-align: center; font-size: 12px; line-height: 1.4; font-variant-numeric: tabular-nums; }
 
 @container card-box-guide (max-width: 640px) {
@@ -76,6 +82,6 @@
   .cgb-copy h3 { max-width: none; margin-bottom: 12px; font-size: 20px; }
   .cgb-copy ul { gap: 9px; font-size: 14px; line-height: 1.6; }
   .cgb-footer { gap: 8px; margin-top: 19px; padding-top: 14px; }
-  .cgb-button { gap: 4px; padding: 9px 10px; font-size: 13px; }
+  .cgb-button { gap: 4px; padding: 0 12px; font-size: 13px; }
   .cgb-progress { font-size: 11px; }
 }

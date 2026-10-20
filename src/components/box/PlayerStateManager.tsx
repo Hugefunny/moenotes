@@ -49,7 +49,7 @@ export default function PlayerStateManager({ locale, box, view, catalogue, busy,
   if (eventField && catalogue?.profile?.events && currentMode === "edit") eventField.editor = <div className="pp-events-editor">
     <div className="pp-events-actions"><button type="button" disabled={busy} aria-pressed={box.player.eventIds.value?.length === 0} onClick={() => void events([])}>{pp("eventsOff")}</button>
       <button type="button" disabled={busy} onClick={() => void events(null)}>{pp("clearRecord")}</button></div>
-    {catalogue.profile.events.choices.map(event => <label key={event.id}><input type="checkbox" disabled={busy} checked={box.player.eventIds.value?.includes(event.id) ?? false}
+    {catalogue.profile.events.choices.map(event => <label key={event.id}><input type="checkbox" className="md3-checkbox" disabled={busy} checked={box.player.eventIds.value?.includes(event.id) ?? false}
       onChange={change => void events(change.target.checked ? [...(box.player.eventIds.value ?? []), event.id] : (box.player.eventIds.value ?? []).filter(id => id !== event.id))} />{localizeMasterText(event.label, locale)}</label>)}
   </div>;
   return <PlayerProfilePanel server={box.server} currentCatalog={valid && catalogue ? catalogue : null} mode={currentMode} busy={busy} groups={groups}
@@ -57,8 +57,8 @@ export default function PlayerStateManager({ locale, box, view, catalogue, busy,
     onChange={(key, value) => void answer(key, value)} onPresenceChange={(key, value) => void presence(key, value)} footer={section => <>
       {error && <p className="dw-alert" role="alert">{tr("playerValueError")}</p>}
       {valid && currentMode === "edit" && !view && <>
-        {section === "bands" && <label><input type="checkbox" disabled={busy} checked={box.player.bandItemsComplete} onChange={event => void save({ ...box, player: { ...box.player, bandItemsComplete: event.target.checked } })} />{tr("furnitureCoverage")}</label>}
-        {section === "characters" && <label><input type="checkbox" disabled={busy} checked={box.player.characterCoverage === "complete"} onChange={event => void save({ ...box, player: { ...box.player, characterCoverage: event.target.checked ? "complete" : "partial" } })} />{tr("characterRankCoverage")}</label>}
+        {section === "bands" && <label><input type="checkbox" className="md3-checkbox" disabled={busy} checked={box.player.bandItemsComplete} onChange={event => void save({ ...box, player: { ...box.player, bandItemsComplete: event.target.checked } })} />{tr("furnitureCoverage")}</label>}
+        {section === "characters" && <label><input type="checkbox" className="md3-checkbox" disabled={busy} checked={box.player.characterCoverage === "complete"} onChange={event => void save({ ...box, player: { ...box.player, characterCoverage: event.target.checked ? "complete" : "partial" } })} />{tr("characterRankCoverage")}</label>}
       </>}
       {!mode && <button type="button" disabled={busy} onClick={() => { setPreview(value => !value); setError(false); }}>{pp(preview ? "edit" : "preview")}</button>}
     </>} />;

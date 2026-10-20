@@ -21,6 +21,7 @@ let hasInitializedMemory = false;
 let currentFilterContent: ReactNode | null = null;
 let currentFilterTitle = "";
 let currentIsDocked = false;
+let currentOpensDocked = false;
 
 let cachedSnapshot: QuickFilterStoreState = {
   filterContent: null,
@@ -46,7 +47,7 @@ function updateSnapshot(): QuickFilterStoreState {
   const pref = readSessionPreference();
   const isDocked = currentIsDocked;
   const hasFilters = currentFilterContent !== null;
-  const isOpen = pref !== null ? pref : isDocked;
+  const isOpen = pref !== null ? pref : currentOpensDocked;
 
   if (
     cachedSnapshot.filterContent === currentFilterContent &&
@@ -113,14 +114,13 @@ function subscribe(callback: () => void) {
 function syncDocumentFilterState() {
   if (typeof document === "undefined") return;
   const pref = readSessionPreference();
-  const open = pref !== null ? pref : currentIsDocked;
+  const open = pref !== null ? pref : currentOpensDocked;
   const hasFilters = currentFilterContent !== null;
   const isDockedOpen = Boolean(open && currentIsDocked && hasFilters);
 
   const root = document.documentElement;
+  // The docked filter sheet's width becomes --mn-filter-offset (src/styles/tokens.css).
   root.dataset.filterDrawer = isDockedOpen ? "open" : "closed";
-  // The docked filter sheet is 20rem wide (src/components/shell/filter-drawer/FilterDrawer.tsx).
-  root.style.setProperty("--mn-filter-offset", isDockedOpen ? "20rem" : "0rem");
 }
 
 export function registerFilters(title: string, content: ReactNode) {
@@ -149,21 +149,28 @@ export function closeFilterDrawer() {
 
 export function toggleFilterDrawer() {
   const pref = readSessionPreference();
-  const currentOpen = pref !== null ? pref : currentIsDocked;
+  const currentOpen = pref !== null ? pref : currentOpensDocked;
   writeSessionPreference(!currentOpen);
 }
 
-// Media query tracking for docked screen width (>= 1024px)
+// The sheet docks beside the content from 1024px, but opens by itself only from 1600px: next to the 17rem navigation
+// drawer its 20rem would leave a narrower window too little room for the list. Until the reader opens or closes it,
+// the sheet follows the width.
 if (typeof window !== "undefined") {
-  const mql = window.matchMedia("(min-width: 1024px)");
-  currentIsDocked = mql.matches;
-  updateSnapshot();
-  mql.addEventListener("change", (e) => {
-    currentIsDocked = e.matches;
+  const docks = window.matchMedia("(min-width: 1024px)");
+  const opensDocked = window.matchMedia("(min-width: 1600px)");
+  const track = () => {
+    currentIsDocked = docks.matches;
+    currentOpensDocked = opensDocked.matches;
     updateSnapshot();
     syncDocumentFilterState();
     emitChange();
-  });
+  };
+  currentIsDocked = docks.matches;
+  currentOpensDocked = opensDocked.matches;
+  updateSnapshot();
+  docks.addEventListener("change", track);
+  opensDocked.addEventListener("change", track);
 }
 
 function getSnapshot(): QuickFilterStoreState {

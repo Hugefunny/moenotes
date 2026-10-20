@@ -45,7 +45,7 @@ export function LevelControl({
           type="button"
           disabled={level >= limit}
           onClick={() => update(limit)}
-          className="md3-state h-10 shrink-0 rounded-full px-3 text-label-large text-primary disabled:text-on-surface/40"
+          className="md3-button md3-button--text"
         >
           {t(locale, "cards.growth.max")}
         </button>

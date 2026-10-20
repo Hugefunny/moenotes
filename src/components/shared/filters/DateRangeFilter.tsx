@@ -48,7 +48,7 @@ export function DateRangeFilter({ title, value, onChange, fromLabel, toLabel, cl
     <FilterSection
       title={title}
       aside={active && clearLabel ? (
-        <button type="button" onClick={() => onChange({ from: null, to: null })} className="md3-state min-h-8 rounded-full px-3 text-label-large text-primary">
+        <button type="button" onClick={() => onChange({ from: null, to: null })} className="md3-button md3-button--text md3-button--small">
           {clearLabel}
         </button>
       ) : undefined}

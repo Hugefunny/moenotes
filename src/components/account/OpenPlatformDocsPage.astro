@@ -15,7 +15,7 @@ const consolePath = localizePath(getRoutePathById("open-platform"), locale);
 <PageLayout locale={locale} titleKey="openPlatform.docs.title" descriptionKey="openPlatform.docs.description">
   <section class="md3-surface max-w-3xl space-y-5 p-6 sm:p-8" data-docs-migration data-docs-base={target ? openPlatformDocsUrl : undefined} data-docs-locale={locale}>
     <p class="text-body-medium leading-7">{t(locale, target ? "openPlatform.docsMoved" : "openPlatform.docsPending")}</p>
-    {target && <a data-docs-target class="inline-flex min-h-11 items-center rounded-full border border-primary bg-secondary-container px-5 text-label-large text-primary" href={target}>{t(locale, "openPlatform.docs.title")}</a>}
+    {target && <a data-docs-target class="md3-button md3-button--tonal" href={target}>{t(locale, "openPlatform.docs.title")}</a>}
     <p><a class="text-label-large underline" href={consolePath}>{t(locale, "openPlatform.developer")}</a></p>
   </section>
 </PageLayout>

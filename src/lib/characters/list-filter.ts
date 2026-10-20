@@ -30,11 +30,23 @@ export function positionOptions(characters: readonly Pick<CharacterViewModel, "b
   return [...seen];
 }
 
-/** Schools by MasterText id, with their localized names, in first-seen order. */
-export function schoolOptions(characters: readonly Pick<CharacterViewModel, "schoolKey" | "school">[]): Array<{ key: string; name: string }> {
-  const seen = new Map<string, string>();
-  for (const character of characters) if (character.schoolKey && character.school && !seen.has(character.schoolKey)) seen.set(character.schoolKey, character.school);
-  return [...seen].map(([key, name]) => ({ key, name }));
+/**
+ * Schools by localized name, in first-seen order. Several MasterText ids can name the same school, so one option
+ * carries every id under its name: the filter state keeps ids, and picking the option picks all of them.
+ */
+export function schoolOptions(characters: readonly Pick<CharacterViewModel, "schoolKey" | "school">[]): Array<{ name: string; keys: string[] }> {
+  const byName = new Map<string, string[]>();
+  for (const character of characters) {
+    if (!character.schoolKey || !character.school) continue;
+    const keys = byName.get(character.school) ?? byName.set(character.school, []).get(character.school)!;
+    if (!keys.includes(character.schoolKey)) keys.push(character.schoolKey);
+  }
+  return [...byName].map(([name, keys]) => ({ name, keys }));
+}
+
+/** The schools filter with one option's ids all added, or all removed when any of them was chosen. */
+export function toggleSchool(chosen: readonly string[], keys: readonly string[]): string[] {
+  return keys.some((key) => chosen.includes(key)) ? chosen.filter((key) => !keys.includes(key)) : [...chosen, ...keys];
 }
 
 export function hasCharacterFilters(state: CharacterFilterState): boolean {

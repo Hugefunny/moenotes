@@ -4,9 +4,10 @@ import type { GameServer } from "@/config/servers";
 import EntityPager from "@/components/shared/EntityPager";
 import RewardChip from "@/components/shared/RewardChip";
 import ScheduleBadge from "@/components/shared/ScheduleBadge";
-import ScheduleCountdown from "@/components/shared/ScheduleCountdown";
 import ServerSchedules from "@/components/shared/ServerSchedules";
-import ServerScope from "@/components/shared/ServerScope";
+import ServerScope, { HeadingServerSwitch } from "@/components/shared/ServerScope";
+import DetailHero from "@/components/shared/DetailHero";
+import { DetailRow } from "@/components/shared/DetailRows";
 import TimesNote from "@/components/shared/TimesNote";
 import ShopPrice, { shopLimitLabel } from "@/components/shop/ShopPrice";
 import ShopThumbnail from "@/components/shop/ShopThumbnail";
@@ -38,10 +39,13 @@ const panelTitle = "font-[var(--md-ref-typeface-brand)] text-xl text-on-surface 
 export default function ShopDetail({ locale, shop: faceted, servers, neighbors }: Props) {
   const [server, pickServer] = useContentServer(locale, servers);
   const shop = useMemo(() => faceted && moveReleaseUrls(valueForServer(faceted, server), entityServer(faceted, server)), [faceted, server]);
+  // The hero carries the server switch beside the name, so the scope leaves its own out.
+  const serverSwitch = <HeadingServerSwitch locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={faceted?.servers ?? []} />;
   return (
-    <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={faceted?.servers ?? []}>
+    <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={faceted?.servers ?? []} hideSwitch>
       <ShopDetailView
         locale={locale}
+        serverSwitch={serverSwitch}
         shop={shop}
         schedules={faceted && <ServerSchedules locale={locale} faceted={faceted} servers={servers} alwaysLabel={t(locale, "shop.alwaysOpen")} />}
       />
@@ -50,7 +54,7 @@ export default function ShopDetail({ locale, shop: faceted, servers, neighbors }
   );
 }
 
-function ShopDetailView({ locale, shop, schedules }: { locale: AppLocale; shop: ShopDetailViewModel | null; schedules: ReactNode }) {
+function ShopDetailView({ locale, shop, serverSwitch, schedules }: { locale: AppLocale; serverSwitch: ReactNode; shop: ShopDetailViewModel | null; schedules: ReactNode }) {
   const now = useNow();
   const timeZone = useDisplayTimeZone();
   const { showSpoiler } = useSpoiler();
@@ -82,27 +86,19 @@ function ShopDetailView({ locale, shop, schedules }: { locale: AppLocale; shop: 
 
   return (
     <div className="w-full space-y-8">
+      <DetailHero title={shop.name} aside={serverSwitch} eyebrow={<ScheduleBadge locale={locale} startAt={shop.startAt} endAt={shop.endAt} now={now} />}>
+        {shop.description && <p className="mt-1 max-w-[60ch] whitespace-pre-line text-body-large text-on-surface-variant">{shop.description}</p>}
+      </DetailHero>
+
       <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(22rem,2fr)_3fr] lg:items-start">
         <aside className="flex w-full flex-col gap-6 lg:sticky lg:top-24">
-          <div className="rounded-shape-lg border border-outline-variant bg-surface-container-low p-4 shadow-elevation-1">
+          <div className="md3-surface p-4">
             <ShopThumbnail eager className="rounded-shape-md" src={shop.thumbnailUrl} alt={shop.name} fallback={shop.name} />
           </div>
           <div className="md3-surface overflow-hidden">
-            <div className="border-b border-outline-variant p-6">
-              <div className="flex flex-wrap items-center gap-2">
-                <ScheduleBadge locale={locale} startAt={shop.startAt} endAt={shop.endAt} now={now} />
-                <ScheduleCountdown locale={locale} startAt={shop.startAt} endAt={shop.endAt} now={now} />
-              </div>
-              <h2 className="mt-3 font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-medium">{shop.name}</h2>
-            </div>
-            <div className="divide-y divide-dashed divide-outline-variant/60 px-6 py-2">
-              {facts.map(([label, value]) => (
-                <div key={label} className="flex items-center justify-between gap-4 py-3.5 text-body-medium">
-                  <span className="shrink-0 font-semibold text-on-surface-variant">{label}</span>
-                  <span className="min-w-0 text-right font-semibold text-on-surface">{value}</span>
-                </div>
-              ))}
-            </div>
+            <dl className="divide-y divide-outline-variant px-6">
+              {facts.map(([label, value]) => <DetailRow key={label} label={label} value={value} />)}
+            </dl>
             <TimesNote locale={locale} value={shop.startAt || shop.endAt} timeZone={timeZone} className="px-6 pb-5 text-body-small text-on-surface-variant" />
             <div className="px-6 pb-5 empty:hidden">{schedules}</div>
           </div>
@@ -141,13 +137,6 @@ function ShopDetailView({ locale, shop, schedules }: { locale: AppLocale; shop: 
               <p className="px-6 pb-5 text-body-small leading-6 text-on-surface-variant">{t(locale, "shop.storePricesNote")}</p>
             </div>
           )}
-
-          {shop.description && (
-            <div className="md3-surface overflow-hidden">
-              <div className={panelHeader}><h3 className={panelTitle}>{t(locale, "shop.description")}</h3></div>
-              <p className="whitespace-pre-line p-6 text-body-medium leading-7 text-on-surface-variant">{shop.description}</p>
-            </div>
-          )}
         </section>
       </div>
     </div>
@@ -157,7 +146,7 @@ function ShopDetailView({ locale, shop, schedules }: { locale: AppLocale; shop: 
 function NotFound({ locale }: { locale: AppLocale }) {
   return (
     <div className="md3-surface p-8 text-center sm:p-12">
-      <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "shop.notFoundTitle")}</h2>
+      <h1 className="text-headline-small text-on-surface">{t(locale, "shop.notFoundTitle")}</h1>
       <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "shop.notFoundDescription")}</p>
     </div>
   );

@@ -3,9 +3,13 @@
    so `className` utilities can adjust a MUI component. */
 @layer theme, base, mui, components, utilities;
 @import "tailwindcss";
+/* `dark:` follows the site's color scheme, as the M3 colors do (`data-theme` on <html>, set before the first paint by
+   src/lib/settings/apply-theme.ts), not the system's: the two differ whenever the settings pin light or dark. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 @import "./md3/colors.css";
 @import "./md3/tokens.css";
 @import "./md3/tailwind.css";
+@import "./md3/material.css";
 @import "./md3/mui-bridge.css";
 @import "./md3/primitives.css";
 @import "./tokens.css";
@@ -22,7 +26,8 @@
   }
 }
 
-/* Tailwind font weights follow the M3 type scale (regular 400 / medium 500): no 600–900 emphasis. */
+/* Weight comes from the type scale (headings semibold or bold, src/styles/md3/tokens.css); the weight utilities stay
+   capped at medium so components do not pick their own emphasis. */
 @theme {
   --font-weight-semibold: 500;
   --font-weight-bold: 500;
@@ -33,9 +38,12 @@
   --breakpoint-5xl: 2200px;
 }
 
-* {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
+/* In the base layer, under MUI's: an input that sizes its own content box (a text field's 1.4375em) keeps it. */
+@layer base {
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 html {
@@ -68,10 +76,14 @@ body {
   min-width: 0;
 }
 
-/* Focus: one M3 focus indicator everywhere (3px secondary ring, 2px gap). */
-:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
-  outline: 3px solid var(--md-sys-color-secondary);
-  outline-offset: 2px;
+/* Focus: one M3 focus indicator everywhere (3px secondary ring, 2px gap). In the components layer: above MUI's, so it
+   replaces MUI's `outline: 0`, and below the utilities, so a control can move the ring (inside a clipping row) or
+   draw its own (a text field's border). */
+@layer components {
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 3px solid var(--md-sys-color-secondary);
+    outline-offset: 2px;
+  }
 }
 :where(button):disabled { cursor: not-allowed; }
 
@@ -127,6 +139,12 @@ html[data-theme="dark"] .mn-brand .mn-brand-starlight, .mn-brand.mn-brand-light 
   to { opacity: 1; transform: none; }
 }
 .mn-draw-reveal { animation: mn-draw-reveal var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-emphasized-decelerate) both; }
+
+/* A tab panel's content as its tab is chosen. */
+@keyframes mn-tab-enter {
+  from { opacity: 0; transform: translateY(4px); }
+}
+.mn-tab-enter { animation: mn-tab-enter var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard); }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

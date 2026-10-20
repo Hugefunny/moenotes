@@ -7,8 +7,8 @@
 import { md3Schemes } from "@/lib/md3/scheme";
 import type { Md3Schemes } from "@/lib/md3/roles";
 
-/** Bumped when the cached shape changes: older caches are ignored and rebuilt on hydration. */
-export const ACCENT_CACHE_VERSION = 2;
+/** Bumped when the cached shape or the scheme recipe changes: older caches are ignored and rebuilt on hydration. */
+export const ACCENT_CACHE_VERSION = 4;
 
 /** What the bootstrap script reads back from storage. */
 export interface AccentCache extends Md3Schemes {

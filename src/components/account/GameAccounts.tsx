@@ -252,7 +252,7 @@ function AccountRow(props: RowProps) {
         <div className="flex flex-wrap gap-2">
           {confirming ? (
             <>
-              <button type="button" disabled={busy} onClick={onRemove} className={`${stampButton} text-error disabled:opacity-60`}>
+              <button type="button" disabled={busy} onClick={onRemove} className={`${stampButton} enabled:text-error`}>
                 {t(locale, "account.games.removeConfirm")}
               </button>
               <button type="button" onClick={() => setConfirming(false)} className={stampButton}>
@@ -272,7 +272,7 @@ function AccountRow(props: RowProps) {
                   </button>
                 )
               )}
-              <button type="button" disabled={busy} onClick={() => setConfirming(true)} className={`${stampButton} disabled:opacity-60`}>
+              <button type="button" disabled={busy} onClick={() => setConfirming(true)} className={stampButton}>
                 {t(locale, "account.games.remove")}
               </button>
             </>
@@ -358,7 +358,7 @@ function ProfilePanel({
             checked={account.public}
             disabled={busy}
             onChange={(event) => onPublic(event.target.checked)}
-            className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+            className="md3-checkbox -mt-px"
           />
           <span className="min-w-0">
             <span className="block text-label-large text-on-surface">{t(locale, "account.profile.public")}</span>
@@ -367,7 +367,7 @@ function ProfilePanel({
             </span>
           </span>
         </label>
-        <button type="button" disabled={refreshing} onClick={() => void refresh()} className={`${stampButton} disabled:opacity-60`}>
+        <button type="button" disabled={refreshing} onClick={() => void refresh()} className={stampButton}>
           {t(locale, refreshing ? "account.games.checking" : "account.profile.refresh")}
         </button>
         {snapshot && <ShareImageButton locale={locale} snapshot={snapshot} cards={cards} isPublic={account.public} own stampButton={stampButton} />}
@@ -463,13 +463,13 @@ function VerifyPanel({
         <button type="button" onClick={() => void copy()} className={stampButton}>
           {t(locale, copied ? "account.games.copied" : "account.games.copy")}
         </button>
-        <button type="button" disabled={busy} onClick={onRefresh} className={`${stampButton} disabled:opacity-60`}>
+        <button type="button" disabled={busy} onClick={onRefresh} className={stampButton}>
           {t(locale, "account.games.refreshCode")}
         </button>
       </div>
       <p className="text-body-small text-on-surface-variant">{t(locale, "account.games.refreshHint")}</p>
-      <button type="button" disabled={busy} onClick={onVerify} className={`${stampButton} disabled:opacity-60`}>
-        {busy && <SiriusIcon className="mr-2 h-4 w-4" />}{t(locale, busy ? "account.games.checking" : "account.games.verify")}
+      <button type="button" disabled={busy} onClick={onVerify} className={stampButton}>
+        {busy && <SiriusIcon className="" />}{t(locale, busy ? "account.games.checking" : "account.games.verify")}
       </button>
     </div>
   );
@@ -534,8 +534,8 @@ function AddForm({
             aria-describedby="game-profile-id-hint"
             className="min-w-0 flex-1 rounded-shape-md border border-outline-variant bg-surface-container px-4 py-2 font-mono text-body-medium text-on-surface focus:border-primary focus:bg-surface-container-low focus:outline-none"
           />
-          <button type="submit" disabled={busy || !valid} className={`${stampButton} disabled:opacity-60`}>
-            {busy && <SiriusIcon className="mr-2 h-4 w-4" />}{t(locale, busy ? "account.games.checking" : "account.games.addButton")}
+          <button type="submit" disabled={busy || !valid} className={stampButton}>
+            {busy && <SiriusIcon className="" />}{t(locale, busy ? "account.games.checking" : "account.games.addButton")}
           </button>
         </div>
         <p id="game-profile-id-hint" className={`mt-2 text-body-small ${showInvalid ? "text-error" : "text-on-surface-variant"}`}>

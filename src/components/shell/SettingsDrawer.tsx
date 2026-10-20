@@ -1,18 +1,16 @@
-import { useCallback, useEffect, useId, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useState, type KeyboardEvent, type ReactNode, type SyntheticEvent } from "react";
 import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
-import Divider from "@mui/material/Divider";
-import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import MenuItem from "@mui/material/MenuItem";
+import SwipeableDrawer from "@mui/material/SwipeableDrawer";
 import Switch from "@mui/material/Switch";
-import Tab from "@mui/material/Tab";
-import Tabs from "@mui/material/Tabs";
 import TextField from "@mui/material/TextField";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import { Icon } from "@/components/shared/icons";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { Icon, type IconName } from "@/components/shared/icons";
+import PrimaryTabs, { rovingStep } from "@/components/shared/PrimaryTabs";
 import { withMd3 } from "@/components/md3/Md3Provider";
 import type { AppLocale } from "@/config/locales";
 import { LOCALE_LABELS, SUPPORTED_LOCALES, flagIconSrc } from "@/config/locales";
@@ -29,6 +27,7 @@ import {
   type CacheCategory,
   type CacheOverview,
 } from "@/lib/cache/usage";
+import { getBandSmallIconWhiteUrl } from "@/lib/cards/assets";
 import { formatBytes } from "@/lib/format/bytes";
 import { defaultGameServer } from "@/lib/game-api/server";
 import type { ThemeBandColor } from "@/lib/masterdata/build-settings";
@@ -36,6 +35,7 @@ import { MD3_DEFAULT_SEED } from "@/lib/md3/scheme";
 import { getForceJapaneseTitles, setForceJapaneseTitles, SONG_TITLE_PREFERENCE_EVENT } from "@/lib/music/title-preference";
 import { useOverlay } from "@/lib/overlay/use-overlay";
 import { useOverlayLayer } from "@/lib/overlay/use-overlay-layer";
+import { useAssetUrl } from "@/lib/servers/use-content-server";
 import { DENSITIES, GAME_SERVER_SETTINGS } from "@/lib/settings/schema";
 import { useSettings } from "@/lib/settings/use-settings";
 import { useSpoiler } from "@/lib/settings/spoiler";
@@ -48,67 +48,165 @@ interface SettingsDrawerProps {
   bands?: ThemeBandColor[];
 }
 
-type SettingsTab = "general" | "data";
-const SETTINGS_TABS: readonly SettingsTab[] = ["general", "data"];
+/** MoeSekai's grouping: how the site looks, what it shows, what the browser keeps. */
+type SettingsTab = "appearance" | "content" | "data";
+const SETTINGS_TABS: readonly { key: SettingsTab; icon: IconName }[] = [
+  { key: "appearance", icon: "palette" },
+  { key: "content", icon: "tune" },
+  { key: "data", icon: "database" },
+];
 
-/** Settings as a Material 3 modal side sheet (bottom sheet on phones), with General and Data tabs. */
+const COLOR_SCHEME_ICONS: Record<AppSettings["colorScheme"], IconName> = { system: "monitor", light: "sun", dark: "moon" };
+
+/** The floating side sheet, as MoeSekai floats it: 12px off the viewport edges, extra-large corners, elevation 3. */
+const SIDE_SHEET_SX = {
+  "& > .MuiDrawer-paper": {
+    top: 12,
+    right: 12,
+    bottom: 12,
+    height: "auto",
+    width: 480,
+    maxWidth: "calc(100vw - 24px)",
+    borderRadius: "var(--md-sys-shape-corner-extra-large)",
+    boxShadow: "var(--md-sys-elevation-level3)",
+  },
+};
+const BOTTOM_SHEET_SX = { "& > .MuiDrawer-paper": { maxHeight: "92dvh" } };
+
+/** Settings as a Material 3 modal sheet: floating at the side on wide screens, a bottom sheet on phones. */
 function SettingsDrawer({ locale, pathname, bands = [] }: SettingsDrawerProps) {
   const { isOpen, close } = useOverlay("settings");
-  const [tab, setTab] = useState<SettingsTab>("general");
+  const [tab, setTab] = useState<SettingsTab>("appearance");
   const id = useId();
   const titleId = `${id}-title`;
   const isTop = useOverlayLayer(`settings-${id}`, isOpen, close);
+  // Phones get the bottom sheet below the breakpoint where src/components/shared/Modal.tsx goes full screen.
+  const bottom = useMediaQuery("(max-width: 599.95px)");
+
+  const header = (
+    <>
+      <h2 id={titleId} className="min-w-0 flex-1 truncate font-[var(--md-ref-typeface-brand)] text-title-large text-on-surface">{t(locale, "settings.title")}</h2>
+      <IconButton aria-label={t(locale, "actions.close")} onClick={close}>
+        <Icon name="close" />
+      </IconButton>
+    </>
+  );
 
   return (
-    <Drawer
-      anchor="right"
+    <SwipeableDrawer
+      anchor={bottom ? "bottom" : "right"}
       open={isOpen}
-      onClose={(_, reason) => {
-        if (reason === "escapeKeyDown" && !isTop()) return;
+      // Swiping only closes the sheet: it opens from the settings button.
+      disableSwipeToOpen
+      onOpen={() => undefined}
+      // Escape only closes the top layer; a swipe closes without an event.
+      onClose={(event?: SyntheticEvent<unknown>) => {
+        if (event?.type === "keydown" && !isTop()) return;
         close();
       }}
-      slotProps={{ paper: { role: "dialog", "aria-labelledby": titleId, sx: { width: "min(100vw, 26rem)", borderRadius: { xs: 0, sm: "var(--md-sys-shape-corner-large) 0 0 var(--md-sys-shape-corner-large)" } } } }}
+      // Closed, the sheet unmounts: the data tab measures the caches again each time it opens.
+      ModalProps={{ keepMounted: false }}
+      sx={bottom ? BOTTOM_SHEET_SX : SIDE_SHEET_SX}
+      slotProps={{ paper: { role: "dialog", "aria-modal": true, "aria-labelledby": titleId } }}
     >
-      <div className="flex shrink-0 items-center gap-2 py-3 pl-6 pr-3">
-        <h2 id={titleId} className="min-w-0 flex-1 truncate font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "settings.title")}</h2>
-        <IconButton aria-label={t(locale, "actions.close")} onClick={close}>
-          <Icon name="close" />
-        </IconButton>
+      {bottom ? (
+        <>
+          <div aria-hidden="true" className="flex shrink-0 justify-center py-4">
+            <span className="h-1 w-8 rounded-full bg-on-surface-variant/40" />
+          </div>
+          <div className="flex shrink-0 items-center gap-2 pb-2 pl-6 pr-3">{header}</div>
+        </>
+      ) : (
+        <div className="flex h-[72px] shrink-0 items-center gap-2 pl-6 pr-3">{header}</div>
+      )}
+      <PrimaryTabs
+        tabs={SETTINGS_TABS.map(({ key, icon }) => ({ value: key, label: t(locale, `settings.tabs.${key}`), icon: <Icon name={icon} /> }))}
+        value={tab}
+        onChange={setTab}
+        label={t(locale, "settings.tabs.label")}
+        tabId={(key) => `${id}-${key}-tab`}
+        panelId={`${id}-panel`}
+        className="shrink-0"
+      />
+      <div
+        role="tabpanel"
+        id={`${id}-panel`}
+        aria-labelledby={`${id}-${tab}-tab`}
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-5"
+      >
+        <div key={tab} className="mn-tab-enter">
+          {tab === "appearance" ? <AppearanceSettings locale={locale} pathname={pathname} bands={bands} />
+            : tab === "content" ? <ContentSettings locale={locale} />
+            : <DataSettings locale={locale} />}
+        </div>
       </div>
-      <Tabs value={tab} onChange={(_, value: SettingsTab) => setTab(value)} variant="fullWidth" aria-label={t(locale, "settings.tabs.label")}>
-        {SETTINGS_TABS.map((key) => (
-          <Tab key={key} value={key} id={`${id}-${key}-tab`} aria-controls={`${id}-panel`} label={t(locale, `settings.tabs.${key}`)} />
-        ))}
-      </Tabs>
-      <div role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-${tab}-tab`} className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
-        {tab === "general" ? <GeneralSettings locale={locale} pathname={pathname} bands={bands} /> : <DataSettings locale={locale} />}
-      </div>
-    </Drawer>
+    </SwipeableDrawer>
   );
 }
 
-function GeneralSettings({ locale, pathname, bands = [] }: SettingsDrawerProps) {
+const flag = (src: string) => <img src={src} alt="" aria-hidden="true" loading="lazy" decoding="async" className="h-5 w-5 shrink-0 rounded-full" />;
+
+/** How the site looks: color scheme, theme color, density, and the interface language. */
+function AppearanceSettings({ locale, pathname, bands = [] }: SettingsDrawerProps) {
   const { settings, updateSettings } = useSettings();
   const update = (patch: Partial<AppSettings>) => updateSettings(patch);
-  const flag = (src: string) => <img src={src} alt="" aria-hidden="true" loading="lazy" decoding="async" className="h-5 w-5 shrink-0 rounded-full" />;
-  const serverFlag = (value: AppSettings["gameServer"]) => flag(serverFlagIconSrc(value === "auto" ? defaultGameServer(locale) : value));
-  const serverLabel = (value: AppSettings["gameServer"]) =>
-    value === "auto"
-      ? t(locale, "settings.gameServerAuto", { server: t(locale, `gameServer.names.${defaultGameServer(locale)}`) })
-      : t(locale, `gameServer.names.${value}`);
+  const assetUrl = useAssetUrl();
+  const accents: AccentOption[] = [
+    { key: DEFAULT_ACCENT, label: t(locale, "settings.accent.default"), color: MD3_DEFAULT_SEED },
+    ...bands.map((band) => ({ key: band.color, label: band.name, color: band.color, icon: assetUrl(getBandSmallIconWhiteUrl(band.bandId)) })),
+  ];
+  const accent = accents.find((option) => option.key.toUpperCase() === settings.accentColor.toUpperCase());
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-6">
+      <Section title={t(locale, "settings.colorScheme")}>
+        <Segmented
+          label={t(locale, "settings.colorScheme")}
+          value={settings.colorScheme}
+          options={["system", "light", "dark"] as const}
+          optionLabel={(value) => t(locale, `settings.options.${value}`)}
+          optionIcon={(value) => COLOR_SCHEME_ICONS[value]}
+          onChange={(colorScheme) => update({ colorScheme })}
+        />
+      </Section>
+
+      <Section
+        title={t(locale, "settings.accent.title")}
+        aside={accent && (
+          <span aria-hidden="true" className="flex min-w-0 items-center gap-2 text-body-medium text-on-surface-variant">
+            <span className="h-4 w-4 shrink-0 rounded-full" style={{ background: accent.color }} />
+            <span className="truncate">{accent.label}</span>
+          </span>
+        )}
+      >
+        <AccentPicker label={t(locale, "settings.accent.title")} options={accents} value={accent?.key} onChange={(accentColor) => update({ accentColor })} />
+      </Section>
+
+      <Section title={t(locale, "settings.density.title")}>
+        <Segmented
+          label={t(locale, "settings.density.title")}
+          value={settings.density}
+          options={DENSITIES}
+          optionLabel={(value) => t(locale, `settings.density.${value}`)}
+          onChange={(density) => update({ density })}
+        />
+      </Section>
+
       <Section title={t(locale, "settings.language")}>
         <TextField
           select
           fullWidth
+          size="small"
           value={locale}
           onChange={(event) => {
             const next = event.target.value as AppLocale;
             if (next !== locale) window.location.href = switchLocalePath(pathname, next);
           }}
-          slotProps={{ select: { renderValue: (value) => <span className="flex items-center gap-3">{flag(flagIconSrc(value as AppLocale))}{LOCALE_LABELS[value as AppLocale]}</span> }, htmlInput: { "aria-label": t(locale, "settings.language") } }}
+          sx={SELECT_SX}
+          slotProps={{
+            select: { IconComponent: SelectChevron, renderValue: (value) => <span className="flex items-center gap-3">{flag(flagIconSrc(value as AppLocale))}{LOCALE_LABELS[value as AppLocale]}</span> },
+            htmlInput: { "aria-label": t(locale, "settings.language") },
+          }}
         >
           {SUPPORTED_LOCALES.map((item) => (
             <MenuItem key={item} value={item} lang={item}>
@@ -119,46 +217,33 @@ function GeneralSettings({ locale, pathname, bands = [] }: SettingsDrawerProps) 
         </TextField>
         <p className="mt-2 text-body-small text-on-surface-variant">{t(locale, "settings.machineTranslationNotice")}</p>
       </Section>
+    </div>
+  );
+}
 
-      <Section title={t(locale, "settings.colorScheme")}>
-        <Segmented
-          label={t(locale, "settings.colorScheme")}
-          value={settings.colorScheme}
-          options={["system", "light", "dark"]}
-          optionLabel={(value) => t(locale, `settings.options.${value}`)}
-          onChange={(value) => update({ colorScheme: value as AppSettings["colorScheme"] })}
-        />
-      </Section>
+/** What the site shows: the default game server, song titles, and spoilers. */
+function ContentSettings({ locale }: { locale: AppLocale }) {
+  const { settings, updateSettings } = useSettings();
+  const serverFlag = (value: AppSettings["gameServer"]) => flag(serverFlagIconSrc(value === "auto" ? defaultGameServer(locale) : value));
+  const serverLabel = (value: AppSettings["gameServer"]) =>
+    value === "auto"
+      ? t(locale, "settings.gameServerAuto", { server: t(locale, `gameServer.names.${defaultGameServer(locale)}`) })
+      : t(locale, `gameServer.names.${value}`);
 
-      <Section title={t(locale, "settings.accent.title")}>
-        <AccentPicker locale={locale} bands={bands} value={settings.accentColor} onChange={(accentColor) => update({ accentColor })} />
-      </Section>
-
-      <Section title={t(locale, "settings.density.title")}>
-        <Segmented
-          label={t(locale, "settings.density.title")}
-          value={settings.density}
-          options={[...DENSITIES]}
-          optionLabel={(value) => t(locale, `settings.density.${value}`)}
-          onChange={(value) => update({ density: value as AppSettings["density"] })}
-        />
-      </Section>
-
-      <Section title={t(locale, "settings.songTitles.title")}>
-        <JapaneseTitlesToggle locale={locale} />
-      </Section>
-
-      <Section title={t(locale, "settings.spoiler.title")}>
-        <SpoilerToggle locale={locale} />
-      </Section>
-
+  return (
+    <div className="space-y-6">
       <Section title={t(locale, "settings.gameServer")}>
         <TextField
           select
           fullWidth
+          size="small"
           value={settings.gameServer}
-          onChange={(event) => update({ gameServer: event.target.value as AppSettings["gameServer"] })}
-          slotProps={{ select: { renderValue: (value) => <span className="flex items-center gap-3">{serverFlag(value as AppSettings["gameServer"])}{serverLabel(value as AppSettings["gameServer"])}</span> }, htmlInput: { "aria-label": t(locale, "settings.gameServer") } }}
+          onChange={(event) => updateSettings({ gameServer: event.target.value as AppSettings["gameServer"] })}
+          sx={SELECT_SX}
+          slotProps={{
+            select: { IconComponent: SelectChevron, renderValue: (value) => <span className="flex items-center gap-3">{serverFlag(value as AppSettings["gameServer"])}{serverLabel(value as AppSettings["gameServer"])}</span> },
+            htmlInput: { "aria-label": t(locale, "settings.gameServer") },
+          }}
         >
           {GAME_SERVER_SETTINGS.map((item) => (
             <MenuItem key={item} value={item}>
@@ -167,6 +252,14 @@ function GeneralSettings({ locale, pathname, bands = [] }: SettingsDrawerProps) 
             </MenuItem>
           ))}
         </TextField>
+      </Section>
+
+      <Section title={t(locale, "settings.songTitles.title")}>
+        <JapaneseTitlesToggle locale={locale} />
+      </Section>
+
+      <Section title={t(locale, "settings.spoiler.title")}>
+        <SpoilerToggle locale={locale} />
       </Section>
     </div>
   );
@@ -198,59 +291,56 @@ function DataSettings({ locale }: { locale: AppLocale }) {
   const files = (count: number) => t(locale, "settings.data.fileCount", { count: count.toLocaleString(locale) });
 
   return (
-    <div className="space-y-6">
-      <Section title={t(locale, "settings.data.cacheTitle")}>
-        {!available ? (
-          <p className="text-body-medium text-on-surface-variant">{t(locale, "settings.data.unavailable")}</p>
-        ) : !overview ? (
-          <p className="text-body-medium text-on-surface-variant">{t(locale, "settings.data.calculating")}</p>
-        ) : (
-          <>
-            <div className="rounded-shape-md bg-surface-container-highest p-4">
-              <div className="flex items-baseline justify-between gap-3">
-                <span className="text-label-large text-on-surface-variant">{t(locale, "settings.data.total")}</span>
-                <span className="text-label-medium text-on-surface-variant">{files(overview.total.entries)}</span>
-              </div>
-              <p className="mt-1 font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{formatBytes(overview.total.bytes)}</p>
-              <CacheBreakdown locale={locale} overview={overview} active={active} onActive={setActive} />
+    <Section title={t(locale, "settings.data.cacheTitle")}>
+      {!available ? (
+        <p className="text-body-medium text-on-surface-variant [text-wrap:pretty]">{t(locale, "settings.data.unavailable")}</p>
+      ) : !overview ? (
+        <p className="text-body-medium text-on-surface-variant">{t(locale, "settings.data.calculating")}</p>
+      ) : (
+        <>
+          <div className="rounded-shape-lg bg-surface-container p-4">
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="text-label-large text-on-surface-variant">{t(locale, "settings.data.total")}</span>
+              <span className="text-label-medium text-on-surface-variant">{files(overview.total.entries)}</span>
             </div>
+            <p className="mt-1 font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{formatBytes(overview.total.bytes)}</p>
+            <CacheBreakdown locale={locale} overview={overview} active={active} onActive={setActive} />
+          </div>
 
-            <ul className="mt-3 divide-y divide-outline-variant overflow-hidden rounded-shape-md border border-outline-variant">
-              {CACHE_CATEGORIES.map((category) => {
-                const usage = overview.categories[category];
-                return (
-                  <li
-                    key={category}
-                    onMouseEnter={() => setActive(category)}
-                    onMouseLeave={() => setActive(null)}
-                    className={`flex items-center gap-3 px-4 py-3 transition-colors ${active === category ? "bg-surface-container-high" : ""}`}
-                  >
-                    <span aria-hidden="true" className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: `var(--mn-cache-${category})` }} />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-title-small text-on-surface">{t(locale, `settings.data.categories.${category}`)}</p>
-                      <p className="truncate text-body-small text-on-surface-variant">{t(locale, `settings.data.categoryHints.${category}`)}</p>
-                    </div>
-                    <div className="shrink-0 text-right">
-                      <p className="text-label-large text-on-surface">{formatBytes(usage.bytes)}</p>
-                      <p className="text-label-small text-on-surface-variant">{files(usage.entries)}</p>
-                    </div>
-                    <Button variant="text" size="small" disabled={busy !== null || usage.entries === 0} onClick={() => void clear(category)}>
-                      {t(locale, busy === category ? "settings.data.clearing" : "settings.data.clear")}
-                    </Button>
-                  </li>
-                );
-              })}
-            </ul>
-          </>
-        )}
-      </Section>
+          {/* An M3 expressive list: rows 2px apart on the container color, the outer corners large, the inner ones small. */}
+          <ul className="mt-3 flex flex-col gap-0.5">
+            {CACHE_CATEGORIES.map((category) => {
+              const usage = overview.categories[category];
+              return (
+                <li
+                  key={category}
+                  onMouseEnter={() => setActive(category)}
+                  onMouseLeave={() => setActive(null)}
+                  className={`flex items-center gap-3 rounded-shape-xs py-3 pl-4 pr-2 transition-colors first:rounded-t-shape-lg last:rounded-b-shape-lg ${active === category ? "bg-surface-container-high" : "bg-surface-container"}`}
+                >
+                  <span aria-hidden="true" className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: `var(--mn-cache-${category})` }} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-title-small text-on-surface">{t(locale, `settings.data.categories.${category}`)}</p>
+                    <p className="line-clamp-2 text-body-small text-on-surface-variant [text-wrap:pretty]">{t(locale, `settings.data.categoryHints.${category}`)}</p>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <p className="text-label-large text-on-surface">{formatBytes(usage.bytes)}</p>
+                    <p className="text-label-small text-on-surface-variant">{files(usage.entries)}</p>
+                  </div>
+                  <Button variant="text" size="small" disabled={busy !== null || usage.entries === 0} onClick={() => void clear(category)}>
+                    {t(locale, busy === category ? "settings.data.clearing" : "settings.data.clear")}
+                  </Button>
+                </li>
+              );
+            })}
+          </ul>
 
-      {available && overview && (
-        <Button variant="tonal" color="error" fullWidth disabled={busy !== null || overview.total.entries === 0} onClick={() => void clear("all")}>
-          {t(locale, busy === "all" ? "settings.data.clearing" : "settings.data.clearAll")}
-        </Button>
+          <Button variant="tonal" color="error" fullWidth className="mt-6" disabled={busy !== null || overview.total.entries === 0} onClick={() => void clear("all")}>
+            {t(locale, busy === "all" ? "settings.data.clearing" : "settings.data.clearAll")}
+          </Button>
+        </>
       )}
-    </div>
+    </Section>
   );
 }
 
@@ -266,7 +356,7 @@ function CacheBreakdown({ locale, overview, active, onActive }: {
 }) {
   const total = overview.total.bytes;
   const parts = CACHE_CATEGORIES.filter((category) => overview.categories[category].bytes > 0);
-  if (total === 0 || parts.length === 0) return <div aria-hidden="true" className="mt-3 h-2.5 rounded-full bg-surface-container" />;
+  if (total === 0 || parts.length === 0) return <div aria-hidden="true" className="mt-3 h-2.5 rounded-full bg-surface-container-highest" />;
   const percent = new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 1 });
   return (
     <div aria-hidden="true" className="mt-3 flex h-2.5 gap-[2px] overflow-hidden rounded-full" onMouseLeave={() => onActive(null)}>
@@ -286,38 +376,71 @@ function CacheBreakdown({ locale, overview, active, onActive }: {
   );
 }
 
-/** Theme color: the site's default blue or a band's color, as M3 filter chips with a swatch. */
-function AccentPicker({ locale, bands, value, onChange }: { locale: AppLocale; bands: ThemeBandColor[]; value: string; onChange: (value: string) => void }) {
-  const options = [{ key: DEFAULT_ACCENT, label: t(locale, "settings.accent.default"), color: MD3_DEFAULT_SEED }, ...bands.map((band) => ({ key: band.color, label: band.name, color: band.color }))];
+interface AccentOption {
+  key: string;
+  label: string;
+  color: string;
+  /** The band's emblem in white, drawn on its color as MoeSekai draws a character's face on theirs. */
+  icon?: string;
+}
+
+/**
+ * Theme color: the site's default blue or a band's color, as MoeSekai's swatches: round, the chosen one a rounded
+ * square ringed in the primary color. The section heading names the chosen one.
+ */
+function AccentPicker({ label, options, value, onChange }: {
+  label: string;
+  options: AccentOption[];
+  value: string | undefined;
+  onChange: (value: string) => void;
+}) {
+  const selectedIndex = options.findIndex((option) => option.key === value);
+  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const next = rovingStep(event.key, selectedIndex, options.length);
+    if (next === null) return;
+    event.preventDefault();
+    onChange(options[next]!.key);
+    event.currentTarget.querySelectorAll<HTMLElement>('[role="radio"]')[next]?.focus();
+  };
   return (
-    <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t(locale, "settings.accent.title")}>
-      {options.map((option) => {
-        const selected = value.toUpperCase() === option.key.toUpperCase();
+    // 10px apart: seven swatches still fit one row of a phone's sheet, the ring and its offset clear of the neighbors.
+    <div role="radiogroup" aria-label={label} onKeyDown={onKeyDown} className="flex flex-wrap gap-2.5 py-1 sm:gap-3">
+      {options.map((option, index) => {
+        const selected = index === selectedIndex;
         return (
-          <Chip
+          <button
             key={option.key}
-            variant="filter"
+            type="button"
             role="radio"
             aria-checked={selected}
+            aria-label={option.label}
             title={option.label}
+            tabIndex={selected || (selectedIndex < 0 && index === 0) ? 0 : -1}
             onClick={() => onChange(option.key)}
-            icon={
-              <span className="grid h-[18px] w-[18px] place-items-center rounded-full" style={{ background: option.color }} aria-hidden="true">
-                {selected && <Icon name="check" className="h-3 w-3 text-white" strokeWidth={3} />}
-              </span>
-            }
-            label={<span className="block max-w-[9rem] truncate">{option.label}</span>}
-          />
+            // 50%, not a full radius: a radius far past what shows cannot be interpolated into the selected corners.
+            className={`grid h-10 w-10 shrink-0 cursor-pointer place-items-center transition-[border-radius] duration-300 ease-standard sm:h-11 sm:w-11 ${
+              selected ? "rounded-shape-lg ring-[3px] ring-primary ring-offset-2 ring-offset-surface-container-low" : "rounded-[50%] hover:rounded-shape-lg"
+            }`}
+            style={{ backgroundColor: option.color }}
+          >
+            {option.icon && <SwatchIcon src={option.icon} />}
+          </button>
         );
       })}
     </div>
   );
 }
 
+/** A band emblem on its swatch; a band without one keeps the plain color. */
+function SwatchIcon({ src }: { src: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return null;
+  return <img src={src} alt="" aria-hidden="true" loading="lazy" decoding="async" onError={() => setFailed(true)} className="h-[70%] w-[70%] object-contain" />;
+}
+
 /** Always show songs under their Japanese titles (shared with the music pages' preference). */
 function JapaneseTitlesToggle({ locale }: { locale: AppLocale }) {
   const [on, setOn] = useState(false);
-  const id = useId();
   useEffect(() => {
     setOn(getForceJapaneseTitles());
     const sync = () => setOn(getForceJapaneseTitles());
@@ -329,50 +452,48 @@ function JapaneseTitlesToggle({ locale }: { locale: AppLocale }) {
     };
   }, []);
   return (
-    <div className="flex items-start justify-between gap-4">
-      <label htmlFor={id} className="min-w-0 cursor-pointer">
-        <span className="block text-body-large text-on-surface">{t(locale, "settings.songTitles.forceJapanese")}</span>
-        <span className="mt-0.5 block text-body-medium text-on-surface-variant">{t(locale, "settings.songTitles.hint")}</span>
-      </label>
-      <Switch
-        id={id}
-        checked={on}
-        className="-my-3 shrink-0"
-        onChange={(event) => {
-          setOn(event.target.checked);
-          setForceJapaneseTitles(event.target.checked);
-        }}
-      />
-    </div>
+    <SettingRow
+      label={t(locale, "settings.songTitles.forceJapanese")}
+      description={t(locale, "settings.songTitles.hint")}
+      control={
+        <Switch
+          checked={on}
+          className="-my-3 -mr-3 shrink-0"
+          onChange={(event) => {
+            setOn(event.target.checked);
+            setForceJapaneseTitles(event.target.checked);
+          }}
+        />
+      }
+    />
   );
 }
 
-/** Filter unreleased / datamined content under Bilibili EULA, unlockable via backdoor ?Spoiler=allow */
+/**
+ * Filter unreleased / datamined content under Bilibili EULA, unlockable via backdoor ?Spoiler=allow. Locked, a lock
+ * stands where the switch would be.
+ */
 function SpoilerToggle({ locale }: { locale: AppLocale }) {
   const { isUnlocked, showSpoiler, setShowSpoiler } = useSpoiler();
-  const id = useId();
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-start justify-between gap-4">
-        <label htmlFor={id} className={`min-w-0 ${isUnlocked ? "cursor-pointer" : "cursor-not-allowed"}`}>
-          <span className="block text-body-large text-on-surface">{t(locale, "settings.spoiler.showLabel")}</span>
-          <span className="mt-0.5 block text-body-medium text-on-surface-variant">
-            {t(locale, "settings.spoiler.eulaNotice")}
-          </span>
-        </label>
-        <Switch
-          id={id}
-          checked={showSpoiler}
-          disabled={!isUnlocked}
-          className="-my-3 shrink-0"
-          onChange={(event) => {
-            if (isUnlocked) setShowSpoiler(event.target.checked);
-          }}
-        />
-      </div>
+    <div className="space-y-3">
+      <SettingRow
+        label={t(locale, "settings.spoiler.showLabel")}
+        description={t(locale, "settings.spoiler.eulaNotice")}
+        control={
+          isUnlocked ? (
+            <Switch checked={showSpoiler} className="-my-3 -mr-3 shrink-0" onChange={(event) => setShowSpoiler(event.target.checked)} />
+          ) : (
+            <span role="img" aria-label={t(locale, "settings.spoiler.restrictedTitle")} title={t(locale, "settings.spoiler.restrictedTitle")} className="grid h-8 w-[52px] shrink-0 place-items-center text-on-surface-variant">
+              <Icon name="lock" className="h-5 w-5" />
+            </span>
+          )
+        }
+        interactive={isUnlocked}
+      />
       {isUnlocked && (
-        <div className="inline-flex items-center gap-1.5 rounded-shape-xs bg-surface-container-high px-2 py-1 text-label-small text-on-surface-variant">
+        <div className="inline-flex items-center gap-1.5 rounded-shape-sm bg-surface-container-high px-2 py-1 text-label-small text-on-surface-variant">
           <Icon name="info" className="h-3.5 w-3.5 shrink-0 text-primary" />
           <span>{t(locale, "settings.spoiler.devOnly")}</span>
         </div>
@@ -381,23 +502,63 @@ function SpoilerToggle({ locale }: { locale: AppLocale }) {
   );
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+/** A setting with a control at its end, as MoeSekai lays its switches out: the whole row is the control's label. */
+function SettingRow({ label, description, control, interactive = true }: { label: string; description: string; control: ReactNode; interactive?: boolean }) {
+  const Row = interactive ? "label" : "div";
+  return (
+    <Row className={`flex items-center gap-4 ${interactive ? "cursor-pointer" : ""}`}>
+      <span className="min-w-0 flex-1">
+        <span className="block text-body-large text-on-surface">{label}</span>
+        <span className="mt-0.5 block text-body-medium text-on-surface-variant [text-wrap:pretty]">{description}</span>
+      </span>
+      {control}
+    </Row>
+  );
+}
+
+/** A group of settings under a heading in the primary color (MoeSekai's), with room for a note at the heading's end. */
+function Section({ title, aside, children }: { title: string; aside?: ReactNode; children: ReactNode }) {
   return (
     <section>
-      <h3 className="mb-3 text-title-small text-on-surface-variant">{title}</h3>
+      <div className="mb-2 flex min-h-6 items-center gap-3">
+        <h3 className="min-w-0 flex-1 text-title-small text-primary">{title}</h3>
+        {aside}
+      </div>
       {children}
-      <Divider className="!mt-7 [section:last-child_&]:hidden" />
     </section>
   );
 }
 
-/** M3 single-select segmented buttons spanning the sheet's width. */
-function Segmented({ label, value, options, optionLabel, onChange }: { label: string; value: string; options: string[]; optionLabel: (value: string) => string; onChange: (value: string) => void }) {
+/** A select as MoeSekai sizes one: 40px tall, medium corners, body-medium text, on the sheet's own surface. */
+const SELECT_SX = {
+  "& .MuiOutlinedInput-root": {
+    borderRadius: "var(--md-sys-shape-corner-medium)",
+    backgroundColor: "var(--md-sys-color-surface-container-low)",
+    fontSize: "var(--md-sys-typescale-body-medium-size)",
+    lineHeight: "var(--md-sys-typescale-body-medium-line-height)",
+    letterSpacing: "var(--md-sys-typescale-body-medium-tracking)",
+  },
+  "&& .MuiSelect-select": { display: "flex", alignItems: "center", minHeight: 0, height: 38, boxSizing: "border-box", paddingBlock: 0, paddingLeft: "12px" },
+};
+
+function SelectChevron({ className }: { className?: string }) {
+  return <Icon name="chevronDown" className={`${className ?? ""} right-2 top-[calc(50%-10px)] h-5 w-5 text-on-surface-variant transition-transform`} />;
+}
+
+/** M3 single-select segmented buttons spanning the sheet's width; the filled segment marks the choice, no checkmark. */
+function Segmented<T extends string>({ label, value, options, optionLabel, optionIcon, onChange }: {
+  label: string;
+  value: T;
+  options: readonly T[];
+  optionLabel: (value: T) => string;
+  optionIcon?: (value: T) => IconName;
+  onChange: (value: T) => void;
+}) {
   return (
-    <ToggleButtonGroup exclusive fullWidth value={value} onChange={(_, next: string | null) => next && onChange(next)} aria-label={label}>
+    <ToggleButtonGroup exclusive fullWidth value={value} onChange={(_, next: T | null) => next && onChange(next)} aria-label={label}>
       {options.map((option) => (
         <ToggleButton key={option} value={option}>
-          {value === option && <Icon name="check" className="h-[18px] w-[18px]" />}
+          {optionIcon && <Icon name={optionIcon(option)} className="h-[18px] w-[18px]" />}
           {optionLabel(option)}
         </ToggleButton>
       ))}

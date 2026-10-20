@@ -1,10 +1,8 @@
 import { useEffect, useId, useRef, useState } from "react";
-import AppBar from "@mui/material/AppBar";
 import ButtonBase from "@mui/material/ButtonBase";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -25,11 +23,10 @@ interface Props {
 }
 
 /**
- * Material 3 small top app bar: navigation icon, the brand signature, the breadcrumb trail (each crumb with a menu of
- * its sibling pages) and the search / settings actions. Below `md` the bar has no room for the trail beside the brand
- * and the actions, so the trail takes a second, full-width row (and --md-app-bar-height grows to match, see
- * src/styles/tokens.css). Flat on the page surface; on scroll it takes the surface-container tone (M3 "on scroll"
- * elevation).
+ * Top app bar, as MoeSekai lays it out: transparent, with its controls grouped in floating glass capsules (navigation,
+ * brand and, from `md`, the breadcrumb trail, each crumb with a menu of its sibling pages; search; settings). Content
+ * scrolling under it fades out through the scroll edge, and the capsules thicken. Below `md` the trail takes a second
+ * row in its own capsule (and --md-app-bar-height grows to match, see src/styles/tokens.css).
  */
 function TopAppBar({ locale, homeHref, crumbs }: Props) {
   const scrolled = useScrollTrigger({ disableHysteresis: true, threshold: 4 });
@@ -50,53 +47,55 @@ function TopAppBar({ locale, homeHref, crumbs }: Props) {
   const navOpen = desktop ? desktopOpen : mobileOpen;
 
   return (
-    <AppBar
-      position="fixed"
-      component="header"
-      className="mn-top-app-bar"
-      data-scrolled={scrolled ? "" : undefined}
-      sx={{ backgroundColor: scrolled ? "var(--md-sys-color-surface-container)" : "var(--md-sys-color-surface)" }}
-    >
-      <Toolbar className="mx-auto w-full max-w-[var(--mn-layout-max-width,120rem)] gap-1 !px-2 sm:!px-4">
-        <Tooltip title={t(locale, navOpen ? "shell.closeSidebar" : "shell.openSidebar")}>
-          <IconButton
-            edge="start"
-            aria-label={t(locale, navOpen ? "shell.closeSidebar" : "shell.openSidebar")}
-            aria-expanded={navOpen}
-            onClick={toggleNav}
-            sx={{ color: "var(--md-sys-color-on-surface)" }}
-          >
-            <Icon name={mobileOpen ? "close" : "menu"} />
-          </IconButton>
-        </Tooltip>
-        <a href={homeHref} className="md3-state mx-1 flex shrink-0 items-center rounded-full px-2 py-1 text-on-surface" aria-label={t(locale, "nav.home")}>
-          <BrandLogo className="mn-brand-shell" />
-        </a>
-        <Breadcrumbs locale={locale} crumbs={crumbs} />
-        <div className="ml-auto flex shrink-0 items-center gap-1">
-          <ButtonBase
-            onClick={() => toggleOverlay("command")}
-            aria-label={t(locale, "shell.openCommandPalette")}
-            className="md3-state !hidden h-12 w-[min(22rem,32vw)] items-center gap-3 !rounded-full !bg-surface-container-high !px-4 !text-on-surface-variant sm:!flex"
-          >
-            <Icon name="search" />
-            <span className="min-w-0 flex-1 truncate text-left text-body-large">{t(locale, "shell.searchPlaceholder")}</span>
-            <kbd className="rounded-shape-xs border border-outline-variant px-1.5 font-sans text-label-small">{shortcut}</kbd>
-          </ButtonBase>
+    <header className="mn-top-app-bar scroll-edge fixed inset-x-0 top-0 z-[1100] text-on-surface" data-scrolled={scrolled ? "" : undefined}>
+      <div className="mx-auto flex h-16 w-full max-w-[var(--mn-layout-max-width,120rem)] items-center gap-2 px-2 sm:px-3">
+        <div className="glass flex h-12 min-w-0 items-center gap-1 rounded-full pl-1 pr-2 md:pr-3">
+          <Tooltip title={t(locale, navOpen ? "shell.closeSidebar" : "shell.openSidebar")}>
+            <IconButton
+              aria-label={t(locale, navOpen ? "shell.closeSidebar" : "shell.openSidebar")}
+              aria-expanded={navOpen}
+              onClick={toggleNav}
+              sx={{ color: "var(--md-sys-color-on-surface)" }}
+            >
+              <Icon name={mobileOpen ? "close" : "menu"} />
+            </IconButton>
+          </Tooltip>
+          <a href={homeHref} className="md3-state flex shrink-0 items-center rounded-full px-1 py-1 text-on-surface" aria-label={t(locale, "nav.home")}>
+            <BrandLogo className="mn-brand-shell" />
+          </a>
+          <Breadcrumbs locale={locale} crumbs={crumbs} />
+        </div>
+        <div className="min-w-0 flex-1" />
+        <ButtonBase
+          onClick={() => toggleOverlay("command")}
+          aria-label={t(locale, "shell.openCommandPalette")}
+          className="glass md3-state !hidden h-12 w-72 shrink items-center gap-2 !rounded-full !pl-4 !pr-3 !text-on-surface-variant lg:!flex"
+        >
+          <Icon name="search" className="h-5 w-5" />
+          <span className="min-w-0 flex-1 truncate text-left text-body-medium">{t(locale, "shell.searchPlaceholder")}</span>
+          <kbd className="inline-flex h-6 items-center rounded-shape-xs border border-outline-variant px-1.5 font-sans text-label-small">{shortcut}</kbd>
+        </ButtonBase>
+        <div className="glass flex h-12 shrink-0 items-center gap-0.5 rounded-full px-1">
           <Tooltip title={t(locale, "shell.openCommandPalette")}>
-            <IconButton className="sm:!hidden" aria-label={t(locale, "shell.openCommandPalette")} onClick={() => toggleOverlay("command")}>
+            <IconButton className="lg:!hidden" aria-label={t(locale, "shell.openCommandPalette")} onClick={() => toggleOverlay("command")}>
               <Icon name="search" />
             </IconButton>
           </Tooltip>
           <Tooltip title={t(locale, "shell.openSettings")}>
-            <IconButton edge="end" aria-label={t(locale, "shell.openSettings")} onClick={() => toggleOverlay("settings")}>
+            <IconButton aria-label={t(locale, "shell.openSettings")} onClick={() => toggleOverlay("settings")}>
               <Icon name="settings" />
             </IconButton>
           </Tooltip>
         </div>
-      </Toolbar>
-      <Breadcrumbs locale={locale} crumbs={crumbs} row />
-    </AppBar>
+      </div>
+      {crumbs.length > 0 && (
+        <div className="mn-app-bar-trail flex h-10 items-start px-2 md:hidden">
+          <div className="glass flex h-9 min-w-0 max-w-full items-center rounded-full px-1.5">
+            <Breadcrumbs locale={locale} crumbs={crumbs} row />
+          </div>
+        </div>
+      )}
+    </header>
   );
 }
 
@@ -112,7 +111,7 @@ function Breadcrumbs({ locale, crumbs, row = false }: { locale: AppLocale; crumb
     <nav
       ref={scrollRef}
       aria-label={t(locale, "shell.breadcrumb")}
-      className={`no-scrollbar min-w-0 overflow-x-auto ${row ? "mn-app-bar-trail flex h-10 items-start px-3 md:hidden" : "flex-1 max-md:hidden"}`}
+      className={`no-scrollbar min-w-0 overflow-x-auto ${row ? "flex" : "flex max-md:hidden"}`}
     >
       <ol className="flex min-w-max items-center gap-0.5 text-body-medium text-on-surface-variant">
         {crumbs.map((crumb, index) => (
@@ -132,27 +131,25 @@ function Crumb({ locale, crumb }: { locale: AppLocale; crumb: HeaderCrumb }) {
   const menuId = useId();
   const open = Boolean(anchor);
   const menuLabel = crumb.picker ? t(locale, "shell.breadcrumbSelectPage") : t(locale, crumb.groupMenu ? "shell.breadcrumbExpandGroup" : "shell.breadcrumbExpandItems");
-  const chip = crumb.current
-    ? "bg-secondary-container text-on-secondary-container"
-    : "text-on-surface-variant";
+  // Plain text on the glass, as on MoeSekai: the current page reads in on-surface, its ancestors recede.
+  const chip = crumb.current ? "text-on-surface" : "text-on-surface-variant";
 
   return (
     <>
       {crumb.picker ? (
         <ButtonBase
-          aria-label={menuLabel}
           aria-haspopup="menu"
           aria-expanded={open}
           aria-controls={open ? menuId : undefined}
           onClick={(event) => setAnchor(event.currentTarget)}
-          className={`md3-state h-8 gap-1 !rounded-shape-sm !px-3 text-label-large ${chip}`}
+          className={`md3-state h-8 gap-1 !rounded-full !pl-3 !pr-1.5 text-label-large ${chip}`}
         >
-          <Icon name="more" className="h-[18px] w-[18px]" />
-          <Icon name="chevronDown" className="h-[18px] w-[18px]" />
+          <span>{menuLabel}</span>
+          <Icon name="chevronDown" className={`h-[18px] w-[18px] transition-transform ${open ? "rotate-180" : ""}`} />
         </ButtonBase>
       ) : (
-        <span className={`flex h-8 items-center overflow-hidden rounded-shape-sm ${chip}`}>
-          <a href={crumb.href} aria-current={crumb.current ? "page" : undefined} className="md3-state flex h-full max-w-[14rem] items-center truncate px-3 text-label-large">
+        <span className={`flex h-8 items-center overflow-hidden rounded-full ${chip}`}>
+          <a href={crumb.href} aria-current={crumb.current ? "page" : undefined} className={`md3-state flex h-full max-w-[14rem] items-center truncate text-label-large ${crumb.options.length > 0 ? "pl-2.5 pr-1" : "px-2.5"}`}>
             <span className="truncate">{crumb.label}</span>
           </a>
           {crumb.options.length > 0 && (
@@ -162,7 +159,7 @@ function Crumb({ locale, crumb }: { locale: AppLocale; crumb: HeaderCrumb }) {
               aria-expanded={open}
               aria-controls={open ? menuId : undefined}
               onClick={(event) => setAnchor(event.currentTarget)}
-              className="md3-state h-full !rounded-none !px-1.5"
+              className="md3-state h-full !rounded-full !px-1"
             >
               <Icon name="chevronDown" className={`h-[18px] w-[18px] transition-transform ${open ? "rotate-180" : ""}`} />
             </ButtonBase>

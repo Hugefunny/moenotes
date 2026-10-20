@@ -479,10 +479,10 @@ export default function StoryScriptReader({ locale, script: neutralScript, chara
           setIsAutoplayMode(true);
           playLine(activeLineIndex ?? 0);
         }}
-        className="flex items-center gap-2 rounded-full bg-primary px-4 py-1.5 text-label-medium text-white shadow-elevation-1 transition active:translate-y-0"
+        className="md3-button md3-button--filled"
       >
-        <svg className="h-3.5 w-3.5 fill-current translate-x-0.5" viewBox="0 0 24 24">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
+        <svg className="fill-current" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M8 5v14l11-7z" />
         </svg>
         {t(locale, "story.ui.autoplay")}
       </button>
@@ -492,9 +492,9 @@ export default function StoryScriptReader({ locale, script: neutralScript, chara
         type="button"
         aria-pressed={showBackgrounds}
         onClick={toggleBackgrounds}
-        className={`flex items-center gap-2 rounded-full border border-outline-variant px-4 py-1.5 text-label-medium transition active:translate-y-0 ${showBackgrounds ? "bg-secondary-container text-primary" : "bg-surface-container-low text-on-surface"}`}
+        className="md3-button md3-button--outlined"
       >
-        <svg className="h-3.5 w-3.5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+        <svg className="fill-current" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M20 4H4a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1zm-1 12.6-4.3-4.3a1 1 0 0 0-1.4 0L10 15.6l-1.3-1.3a1 1 0 0 0-1.4 0L5 16.6V6h14v10.6zM8.5 10.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
         </svg>
         {t(locale, "story.ui.showBackgrounds")}
@@ -582,18 +582,18 @@ export default function StoryScriptReader({ locale, script: neutralScript, chara
         </div>
 
         {/* Controller */}
-        <div className="flex items-center justify-between px-4 py-2.5">
+        <div className="flex items-center justify-between gap-2 px-3 py-2">
           {/* Left Navigation and Play */}
-          <div className="flex items-center gap-2 md:gap-3">
+          <div className="flex items-center gap-1">
             {/* Prev Button */}
             <button
               type="button"
               disabled={activeLineIndex === 0}
               onClick={() => activeLineIndex > 0 && playLine(activeLineIndex - 1)}
-              className="text-on-surface-variant hover:text-on-surface disabled:opacity-30 transition p-1"
+              className="md3-icon-button"
               aria-label="Previous line"
             >
-              <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
+              <svg className="fill-current" viewBox="0 0 24 24">
                 <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
               </svg>
             </button>
@@ -602,15 +602,15 @@ export default function StoryScriptReader({ locale, script: neutralScript, chara
             <button
               type="button"
               onClick={handleTogglePlayState}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-white transition hover:scale-105"
+              className="md3-icon-button md3-icon-button--filled"
               aria-label={isPlaying ? "Pause autoplay" : "Start autoplay"}
             >
               {isPlaying ? (
-                <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
+                <svg className="fill-current" viewBox="0 0 24 24">
                   <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
                 </svg>
               ) : (
-                <svg className="h-5 w-5 fill-current translate-x-0.5" viewBox="0 0 24 24">
+                <svg className="fill-current" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
                 </svg>
               )}
@@ -621,10 +621,10 @@ export default function StoryScriptReader({ locale, script: neutralScript, chara
               type="button"
               disabled={activeLineIndex === script.lines.length - 1}
               onClick={() => activeLineIndex < script.lines.length - 1 && playLine(activeLineIndex + 1)}
-              className="text-on-surface-variant hover:text-on-surface disabled:opacity-30 transition p-1"
+              className="md3-icon-button"
               aria-label="Next line"
             >
-              <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
+              <svg className="fill-current" viewBox="0 0 24 24">
                 <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
               </svg>
             </button>
@@ -641,7 +641,7 @@ export default function StoryScriptReader({ locale, script: neutralScript, chara
           </div>
 
           {/* Right speed select and exit cross */}
-          <div className="flex items-center gap-2 md:gap-3">
+          <div className="flex items-center gap-1">
             {/* Speed toggle */}
             <button
               type="button"
@@ -653,7 +653,7 @@ export default function StoryScriptReader({ locale, script: neutralScript, chara
                   return 1;
                 });
               }}
-              className="rounded-full border border-outline-variant bg-surface-container-low px-2.5 py-0.5 text-label-small text-on-surface transition active:translate-y-0 hover:bg-primary/6 hover:border-primary/30"
+              className="md3-button md3-button--text md3-button--small min-w-12 tabular-nums"
             >
               {playbackRate}x
             </button>
@@ -671,10 +671,10 @@ export default function StoryScriptReader({ locale, script: neutralScript, chara
                   audioRef.current.src = "";
                 }
               }}
-              className="text-on-surface-variant hover:text-on-surface transition p-1"
+              className="md3-icon-button"
               aria-label="Close player"
             >
-              <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
+              <svg className="fill-current" viewBox="0 0 24 24">
                 <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
               </svg>
             </button>
@@ -798,22 +798,21 @@ function SceneBackground({ url, label, expanded, line, isActive }: { url: string
       <figcaption className="absolute bottom-3 left-3 rounded-shape-sm bg-inverse-surface/80 px-3 py-1 text-label-medium text-inverse-on-surface">{label}</figcaption>
     </figure>;
   }
-  return <button
-    id={id}
-    type="button"
-    disabled={failed}
-    onClick={() => setOpened(true)}
-    className="group flex w-full items-center gap-3 py-1 text-label-medium text-on-surface-variant disabled:cursor-default"
-  >
-    <span className="h-px flex-1 bg-outline-variant/22" aria-hidden="true" />
-    <span className={`flex items-center gap-1.5 rounded-full border bg-surface-container-low px-3 py-1 transition group-enabled:group-hover:border-primary group-enabled:group-hover:text-primary ${isActive ? "border-primary text-primary" : "border-outline-variant/30"}`}>
-      <svg className="h-3 w-3 shrink-0 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+  return <div id={id} className="flex items-center gap-3 py-1">
+    <span className="h-px flex-1 bg-outline-variant/60" aria-hidden="true" />
+    <button
+      type="button"
+      disabled={failed}
+      onClick={() => setOpened(true)}
+      className={`md3-button md3-button--small max-w-[80%] ${isActive ? "md3-button--filled" : "md3-button--tonal"}`}
+    >
+      <svg className="fill-current" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M20 4H4a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1zm-1 12.6-4.3-4.3a1 1 0 0 0-1.4 0L10 15.6l-1.3-1.3a1 1 0 0 0-1.4 0L5 16.6V6h14v10.6zM8.5 10.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
       </svg>
-      {label}
-    </span>
-    <span className="h-px flex-1 bg-outline-variant/22" aria-hidden="true" />
-  </button>;
+      <span className="truncate">{label}</span>
+    </button>
+    <span className="h-px flex-1 bg-outline-variant/60" aria-hidden="true" />
+  </div>;
 }
 
 /** A time/place card that does not open a scene: centered, like the game shows it. */
@@ -929,17 +928,19 @@ function ClipBlock({ video, lineIndices, lineProps, locale, events }: {
       </video>
     )}
     {items.length > 0 && !failed && (
-      <button
-        type="button"
-        aria-expanded={listOpen}
-        onClick={() => setListOpen((open) => !open)}
-        className="flex w-full items-center justify-center gap-1.5 border-t border-outline-variant px-4 py-2 text-label-medium text-on-surface-variant transition hover:text-primary"
-      >
-        {listOpen ? t(locale, "story.ui.hideSubtitleList") : t(locale, "story.ui.showSubtitleList", { count: items.length })}
-        <svg className={`h-3.5 w-3.5 fill-current transition-transform ${listOpen ? "rotate-180" : ""}`} viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
-        </svg>
-      </button>
+      <div className="flex justify-center border-t border-outline-variant p-1.5">
+        <button
+          type="button"
+          aria-expanded={listOpen}
+          onClick={() => setListOpen((open) => !open)}
+          className="md3-button md3-button--text md3-button--small"
+        >
+          {listOpen ? t(locale, "story.ui.hideSubtitleList") : t(locale, "story.ui.showSubtitleList", { count: items.length })}
+          <svg className={`fill-current transition-transform ${listOpen ? "rotate-180" : ""}`} viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
+          </svg>
+        </button>
+      </div>
     )}
     {items.length > 0 && (listOpen || failed) && <ol className="divide-y divide-outline-variant/15 border-t border-outline-variant">
       {items.map((item, position) => <ClipLine key={item.index} {...item} onScreen={onScreen === position} />)}
@@ -1006,15 +1007,16 @@ function VoicePlayButton({ isPlaying, onClick }: { isPlaying: boolean; onClick: 
         e.stopPropagation();
         onClick();
       }}
-      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-outline-variant bg-surface-container-low text-primary transition hover:bg-primary/6 active:translate-y-0"
+      className="md3-icon-button md3-icon-button--tonal md3-icon-button--small"
       aria-label={isPlaying ? "Pause voice" : "Play voice"}
+      aria-pressed={isPlaying}
     >
       {isPlaying ? (
-        <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
+        <svg className="fill-current" viewBox="0 0 24 24">
           <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
         </svg>
       ) : (
-        <svg className="h-4 w-4 fill-current translate-x-0.5" viewBox="0 0 24 24">
+        <svg className="fill-current" viewBox="0 0 24 24">
           <path d="M8 5v14l11-7z" />
         </svg>
       )}

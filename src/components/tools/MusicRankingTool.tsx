@@ -108,9 +108,9 @@ function ChangeSongButton({ onClick, label }: { onClick: () => void; label: stri
     <button
       type="button"
       onClick={onClick}
-      className="md3-state inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full border border-outline-variant bg-surface-container-low px-4 py-2.5 text-label-large text-on-surface shadow-elevation-1 transition hover:border-primary hover:text-primary"
+      className="md3-button md3-button--tonal"
     >
-      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M9 18V6l10-2v12" /><circle cx="6" cy="18" r="3" /><circle cx="16" cy="16" r="3" />
       </svg>
       {label}

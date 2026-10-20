@@ -139,6 +139,7 @@ export default function Live2DViewer({ locale, characters, bands }: Props) {
 
   const quickFilterContent = (
     <BaseFilters
+      locale={locale}
       variant="plain"
       title={t(locale, "live2d.filterTitle")}
       searchValue={query}
@@ -273,7 +274,7 @@ function ModelView({ locale, entry, costumes, onCostume, onChooseCharacter }: {
               {model.id}{model.bytes > 0 ? ` · ${(model.bytes / (1024 * 1024)).toFixed(1)} MB` : ""}
             </p>
           </div>
-          <button type="button" onClick={onChooseCharacter} className={`${pillClass(false)} shrink-0`}>{t(locale, "live2d.chooseCharacter")}</button>
+          <button type="button" onClick={onChooseCharacter} className="md3-button md3-button--outlined md3-button--small">{t(locale, "live2d.chooseCharacter")}</button>
         </div>
 
         <ControlGroup title={t(locale, "live2d.costumes")}>
@@ -337,7 +338,7 @@ function ModelView({ locale, entry, costumes, onCostume, onChooseCharacter }: {
               <Toggle label={t(locale, "live2d.physics")} checked={state.physics} disabled={!state.hasPhysics} onChange={(on) => act((source) => { source.physics = on; })} />
               <Toggle label={t(locale, "live2d.breath")} checked={state.breath} onChange={(on) => act((source) => { source.breath = on; })} />
               <div className="flex flex-wrap gap-2 pt-1">
-                <button type="button" onClick={() => act((source) => (source.paused ? source.play() : source.pause()))} className={pillClass(false)}>
+                <button type="button" onClick={() => act((source) => (source.paused ? source.play() : source.pause()))} className="md3-button md3-button--outlined md3-button--small">
                   {t(locale, state.paused ? "live2d.resume" : "live2d.pause")}
                 </button>
                 <button
@@ -346,7 +347,7 @@ function ModelView({ locale, entry, costumes, onCostume, onChooseCharacter }: {
                     source.playMotion(source.defaultMotion);
                     if (source.defaultExpression) source.setExpression(source.defaultExpression);
                   })}
-                  className={pillClass(false)}
+                  className="md3-button md3-button--outlined md3-button--small"
                 >
                   {t(locale, "live2d.reset")}
                 </button>
@@ -389,7 +390,7 @@ function ControlGroup({ title, children }: { title: string; children: ReactNode 
 function Toggle({ label, checked, onChange, disabled = false }: { label: string; checked: boolean; onChange: (checked: boolean) => void; disabled?: boolean }) {
   return (
     <label className={`flex items-center gap-2 text-label-large text-on-surface ${disabled ? "opacity-45" : "cursor-pointer"}`}>
-      <input type="checkbox" className="h-4 w-4 accent-primary" checked={checked} disabled={disabled} onChange={(event) => onChange(event.target.checked)} />
+      <input type="checkbox" className="md3-checkbox" checked={checked} disabled={disabled} onChange={(event) => onChange(event.target.checked)} />
       {label}
     </label>
   );
@@ -405,7 +406,7 @@ function StageEmpty({ locale, list, onChoose, onRetry }: { locale: AppLocale; li
         {list.kind === "error" && (
           <>
             <p className="text-label-large text-error">{t(locale, "live2d.listError")}</p>
-            <button type="button" onClick={onRetry} className={`${pillClass(false)} mt-4`}>{t(locale, "live2d.retry")}</button>
+            <button type="button" onClick={onRetry} className="md3-button md3-button--outlined mt-4">{t(locale, "live2d.retry")}</button>
           </>
         )}
         {empty && <p className="text-label-large text-on-surface-variant">{t(locale, "live2d.listEmpty")}</p>}
@@ -416,7 +417,7 @@ function StageEmpty({ locale, list, onChoose, onRetry }: { locale: AppLocale; li
             <button
               type="button"
               onClick={onChoose}
-              className="md3-state mt-5 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-label-large text-white shadow-elevation-1 hover:bg-primary"
+              className="md3-button md3-button--filled mt-5"
             >
               {t(locale, "live2d.chooseCharacter")}
             </button>

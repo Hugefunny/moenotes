@@ -3,7 +3,8 @@ import type { AppLocale } from "@/config/locales";
 import type { GameServer } from "@/config/servers";
 import { t } from "@/i18n";
 import { localizePath } from "@/i18n/routing";
-import ServerScope from "@/components/shared/ServerScope";
+import ServerScope, { HeadingServerSwitch } from "@/components/shared/ServerScope";
+import DetailHero from "@/components/shared/DetailHero";
 import EntityPager from "@/components/shared/EntityPager";
 import { HelpCarousels, HelpRichText } from "@/components/help/HelpParts";
 import { helpTopicPath } from "@/lib/help/paths";
@@ -23,7 +24,12 @@ export default function HelpDetail({ locale, servers, detail }: Props) {
   const [server, pickServer] = useContentServer(locale, servers);
   const shown = useMemo(() => (detail ? valueForServer(detail, server) : null), [detail, server]);
   if (!detail || !shown) {
-    return <div className="rounded-shape-lg border border-dashed border-outline-variant bg-surface-container-low p-10 text-center font-bold text-on-surface-variant">{t(locale, "help.empty")}</div>;
+    return (
+      <div className="space-y-6">
+        <DetailHero title={t(locale, "seo.helpDetail.title")} />
+        <div className="rounded-shape-lg border border-dashed border-outline-variant bg-surface-container-low p-10 text-center font-bold text-on-surface-variant">{t(locale, "help.empty")}</div>
+      </div>
+    );
   }
   const { topic, category, siblings } = shown;
   const index = siblings.findIndex((entry) => entry.id === topic.id);
@@ -32,13 +38,14 @@ export default function HelpDetail({ locale, servers, detail }: Props) {
   const categoryHref = `${localizePath(getRoutePathById("help"), locale)}?category=${topic.categoryId}`;
 
   return (
-    <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={detail.servers}>
+    <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={detail.servers} hideSwitch>
       <article className="mx-auto max-w-3xl space-y-6">
-        <header className="rounded-shape-lg border border-outline-variant bg-surface-container-low p-6 shadow-elevation-1">
-          <a href={categoryHref} className="text-label-medium text-primary hover:underline">{topic.categoryTitle}</a>
-          <h2 className="mt-2 text-headline-small text-on-surface">{topic.title}</h2>
-          <HelpRichText value={topic.body} className="mt-4 text-body-medium leading-7 text-on-surface" />
-        </header>
+        <DetailHero
+          title={topic.title}
+          eyebrow={<a href={categoryHref} className="text-primary hover:underline">{topic.categoryTitle}</a>}
+          aside={<HeadingServerSwitch locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={detail.servers} />}
+        />
+        <HelpRichText value={topic.body} className="md3-surface p-6 text-body-large leading-8 text-on-surface sm:px-8" />
         {category && category.carousels.length > 0 ? (
           <section>
             <h3 className="mb-3 text-label-large text-on-surface-variant">{t(locale, "help.guides")}</h3>

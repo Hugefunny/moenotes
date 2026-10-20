@@ -111,9 +111,9 @@ export default function MusicExplorer({ locale, servers, initialSongs, categorie
         type="button"
         onClick={() => setQueue(queue)}
         disabled={queue.length === 0}
-        className="md3-state inline-flex items-center gap-1.5 rounded-full border border-outline-variant bg-surface-container-low px-3.5 py-1.5 text-label-medium text-on-surface transition hover:border-primary hover:text-primary disabled:opacity-50"
+        className="md3-button md3-button--outlined md3-button--small"
       >
-        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" /></svg>
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" /></svg>
         {t(locale, "music.playAll", { count: queue.length })}
       </button>
       <CollectionViewSwitch locale={locale} views={VIEWS} value={view} onChange={setView} compact />
@@ -214,7 +214,7 @@ function EmptyState({ locale, onReset }: { locale: AppLocale; onReset: () => voi
       <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">
         {t(locale, "music.emptyDescription")}
       </p>
-      <button type="button" onClick={onReset} className="md3-state mt-6 rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
+      <button type="button" onClick={onReset} className="md3-button md3-button--tonal mt-6">
         {t(locale, "music.reset")}
       </button>
     </div>

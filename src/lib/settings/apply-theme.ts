@@ -83,7 +83,6 @@ export function buildThemeBootstrapScript(): string {
     // The navigation drawer's state (src/lib/sidebar/sidebar-store.ts), so the content starts at its final offset.
     if (sessionStorage.getItem(${JSON.stringify(storageKeys.sidebarOpen)}) === 'false') {
       root.dataset.sidebar = 'closed';
-      root.style.setProperty('--mn-sidebar-offset', '0rem');
     }
   } catch(e) {}
   try {

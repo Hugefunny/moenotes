@@ -105,6 +105,7 @@ export default function RewardsExplorer({ locale, servers, initialEntries }: Pro
 
   const quickFilterContent = (
     <BaseFilters
+      locale={locale}
       sort={sort}
       variant="plain"
       title={t(locale, "rewards.filterTitle")}
@@ -160,7 +161,7 @@ export default function RewardsExplorer({ locale, servers, initialEntries }: Pro
           <div className="md3-surface p-8 text-center sm:p-12">
             <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "rewards.emptyTitle")}</h2>
             <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "rewards.emptyDescription")}</p>
-            <button type="button" onClick={resetFilters} className="md3-state mt-6 rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
+            <button type="button" onClick={resetFilters} className="md3-button md3-button--tonal mt-6">
               {t(locale, "rewards.reset")}
             </button>
           </div>

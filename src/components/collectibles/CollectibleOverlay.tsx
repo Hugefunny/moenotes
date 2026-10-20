@@ -49,8 +49,8 @@ export interface CollectibleOverlayProps<T extends ServerFaceted<{ id: number }>
 
 type CopyState = "idle" | "copying" | "image" | "link" | "error";
 
-const actionButton = " grid h-8 w-8 place-items-center rounded-full border-2 border-outline-variant bg-surface-container-low text-on-surface-variant  transition hover:text-on-surface disabled:opacity-50";
-const checkIcon = <svg className="h-4 w-4 text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>;
+const actionButton = "md3-icon-button md3-icon-button--outlined md3-icon-button--small";
+const checkIcon = <svg className="text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>;
 
 /**
  * Detail of a collectible (title, sticker, comic, background) over its list, opened from `?id=`: the artwork (opens
@@ -95,15 +95,15 @@ export default function CollectibleOverlay<T extends ServerFaceted<{ id: number 
   const headerActions = entry && imageUrl ? (
     <>
       <button type="button" onClick={handleDownload} disabled={downloading} className={actionButton} aria-label={t(locale, "lightbox.download")} title={t(locale, "lightbox.download")}>
-        {downloading ? <SiriusIcon /> : (
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+        {downloading ? <SiriusIcon className="" /> : (
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
         )}
       </button>
       <button type="button" onClick={handleCopy} disabled={copyState === "copying"} className={actionButton} aria-label={t(locale, "cards.assets.copyImage")} title={copyState === "image" || copyState === "link" || copyState === "error" ? t(locale, `cards.assets.copyStates.${copyState}`) : t(locale, "cards.assets.copyImage")}>
-        {copyState === "copying" ? <SiriusIcon /> : copyState === "image" || copyState === "link" ? checkIcon : copyState === "error" ? (
-          <svg className="h-4 w-4 text-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        {copyState === "copying" ? <SiriusIcon className="" /> : copyState === "image" || copyState === "link" ? checkIcon : copyState === "error" ? (
+          <svg className="text-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
         ) : (
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
         )}
       </button>
     </>

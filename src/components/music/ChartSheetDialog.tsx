@@ -191,14 +191,14 @@ export default function ChartSheetDialog({ locale, song, difficulty: requested, 
       type="button"
       onClick={download}
       disabled={downloadState === "downloading"}
-      className="grid h-8 w-8 place-items-center rounded-full border-2 border-outline-variant bg-surface-container-low text-on-surface-variant transition hover:text-on-surface disabled:opacity-50"
+      className="md3-icon-button md3-icon-button--outlined md3-icon-button--small"
       aria-label={t(locale, "music.chartPreview.download")}
       title={t(locale, "music.chartPreview.download")}
     >
       {downloadState === "idle" && <DownloadIcon />}
-      {downloadState === "downloading" && <Spinner />}
+      {downloadState === "downloading" && <Spinner className="" />}
       {downloadState === "success" && (
-        <svg className="h-4 w-4 text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+        <svg className="text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
         </svg>
       )}
@@ -268,8 +268,6 @@ export default function ChartSheetDialog({ locale, song, difficulty: requested, 
   );
 }
 
-const primaryButton = " md3-state inline-flex min-h-10 items-center gap-2 rounded-full border border-outline-variant bg-primary px-6 py-2.5 text-sm font-bold text-on-primary shadow-elevation-1";
-
 /** Progress and failure, in the frame the viewer takes once the sheet is drawn. */
 function SheetStatus({ locale, sheet, onRetry }: { locale: AppLocale; sheet: SheetState; onRetry: () => void }) {
   const frame = "flex h-[60vh] w-full flex-col items-center justify-center gap-3 rounded-shape-lg border border-outline-variant bg-surface-container-highest p-6 text-center";
@@ -280,7 +278,7 @@ function SheetStatus({ locale, sheet, onRetry }: { locale: AppLocale; sheet: She
         <h4 className="font-[var(--md-ref-typeface-brand)] text-title-large text-on-surface">{t(locale, `music.chartPreview.${sheet.kind}Title`)}</h4>
         <p className="max-w-md text-body-medium leading-7 text-on-surface-variant">{t(locale, `music.chartPreview.${sheet.kind}Description`)}</p>
         {sheet.kind !== "unsupported" && (
-          <button type="button" onClick={onRetry} className={primaryButton}>{t(locale, "music.chartPreview.retry")}</button>
+          <button type="button" onClick={onRetry} className="md3-button md3-button--filled">{t(locale, "music.chartPreview.retry")}</button>
         )}
       </div>
     );
@@ -393,15 +391,13 @@ function SheetViewer({ locale, url, width, height, alt }: { locale: AppLocale; u
     event.preventDefault();
   };
 
-  const iconButton = " md3-state grid h-10 w-10 place-items-center rounded-full border border-outline-variant bg-surface-container-low text-on-surface ";
-
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-end gap-2">
-        <button type="button" className={iconButton} onClick={() => zoomAtCentre(0.8)} aria-label={t(locale, "music.chartPreview.zoomOut")}><MinusIcon /></button>
+        <button type="button" className="md3-icon-button md3-icon-button--outlined" onClick={() => zoomAtCentre(0.8)} aria-label={t(locale, "music.chartPreview.zoomOut")}><MinusIcon /></button>
         <span className="w-12 text-center font-mono text-label-medium text-on-surface" aria-live="polite">{Math.round(view.scale * 100)}%</span>
-        <button type="button" className={iconButton} onClick={() => zoomAtCentre(1.25)} aria-label={t(locale, "music.chartPreview.zoomIn")}><PlusIcon /></button>
-        <button type="button" className={`${iconButton} w-auto px-4 text-label-medium`} onClick={fit}>{t(locale, "music.chartPreview.fit")}</button>
+        <button type="button" className="md3-icon-button md3-icon-button--outlined" onClick={() => zoomAtCentre(1.25)} aria-label={t(locale, "music.chartPreview.zoomIn")}><PlusIcon /></button>
+        <button type="button" className="md3-button md3-button--outlined" onClick={fit}>{t(locale, "music.chartPreview.fit")}</button>
       </div>
       <div
         ref={viewportRef}
@@ -472,7 +468,7 @@ function Spinner({ className = "h-4 w-4" }: { className?: string }) {
 
 function DownloadIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M12 4v11" /><path d="m7 10 5 5 5-5" /><path d="M5 20h14" />
     </svg>
   );
@@ -480,7 +476,7 @@ function DownloadIcon() {
 
 function PlusIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
       <path d="M12 5v14M5 12h14" />
     </svg>
   );
@@ -488,7 +484,7 @@ function PlusIcon() {
 
 function MinusIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
       <path d="M5 12h14" />
     </svg>
   );

@@ -103,6 +103,7 @@ export default function BandItemsExplorer({ locale, servers, initialItems, initi
 
   const quickFilterContent = (
     <BaseFilters
+      locale={locale}
       sort={sort}
       variant="plain"
       title={t(locale, "bandItems.filterTitle")}
@@ -218,7 +219,8 @@ function BandItemCard({ item, locale, onOpen }: { item: BandItemViewModel; local
               max={maxLevel}
               value={level}
               onChange={(event) => setLevel(Number(event.target.value))}
-              className="mt-2 w-full accent-primary"
+              className="md3-range mt-2 w-full"
+              style={{ "--md3-range-progress": `${maxLevel > 1 ? ((level - 1) / (maxLevel - 1)) * 100 : 0}%` } as React.CSSProperties}
               aria-label={t(locale, "bandItems.level", { level })}
             />
           </div>
@@ -243,7 +245,7 @@ function EmptyState({ locale, onReset }: { locale: AppLocale; onReset: () => voi
       <button
         type="button"
         onClick={onReset}
-        className="md3-state mt-6 rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1"
+        className="md3-button md3-button--tonal mt-6"
       >
         {t(locale, "bandItems.reset")}
       </button>

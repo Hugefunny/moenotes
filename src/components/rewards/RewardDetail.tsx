@@ -1,7 +1,9 @@
 import { useMemo, useState, type ReactNode } from "react";
 import type { AppLocale } from "@/config/locales";
 import type { GameServer } from "@/config/servers";
-import ServerScope from "@/components/shared/ServerScope";
+import ServerScope, { HeadingServerSwitch } from "@/components/shared/ServerScope";
+import DetailHero from "@/components/shared/DetailHero";
+import { DetailRow } from "@/components/shared/DetailRows";
 import ServerSchedules from "@/components/shared/ServerSchedules";
 import TimesNote from "@/components/shared/TimesNote";
 import { moveReleaseUrls } from "@/lib/assets/release";
@@ -34,14 +36,21 @@ const panelTitle = "font-[var(--md-ref-typeface-brand)] text-xl text-on-surface 
 export default function RewardDetail({ locale, entry: faceted, servers }: Props) {
   const [server, pickServer] = useContentServer(locale, servers);
   const entry = useMemo(() => faceted && moveReleaseUrls(valueForServer(faceted, server), entityServer(faceted, server)), [faceted, server]);
+  // The hero carries the server switch beside the name, so the scope leaves its own out.
+  const serverSwitch = <HeadingServerSwitch locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={faceted?.servers ?? []} />;
   return (
-    <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={faceted?.servers ?? []}>
-      <RewardDetailView locale={locale} entry={entry} schedules={faceted && <ServerSchedules locale={locale} faceted={faceted} servers={servers} alwaysLabel={t(locale, "rewards.alwaysOpen")} />} />
+    <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={faceted?.servers ?? []} hideSwitch>
+      <RewardDetailView
+        locale={locale}
+        serverSwitch={serverSwitch}
+        entry={entry}
+        schedules={faceted && <ServerSchedules locale={locale} faceted={faceted} servers={servers} alwaysLabel={t(locale, "rewards.alwaysOpen")} />}
+      />
     </ServerScope>
   );
 }
 
-function RewardDetailView({ locale, entry, schedules }: { locale: AppLocale; entry: RewardEntryDetail | null; schedules: ReactNode }) {
+function RewardDetailView({ locale, entry, serverSwitch, schedules }: { locale: AppLocale; serverSwitch: ReactNode; entry: RewardEntryDetail | null; schedules: ReactNode }) {
   const now = useNow();
   const timeZone = useDisplayTimeZone();
   const { showSpoiler } = useSpoiler();
@@ -59,25 +68,19 @@ function RewardDetailView({ locale, entry, schedules }: { locale: AppLocale; ent
 
   return (
     <div className="w-full space-y-8">
+      <DetailHero title={entry.title} aside={serverSwitch} eyebrow={<ScheduleBadge locale={locale} startAt={entry.startAt} endAt={entry.endAt} now={now} />}>
+        {(entry.kind === "seasonPass" || entry.kind === "monthlyPass") && entry.description && <p className="mt-1 max-w-[60ch] whitespace-pre-line text-body-large text-on-surface-variant">{entry.description}</p>}
+      </DetailHero>
+
       <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(22rem,2fr)_3fr] lg:items-start">
         <aside className="flex w-full flex-col gap-6 lg:sticky lg:top-24">
-          <div className="rounded-shape-lg border border-outline-variant bg-surface-container-low p-4 shadow-elevation-1">
+          <div className="md3-surface p-4">
             <BannerImage eager className="rounded-shape-md border border-outline-variant" src={entry.bannerUrl} alt={entry.title} fallback={entry.title} imageClassName={rewardBannerCrop(entry.kind)} />
           </div>
           <div className="md3-surface overflow-hidden">
-            <div className="border-b border-outline-variant p-6">
-              <ScheduleBadge locale={locale} startAt={entry.startAt} endAt={entry.endAt} now={now} />
-              <h2 className="mt-3 font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface sm:text-headline-medium">{entry.title}</h2>
-              {(entry.kind === "seasonPass" || entry.kind === "monthlyPass") && entry.description && <p className="mt-3 whitespace-pre-line text-body-medium leading-7 text-on-surface-variant">{entry.description}</p>}
-            </div>
-            <div className="divide-y divide-dashed divide-outline-variant/60 px-6 py-2">
-              {facts.map(([label, value]) => (
-                <div key={label} className="flex items-center justify-between gap-4 py-3.5 text-body-medium">
-                  <span className="shrink-0 font-semibold text-on-surface-variant">{label}</span>
-                  <span className="min-w-0 text-right font-semibold text-on-surface">{value}</span>
-                </div>
-              ))}
-            </div>
+            <dl className="divide-y divide-outline-variant px-6">
+              {facts.map(([label, value]) => <DetailRow key={label} label={label} value={value} />)}
+            </dl>
             <TimesNote locale={locale} value={entry.startAt || entry.endAt} timeZone={timeZone} className="px-6 pb-5 text-body-small text-on-surface-variant" />
             <div className="px-6 pb-5 empty:hidden">{schedules}</div>
           </div>
@@ -89,7 +92,7 @@ function RewardDetailView({ locale, entry, schedules }: { locale: AppLocale; ent
           {entry.kind === "mission" && <MissionGroupView entry={entry} locale={locale} />}
           {entry.kind === "monthlyPass" && <MonthlyPassView entry={entry} locale={locale} />}
           <div className="flex justify-start">
-            <a href={localizePath(getRoutePathById("rewards"), locale)} className="md3-state inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
+            <a href={localizePath(getRoutePathById("rewards"), locale)} className="md3-button md3-button--tonal">
               {t(locale, "rewards.backToList")}
             </a>
           </div>
@@ -321,9 +324,9 @@ function MonthlyPassView({ entry, locale }: { entry: MonthlyPassDetail; locale: 
 function NotFound({ locale }: { locale: AppLocale }) {
   return (
     <div className="md3-surface p-8 text-center sm:p-12">
-      <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">{t(locale, "rewards.notFoundTitle")}</h2>
+      <h1 className="text-headline-small text-on-surface">{t(locale, "rewards.notFoundTitle")}</h1>
       <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "rewards.notFoundDescription")}</p>
-      <a href={localizePath(getRoutePathById("rewards"), locale)} className="md3-state mt-6 inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
+      <a href={localizePath(getRoutePathById("rewards"), locale)} className="md3-button md3-button--tonal mt-6">
         {t(locale, "rewards.backToList")}
       </a>
     </div>

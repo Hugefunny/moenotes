@@ -25,6 +25,7 @@ import {
   parseCharacterFilterState,
   positionOptions,
   schoolOptions,
+  toggleSchool,
   type CharacterFilterState,
 } from "@/lib/characters/list-filter";
 
@@ -98,10 +99,11 @@ export default function CharactersExplorer({ locale, servers, initialCharacters 
     memory.clearState();
   };
 
-  const toggle = (field: "positions" | "schools", value: string) => setFilters((current) => ({ ...current, [field]: toggleArrayItem(current[field], value) }));
+  const toggle = (field: "positions", value: string) => setFilters((current) => ({ ...current, [field]: toggleArrayItem(current[field], value) }));
 
   useQuickFilter(t(locale, "characters.filterTitle"), (
     <BaseFilters
+      locale={locale}
       sort={sort}
       variant="plain"
       title={t(locale, "characters.filterTitle")}
@@ -131,7 +133,7 @@ export default function CharactersExplorer({ locale, servers, initialCharacters 
       <FilterSection title={t(locale, "characters.list.school")}>
         <div className="flex flex-wrap gap-2">
           <FilterButton active={filters.schools.length === 0} onClick={() => setFilters((current) => ({ ...current, schools: [] }))}>ALL</FilterButton>
-          {schools.map((school) => <FilterButton key={school.key} active={filters.schools.includes(school.key)} onClick={() => toggle("schools", school.key)}>{school.name}</FilterButton>)}
+          {schools.map((school) => <FilterButton key={school.name} active={school.keys.some((key) => filters.schools.includes(key))} onClick={() => setFilters((current) => ({ ...current, schools: toggleSchool(current.schools, school.keys) }))}>{school.name}</FilterButton>)}
         </div>
       </FilterSection>
       <FilterSection title={t(locale, "characters.list.birthMonth")}>
@@ -152,7 +154,7 @@ export default function CharactersExplorer({ locale, servers, initialCharacters 
       {filtered.length === 0 ? (
         <div className="md3-surface p-8 text-center sm:p-12">
           <p className="text-body-medium text-on-surface-variant">{t(locale, "characters.list.empty")}</p>
-          <button type="button" onClick={resetFilters} className="md3-state mt-6 rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
+          <button type="button" onClick={resetFilters} className="md3-button md3-button--tonal mt-6">
             {t(locale, "characters.reset")}
           </button>
         </div>

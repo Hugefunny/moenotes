@@ -15,6 +15,6 @@ const entry = await getBuildRewardEntryDetail(locale, slug);
 const servers = await getBuildServers();
 ---
 
-<PageLayout locale={locale} titleKey="seo.rewardDetail.title" descriptionKey="seo.rewardDetail.description">
+<PageLayout locale={locale} titleKey="seo.rewardDetail.title" descriptionKey="seo.rewardDetail.description" hideHeader>
   <RewardDetail client:load servers={servers} locale={locale} entry={entry} />
 </PageLayout>

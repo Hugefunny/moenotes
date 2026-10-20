@@ -67,7 +67,7 @@ export default function ChartQuickSettings({ locale, player }: { locale: AppLoca
         if (item.type === "bool") {
           return (
             <label key={name} className="inline-flex cursor-pointer items-center gap-2 text-label-large text-on-surface">
-              <input type="checkbox" className="h-4 w-4 accent-primary" checked={value === true} onChange={(event) => apply(name, event.target.checked)} />
+              <input type="checkbox" className="md3-checkbox" checked={value === true} onChange={(event) => apply(name, event.target.checked)} />
               {label}
             </label>
           );
@@ -89,7 +89,8 @@ export default function ChartQuickSettings({ locale, player }: { locale: AppLoca
                 const next = Number(event.target.value);
                 apply(name, item.type === "float" ? Math.round(next * 100) / 100 : Math.round(next), APPLY_DELAY_MS);
               }}
-              className="w-full accent-primary"
+              className="md3-range w-full"
+              style={{ "--md3-range-progress": `${max > min ? ((number - min) / (max - min)) * 100 : 0}%` } as React.CSSProperties}
             />
           </label>
         );
@@ -101,7 +102,7 @@ export default function ChartQuickSettings({ locale, player }: { locale: AppLoca
           setBusy(true);
           void player.setSettings(defaults).catch(() => undefined).finally(() => setBusy(false));
         }}
-        className="md3-state rounded-full border border-outline-variant bg-surface-container-low px-4 py-1.5 text-label-medium text-on-surface"
+        className="md3-button md3-button--outlined md3-button--small"
       >
         {t(locale, "chartPreview3d.quick.reset")}
       </button>

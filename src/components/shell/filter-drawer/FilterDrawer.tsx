@@ -10,9 +10,10 @@ import { safeGetSessionStorage, safeSetSessionStorage } from "@/lib/storage/safe
 
 export const FILTER_DRAWER_ID = "filter-drawer";
 
-/** Left edge of the content column: past the layout's side gutter and the docked navigation drawer. */
-export const FILTER_DOCK_LEFT = "calc(max(0px, (100vw - var(--mn-layout-max-width, 120rem)) / 2) + var(--mn-sidebar-offset, 17rem))";
-/** Width of the docked filter sheet; the content shifts by --mn-filter-offset (src/lib/filter/quick-filter-store.ts). */
+/** Left edge of the content column: past the layout's side gutter and the docked navigation drawer, or with that drawer
+ * folded away, inset from the window as the drawer is (src/components/shell/Sidebar.tsx). */
+export const FILTER_DOCK_LEFT = "calc(max(0px, (100vw - var(--mn-layout-max-width, 120rem)) / 2) + max(var(--mn-sidebar-offset, 17rem), 0.75rem))";
+/** Width of the docked filter sheet; the content shifts by --mn-filter-offset (src/styles/tokens.css). */
 export const FILTER_SHEET_WIDTH = "20rem";
 
 interface FilterDrawerProps {
@@ -68,7 +69,7 @@ export default function FilterDrawer({ locale, pathname }: FilterDrawerProps) {
         anchor="left"
         open={shouldShow}
         onClose={close}
-        slotProps={{ paper: { id: FILTER_DRAWER_ID, role: "dialog", "aria-labelledby": titleId, sx: { width: "min(22.5rem, calc(100vw - 56px))" } } }}
+        slotProps={{ paper: { id: FILTER_DRAWER_ID, role: "dialog", "aria-labelledby": titleId, className: "glass-thick", sx: { width: "min(22.5rem, calc(100vw - 56px))", borderRadius: "0 28px 28px 0" } } }}
       >
         {sheet}
       </Drawer>
@@ -80,8 +81,8 @@ export default function FilterDrawer({ locale, pathname }: FilterDrawerProps) {
       <aside
         id={FILTER_DRAWER_ID}
         aria-labelledby={titleId}
-        className="fixed bottom-0 top-[var(--md-app-bar-height,64px)] z-30 flex flex-col border-r border-outline-variant bg-surface-container-low transition-[left] duration-300 ease-[var(--md-sys-motion-easing-emphasized)]"
-        style={{ left: FILTER_DOCK_LEFT, width: FILTER_SHEET_WIDTH }}
+        className="mn-shell-offset glass fixed bottom-3 top-[calc(var(--md-app-bar-height,64px)+0.75rem)] z-30 flex flex-col overflow-hidden rounded-shape-xl transition-[left] duration-300 ease-[var(--md-sys-motion-easing-emphasized)]"
+        style={{ left: FILTER_DOCK_LEFT, width: `calc(${FILTER_SHEET_WIDTH} - 0.75rem)` }}
       >
         {sheet}
       </aside>

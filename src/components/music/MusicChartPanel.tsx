@@ -32,7 +32,7 @@ interface ChartPanelProps {
 
 const sectionHeader = "border-b border-outline-variant px-6 py-4 sm:px-8";
 const subHeading = "text-label-medium text-on-surface-variant";
-const linkButton = " md3-state inline-flex items-center gap-1.5 rounded-full border border-outline-variant bg-surface-container-low px-4 py-2 text-xs font-bold text-on-surface  transition hover:border-primary hover:text-primary";
+const linkButton = "md3-button md3-button--outlined md3-button--small";
 
 /** One difficulty at a time: its figures (music-data.json), the Gekisou missions, the combo tier rewards and tool links. */
 export default function MusicChartPanel({ locale, song, metrics, status, comboTiers }: ChartPanelProps) {
@@ -127,11 +127,11 @@ export default function MusicChartPanel({ locale, song, metrics, status, comboTi
 
         <div className="flex flex-wrap gap-2">
           <a href={getChartPreviewHref(locale, { musicId: song.id, difficulty })} className={linkButton}>
-            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" /></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" /></svg>
             {t(locale, "music.chart.openPreview", { difficulty: difficultyLabel(difficulty) })}
           </a>
           <a href={getMusicRankingHref(locale, song.id)} className={linkButton}>
-            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z" /></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z" /></svg>
             {t(locale, "music.ranking.title")}
           </a>
         </div>

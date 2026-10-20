@@ -14,6 +14,6 @@ const { locale, helpId } = Astro.props;
 const [detail, servers] = await Promise.all([getBuildHelpTopicDetail(locale, helpId), getBuildServers()]);
 ---
 
-<PageLayout locale={locale} titleKey="seo.helpDetail.title" descriptionKey="seo.helpDetail.description" showDescription={false}>
+<PageLayout locale={locale} titleKey="seo.helpDetail.title" descriptionKey="seo.helpDetail.description" hideHeader>
   <HelpDetail client:load locale={locale} servers={servers} detail={detail} />
 </PageLayout>

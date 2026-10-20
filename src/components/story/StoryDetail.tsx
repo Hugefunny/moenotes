@@ -1,32 +1,24 @@
 import { useMemo, useState, type ReactNode } from "react";
 import type { AppLocale } from "@/config/locales";
 import type { GameServer } from "@/config/servers";
-import ServerScope from "@/components/shared/ServerScope";
+import ServerScope, { HeadingServerSwitch } from "@/components/shared/ServerScope";
 import { forServer, type ServerFaceted } from "@/lib/servers/facets";
 import { useAssetUrl, useContentServer } from "@/lib/servers/use-content-server";
 import { t } from "@/i18n";
 import { localizePath } from "@/i18n/routing";
-import { getAssetUrl } from "@/lib/assets/url";
 import type { ParsedStoryScript } from "@/lib/story/parser";
 import type { RawStoryCharacter, StoryNeighbor, StoryViewModel } from "@/lib/story/data";
 import { formatPlayTime, storyEpisodeLabel, storyUnlockLabels } from "@/lib/story/labels";
 import CharacterAvatarStack from "@/components/shared/CharacterAvatarStack";
 import RewardChip from "@/components/shared/RewardChip";
 import { storyPath } from "@/lib/story/paths";
+import { getStoryArtworkUrl } from "@/lib/story/assets";
 import type { RawText } from "@/lib/cards/data";
 import StoryScriptReader from "@/components/story/StoryScriptReader";
 import StoryPlayerLink from "@/components/story/StoryPlayerLink";
 import SpoilerNotice from "@/components/shared/SpoilerNotice";
 import { useNow } from "@/lib/schedule/use-now";
 import { isSpoiler, useSpoiler } from "@/lib/settings/spoiler";
-
-/** Main episodes have an illustration; bond stories only a banner. Banners carry lettering, so they follow the locale. */
-function storyArtworkUrl(story: StoryViewModel | null, locale: AppLocale): string {
-  if (!story) return "";
-  if ((story.category === "main" || story.category === "event" || story.category === "birthday") && story.assets.image) return getAssetUrl({ path: `Story/Image/Episode/${story.assets.image}.png`, type: "raw", locale });
-  if (story.assets.banner) return getAssetUrl({ path: `Story/Banner/Episode/${story.assets.banner}.png`, type: "raw", locale });
-  return "";
-}
 
 interface StoryDetailProps {
   locale: AppLocale;
@@ -50,18 +42,22 @@ export default function StoryDetail({ servers, advServers, story, ...props }: St
   const [server, pickServer] = useContentServer(props.locale, servers);
   const shown = useMemo(() => story && forServer(story, server), [story, server]);
   return (
-    <ServerScope locale={props.locale} servers={servers} server={server} onChange={pickServer} entityServers={advServers}>
-      <StoryDetailView {...props} story={shown} />
+    <ServerScope locale={props.locale} servers={servers} server={server} onChange={pickServer} entityServers={advServers} hideSwitch>
+      <StoryDetailView
+        {...props}
+        story={shown}
+        serverSwitch={<HeadingServerSwitch locale={props.locale} servers={servers} server={server} onChange={pickServer} entityServers={advServers} />}
+      />
     </ServerScope>
   );
 }
 
-function StoryDetailView({ locale, advId, initialTitle, initialScript, initialCharacters, initialTexts, story, previous, next }: Omit<StoryDetailProps, "story"> & { story: StoryViewModel | null }) {
+function StoryDetailView({ locale, advId, initialTitle, initialScript, initialCharacters, initialTexts, story, previous, next, serverSwitch }: Omit<StoryDetailProps, "story"> & { story: StoryViewModel | null; serverSwitch: ReactNode }) {
   const now = useNow();
   const { showSpoiler } = useSpoiler();
   const isUnreleased = Boolean(now !== null && story?.startAt && isSpoiler(story.startAt, now));
   const [artworkFailed, setArtworkFailed] = useState(false);
-  const artworkUrl = useAssetUrl()(storyArtworkUrl(story, locale));
+  const artworkUrl = useAssetUrl()(story ? getStoryArtworkUrl(story, locale) : "");
 
   // Every hook runs before this return, so the notice can replace a page already rendered without it.
   if (!showSpoiler && isUnreleased) {
@@ -86,7 +82,7 @@ function StoryDetailView({ locale, advId, initialTitle, initialScript, initialCh
       )}
       <div className="flex min-w-0 flex-1 flex-col justify-center p-6">
         <p className="text-label-medium text-primary">{eyebrow || `ADV ${advId}`}</p>
-        <h1 className="mt-2 text-headline-small text-on-surface">{initialTitle}</h1>
+        <h1 className="mt-2 text-balance text-headline-medium text-on-surface sm:text-headline-large">{initialTitle}</h1>
         {story?.description && <p className="mt-3 whitespace-pre-line text-body-medium leading-6 text-on-surface-variant">{story.description}</p>}
         {story?.birthday && (
           <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -121,7 +117,9 @@ function StoryDetailView({ locale, advId, initialTitle, initialScript, initialCh
     {controls && <div className="border-t border-outline-variant px-6 py-4">{controls}</div>}
   </header>;
 
+  // The page heading is this header's title (PageLayout `hideHeader`); the server switch sits above it, in the column.
   return <div className="mx-auto max-w-4xl">
+    <div className="mb-4 empty:hidden">{serverSwitch}</div>
     {initialScript
       ? <StoryScriptReader locale={locale} script={initialScript} characters={initialCharacters} texts={initialTexts} layer="page" renderHeader={header} />
       : <>

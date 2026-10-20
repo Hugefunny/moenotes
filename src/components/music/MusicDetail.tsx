@@ -1,8 +1,12 @@
-import SiriusLoader, { SiriusIcon } from "@/components/shared/SiriusLoader";
+import { SiriusIcon } from "@/components/shared/SiriusLoader";
 import { useEffect, useMemo, useState, useRef, type ReactNode } from "react";
 import type { AppLocale } from "@/config/locales";
 import type { GameServer } from "@/config/servers";
-import ServerScope from "@/components/shared/ServerScope";
+import ServerScope, { HeadingServerSwitch } from "@/components/shared/ServerScope";
+import AssetGallery, { type GalleryAsset } from "@/components/shared/AssetGallery";
+import DetailHero from "@/components/shared/DetailHero";
+import { DetailList, DetailRow } from "@/components/shared/DetailRows";
+import { BandLogoMark } from "@/components/shared/BandLogo";
 import { moveReleaseUrls } from "@/lib/assets/release";
 import { entityServer, forServer, valueForServer, type ServerFaceted, type ServerFacetedValue } from "@/lib/servers/facets";
 import { useAssetUrl, useContentServer } from "@/lib/servers/use-content-server";
@@ -15,7 +19,6 @@ import { getChartPreviewHref } from "@/lib/music/chart-preview";
 import { useNow } from "@/lib/schedule/use-now";
 import { isSpoiler, useSpoiler } from "@/lib/settings/spoiler";
 import { SpoilerNotice, DeveloperTestingBanner } from "@/components/shared/SpoilerNotice";
-import Modal from "@/components/shared/Modal";
 import ChartSheetDialog from "@/components/music/ChartSheetDialog";
 import { difficultyStyles } from "@/components/music/difficulty-styles";
 import {
@@ -31,8 +34,6 @@ import { rewardName } from "@/components/shared/RewardChip";
 import {
   getCardTypeIconUrl,
   getBandSmallIconUrl,
-  getBandLogoUrl,
-  getBandLogoWhiteUrl,
   getCharacterFaceIconUrl,
   type CardType,
 } from "@/lib/cards/assets";
@@ -48,93 +49,37 @@ interface Props {
   servers: GameServer[];
 }
 
-interface DetailData {
-  song: MusicViewModel | null;
-}
-
 /** The song as the page's server has it (docs/servers.md). */
 export default function MusicDetail({ locale, initialSong, liveDetail, liveExtras, servers }: Props) {
   const [server, pickServer] = useContentServer(locale, servers);
   const song = useMemo(() => initialSong && moveReleaseUrls(forServer(initialSong, server), entityServer(initialSong, server)), [initialSong, server]);
   const extras = useMemo(() => (liveExtras ? valueForServer(liveExtras, server) : null), [liveExtras, server]);
+  // The hero carries the server switch beside the name, so the scope leaves its own out.
+  const serverSwitch = <HeadingServerSwitch locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={initialSong?.servers ?? []} />;
   return (
-    <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={initialSong?.servers ?? []}>
-      <MusicDetailView locale={locale} song={song} liveDetail={liveDetail ?? null} extras={extras} />
+    <ServerScope locale={locale} servers={servers} server={server} onChange={pickServer} entityServers={initialSong?.servers ?? []} hideSwitch>
+      <MusicDetailView locale={locale} song={song} liveDetail={liveDetail ?? null} extras={extras} serverSwitch={serverSwitch} />
     </ServerScope>
   );
 }
 
-function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale: AppLocale; song: MusicViewModel | null; liveDetail: MusicDetailData | null; extras: MusicLiveExtras | null }) {
+function MusicDetailView({ locale, song, liveDetail, extras, serverSwitch }: { locale: AppLocale; song: MusicViewModel | null; liveDetail: MusicDetailData | null; extras: MusicLiveExtras | null; serverSwitch: ReactNode }) {
   const assetUrl = useAssetUrl();
   const titleOf = useSongTitle();
   const { index: metrics, status: metricsStatus } = useChartMetrics();
   const timeZone = useDisplayTimeZone();
-  const data: DetailData = { song: initial };
-  const loading = false;
-  const error = false;
-  const [, setReloadKey] = useState(0);
-  const [activeTabId, setActiveTabId] = useState<"jacket" | "info">("jacket");
-  const [jacketModalOpen, setJacketModalOpen] = useState(false);
-  const [copyState, setCopyState] = useState<"idle" | "copying" | "success" | "error">("idle");
-  const [downloadState, setDownloadState] = useState<"idle" | "downloading" | "success">("idle");
   // The difficulty whose 2D chart sheet is open (null: none).
   const [sheetDifficulty, setSheetDifficulty] = useState<SongDifficultyModel["difficulty"] | null>(null);
 
-  const song = data.song;
   const now = useNow();
   const { showSpoiler } = useSpoiler();
   const isUnreleased = Boolean(now !== null && song?.startAt && isSpoiler(song.startAt, now));
 
-  const copyJacketLink = async () => {
-    if (!song) return;
-    setCopyState("copying");
-    try {
-      const response = await fetch(song.jacketUrl);
-      const blob = await response.blob();
-      if (navigator.clipboard.write && typeof ClipboardItem !== "undefined") {
-        await navigator.clipboard.write([new ClipboardItem({ [blob.type || "image/png"]: blob })]);
-        setCopyState("success");
-      } else {
-        await navigator.clipboard.writeText(song.jacketUrl);
-        setCopyState("success");
-      }
-    } catch {
-      try {
-        await navigator.clipboard.writeText(song.jacketUrl);
-        setCopyState("success");
-      } catch {
-        setCopyState("error");
-      }
-    }
-    setTimeout(() => setCopyState("idle"), 1800);
-  };
-
-  const downloadJacket = async () => {
-    if (!song) return;
-    setDownloadState("downloading");
-    await saveRemoteFile(song.jacketUrl, `${song.jacketAssetName}.webp`);
-    setDownloadState("success");
-    setTimeout(() => setDownloadState("idle"), 1500);
-  };
-
-  if (loading) {
-    return <SiriusLoader locale={locale} label={t(locale, "music.loading")} className="md3-surface min-h-72" />;
-  }
-
-  if (error || !song) {
+  if (!song) {
     return (
-      <div className="md3-surface p-8 text-center sm:p-12" role={error ? "alert" : undefined}>
-        <h2 className="font-[var(--md-ref-typeface-brand)] text-headline-small text-on-surface">
-          {t(locale, error ? "music.loadErrorTitle" : "music.detailNotFound")}
-        </h2>
-        <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">
-          {t(locale, error ? "music.loadErrorDescription" : "music.detailNotFoundDescription")}
-        </p>
-        {error && (
-          <button type="button" onClick={() => setReloadKey((value) => value + 1)} className="md3-state mt-6 rounded-full border border-outline-variant bg-primary px-6 py-3 text-label-large text-on-primary shadow-elevation-1">
-            {t(locale, "cards.retry")}
-          </button>
-        )}
+      <div className="md3-surface p-8 text-center sm:p-12">
+        <h1 className="text-headline-small text-on-surface">{t(locale, "music.detailNotFound")}</h1>
+        <p className="mx-auto mt-3 max-w-xl text-body-medium leading-7 text-on-surface-variant">{t(locale, "music.detailNotFoundDescription")}</p>
       </div>
     );
   }
@@ -145,203 +90,57 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
 
   const attributeName = t(locale, `cards.attributes.${song.musicType}`);
   const title = titleOf(song);
-
-  const previewActions = (
-    <>
-      <button
-        type="button"
-        onClick={downloadJacket}
-        disabled={downloadState === "downloading"}
-        className="grid h-8 w-8 place-items-center rounded-full border-2 border-outline-variant bg-surface-container-low text-on-surface-variant transition hover:text-on-surface disabled:opacity-50"
-      >
-        {downloadState === "idle" && (
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-          </svg>
-        )}
-        {downloadState === "downloading" && <SiriusIcon />}
-        {downloadState === "success" && <svg className="h-4 w-4 text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
-      </button>
-      <button
-        type="button"
-        onClick={copyJacketLink}
-        disabled={copyState === "copying"}
-        className="grid h-8 w-8 place-items-center rounded-full border-2 border-outline-variant bg-surface-container-low text-on-surface-variant transition hover:text-on-surface disabled:opacity-50"
-      >
-        {copyState === "idle" && (
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-          </svg>
-        )}
-        {copyState === "copying" && <SiriusIcon />}
-        {copyState === "success" && <svg className="h-4 w-4 text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
-        {copyState === "error" && <svg className="h-4 w-4 text-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>}
-      </button>
-    </>
-  );
+  const jacket: GalleryAsset[] = [{ id: "jacket", label: t(locale, "music.assets.jacket"), url: song.jacketUrl, downloadName: `${song.jacketAssetName}.webp` }];
 
   return (
-    <div className="space-y-8 w-full">
+    <div className="w-full space-y-8">
       {isUnreleased && <DeveloperTestingBanner locale={locale} />}
-      <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(20rem,1fr)_1.5fr] lg:items-start">
-        {/* Left Column: Fixed / Sticky Asset Pane */}
-        <aside className="lg:sticky lg:top-24 w-full flex flex-col pt-8">
-          <div
-            className="relative aspect-square w-full rounded-shape-lg border border-outline-variant bg-surface-container-low p-5 shadow-elevation-1"
-          >
-            {/* Spine Crease */}
+      <DetailHero
+        title={title}
+        subtitle={title !== song.title ? song.title : undefined}
+        aside={serverSwitch}
+        eyebrow={<>
+          <BandLogoMark locale={locale} bandId={song.bandId} />
+          <span>{song.bandName}</span>
+          <span className="inline-flex items-center gap-1.5 text-on-surface"><img className="h-5 w-5" src={assetUrl(getCardTypeIconUrl(song.musicType as CardType))} alt="" aria-hidden="true" />{attributeName}</span>
+        </>}
+      >
+        {song.vocalists.length > 0 && (
+          <ul className="mt-1 flex flex-wrap gap-2" aria-label={t(locale, "music.vocals")}>
+            {song.vocalists.map((vocalist) => (
+              <li key={vocalist.id}>
+                <a href={localizePath(`/characters/${vocalist.id}`, locale)} className="md3-state inline-flex items-center gap-2 rounded-full border border-outline-variant py-1 pl-1 pr-3 text-label-large text-on-surface">
+                  <img className="h-7 w-7 rounded-full bg-surface-container-highest object-cover" src={assetUrl(getCharacterFaceIconUrl(vocalist.id))} alt="" aria-hidden="true" />
+                  {vocalist.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </DetailHero>
 
-            {/* Bookmarks on Top Edge */}
-            <div className="absolute bottom-full left-4 right-4 flex gap-1 pb-[1px] z-10">
-              <button
-                type="button"
-                onClick={() => setActiveTabId("jacket")}
-                className={`px-4 pt-1.5 pb-3 text-label-medium border border-b-0 border-outline-variant rounded-t-xl transition-all origin-bottom -mb-[6px] rotate-[-1deg] ${ activeTabId === "jacket" ? "bg-primary text-on-primary shadow-md z-20 -translate-y-[2px]" : "bg-surface-container text-on-surface hover:bg-secondary-container hover:-translate-y-[1px]" }`}
-              >
-                {t(locale, "music.assets.jacket")}
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTabId("info")}
-                className={`px-4 pt-1.5 pb-3 text-label-medium border border-b-0 border-outline-variant rounded-t-xl transition-all origin-bottom -mb-[6px] rotate-[1.5deg] ${ activeTabId === "info" ? "bg-primary text-on-primary shadow-md z-20 -translate-y-[2px]" : "bg-surface-container text-on-surface hover:bg-secondary-container hover:-translate-y-[1px]" }`}
-              >
-                {t(locale, "music.songInfoTitle")}
-              </button>
-            </div>
-
-            {/* Content Area */}
-            <div className="relative h-full w-full flex flex-col">
-              {activeTabId === "jacket" ? (
-                <div className="h-full w-full">
-                  <button
-                    type="button"
-                    onClick={() => setJacketModalOpen(true)}
-                    className="group relative block w-full h-full overflow-hidden rounded-shape-lg border border-outline-variant bg-surface-container-highest shadow-inner transition hover:scale-[1.01]"
-                    aria-label={t(locale, "music.assets.previewFull")}
-                  >
-                    <img
-                      className="h-full w-full object-cover transition duration-300 group-hover:scale-102"
-                      src={song.jacketUrl}
-                      alt={title}
-                    />
-                    <div className="absolute inset-0 bg-black/0 transition group-hover:bg-black/10 flex items-center justify-center">
-                      <svg className="h-8 w-8 text-white opacity-0 transition group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m4-3H6" /></svg>
-                    </div>
-                  </button>
-                </div>
-              ) : (
-                <div className="h-full w-full flex flex-col justify-between">
-                  <div className="flex-1 overflow-y-auto space-y-4 pr-1">
-                    <div className="rounded-shape-lg border border-solid border-outline-variant bg-surface-container p-4 space-y-3 shadow-inner">
-                      <h4 className="font-[var(--md-ref-typeface-brand)] text-body-medium text-on-surface border-b border-outline-variant/60 pb-1.5">Song Notebook</h4>
-                      <div className="space-y-2 text-label-small text-on-surface-variant">
-                        <div className="flex justify-between border-b border-outline-variant/20 pb-1">
-                          <span>Band</span>
-                          <span className="text-on-surface">{song.bandName}</span>
-                        </div>
-                        <div className="flex justify-between border-b border-outline-variant pb-1">
-                          <span>Attribute</span>
-                          <span className="text-on-surface">{attributeName}</span>
-                        </div>
-                        <div className="flex justify-between border-b border-outline-variant/20 pb-1">
-                          <span>Composer</span>
-                          <span className="text-on-surface">{song.composer}</span>
-                        </div>
-                        <div className="flex justify-between border-b border-outline-variant/20 pb-1">
-                          <span>Lyricist</span>
-                          <span className="text-on-surface">{song.lyricist}</span>
-                        </div>
-                        <div className="flex justify-between border-b border-outline-variant/20 pb-1">
-                          <span>Release</span>
-                          <span className="text-on-surface">{formatMasterDay(song.startAt, locale, timeZone)}</span>
-                        </div>
-                        <div className="flex justify-between border-b border-outline-variant/20 pb-1">
-                          <span>Song ID</span>
-                          <span className="text-on-surface">#{song.id}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Jacket Asset</span>
-                          <span className="text-on-surface">{song.jacketAssetName}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="mt-6 w-full">
+      <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(20rem,2fr)_3fr] lg:items-start">
+        <aside className="lg:sticky lg:top-24">
+          <AssetGallery locale={locale} assets={jacket} shape="square">
             <SongAudioPanel locale={locale} song={song} title={title} />
-          </div>
+          </AssetGallery>
         </aside>
 
-        {/* Right Column: Details & Difficulties */}
-        <section className="flex-1 min-w-0 space-y-6">
-          {/* Main Info */}
-          <div className="md3-surface overflow-hidden">
-            {/* Header Banner */}
-            <div className="border-b border-outline-variant p-6 sm:p-8">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <img
-                      className="h-6 w-auto object-contain block dark:hidden"
-                      src={assetUrl(getBandLogoUrl(song.bandId, locale))}
-                      alt=""
-                      aria-hidden="true"
-                      onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
-                    />
-                    <img
-                      className="h-6 w-auto object-contain hidden dark:block"
-                      src={assetUrl(getBandLogoWhiteUrl(song.bandId, locale))}
-                      alt=""
-                      aria-hidden="true"
-                      onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
-                    />
-                    <span className="font-[var(--md-ref-typeface-mono)] text-body-medium text-primary">{song.bandName}</span>
-                  </div>
-                  <h2 className="mt-1 font-[var(--md-ref-typeface-brand)] text-headline-medium text-on-surface sm:text-headline-large">{title}</h2>
-                  {title !== song.title && <p className="mt-1 text-label-large text-on-surface-variant">{song.title}</p>}
-                </div>
-                <img className="h-8 w-8 shrink-0" src={assetUrl(getCardTypeIconUrl(song.musicType as CardType))} alt="" aria-hidden="true" />
-              </div>
-            </div>
-
-            {/* Details Table */}
-            <div className="p-6 sm:p-8 bg-surface-container-low">
-              <div className="divide-y divide-dashed divide-outline-variant/60">
-                <DetailRow label={t(locale, "music.composer")} value={song.composer} />
-                <DetailRow label={t(locale, "music.lyricist")} value={song.lyricist} />
-                <DetailRow label={t(locale, "music.arranger")} value={song.arranger} />
-                <DetailRow label={t(locale, "cards.detailBand")} value={
-                  <span className="inline-flex items-center gap-1.5">
-                    <img className="h-5 w-auto object-contain" src={assetUrl(getBandSmallIconUrl(song.bandId))} alt="" aria-hidden="true" />
-                    {song.bandName}
-                  </span>
-                } />
-                {song.vocalists.length > 0 && (
-                  <DetailRow label={t(locale, "music.vocals")} value={
-                    <div className="flex flex-wrap gap-1.5 justify-end">
-                      {song.vocalists.map((voc) => (
-                        <a
-                          key={voc.id}
-                          href={localizePath(`/characters/${voc.id}`, locale)}
-                          className="md3-state inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-outline-variant bg-surface-container-highest hover:bg-primary hover:text-white transition-all text-label-medium text-on-surface shadow-sm"
-                        >
-                          <img className="h-4.5 w-4.5 rounded-full object-cover bg-white" src={assetUrl(getCharacterFaceIconUrl(voc.id))} alt="" />
-                          <span>{voc.name}</span>
-                        </a>
-                      ))}
-                    </div>
-                  } />
-                )}
-                <DetailRow label={t(locale, "music.releaseDate")} value={formatMasterDay(song.startAt, locale, timeZone)} />
-                <DetailRow label={t(locale, "music.songId")} value={`#${song.id}`} />
-                <DetailRow label={t(locale, "music.jacketAsset")} value={song.jacketAssetName} />
-              </div>
-            </div>
-          </div>
+        <section className="min-w-0 flex-1 space-y-6">
+          <DetailList>
+            <DetailRow label={t(locale, "music.composer")} value={song.composer} />
+            <DetailRow label={t(locale, "music.lyricist")} value={song.lyricist} />
+            <DetailRow label={t(locale, "music.arranger")} value={song.arranger} />
+            <DetailRow label={t(locale, "cards.detailBand")} value={
+              <span className="inline-flex items-center gap-1.5">
+                <img className="h-5 w-auto object-contain" src={assetUrl(getBandSmallIconUrl(song.bandId))} alt="" aria-hidden="true" />
+                {song.bandName}
+              </span>
+            } />
+            <DetailRow label={t(locale, "music.releaseDate")} value={formatMasterDay(song.startAt, locale, timeZone)} />
+            <DetailRow label={t(locale, "music.songId")} value={`#${song.id}`} />
+            <DetailRow label={t(locale, "music.jacketAsset")} value={song.jacketAssetName} />
+          </DetailList>
 
           {/* Difficulties Card */}
           <div className="md3-surface overflow-hidden">
@@ -354,7 +153,7 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
               {song.difficulties.map((diff) => {
                 const config = difficultyStyles[diff.difficulty];
                 const level = t(locale, `music.difficultyLevels.${diff.difficulty}`);
-                const previewButton = " md3-state inline-flex items-center gap-1 rounded-full border border-outline-variant bg-surface-container-low px-2.5 py-1 text-[10px] font-bold text-on-surface transition hover:border-primary hover:text-primary";
+                const previewButton = "md3-button md3-button--outlined md3-button--small";
 
                 return (
                   <div key={diff.difficulty} className={`p-3 border rounded-shape-lg flex flex-col items-center justify-between text-center gap-2 ${config.cardBg}`}>
@@ -375,7 +174,7 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
                         aria-label={t(locale, "music.preview2dLabel", { difficulty: level })}
                         className={previewButton}
                       >
-                        <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                           <rect x="4" y="3" width="16" height="18" rx="2" /><path d="M10 3v18M4 12h16" />
                         </svg>
                         {t(locale, "music.preview2d")}
@@ -385,7 +184,7 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
                         aria-label={t(locale, "music.preview3dLabel", { difficulty: level })}
                         className={previewButton}
                       >
-                        <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" /></svg>
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" /></svg>
                         {t(locale, "music.preview3d")}
                       </a>
                     </div>
@@ -403,7 +202,7 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
 
           {/* Back Action */}
           <div className="flex justify-start">
-            <a href={localizePath(getRoutePathById("music"), locale)} className="md3-state inline-flex rounded-full border border-outline-variant bg-surface-container-low px-6 py-3 text-label-large text-on-surface shadow-elevation-1">
+            <a href={localizePath(getRoutePathById("music"), locale)} className="md3-button md3-button--tonal">
               {t(locale, "music.backToList")}
             </a>
           </div>
@@ -413,33 +212,6 @@ function MusicDetailView({ locale, song: initial, liveDetail, extras }: { locale
       {song.difficulties.length > 0 && (
         <ChartSheetDialog locale={locale} song={song} difficulty={sheetDifficulty} onClose={() => setSheetDifficulty(null)} />
       )}
-
-      {/* Jacket Zoom Modal */}
-      <Modal
-        isOpen={jacketModalOpen}
-        onClose={() => setJacketModalOpen(false)}
-        title={title}
-        closeLabel={t(locale, "actions.close")}
-        size="md"
-        headerActions={previewActions}
-      >
-        <div className="w-full overflow-hidden rounded-shape-lg border border-outline-variant bg-surface-container">
-          <img
-            className="mx-auto max-h-[65vh] w-full object-contain"
-            src={song.jacketUrl}
-            alt={title}
-          />
-        </div>
-      </Modal>
-    </div>
-  );
-}
-
-function DetailRow({ label, value }: { label: string; value: ReactNode }) {
-  return (
-    <div className="flex items-center justify-between py-3.5 text-body-medium">
-      <span className="font-semibold text-on-surface-variant">{label}</span>
-      <span className="font-semibold text-on-surface text-right">{value}</span>
     </div>
   );
 }
@@ -624,11 +396,11 @@ function SongAudioPanel({ locale, song, title }: { locale: AppLocale; song: Musi
             type="button"
             onClick={() => download(item)}
             disabled={downloading !== null}
-            className="md3-state inline-flex items-center gap-2 rounded-full border border-outline-variant bg-surface-container-low px-4 py-2 text-label-medium text-on-surface shadow-elevation-1 disabled:opacity-60"
+            className="md3-button md3-button--tonal md3-button--small"
           >
             {downloading === item.kind
-              ? <SiriusIcon />
-              : <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4v11" /><path d="m7 10 5 5 5-5" /><path d="M5 20h14" /></svg>}
+              ? <SiriusIcon className="" />
+              : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4v11" /><path d="m7 10 5 5 5-5" /><path d="M5 20h14" /></svg>}
             {t(locale, "music.audio.download", { kind: t(locale, `music.audio.${item.kind}`) })}
           </button>
         ))}
@@ -694,7 +466,7 @@ function AudioPlayer({ locale, src, title, label }: { locale: AppLocale; src: st
   };
 
   return (
-    <div className="md3-surface overflow-hidden border border-outline-variant bg-surface-container-low p-4 shadow-elevation-1 flex flex-col gap-3">
+    <div className="md3-surface overflow-hidden p-4 flex flex-col gap-3">
       <audio
         ref={audioRef}
         src={src}
@@ -718,15 +490,15 @@ function AudioPlayer({ locale, src, title, label }: { locale: AppLocale; src: st
         <button
           type="button"
           onClick={togglePlay}
-          className="md3-state flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-outline-variant bg-primary text-on-primary shadow-sm hover:scale-105 transition-all"
+          className="md3-icon-button md3-icon-button--filled shrink-0"
           aria-label={t(locale, isPlaying ? "music.audio.pause" : "music.audio.play")}
         >
           {isPlaying ? (
-            <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
+            <svg className="fill-current" viewBox="0 0 24 24">
               <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
             </svg>
           ) : (
-            <svg className="h-5 w-5 fill-current ml-0.5" viewBox="0 0 24 24">
+            <svg className="fill-current ml-0.5" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z" />
             </svg>
           )}
@@ -744,14 +516,8 @@ function AudioPlayer({ locale, src, title, label }: { locale: AppLocale; src: st
           max={duration || 100}
           value={currentTime}
           onChange={handleSeek}
-          className="flex-1 h-1.5 rounded-shape-sm appearance-none cursor-pointer bg-surface-container-highest accent-primary focus:outline-none"
-          style={{
-            background: `linear-gradient(to right, var(--md-sys-color-primary) 0%, var(--md-sys-color-primary) ${
-              duration ? (currentTime / duration) * 100 : 0
-            }%, var(--md-sys-color-surface-container-highest) ${
-              duration ? (currentTime / duration) * 100 : 0
-            }%, var(--md-sys-color-surface-container-highest) 100%)`,
-          }}
+          className="md3-range min-w-0 flex-1"
+          style={{ "--md3-range-progress": `${duration ? (currentTime / duration) * 100 : 0}%` } as React.CSSProperties}
         />
         <span className="font-mono text-label-small text-on-surface-variant shrink-0 w-8 text-right">
           {formatTime(duration)}
