@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { accountLoginUrl } from "@/config/account";
 import type { AppLocale } from "@/config/locales";
 import { roomCheckConfig } from "@/config/room-check";
 import type { GameServer } from "@/config/servers";
@@ -26,9 +27,9 @@ interface Props {
 }
 
 /** The failures opening a room can end in, each with its own copy. */
-const FAILURES: readonly RoomErrorCode[] = ["bad_code", "room_exists", "busy", "bot_unavailable", "network", "invalid", "internal"];
+const FAILURES: readonly RoomErrorCode[] = ["bad_code", "room_exists", "login_required", "rate_limited", "busy", "bot_unavailable", "network", "invalid", "internal"];
 /** Failures another attempt can get past. */
-const RETRYABLE: readonly RoomErrorCode[] = ["busy", "network", "invalid", "internal", "bot_unavailable"];
+const RETRYABLE: readonly RoomErrorCode[] = ["rate_limited", "busy", "network", "invalid", "internal", "bot_unavailable"];
 
 /**
  * Opens a room and follows it from this page. The code is optional: left blank the service picks a free one, which
@@ -69,6 +70,13 @@ export default function CreateRoomCard({ locale, region, onRegion, busy, error, 
       {wait > 0 ? t(locale, "roomCheck.states.retryIn", { n: wait }) : t(locale, "roomCheck.states.retry")}
     </button>
   );
+  // A room is bound to the account that opens it, so the page sends a visitor without a session to sign in first.
+  const login = kind === "login_required" ? (
+    <button type="button" className="md3-button md3-button--tonal md3-button--small"
+      onClick={() => { window.location.href = accountLoginUrl(locale, window.location.pathname); }}>
+      {tr("errors.login_required.action")}
+    </button>
+  ) : null;
 
   return (
     <form className="rc-create" onSubmit={submit} noValidate aria-labelledby="rc-create-title">
@@ -101,7 +109,7 @@ export default function CreateRoomCard({ locale, region, onRegion, busy, error, 
       {kind
         ? <div className="rc-create-error" data-kind={kind} role="alert">
           <span>{tr(`errors.${kind}.title`)} {tr(`errors.${kind}.body`)}</span>
-          {retry}
+          {kind === "login_required" ? login : retry}
         </div>
         : opened !== null && <p className="rc-create-opened" role="status">{tr("opened", { code: opened })}</p>}
     </form>

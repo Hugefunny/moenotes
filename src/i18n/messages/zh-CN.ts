@@ -2311,6 +2311,8 @@ export const zhCN = {
       errors: {
         bad_code: { title: "这不是可用的房间号。", body: "房间号是 7 位数字；也可以留空自动分配。" },
         room_exists: { title: "这个房间号已被占用。", body: "已经有一个房间用了一样的号。换一个，或者留空。" },
+        login_required: { title: "登录后才能建房。", body: "房间会绑定到建房的账号。", action: "登录" },
+        rate_limited: { title: "请求太频繁。", body: "稍等片刻再试。" },
         busy: { title: "正在创建的房间较多。", body: "服务繁忙，请稍后再试。" },
         bot_unavailable: { title: "暂时无法创建房间。", body: "请稍后再试。" },
         network: { title: "房间没能开起来。", body: "请检查网络后重试。" },

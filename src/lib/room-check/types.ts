@@ -80,7 +80,13 @@ export type RoomErrorCode =
   /** The room no longer holds the observer (`leave`). */
   | "not_bot_room"
   /** The observer can only leave a room that already has four real players (`leave`). */
-  | "not_at_four";
+  | "not_at_four"
+  /** The visitor is not signed in, so the room cannot be bound to an account (`create`, `leave`). */
+  | "login_required"
+  /** The room was opened by another site account (`leave`, `watch`). */
+  | "not_owner"
+  /** Too many requests from this address (`rate_limited`). */
+  | "rate_limited";
 
 export interface RoomError {
   code: RoomErrorCode;

@@ -122,6 +122,7 @@ export function parseRoomSnapshot(value: unknown): RoomSnapshot | null {
 const ERROR_CODES: readonly RoomErrorCode[] = [
   "room_not_found", "room_full", "cooldown", "busy", "bad_code", "internal",
   "room_exists", "bot_unavailable", "not_bot_room", "not_at_four",
+  "login_required", "not_owner", "rate_limited",
 ];
 
 /** The service's error body; anything else reads as `invalid`. */
@@ -172,7 +173,11 @@ export function parseWatchEvent(name: string, data: string): RoomWatchEvent | nu
     return null;
   }
   if (name === "stopped") return { type: "stopped", reason: parseWatchStopReason(body) };
-  if (name === "at_four") return { type: "at_four", snapshot: parseRoomSnapshot(body) };
+  if (name === "at_four") {
+    // The prompt carries its read under `snapshot`; a flat read is accepted too.
+    const source = record(body) ? body : {};
+    return { type: "at_four", snapshot: parseRoomSnapshot(source.snapshot ?? body) };
+  }
   if (name === "snapshot") {
     const snapshot = parseRoomSnapshot(body);
     return snapshot ? { type: "snapshot", snapshot } : null;

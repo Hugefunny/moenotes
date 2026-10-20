@@ -2267,6 +2267,8 @@ export const enUS = {
       errors: {
         bad_code: { title: "That is not a room code.", body: "Room codes have seven digits; leave the field blank to have one picked." },
         room_exists: { title: "That code is taken.", body: "Another room already uses it. Choose another one, or leave the field blank." },
+        login_required: { title: "Sign in to open a room.", body: "The room is bound to the account that opens it.", action: "Sign in" },
+        rate_limited: { title: "Too many requests.", body: "Try again in a moment." },
         busy: { title: "Many rooms are being opened.", body: "The service is busy. Try again in a moment." },
         bot_unavailable: { title: "Rooms cannot be opened right now.", body: "Try again later." },
         network: { title: "The room could not be opened.", body: "Check the connection and try again." },

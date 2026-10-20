@@ -1,11 +1,12 @@
 import type { GameServer } from "./servers";
 
 /**
- * The room query service behind Room Check, set at build time with `PUBLIC_ROOM_CHECK_API`. Pages call it from the
- * browser; `mock` serves made-up rooms in the page itself, and is what development builds use when the variable is unset.
+ * The room query service behind Room Check. Pages call it same-origin through the site's relay, which forwards to the
+ * service and checks the visitor's session for the actions that open or leave a room. Development uses made-up rooms
+ * in the page itself unless `PUBLIC_ROOM_CHECK_API` points elsewhere.
  */
 export const roomCheckConfig = {
-  api: (import.meta.env.PUBLIC_ROOM_CHECK_API || (import.meta.env.DEV ? "mock" : "")).replace(/\/+$/, ""),
+  api: (import.meta.env.DEV ? (import.meta.env.PUBLIC_ROOM_CHECK_API || "mock") : "/api/room-check").replace(/\/+$/, ""),
   /** Servers whose rooms can be looked up, in the order the switcher shows them. */
   servers: ["tw", "kr", "en"] as readonly GameServer[],
   /** Rooms the page keeps in its list. */

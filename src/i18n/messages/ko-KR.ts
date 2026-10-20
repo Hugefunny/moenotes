@@ -2256,6 +2256,8 @@ export const koKR = {
       errors: {
         bad_code: { title: "사용할 수 없는 번호입니다.", body: "방 번호는 7자리 숫자입니다. 비워 두면 알아서 정해집니다." },
         room_exists: { title: "이미 쓰이는 번호입니다.", body: "같은 번호의 방이 이미 있습니다. 다른 번호를 쓰거나 비워 두세요." },
+        login_required: { title: "로그인하면 방을 만들 수 있습니다.", body: "방은 만든 계정에 연결됩니다.", action: "로그인" },
+        rate_limited: { title: "요청이 너무 많습니다.", body: "잠시 후 다시 시도해 주세요." },
         busy: { title: "여는 중인 방이 많습니다.", body: "서비스가 혼잡합니다. 잠시 후 다시 시도하세요." },
         bot_unavailable: { title: "지금은 방을 열 수 없습니다.", body: "잠시 후 다시 시도하세요." },
         network: { title: "방을 열지 못했습니다.", body: "연결을 확인하고 다시 시도하세요." },

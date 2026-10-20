@@ -2310,6 +2310,8 @@ export const zhTW = {
       errors: {
         bad_code: { title: "這不是可用的房間號。", body: "房間號是 7 位數字；也可以留空自動分配。" },
         room_exists: { title: "這個房間號已被占用。", body: "已經有房間用了一樣的號。換一個，或者留空。" },
+        login_required: { title: "登入後才能建房。", body: "房間會綁定到建房的帳號。", action: "登入" },
+        rate_limited: { title: "請求過於頻繁。", body: "稍後再試。" },
         busy: { title: "正在建立的房間較多。", body: "服務繁忙，請稍後再試。" },
         bot_unavailable: { title: "暫時無法建立房間。", body: "請稍後再試。" },
         network: { title: "房間沒能開起來。", body: "請檢查網路後重試。" },
