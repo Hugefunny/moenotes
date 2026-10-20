@@ -159,6 +159,7 @@ export const idID = {
       news: "Pengumuman",
       eventTracker: "Pelacak Event",
       musicRanking: "Peringkat Lagu",
+      roomCheck: "Cek Ruangan",
       chartData: "Meta Lagu"
     }
   },
@@ -1113,6 +1114,178 @@ export const idID = {
       notReturned: "Tidak dikembalikan kali ini: {ranks}"
     }
   },
+  roomCheck: {
+    alpha: "Alpha",
+    alphaHint: "Versi awal: tata letak dan angkanya masih bisa berubah.",
+    difficulty: {
+      "0": "Easy",
+      "1": "Normal",
+      "2": "Hard",
+      "3": "Expert",
+      "4": "Master"
+    },
+    form: {
+      label: "Kode ruangan",
+      placeholder: "Kode ruangan 7 digit, atau tempel pesan berisi kode",
+      submit: "Lihat",
+      hint: "Menempelkan pesan akan menambahkan semua kode ruangan di dalamnya.",
+      notes: {
+        added: "Ruangan ditambahkan: {n}",
+        invalid: "Masukkan kode ruangan 7 digit.",
+        known: "Sudah ada di daftar."
+      }
+    },
+    list: {
+      title: "Ruangan",
+      clear: "Kosongkan",
+      empty: "Ruangan yang Anda lihat akan muncul di sini. Hanya kodenya yang disimpan, di peramban ini.",
+      remove: "Hapus ruangan {code}",
+      humans: "Kursi terisi {n} dari {capacity}",
+      unknownSong: "Lagu {id}",
+      status: {
+        idle: "Belum dibaca",
+        queued: "Menunggu",
+        loading: "Membaca…",
+        ready: "Terbaca",
+        error: {
+          room_not_found: "Tidak ditemukan",
+          room_full: "Penuh",
+          cooldown: "Tunggu",
+          busy: "Sibuk",
+          bad_code: "Kode tidak valid",
+          network: "Gagal",
+          invalid: "Tidak terbaca"
+        }
+      }
+    },
+    fresh: {
+      justNow: "baru saja",
+      secondsAgo: "{n} dtk lalu",
+      readAgo: "Dibaca {time}",
+      live: "Langsung",
+      source: {
+        live: "Dibaca khusus untuk Anda",
+        cache: "Hasil baca terbaru yang dibagikan orang lain"
+      },
+      stopped: {
+        full: "Pembaruan langsung berhenti: ada empat pemain di ruangan.",
+        lease: "Pembaruan langsung berhenti setelah 10 menit.",
+        closed: "Pembaruan langsung berhenti: ruangan ditutup.",
+        error: "Pembaruan langsung berhenti."
+      },
+      refresh: "Muat ulang",
+      refreshIn: "Muat ulang tersedia dalam {n} dtk",
+      refreshInShort: "{n} dtk",
+      liveToggle: "Pembaruan langsung"
+    },
+    room: {
+      song: "Lagu ruangan",
+      unknownSong: "Lagu {id}",
+      noSong: "Belum ada lagu",
+      missions: "Misi Gekisou",
+      copy: "Salin",
+      copyCode: "Salin kode ruangan {code}",
+      copied: "Tersalin",
+      votes: "Pilihan lagu",
+      voteCount: "{n} memilih"
+    },
+    player: {
+      title: "Pemain",
+      joinOrder: "Masuk ke-{n}",
+      host: "Host",
+      unnamed: "Pemain tanpa nama",
+      status: {
+        waiting: "Belum siap",
+        ready: "Siap",
+        playing: "Sedang live"
+      },
+      picked: "Memilih {title}",
+      characterRank: "Peringkat karakter",
+      averageLevel: "Rata-rata Lv",
+      shareLabel: "{n}% dari total peringkat karakter tertinggi di ruangan",
+      unknownTeam: "Deck tidak tersedia",
+      expandAll: "Tampilkan semua deck",
+      collapseAll: "Tampilkan deck yang dipilih",
+      emptySeat: "Kursi kosong"
+    },
+    formation: {
+      leader: "Pemimpin",
+      slot: "Slot {n}",
+      noSupport: "Tanpa Snap",
+      unknownCard: "Kartu {id}",
+      rankValue: "Rank {n}",
+      supportSkills: "Skill Snap",
+      supportGekisouSkills: "Skill Gekisou Snap",
+      totalCharacterRank: "Total peringkat karakter",
+      vipRank: "Peringkat T.G.W CARD",
+      level: "Level",
+      awake: "Pelatihan",
+      rank: "Rank",
+      skills: {
+        live: "Skill live",
+        leader: "Skill pemimpin",
+        gekisou: "Skill Gekisou"
+      },
+      characterRank: "Peringkat karakter",
+      bandItem: "Peralatan band",
+      bandItemTitle: "Peralatan band: Performance {performance}, Technique {technique}, Visual {visual}",
+      order: "Urutan tampil",
+      caption: "Deck {name}",
+      orderShort: "Tampil ke-{n}",
+      short: {
+        awake: "Pelatihan",
+        characterRank: "Karakter",
+        live: "Live",
+        gekisou: "Gekisou",
+        leader: "Pemimpin",
+        rank: "Rank",
+        snapSkills: "Skill",
+        snapGekisou: "Gekisou"
+      }
+    },
+    states: {
+      loading: "Membaca ruangan {code}…",
+      retry: "Coba lagi",
+      retryIn: "Coba lagi dalam {n} dtk",
+      intro: {
+        title: "Intip isi ruangan",
+        body: "Masukkan kode ruangan untuk melihat siapa yang ada di ruangan, lagu yang dipilih setiap pemain, dan deck semua pemain. Tempel pesan untuk memeriksa beberapa ruangan sekaligus."
+      },
+      room_not_found: {
+        title: "Ruangan {code} tidak ditemukan",
+        body: "Ruangan mungkin sudah ditutup, atau kodenya salah. Ruangan ditutup saat semua orang keluar."
+      },
+      room_full: {
+        title: "Ruangan {code} penuh",
+        body: "Ada lima pemain di ruangan, jadi saat ini tidak dapat dilihat."
+      },
+      cooldown: {
+        title: "Ruangan {code} baru saja dibaca",
+        body: "Satu ruangan dibaca paling banyak sekali setiap beberapa detik; sampai saat itu, hasil baca terakhir tetap ditampilkan."
+      },
+      busy: {
+        title: "Banyak ruangan sedang dibaca",
+        body: "Layanan sedang sibuk. Coba lagi sebentar lagi."
+      },
+      bad_code: {
+        title: "{code} bukan kode ruangan",
+        body: "Kode ruangan terdiri dari tujuh digit."
+      },
+      network: {
+        title: "Ruangan {code} tidak dapat dibaca",
+        body: "Periksa koneksi lalu coba lagi."
+      },
+      invalid: {
+        title: "Jawaban untuk ruangan {code} tidak dapat dibaca",
+        body: "Coba lagi nanti."
+      }
+    },
+    host: {
+      title: "Buat ruangan",
+      body: "Buat ruangan yang hanya menerima pemain yang memenuhi syarat Anda.",
+      badge: "Segera hadir"
+    }
+  },
   musicRanking: {
     changeSong: "Ganti lagu",
     chooseSong: "Pilih lagu",
@@ -1467,6 +1640,10 @@ export const idID = {
     eventTracker: {
       title: "Pelacak Event",
       description: "Peringkat langsung event BanG Dream! Our Notes saat ini di setiap server: papan peringkat lagu tantangan beserta deck, garis batas hadiah (cut-off), peringkat poin event, dan sisa waktu."
+    },
+    roomCheck: {
+      title: "Cek Ruangan",
+      description: "Masukkan kode ruangan BanG Dream! Our Notes untuk melihat siapa yang ada di ruangan, lagu yang dipilih setiap pemain, dan deck semua pemain."
     },
     musicRanking: {
       title: "Peringkat Lagu",

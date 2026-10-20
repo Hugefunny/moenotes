@@ -159,6 +159,7 @@ export const frFR = {
       news: "Actualités",
       eventTracker: "Suivi des événements",
       musicRanking: "Classements musicaux",
+      roomCheck: "Vérification de salle",
       chartData: "Meta des morceaux"
     }
   },
@@ -1114,6 +1115,178 @@ export const frFR = {
       notReturned: "Non renvoyé cette fois : {ranks}"
     }
   },
+  roomCheck: {
+    alpha: "Alpha",
+    alphaHint: "Version préliminaire : la mise en page et les chiffres peuvent encore changer.",
+    difficulty: {
+      "0": "Easy",
+      "1": "Normal",
+      "2": "Hard",
+      "3": "Expert",
+      "4": "Master"
+    },
+    form: {
+      label: "Code de salle",
+      placeholder: "Code de salle à 7 chiffres, ou collez un message contenant des codes",
+      submit: "Consulter",
+      hint: "Coller un message ajoute tous les codes de salle qu'il contient.",
+      notes: {
+        added: "Salles ajoutées : {n}",
+        invalid: "Saisissez un code de salle à 7 chiffres.",
+        known: "Déjà dans la liste."
+      }
+    },
+    list: {
+      title: "Salles",
+      clear: "Vider",
+      empty: "Les salles que vous consultez apparaissent ici. Seuls leurs codes sont conservés, dans ce navigateur.",
+      remove: "Retirer la salle {code}",
+      humans: "{n} places occupées sur {capacity}",
+      unknownSong: "Morceau {id}",
+      status: {
+        idle: "Non lue",
+        queued: "En attente",
+        loading: "Lecture…",
+        ready: "Lue",
+        error: {
+          room_not_found: "Introuvable",
+          room_full: "Pleine",
+          cooldown: "Patientez",
+          busy: "Occupé",
+          bad_code: "Code invalide",
+          network: "Échec",
+          invalid: "Illisible"
+        }
+      }
+    },
+    fresh: {
+      justNow: "à l'instant",
+      secondsAgo: "il y a {n} s",
+      readAgo: "Lue {time}",
+      live: "En direct",
+      source: {
+        live: "Lue rien que pour vous",
+        cache: "Partagée par quelqu'un qui vient de regarder"
+      },
+      stopped: {
+        full: "Les mises à jour en direct sont arrêtées : quatre joueurs sont dans la salle.",
+        lease: "Les mises à jour en direct sont arrêtées après 10 minutes.",
+        closed: "Les mises à jour en direct sont arrêtées : la salle a fermé.",
+        error: "Les mises à jour en direct sont arrêtées."
+      },
+      refresh: "Actualiser",
+      refreshIn: "Actualisation possible dans {n} s",
+      refreshInShort: "{n} s",
+      liveToggle: "Mises à jour en direct"
+    },
+    room: {
+      song: "Morceau de la salle",
+      unknownSong: "Morceau {id}",
+      noSong: "Aucun morceau pour l'instant",
+      missions: "Missions Gekisou",
+      copy: "Copier",
+      copyCode: "Copier le code de salle {code}",
+      copied: "Copié",
+      votes: "Morceaux choisis",
+      voteCount: "{n} l'ont choisi"
+    },
+    player: {
+      title: "Joueurs",
+      joinOrder: "Arrivé en {n}e position",
+      host: "Hôte",
+      unnamed: "Joueur sans nom",
+      status: {
+        waiting: "Pas prêt",
+        ready: "Prêt",
+        playing: "En live"
+      },
+      picked: "A choisi {title}",
+      characterRank: "Rang de personnage",
+      averageLevel: "Nv moyen",
+      shareLabel: "{n} % du meilleur total de rang de personnage de la salle",
+      unknownTeam: "Équipe indisponible",
+      expandAll: "Afficher toutes les équipes",
+      collapseAll: "Afficher l'équipe choisie",
+      emptySeat: "Place libre"
+    },
+    formation: {
+      leader: "Leader",
+      slot: "Emplacement {n}",
+      noSupport: "Sans Snap",
+      unknownCard: "Carte {id}",
+      rankValue: "Rang {n}",
+      supportSkills: "Compétences Snap",
+      supportGekisouSkills: "Compétences Gekisou du Snap",
+      totalCharacterRank: "Total de rang de personnage",
+      vipRank: "Rang T.G.W CARD",
+      level: "Niveau",
+      awake: "Entraînement",
+      rank: "Rang",
+      skills: {
+        live: "Compétence live",
+        leader: "Compétence de leader",
+        gekisou: "Compétence Gekisou"
+      },
+      characterRank: "Rang de personnage",
+      bandItem: "Équipement de groupe",
+      bandItemTitle: "Équipement de groupe : Performance {performance}, Technique {technique}, Visual {visual}",
+      order: "Ordre de jeu",
+      caption: "Équipe de {name}",
+      orderShort: "Passe en {n}e",
+      short: {
+        awake: "Entraîn.",
+        characterRank: "Perso",
+        live: "Live",
+        gekisou: "Gekisou",
+        leader: "Leader",
+        rank: "Rang",
+        snapSkills: "Compét.",
+        snapGekisou: "Gekisou"
+      }
+    },
+    states: {
+      loading: "Lecture de la salle {code}…",
+      retry: "Réessayer",
+      retryIn: "Réessayer dans {n} s",
+      intro: {
+        title: "Jeter un œil dans une salle",
+        body: "Saisissez un code de salle pour voir qui s'y trouve, le morceau choisi par chaque joueur et l'équipe de chacun. Collez un message pour consulter plusieurs salles d'un coup."
+      },
+      room_not_found: {
+        title: "La salle {code} est introuvable",
+        body: "La salle a peut-être fermé, ou le code est erroné. Une salle ferme quand tout le monde en sort."
+      },
+      room_full: {
+        title: "La salle {code} est pleine",
+        body: "Cinq joueurs sont dans la salle : impossible de la consulter pour l'instant."
+      },
+      cooldown: {
+        title: "La salle {code} vient d'être lue",
+        body: "Une salle n'est lue qu'une fois toutes les quelques secondes ; d'ici là, la dernière lecture reste affichée."
+      },
+      busy: {
+        title: "De nombreuses salles sont en cours de lecture",
+        body: "Le service est occupé. Réessayez dans un instant."
+      },
+      bad_code: {
+        title: "{code} n'est pas un code de salle",
+        body: "Les codes de salle comportent sept chiffres."
+      },
+      network: {
+        title: "Impossible de lire la salle {code}",
+        body: "Vérifiez la connexion et réessayez."
+      },
+      invalid: {
+        title: "Impossible de lire la réponse de la salle {code}",
+        body: "Réessayez plus tard."
+      }
+    },
+    host: {
+      title: "Créer une salle",
+      body: "Créez une salle qui n'accueille que les joueurs remplissant vos conditions.",
+      badge: "Bientôt disponible"
+    }
+  },
   musicRanking: {
     changeSong: "Changer de morceau",
     chooseSong: "Choisir un morceau",
@@ -1465,6 +1638,10 @@ export const frFR = {
     eventTracker: {
       title: "Suivi des événements",
       description: "Classements en direct de l'événement actuel de BanG Dream! Our Notes sur chaque serveur : classements des morceaux défi avec formations, paliers de récompense, classement des points et temps restant."
+    },
+    roomCheck: {
+      title: "Vérification de salle",
+      description: "Saisissez un code de salle de BanG Dream! Our Notes pour voir qui s'y trouve, le morceau choisi par chaque joueur et l'équipe de chacun."
     },
     musicRanking: {
       title: "Classements musicaux",
