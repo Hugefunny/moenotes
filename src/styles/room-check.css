@@ -211,17 +211,41 @@
 .rc-gear [data-zero]{opacity:.45}
 .rc-unit-snap{display:grid;gap:4px;margin-top:auto;padding-top:5px;border-top:1px dashed var(--md-sys-color-outline-variant)}
 
-/* States and the coming-soon card */
+/* States and the card that opens a room */
 .rc-state{display:grid;justify-items:center;gap:10px;padding:40px 24px;border-radius:var(--md-sys-shape-corner-large);background:var(--md-sys-color-surface-container-low);text-align:center}
 .rc-state-icon{color:var(--md-sys-color-primary)}
 .rc-state:is([data-kind="room_not_found"],[data-kind="network"],[data-kind="invalid"],[data-kind="bad_code"]) .rc-state-icon{color:var(--md-sys-color-error)}
 .rc-root .rc-state h2{font-family:var(--md-ref-typeface-brand);font-size:var(--md-sys-typescale-title-large-size);line-height:var(--md-sys-typescale-title-large-line-height);font-weight:400}
 .rc-state p{max-width:36rem;margin:0;font-size:var(--md-sys-typescale-body-medium-size);line-height:var(--md-sys-typescale-body-medium-line-height);color:var(--md-sys-color-on-surface-variant)}
-.rc-soon{display:flex;align-items:center;gap:14px;padding:14px 18px;border:1px dashed var(--md-sys-color-outline-variant);border-radius:var(--md-sys-shape-corner-large);color:var(--md-sys-color-on-surface-variant)}
-.rc-soon div{display:grid;gap:2px;min-width:0}
-.rc-soon strong{font-size:var(--md-sys-typescale-title-small-size);font-weight:500;color:var(--md-sys-color-on-surface)}
-.rc-soon p{margin:0;font-size:var(--md-sys-typescale-body-small-size)}
-.rc-soon-badge{flex:none;margin-left:auto;padding:4px 12px;border-radius:var(--md-sys-shape-corner-full);background:var(--md-sys-color-surface-container-highest);font-size:var(--md-sys-typescale-label-medium-size)}
+
+/* Opening a room: one card at the foot of the page */
+.rc-create{display:grid;gap:10px 16px;padding:16px;border-radius:var(--md-sys-shape-corner-large);background:var(--md-sys-color-surface-container-low)}
+@media (min-width:720px){.rc-create{padding:20px}}
+.rc-create-head{display:flex;align-items:center;gap:14px;min-width:0}
+.rc-create-icon{flex:none;color:var(--md-sys-color-primary)}
+.rc-create-text{display:grid;gap:2px;min-width:0}
+.rc-root .rc-create-text h2{font-size:var(--md-sys-typescale-title-medium-size);line-height:var(--md-sys-typescale-title-medium-line-height)}
+.rc-create-text p{margin:0;font-size:var(--md-sys-typescale-body-small-size);line-height:var(--md-sys-typescale-body-small-line-height);color:var(--md-sys-color-on-surface-variant)}
+.rc-create-fields{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;align-items:end}
+@media (min-width:720px){.rc-create-fields{grid-template-columns:minmax(0,18rem) auto auto;justify-content:start}}
+.rc-create-submit{display:inline-flex;align-items:center;gap:8px;justify-self:start;min-width:120px;min-height:40px}
+.rc-create-submit:disabled{cursor:default;opacity:.7}
+.rc-create-opened{margin:0;font-size:var(--md-sys-typescale-body-medium-size);line-height:var(--md-sys-typescale-body-medium-line-height);color:var(--md-sys-color-primary)}
+.rc-create-error{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;padding:8px 14px;border-radius:var(--md-sys-shape-corner-medium);background:var(--md-sys-color-error-container);color:var(--md-sys-color-on-error-container);font-size:var(--md-sys-typescale-body-medium-size)}
+.rc-create-error[data-kind="busy"]{background:var(--md-sys-color-warning-container);color:var(--md-sys-color-on-warning-container,var(--md-sys-color-on-surface))}
+
+/* A room this browser opened */
+.rc-own{flex:none;padding:2px 10px;border-radius:var(--md-sys-shape-corner-full);background:var(--md-sys-color-primary-container);color:var(--md-sys-color-on-primary-container);font-size:var(--md-sys-typescale-label-small-size);line-height:18px;white-space:nowrap}
+
+/* Four players in a room this page opened: the observer may leave, which frees the last seat */
+.rc-atfour{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:12px 16px;border-radius:var(--md-sys-shape-corner-large);background:var(--md-sys-color-tertiary-container);color:var(--md-sys-color-on-tertiary-container)}
+.rc-atfour[data-variant="prompt"]{background:var(--md-sys-color-primary-container);color:var(--md-sys-color-on-primary-container)}
+.rc-atfour-icon{flex:none}
+.rc-atfour p{margin:0;font-size:var(--md-sys-typescale-body-medium-size);line-height:var(--md-sys-typescale-body-medium-line-height)}
+.rc-atfour-text{display:grid;gap:2px;flex:1 1 14rem;min-width:0}
+.rc-root .rc-atfour-text h3{font-size:var(--md-sys-typescale-title-small-size);line-height:var(--md-sys-typescale-title-small-line-height);font-weight:500}
+.rc-atfour-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-left:auto}
+.rc-atfour-error{flex-basis:100%;font-size:var(--md-sys-typescale-body-small-size);color:var(--md-sys-color-error)}
 
 @media (prefers-reduced-motion:reduce){
   .rc-fresh[data-level="live"] .rc-fresh-dot::after,.rc-ring[data-spinning],.rc-seat[data-changed]{animation:none}

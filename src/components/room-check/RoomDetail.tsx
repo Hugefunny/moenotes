@@ -22,12 +22,14 @@ interface Props {
   live: LiveState;
   /** Players whose team or song changed in the last update. */
   changed: ReadonlySet<string>;
+  /** A notice above the room: the four-player offer of a room this page opened. */
+  banner?: ReactNode;
   onRefresh: () => void;
   onLive: (on: boolean) => void;
 }
 
 /** The selected room: its song, how fresh the read is, what everyone picked, and each player's team. */
-export default function RoomDetail({ locale, entry, songs, cards, assetUrl, now, live, changed, onRefresh, onLive }: Props) {
+export default function RoomDetail({ locale, entry, songs, cards, assetUrl, now, live, changed, banner, onRefresh, onLive }: Props) {
   const read = shownRead(entry);
   const error = entry.status === "error" ? entry.error : null;
   const retryAt = error?.retryAfterMs != null && entry.errorAt !== null ? entry.errorAt + error.retryAfterMs : null;
@@ -40,7 +42,8 @@ export default function RoomDetail({ locale, entry, songs, cards, assetUrl, now,
   const snapshot = read.snapshot;
   return (
     <div className="rc-detail" aria-busy={busy}>
-      <RoomHeader locale={locale} snapshot={snapshot} songs={songs}>
+      {banner}
+      <RoomHeader locale={locale} snapshot={snapshot} songs={songs} created={entry.created}>
         <FreshnessBar locale={locale} snapshot={snapshot} receivedAt={read.receivedAt} now={now} loading={busy} live={live} onRefresh={onRefresh} onLive={onLive} />
       </RoomHeader>
       {error && error.code !== "cooldown" && <RoomStateCard locale={locale} kind={error.code} code={entry.code} compact now={now} retryAt={retryAt} onRetry={onRefresh} />}
@@ -50,7 +53,7 @@ export default function RoomDetail({ locale, entry, songs, cards, assetUrl, now,
 }
 
 /** The room's song and missions, its code and seats, and (as children) how fresh the read is. */
-function RoomHeader({ locale, snapshot, songs, children }: { locale: AppLocale; snapshot: RoomSnapshot; songs: ReadonlyMap<number, RoomSong>; children: ReactNode }) {
+function RoomHeader({ locale, snapshot, songs, created, children }: { locale: AppLocale; snapshot: RoomSnapshot; songs: ReadonlyMap<number, RoomSong>; created: boolean; children: ReactNode }) {
   const tr = (name: string, values?: Record<string, string | number>) => t(locale, `roomCheck.room.${name}`, values);
   const song = snapshot.room.musicId !== null ? songs.get(snapshot.room.musicId) : undefined;
   const [copied, setCopied] = useState(false);
@@ -75,6 +78,7 @@ function RoomHeader({ locale, snapshot, songs, children }: { locale: AppLocale; 
         </div>
       </div>
       <div className="rc-room-facts">
+        {created && <span className="rc-own" title={tr("ownHint")}>{tr("own")}</span>}
         <button type="button" className="rc-code md3-state" onClick={copy} title={tr("copy")} aria-label={tr("copyCode", { code: snapshot.code })}>
           <span>{snapshot.code}</span>
           <small aria-live="polite">{copied ? tr("copied") : tr("copy")}</small>

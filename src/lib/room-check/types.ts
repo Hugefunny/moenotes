@@ -64,7 +64,23 @@ export interface RoomSnapshot {
   players: RoomPlayer[];
 }
 
-export type RoomErrorCode = "room_not_found" | "room_full" | "cooldown" | "busy" | "bad_code" | "internal" | "network" | "invalid";
+export type RoomErrorCode =
+  | "room_not_found"
+  | "room_full"
+  | "cooldown"
+  | "busy"
+  | "bad_code"
+  | "internal"
+  | "network"
+  | "invalid"
+  /** A room with the requested code already exists (`create`). */
+  | "room_exists"
+  /** Rooms cannot be opened right now (`create`). */
+  | "bot_unavailable"
+  /** The room no longer holds the observer (`leave`). */
+  | "not_bot_room"
+  /** The observer can only leave a room that already has four real players (`leave`). */
+  | "not_at_four";
 
 export interface RoomError {
   code: RoomErrorCode;
@@ -93,4 +109,18 @@ export interface RoomEntry {
   error: RoomError | null;
   /** When the failed attempt answered (the page's clock). */
   errorAt: number | null;
+  /** The watch this browser was given when it opened the room; null for a room that was only read. */
+  watchId: string | null;
+  /** Whether this browser opened the room. */
+  created: boolean;
 }
+
+/** A room the service opened for this browser, with the watch that follows it. */
+export interface CreatedRoom {
+  code: string;
+  region: GameServer;
+  watchId: string;
+}
+
+/** Why a live view ended: the room filled up, its time ran out, the room closed, the observer left, or the service stopped it. */
+export type WatchStop = "full" | "lease" | "closed" | "kicked" | "error";

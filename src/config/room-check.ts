@@ -21,3 +21,9 @@ export function roomCheckUrl(code: string, region: GameServer, parts: readonly s
   const path = ["v1", "rooms", code, ...parts].map(encodeURIComponent).join("/");
   return `${roomCheckConfig.api}/${path}?${new URLSearchParams({ region, ...query })}`;
 }
+
+/** The address behind Room Check's endpoints that name no room yet, e.g. `["create"]`. */
+export function roomCheckRootUrl(parts: readonly string[] = []): string {
+  const path = ["v1", "rooms", ...parts].map(encodeURIComponent).join("/");
+  return `${roomCheckConfig.api}/${path}`;
+}

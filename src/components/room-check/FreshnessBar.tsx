@@ -1,7 +1,7 @@
 import type { AppLocale } from "@/config/locales";
 import { t } from "@/i18n";
 import { formatAge } from "@/lib/game-api/server";
-import type { WatchStop } from "@/lib/room-check/client";
+import type { WatchStop } from "@/lib/room-check/types";
 import { freshness, readAge, refreshIn, refreshWindow } from "@/lib/room-check/summary";
 import type { RoomSnapshot } from "@/lib/room-check/types";
 

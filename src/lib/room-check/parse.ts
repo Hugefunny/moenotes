@@ -1,5 +1,5 @@
 import { GAME_SERVERS, type GameServer } from "@/config/servers";
-import type { RoomError, RoomErrorCode, RoomFormation, RoomPlayer, RoomSnapshot, RoomSupport, RoomUnit } from "./types";
+import type { CreatedRoom, RoomError, RoomErrorCode, RoomFormation, RoomPlayer, RoomSnapshot, RoomSupport, RoomUnit, WatchStop } from "./types";
 
 /** Room codes are seven digits. */
 export const ROOM_CODE_LENGTH = 7;
@@ -119,11 +119,63 @@ export function parseRoomSnapshot(value: unknown): RoomSnapshot | null {
   }
 }
 
-const ERROR_CODES: readonly RoomErrorCode[] = ["room_not_found", "room_full", "cooldown", "busy", "bad_code", "internal"];
+const ERROR_CODES: readonly RoomErrorCode[] = [
+  "room_not_found", "room_full", "cooldown", "busy", "bad_code", "internal",
+  "room_exists", "bot_unavailable", "not_bot_room", "not_at_four",
+];
 
 /** The service's error body; anything else reads as `invalid`. */
 export function parseRoomError(value: unknown): RoomError {
   const source = record(value) ? value : {};
   const code = (ERROR_CODES as readonly unknown[]).includes(source.error) ? (source.error as RoomErrorCode) : "invalid";
   return { code, retryAfterMs: nullableInt(source.retryAfterMs), snapshot: source.snapshot === undefined ? null : parseRoomSnapshot(source.snapshot) };
+}
+
+/** A room the service opened for this browser: its code, server and the watch that follows it. */
+export function parseCreatedRoom(value: unknown): CreatedRoom | null {
+  try {
+    const source = need(record(value) ? value : null, "created");
+    return {
+      code: need(typeof source.code === "string" && isRoomCode(source.code) ? source.code : null, "created.code"),
+      region: parseRegion(source.region),
+      watchId: need(typeof source.watchId === "string" && source.watchId !== "" ? source.watchId : null, "created.watchId"),
+    };
+  } catch (error) {
+    if (error instanceof Invalid) return null;
+    throw error;
+  }
+}
+
+const STOP_REASONS: readonly WatchStop[] = ["full", "lease", "closed", "kicked", "error"];
+
+/** Why a live view stopped, from a `stopped` event; an unknown reason reads as `error`. */
+export function parseWatchStopReason(value: unknown): WatchStop {
+  const reason = record(value) ? value.reason : undefined;
+  return (STOP_REASONS as readonly unknown[]).includes(reason) ? (reason as WatchStop) : "error";
+}
+
+/** One event of a room's event stream, by its event name and data. */
+export type RoomWatchEvent =
+  | { type: "snapshot"; snapshot: RoomSnapshot }
+  | { type: "at_four"; snapshot: RoomSnapshot | null }
+  | { type: "stopped"; reason: WatchStop };
+
+/**
+ * An event of a room's stream. `snapshot` and `at_four` carry a full room read (`at_four` still marks the four
+ * players when its read does not parse); `stopped` carries why the stream ended.
+ */
+export function parseWatchEvent(name: string, data: string): RoomWatchEvent | null {
+  let body: unknown;
+  try {
+    body = JSON.parse(data);
+  } catch {
+    return null;
+  }
+  if (name === "stopped") return { type: "stopped", reason: parseWatchStopReason(body) };
+  if (name === "at_four") return { type: "at_four", snapshot: parseRoomSnapshot(body) };
+  if (name === "snapshot") {
+    const snapshot = parseRoomSnapshot(body);
+    return snapshot ? { type: "snapshot", snapshot } : null;
+  }
+  return null;
 }
