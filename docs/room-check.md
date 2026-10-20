@@ -6,8 +6,9 @@ the internal origin (`server/internal/web/roomcheck.go`).
 
 ## Client contract
 
-`src/config/room-check.ts` holds the base the page calls (`PUBLIC_ROOM_CHECK_API`; `mock` serves made-up rooms in the
-page itself) and `src/lib/room-check/client.ts` the requests. A room's endpoint is
+`src/config/room-check.ts` holds the base the page calls (the same-origin `/api/room-check`; development builds use
+`mock`, which serves made-up rooms in the page itself, unless `PUBLIC_ROOM_CHECK_API` points elsewhere) and
+`src/lib/room-check/client.ts` the requests. A room's endpoint is
 `/api/room-check/v1/rooms/{code}?region=…` plus one of:
 
 | Path suffix | Method | Meaning |
