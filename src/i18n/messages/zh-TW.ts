@@ -2335,6 +2335,7 @@ export const zhTW = {
           bad_code: "房間號無效",
           network: "失敗",
           invalid: "無法解析",
+          internal: "服務異常",
         },
       },
     },
@@ -2457,6 +2458,10 @@ export const zhTW = {
       },
       invalid: {
         title: "無法解析房間 {code} 的結果",
+        body: "請稍後再試。",
+      },
+      internal: {
+        title: "讀取房間 {code} 時服務異常",
         body: "請稍後再試。",
       },
     },

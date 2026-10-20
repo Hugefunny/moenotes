@@ -2336,6 +2336,7 @@ export const zhCN = {
           bad_code: "房间号无效",
           network: "失败",
           invalid: "无法解析",
+          internal: "服务异常",
         },
       },
     },
@@ -2459,6 +2460,10 @@ export const zhCN = {
       invalid: {
         title: "无法解析房间 {code} 的结果",
         body: "请稍后再试。",
+      },
+      internal: {
+        title: "读取房间 {code} 时服务异常",
+        body: "请稍后重试。",
       },
     },
     host: {

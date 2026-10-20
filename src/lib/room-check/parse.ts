@@ -119,7 +119,7 @@ export function parseRoomSnapshot(value: unknown): RoomSnapshot | null {
   }
 }
 
-const ERROR_CODES: readonly RoomErrorCode[] = ["room_not_found", "room_full", "cooldown", "busy", "bad_code"];
+const ERROR_CODES: readonly RoomErrorCode[] = ["room_not_found", "room_full", "cooldown", "busy", "bad_code", "internal"];
 
 /** The service's error body; anything else reads as `invalid`. */
 export function parseRoomError(value: unknown): RoomError {

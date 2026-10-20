@@ -2281,6 +2281,7 @@ export const koKR = {
           bad_code: "잘못된 번호",
           network: "실패",
           invalid: "해석 불가",
+          internal: "서비스 오류",
         },
       },
     },
@@ -2403,6 +2404,10 @@ export const koKR = {
       },
       invalid: {
         title: "방 {code}의 결과를 해석하지 못했습니다",
+        body: "잠시 후 다시 시도하세요.",
+      },
+      internal: {
+        title: "방 {code}을(를) 읽는 중 서비스 오류가 발생했습니다",
         body: "잠시 후 다시 시도하세요.",
       },
     },

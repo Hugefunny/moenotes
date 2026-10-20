@@ -64,7 +64,7 @@ export interface RoomSnapshot {
   players: RoomPlayer[];
 }
 
-export type RoomErrorCode = "room_not_found" | "room_full" | "cooldown" | "busy" | "bad_code" | "network" | "invalid";
+export type RoomErrorCode = "room_not_found" | "room_full" | "cooldown" | "busy" | "bad_code" | "internal" | "network" | "invalid";
 
 export interface RoomError {
   code: RoomErrorCode;

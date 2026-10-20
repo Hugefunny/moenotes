@@ -2326,6 +2326,7 @@ export const jaJP = {
           bad_code: "無効な番号",
           network: "失敗",
           invalid: "解析できません",
+          internal: "サービスエラー",
         },
       },
     },
@@ -2449,6 +2450,10 @@ export const jaJP = {
       invalid: {
         title: "ルーム {code} の結果を解析できませんでした",
         body: "しばらくしてから再試行してください。",
+      },
+      internal: {
+        title: "ルーム {code} の読み込み中にエラーが発生しました",
+        body: "サービスが一時的に利用できません。しばらくしてから再試行してください。",
       },
     },
     host: {

@@ -17,7 +17,7 @@ interface Props {
   compact?: boolean;
 }
 
-const RETRYABLE: readonly Kind[] = ["busy", "network", "invalid", "cooldown", "room_not_found"];
+const RETRYABLE: readonly Kind[] = ["busy", "network", "invalid", "internal", "cooldown", "room_not_found"];
 
 /** Every state without a room to show, in one card style: the first visit, a read under way, and each failure. */
 export default function RoomStateCard({ locale, kind, code, now, retryAt = null, onRetry, compact = false }: Props) {

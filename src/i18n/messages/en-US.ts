@@ -2292,6 +2292,7 @@ export const enUS = {
           bad_code: "Invalid code",
           network: "Failed",
           invalid: "Unreadable",
+          internal: "Service error",
         },
       },
     },
@@ -2415,6 +2416,10 @@ export const enUS = {
       invalid: {
         title: "The answer for room {code} could not be read",
         body: "Try again later.",
+      },
+      internal: {
+        title: "Room {code} could not be read",
+        body: "The service is temporarily unavailable. Try again in a moment.",
       },
     },
     host: {
