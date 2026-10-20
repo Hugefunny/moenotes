@@ -19,7 +19,7 @@ test("release files are addressed by asset path, not by ID", () => {
 test("audio requests resolve a cue sheet's published m4a", () => {
   expect(getAssetUrl({ type: "audio", path: "A_Abracadabra" })).toBe(`${api}/zh-Hans/Cri/Sound/A_Abracadabra/A_Abracadabra.m4a`);
   expect(getAssetUrl({ type: "audio", path: "Cri/Sound/MusicScore/A_AveMujica.acb", locale: "ja-JP" }))
-    .toBe(`${api}/ja/Cri/Sound/MusicScore/A_AveMujica/A_AveMujica.m4a`);
+    .toBe(`${api}/ja/Cri/Sound/A_AveMujica/A_AveMujica.m4a`);
   expect(getAudioAssetUrl("sound_bgm_adv_cafe_time", "en-US")).toBe(`${api}/en/Cri/Sound/sound_bgm_adv_cafe_time/sound_bgm_adv_cafe_time.m4a`);
   expect(getAssetUrl({ type: "audio", path: " " })).toBe("");
 });

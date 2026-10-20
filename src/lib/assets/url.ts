@@ -51,9 +51,8 @@ export function getAudioAssetUrl(cueSheetPath: string, locale: AppLocale = DEFAU
     .replace(/^\/+|\/+$/g, "")
     .replace(/\.(acb|awb|m4a)$/i, "");
   if (!cleanPath) return "";
-  const key = cleanPath.startsWith(AUDIO_PREFIX) ? cleanPath : `${AUDIO_PREFIX}${cleanPath}`;
-  const sheet = key.split("/").filter(Boolean).at(-1);
-  return sheet ? releaseFileUrl(key, `${sheet}.m4a`, locale) : "";
+  const sheet = cleanPath.split("/").filter(Boolean).at(-1);
+  return sheet ? releaseFileUrl(`${AUDIO_PREFIX}${sheet}`, `${sheet}.m4a`, locale) : "";
 }
 
 /** Artwork addressed by its MasterData asset path; the extension is optional. Text-bearing art differs by language. */

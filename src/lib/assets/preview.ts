@@ -24,8 +24,8 @@ export function getAssetBrowserPreview(
     return url ? { type: "image", url: serverAssetUrl(url, server) } : null;
   }
 
-  const sound = relPath.match(/^(Cri\/Sound\/(?:[^/]+\/)*([^/]+))\.(?:acb|awb)$/i);
-  if (sound) return { type: "audio", url: serverAssetUrl(releaseFileUrl(sound[1]!, `${sound[2]}.m4a`, locale), server) };
+  const sound = relPath.match(/^Cri\/Sound\/(?:.*\/)?([^/]+)\.(?:acb|awb)$/i);
+  if (sound) return { type: "audio", url: serverAssetUrl(releaseFileUrl(`Cri/Sound/${sound[1]}`, `${sound[1]}.m4a`, locale), server) };
 
   return null;
 }
