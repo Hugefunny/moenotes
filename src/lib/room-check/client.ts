@@ -83,7 +83,10 @@ export const httpRoomApi: RoomApi = {
           if (source?.readyState === EventSource.CLOSED) stop("error");
         };
         ping = window.setInterval(() => {
-          if (document.visibilityState !== "visible") return;
+          // Keep the lease alive even while the tab is in the background.
+          // Browsers throttle hidden timers, but a minute still beats the
+          // service's stale window; dropping the ping there stopped a live
+          // view as soon as the player switched back to the game.
           void fetch(roomCheckUrl(code, region, ["watch", watchId!, "ping"]), { method: "POST" })
             .then((reply) => { if (!reply.ok) stop("lease"); }, () => undefined);
         }, roomCheckConfig.watchPingMs);
