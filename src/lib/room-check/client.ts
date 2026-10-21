@@ -32,13 +32,18 @@ export interface RoomApi {
   create(region: GameServer, code: string | null, signal?: AbortSignal): Promise<CreateReply>;
   /** Follows a room this page opened, through the watch the service returned for it. */
   watchCreated(room: CreatedRoom, handlers: CreatedWatchHandlers): () => void;
-  /** Asks the observer of a room this page opened to leave, once four players are in. */
+  /** Asks the observer of a room this page opened to leave at any time. */
   kick(room: CreatedRoom): Promise<KickReply>;
   /** Abandons a room this page opened: the observer leaves at once and the room closes. */
   stopCreated(room: CreatedRoom): void;
 }
 
 const failure = (code: RoomError["code"], retryAfterMs: number | null = null): RoomReply => ({ ok: false, error: { code, retryAfterMs, snapshot: null } });
+
+function requestSignal(signal?: AbortSignal): AbortSignal {
+  const timeout = AbortSignal.timeout(35_000);
+  return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
 
 async function readJson(response: Response): Promise<unknown> {
   try {
@@ -63,12 +68,15 @@ function refusal(response: Response, body: unknown): RoomError {
 function followEvents(code: string, region: GameServer, watchId: string, handlers: CreatedWatchHandlers, dropWatch: boolean): () => void {
   let closed = false;
   let ping: number | undefined;
+  let initial: number | undefined;
+  let received = false;
   const source = new EventSource(roomCheckUrl(code, region, ["events"], { watch: watchId }));
   const stop = (reason: WatchStop | null) => {
     if (closed) return;
     closed = true;
     source.close();
     window.clearInterval(ping);
+    window.clearTimeout(initial);
     if (dropWatch) void fetch(roomCheckUrl(code, region, ["watch", watchId]), { method: "DELETE", keepalive: true }).catch(() => undefined);
     if (reason) handlers.onStop(reason);
   };
@@ -76,7 +84,12 @@ function followEvents(code: string, region: GameServer, watchId: string, handler
     source.addEventListener(name, (event) => {
       const parsed = parseWatchEvent(name, (event as MessageEvent<string>).data);
       if (!parsed || closed) return;
-      if (parsed.type === "snapshot") handlers.onSnapshot(parsed.snapshot);
+      if (parsed.type === "snapshot") {
+        window.clearTimeout(initial);
+        initial = undefined;
+        received = true;
+        handlers.onSnapshot(parsed.snapshot);
+      }
       else if (parsed.type === "at_four") handlers.onAtFour(parsed.snapshot);
       else stop(parsed.reason);
     });
@@ -84,8 +97,16 @@ function followEvents(code: string, region: GameServer, watchId: string, handler
   listen("snapshot");
   listen("at_four");
   listen("stopped");
+  initial = window.setTimeout(() => stop("error"), 35_000);
+  source.onopen = () => {
+    if (received) {
+      window.clearTimeout(initial);
+      initial = undefined;
+    }
+  };
   source.onerror = () => {
     if (source.readyState === EventSource.CLOSED) stop("error");
+    else if (!closed && initial === undefined) initial = window.setTimeout(() => stop("error"), 35_000);
   };
   ping = window.setInterval(() => {
     // Keep the watch alive even while the tab is in the background.
@@ -93,7 +114,7 @@ function followEvents(code: string, region: GameServer, watchId: string, handler
     // service's stale window; dropping the ping there stopped a live
     // view as soon as the player switched back to the game.
     void fetch(roomCheckUrl(code, region, ["watch", watchId, "ping"]), { method: "POST" })
-      .then((reply) => { if (!reply.ok) stop("lease"); }, () => undefined);
+      .then((reply) => { if (reply.status === 404) stop("lease"); else if (reply.status === 401 || reply.status === 403) stop("error"); }, () => undefined);
   }, roomCheckConfig.watchPingMs);
   return () => stop(null);
 }
@@ -103,7 +124,7 @@ export const httpRoomApi: RoomApi = {
   async read(code, region, signal) {
     let response: Response;
     try {
-      response = await fetch(roomCheckUrl(code, region), { signal: signal ?? null, headers: { accept: "application/json" } });
+      response = await fetch(roomCheckUrl(code, region), { signal: requestSignal(signal), headers: { accept: "application/json" } });
     } catch (error) {
       if (signal?.aborted) throw error;
       return failure("network");
@@ -121,7 +142,7 @@ export const httpRoomApi: RoomApi = {
     let stopFollow: (() => void) | null = null;
     void (async () => {
       try {
-        const response = await fetch(roomCheckUrl(code, region, ["watch"]), { method: "POST" });
+        const response = await fetch(roomCheckUrl(code, region, ["watch"]), { method: "POST", signal: requestSignal() });
         const body = await readJson(response) as { watchId?: unknown } | null;
         if (!response.ok || typeof body?.watchId !== "string") {
           if (!closed) handlers.onStop("error");
@@ -147,7 +168,7 @@ export const httpRoomApi: RoomApi = {
     try {
       response = await fetch(roomCheckRootUrl(["create"]), {
         method: "POST",
-        signal: signal ?? null,
+        signal: requestSignal(signal),
         headers: { accept: "application/json", "content-type": "application/json" },
         // No code asks the service to pick one.
         body: JSON.stringify(code ? { region, code } : { region }),
@@ -169,7 +190,7 @@ export const httpRoomApi: RoomApi = {
   async kick(room) {
     let response: Response;
     try {
-      response = await fetch(roomCheckUrl(room.code, room.region, ["probe", "leave"]), { method: "POST", headers: { accept: "application/json" } });
+      response = await fetch(roomCheckUrl(room.code, room.region, ["probe", "leave"]), { method: "POST", signal: requestSignal(), headers: { accept: "application/json" } });
     } catch {
       return { ok: false, error: { code: "network", retryAfterMs: null, snapshot: null } };
     }

@@ -91,14 +91,14 @@ function RoomCheckTool({ locale, songs, cards }: Props) {
   }, []);
 
   // The list of an earlier visit comes back unread; the first room is read once shown. A room this browser opened is
-  // followed again through its watch, which falls back to a plain read when it has ended.
+  // followed again through its watch, which keeps the final snapshot when it has ended.
   useEffect(() => {
     const saved = loadSavedRooms();
     const first = saved[0];
     // A watch still holding the first room fills it from the stream, so it is not queued for a read.
     const following = first?.created === true && first.watchId !== null;
     const restoredRooms = saved.map(({ code, region: server, watchId, created }, index) => {
-      const status: RoomEntry["status"] = index === 0 ? (following ? "idle" : "queued") : "idle";
+      const status: RoomEntry["status"] = index === 0 && !created ? "queued" : "idle";
       return blank(code, server, status, created, watchId);
     });
     setRooms(restoredRooms);
@@ -148,9 +148,12 @@ function RoomCheckTool({ locale, songs, cards }: Props) {
     createController.current?.abort();
   }, []);
 
-  /** The watch of a room this page opened has ended: the room stays in the list, read like any other room. */
+  /** The watch of a room this page opened has ended: the room stays in the list with its final snapshot. */
   const forgetWatch = useCallback((key: string, reason: WatchStop) => {
-    update(key, (entry) => (entry.watchId === null ? entry : { ...entry, watchId: null, status: "queued" }));
+    const gone = reason === "kicked" || reason === "closed" || reason === "full";
+    update(key, (entry) => ({ ...entry, watchId: gone ? null : entry.watchId,
+      status: gone ? (entry.last ? "ready" : "idle") : "error",
+      error: gone ? null : { code: "network", retryAfterMs: null, snapshot: null }, errorAt: gone ? null : Date.now() }));
     setAtFour((offer) => (offer && offer.key === key ? null : offer));
     setLive({ status: "stopped", reason });
     setOpened(null);
@@ -177,13 +180,14 @@ function RoomCheckTool({ locale, songs, cards }: Props) {
     }
     setSelected(key);
     const entry = rooms.find((item) => entryKey(item) === key);
-    if (!entry || entry.status !== "idle") return;
-    // A room this browser opened is followed again through its watch; a watch that has ended falls back to a read.
-    if (entry.created && entry.watchId) {
+    if (!entry) return;
+    // A room this browser opened is followed again through its watch; a watch that has ended keeps its final snapshot.
+    if (entry.created) {
+      if (!entry.watchId) return;
       setLive({ status: "on" });
       return;
     }
-    update(key, (item) => ({ ...item, status: "queued" }));
+    if (entry.status === "idle") update(key, (item) => ({ ...item, status: "queued" }));
   };
 
   const remove = (key: string) => {
@@ -193,7 +197,7 @@ function RoomCheckTool({ locale, songs, cards }: Props) {
     if (removed?.created && removed.watchId) api.stopCreated({ code: removed.code, region: removed.region, watchId: removed.watchId });
     const next = rooms.filter((entry) => entryKey(entry) !== key);
     const first = next[0];
-    setRooms(key === selected && first?.status === "idle" ? next.map((entry) => (entry === first ? { ...entry, status: "queued" } : entry)) : next);
+    setRooms(key === selected && first?.status === "idle" && !first.created ? next.map((entry) => (entry === first ? { ...entry, status: "queued" } : entry)) : next);
     if (key === selected) {
       setLive({ status: "off" });
       setAtFour(null);
@@ -213,7 +217,11 @@ function RoomCheckTool({ locale, songs, cards }: Props) {
   };
 
   const refresh = () => {
-    if (!current || current.status === "loading" || current.status === "queued") return;
+    if (!current || (current.created && !current.watchId) || current.status === "loading" || current.status === "queued") return;
+    if (current.created && current.watchId) {
+      setLive({ status: "on" });
+      return;
+    }
     if (current.last && refreshIn(current.last.snapshot, current.last.receivedAt, Date.now()) > 0) return;
     update(entryKey(current), (entry) => ({ ...entry, status: "queued" }));
   };
@@ -259,13 +267,13 @@ function RoomCheckTool({ locale, songs, cards }: Props) {
       });
   };
 
-  /** Asks the observer of a room this page opened to leave, so the fifth player can join. */
+  /** Asks the observer of a room this page opened to leave at any time. */
   const kick = (room: CreatedRoom, key: string) => {
-    setAtFour((offer) => (offer && offer.key === key ? { ...offer, kicking: true, failed: false } : offer));
+    setAtFour({ key, prompt: false, kicking: true, failed: false, onKick: () => kick(room, key), onKeep: () => undefined });
     const failed = () => setAtFour((offer) => (offer && offer.key === key ? { ...offer, kicking: false, failed: true } : offer));
     api.kick(room).then((reply) => {
-      // A room whose observer is already gone is read like any other from now on.
-      if (reply.ok || reply.error.code === "not_bot_room") forgetWatch(key, "kicked");
+      // A room whose observer is already gone keeps its final snapshot.
+      if (reply.ok || reply.error.code === "watch_not_found") forgetWatch(key, "kicked");
       else failed();
     }, failed);
   };
@@ -283,8 +291,8 @@ function RoomCheckTool({ locale, songs, cards }: Props) {
       const moved = changedPlayers(previous, snapshot);
       previous = snapshot;
       apply(key, { ok: true, snapshot });
-      // A room that dropped below four again no longer needs the observer to leave.
-      if (snapshot.room.humans < 4) setAtFour((state) => (state && state.key === key ? null : state));
+      // A room that dropped below four again uses the persistent removal notice.
+      if (snapshot.room.humans < 4) setAtFour((state) => (state && state.key === key && !state.kicking && !state.failed ? null : state));
       if (moved.size) {
         setChanged(moved);
         window.clearTimeout(flash);
@@ -292,7 +300,7 @@ function RoomCheckTool({ locale, songs, cards }: Props) {
       }
     };
     const onStop = (reason: WatchStop) => {
-      // A room this page opened stays in the list: its watch ended, so it is read like any other room.
+      // A room this page opened stays in the list: its final snapshot remains available.
       if (own) forgetWatch(key, reason);
       else setLive({ status: "stopped", reason });
     };
@@ -320,7 +328,13 @@ function RoomCheckTool({ locale, songs, cards }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [followKey, api, apply]);
 
-  const atFourState = atFour && current && atFour.key === entryKey(current) && current.watchId !== null ? atFour : null;
+  const atFourState = current?.created && current.watchId ? (
+    atFour?.key === entryKey(current) ? atFour : {
+      prompt: false, kicking: false, failed: false,
+      onKick: () => kick({ code: current.code, region: current.region, watchId: current.watchId! }, entryKey(current)),
+      onKeep: () => undefined,
+    }
+  ) : null;
 
   return (
     <div className="rc-root">
@@ -331,7 +345,7 @@ function RoomCheckTool({ locale, songs, cards }: Props) {
           {current
             ? <RoomDetail locale={locale} entry={current} songs={songMap} cards={cards} assetUrl={assetUrl} now={now} live={live} changed={changed}
               banner={atFourState ? <AtFourNotice locale={locale} state={atFourState} /> : null}
-              onRefresh={refresh} onLive={(on) => setLive(on ? { status: "on" } : { status: "off" })} />
+              onRefresh={refresh} onLive={(on) => { if (!(current.created && !current.watchId)) setLive(on ? { status: "on" } : { status: "off" }); }} />
             : <RoomStateCard locale={locale} kind="intro" now={now} />}
         </div>
       </div>

@@ -121,7 +121,7 @@ export function parseRoomSnapshot(value: unknown): RoomSnapshot | null {
 
 const ERROR_CODES: readonly RoomErrorCode[] = [
   "room_not_found", "room_full", "cooldown", "busy", "bad_code", "internal",
-  "room_exists", "bot_unavailable", "not_bot_room", "not_at_four",
+  "room_exists", "bot_unavailable", "watch_not_found", "not_bot_room", "not_at_four",
   "login_required", "not_owner", "rate_limited",
 ];
 

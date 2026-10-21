@@ -13,6 +13,7 @@ interface Props {
   receivedAt: number;
   now: number;
   loading: boolean;
+  unavailable?: boolean;
   live: LiveState;
   onRefresh: () => void;
   onLive: (on: boolean) => void;
@@ -30,7 +31,7 @@ export function ageText(locale: AppLocale, age: number): string {
  * ticking every second (screen readers hear it every five), where the read came from, the refresh button with its
  * wait drawn as a ring, and the live switch.
  */
-export default function FreshnessBar({ locale, snapshot, receivedAt, now, loading, live, onRefresh, onLive }: Props) {
+export default function FreshnessBar({ locale, snapshot, receivedAt, now, loading, unavailable, live, onRefresh, onLive }: Props) {
   const tr = (key: string, values?: Record<string, string | number>) => t(locale, `roomCheck.fresh.${key}`, values);
   const age = readAge(snapshot, receivedAt, now);
   const wait = refreshIn(snapshot, receivedAt, now);
@@ -45,20 +46,20 @@ export default function FreshnessBar({ locale, snapshot, receivedAt, now, loadin
         <small>{tr(`source.${snapshot.source}`)}</small>
         <span className="sr-only" aria-live="polite">{tr("readAgo", { time: ageText(locale, spoken) })}</span>
       </span>
-      {live.status === "stopped" && <span className="rc-fresh-note" role="status">{tr(`stopped.${live.reason}`)}</span>}
+      {live.status === "stopped" && !unavailable && <span className="rc-fresh-note" role="status">{tr(`stopped.${live.reason}`)}</span>}
       <span className="rc-fresh-actions">
         {/* A live view updates itself; the manual refresh comes back when it stops. */}
-        {!on && <button type="button" className="md3-button md3-button--tonal md3-button--small rc-refresh" onClick={onRefresh}
+        {!on && !unavailable && <button type="button" className="md3-button md3-button--tonal md3-button--small rc-refresh" onClick={onRefresh}
           disabled={loading || wait > 0} aria-label={wait > 0 ? tr("refreshIn", { n: Math.ceil(wait / 1000) }) : tr("refresh")}>
           <CooldownRing share={span > 0 ? wait / span : 0} spinning={loading} />
           <span aria-hidden="true">{wait > 0 ? tr("refreshInShort", { n: Math.ceil(wait / 1000) }) : tr("refresh")}</span>
         </button>}
-        <label className="rc-live-switch">
+        {!unavailable && <label className="rc-live-switch">
           <span>{tr("liveToggle")}</span>
           <button type="button" role="switch" aria-checked={on} className={`md3-switch${on ? " md3-switch--on" : ""}`} onClick={() => onLive(!on)}>
             <span className="md3-switch__thumb" />
           </button>
-        </label>
+        </label>}
       </span>
     </div>
   );

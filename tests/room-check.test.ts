@@ -202,8 +202,8 @@ describe("leaving a room this page opened", () => {
   });
 
   test("a refusal keeps its reason", async () => {
-    stubFetch(() => ({ status: 409, body: { error: "not_at_four" } }));
-    expect(await httpRoomApi.kick(room)).toEqual({ ok: false, error: { code: "not_at_four", retryAfterMs: null, snapshot: null } });
+    stubFetch(() => ({ status: 409, body: { error: "not_owner" } }));
+    expect(await httpRoomApi.kick(room)).toEqual({ ok: false, error: { code: "not_owner", retryAfterMs: null, snapshot: null } });
   });
 
   test("abandoning the room ends its watch, so the observer leaves", () => {

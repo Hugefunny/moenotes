@@ -78,8 +78,9 @@ export type RoomErrorCode =
   /** Rooms cannot be opened right now (`create`). */
   | "bot_unavailable"
   /** The room no longer holds the observer (`leave`). */
+  | "watch_not_found"
   | "not_bot_room"
-  /** The observer can only leave a room that already has four real players (`leave`). */
+  /** A leave refusal from a service that requires four players. */
   | "not_at_four"
   /** The visitor is not signed in, so the room cannot be bound to an account (`create`, `leave`). */
   | "login_required"

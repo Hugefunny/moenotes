@@ -215,7 +215,6 @@ export function createMockRoomApi(pool: MockPool): RoomApi {
       await delay(400);
       const state = created.get(key(createdRoom));
       if (!state || state.room.watchId !== createdRoom.watchId) return { ok: false, error: { code: "not_bot_room", retryAfterMs: null, snapshot: null } };
-      if (state.humans < 4) return { ok: false, error: { code: "not_at_four", retryAfterMs: null, snapshot: null } };
       state.kicked = true;
       // Without the observer the room holds one player fewer, which is what a plain read shows from now on.
       reads.set(`${state.room.region}:${state.room.code}`, room(state.room.code, state.room.region, pool, Date.now(), state.extra, state.humans - 1));

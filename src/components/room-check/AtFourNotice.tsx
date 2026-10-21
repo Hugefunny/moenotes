@@ -10,10 +10,7 @@ export interface AtFourState {
   onKeep: () => void;
 }
 
-/**
- * Four players are in the room this page opened: the observer there can be asked to leave, which is what a room needs
- * before the fifth player joins. The offer stays after it is dismissed, so the room can be watched a little longer.
- */
+/** The room observer can leave at any time; its reminder stays visible while present. */
 export default function AtFourNotice({ locale, state }: { locale: AppLocale; state: AtFourState }) {
   const tr = (key: string) => t(locale, `roomCheck.atFour.${key}`);
   const actions = (
@@ -35,7 +32,7 @@ export default function AtFourNotice({ locale, state }: { locale: AppLocale; sta
     );
   }
   return (
-    <div className="rc-atfour" data-variant="prompt" role="alertdialog" aria-labelledby="rc-atfour-title" aria-describedby="rc-atfour-body">
+    <div className="rc-atfour" data-variant="prompt" role="status" aria-labelledby="rc-atfour-title" aria-describedby="rc-atfour-body">
       <FourIcon />
       <div className="rc-atfour-text">
         <h3 id="rc-atfour-title">{tr("promptTitle")}</h3>

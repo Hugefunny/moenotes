@@ -35,16 +35,20 @@ export default function RoomDetail({ locale, entry, songs, cards, assetUrl, now,
   const retryAt = error?.retryAfterMs != null && entry.errorAt !== null ? entry.errorAt + error.retryAfterMs : null;
   const busy = entry.status === "loading" || entry.status === "queued";
 
+  const removed = entry.created && !entry.watchId;
+  const removedNotice = removed ? <p className="rc-fresh-note" role="status">{t(locale, "roomCheck.atFour.removed")}</p> : null;
   if (!read) {
-    if (error) return <RoomStateCard locale={locale} kind={error.code} code={entry.code} retryAt={retryAt} now={now} onRetry={onRefresh} />;
-    return <RoomStateCard locale={locale} kind="loading" code={entry.code} now={now} />;
+    if (removed) return <div className="rc-detail">{removedNotice}</div>;
+    if (error) return <div className="rc-detail">{banner}<RoomStateCard locale={locale} kind={error.code} code={entry.code} retryAt={retryAt} now={now} onRetry={onRefresh} /></div>;
+    return <div className="rc-detail">{banner}<RoomStateCard locale={locale} kind="loading" code={entry.code} now={now} /></div>;
   }
   const snapshot = read.snapshot;
   return (
     <div className="rc-detail" aria-busy={busy}>
       {banner}
+      {removedNotice}
       <RoomHeader locale={locale} snapshot={snapshot} songs={songs} created={entry.created}>
-        <FreshnessBar locale={locale} snapshot={snapshot} receivedAt={read.receivedAt} now={now} loading={busy} live={live} onRefresh={onRefresh} onLive={onLive} />
+        <FreshnessBar locale={locale} snapshot={snapshot} receivedAt={read.receivedAt} now={now} loading={busy} unavailable={removed} live={live} onRefresh={onRefresh} onLive={onLive} />
       </RoomHeader>
       {error && error.code !== "cooldown" && <RoomStateCard locale={locale} kind={error.code} code={entry.code} compact now={now} retryAt={retryAt} onRetry={onRefresh} />}
       <Players key={`${snapshot.region}:${snapshot.code}`} locale={locale} snapshot={snapshot} songs={songs} cards={cards} assetUrl={assetUrl} changed={changed} />

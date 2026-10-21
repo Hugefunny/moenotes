@@ -103,6 +103,7 @@ export default function CreateRoomCard({ locale, region, onRegion, busy, error, 
           {tr(busy ? "creating" : "submit")}
         </button>
       </div>
+      <p className="rc-form-hint">{t(locale, "roomCheck.atFour.notice")}</p>
       <p id="rc-create-hint" className="rc-form-hint" data-kind={invalid ? "invalid" : undefined} role={invalid ? "alert" : undefined}>
         {invalid ? tr("invalidCode") : tr("hint")}
       </p>
