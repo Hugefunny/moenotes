@@ -6,51 +6,39 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/StarMoe-org/moenotes/server/internal/config"
 	"github.com/StarMoe-org/moenotes/server/internal/siteconfig"
 	"github.com/StarMoe-org/moenotes/server/internal/web"
 )
 
-// TestRoomCheckRoutePrecedesAPIRoute keeps the room-check relay reachable: its paths are under /api/ too, so the
-// route switch has to match them first.
-func TestRoomCheckRoutePrecedesAPIRoute(t *testing.T) {
-	roomCheck := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("X-Relayed", r.URL.Path+"?"+r.URL.RawQuery)
-		_, _ = w.Write([]byte("room-check"))
-	}))
-	defer roomCheck.Close()
+func TestRetiredRoomToolNeverReachesAccountProxy(t *testing.T) {
+	calls := 0
 	account := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls++
 		_, _ = w.Write([]byte(`{"user":null}`))
 	}))
 	defer account.Close()
-
 	cfg := testConfig(t)
 	cfg.APIOrigin = account.URL
-	cfg.RoomCheckOrigin = roomCheck.URL
 	handler := (&Server{cfg: cfg, site: siteconfig.Current(), store: &Store{Roots: &web.RootSource{}}}).routes()
-
-	get := func(path string) *httptest.ResponseRecorder {
-		recorder := httptest.NewRecorder()
-		handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "http://site"+path, nil))
-		return recorder
+	paths := []string{"/api/room-check", "/api/room-check/", "/api/room-check/v1/rooms/create", "/api/room-check/v1/rooms/1234567/watch", "/api/room-check/v1/rooms/1234567/events?watch=old", "/api/room-check/v1/rooms/1234567/probe/leave"}
+	for _, locale := range []string{"", "/zh-tw", "/ja", "/en", "/ko", "/th", "/id", "/vi", "/es", "/pt", "/fr", "/de", "/ru"} {
+		paths = append(paths, locale+"/tools/room-check", locale+"/tools/room-check/")
 	}
-	relayed := get("/api/room-check/v1/rooms/1234567?region=tw")
-	if relayed.Code != http.StatusOK || relayed.Body.String() != "room-check" {
-		t.Fatalf("room-check should be relayed, got %d %q", relayed.Code, relayed.Body.String())
+	for _, path := range paths {
+		for _, method := range []string{http.MethodGet, http.MethodPost, http.MethodDelete} {
+			got := httptest.NewRecorder()
+			handler.ServeHTTP(got, httptest.NewRequest(method, "http://site"+path, nil))
+			if got.Code != http.StatusGone || got.Header().Get("Cache-Control") != "no-store" {
+				t.Errorf("%s %s: got %d, cache=%q", method, path, got.Code, got.Header().Get("Cache-Control"))
+			}
+		}
 	}
-	if got := relayed.Header().Get("X-Relayed"); got != "/v1/rooms/1234567?region=tw" {
-		t.Fatalf("rewritten path: %q", got)
+	if calls != 0 {
+		t.Fatalf("retired requests reached account service %d times", calls)
 	}
-	// The account API keeps receiving the rest of /api/*.
-	me := get("/api/me")
-	if me.Code != http.StatusOK || !strings.Contains(me.Body.String(), `"user":null`) {
-		t.Fatalf("/api/me: %d %q", me.Code, me.Body.String())
-	}
-	invalid := func() *config.Config { c := testConfig(t); c.RoomCheckInvalid = true; return c }()
-	handler = (&Server{cfg: invalid, site: siteconfig.Current(), store: &Store{Roots: &web.RootSource{}}}).routes()
-	recorder := httptest.NewRecorder()
-	handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "http://site/api/room-check/v1/rooms/1234567", nil))
-	if recorder.Code != http.StatusNotFound {
-		t.Fatalf("invalid room-check origin should answer 404, got %d", recorder.Code)
+	me := httptest.NewRecorder()
+	handler.ServeHTTP(me, httptest.NewRequest(http.MethodGet, "http://site/api/me", nil))
+	if me.Code != http.StatusOK || !strings.Contains(me.Body.String(), `"user":null`) || calls != 1 {
+		t.Fatalf("account API should remain available: %d %q calls=%d", me.Code, me.Body.String(), calls)
 	}
 }

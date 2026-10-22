@@ -1827,6 +1827,7 @@ export const zhCN = {
     preview3d: "3D 预览",
     preview3dLabel: "3D 预览 {difficulty} 谱面",
     picker: { title: "选择歌曲", songHint: "点击封面选择这首歌。", hint: "点击难度即可选定该谱面，点击封面则沿用当前难度。", pickSong: "选择《{title}》", pickDifficulty: "选择《{title}》{difficulty}", listLabel: "乐曲清单" },
+    artist: "艺人",
     composer: "作曲",
     lyricist: "作词",
     arranger: "编曲",

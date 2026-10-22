@@ -23,10 +23,6 @@ import (
 const (
 	retryBase = 10 * time.Minute
 	retryMax  = 3 * time.Hour
-
-	// defaultRoomCheckOrigin is the site's room-check service, used when
-	// MOENOTES_ROOM_CHECK_INTERNAL is unset.
-	defaultRoomCheckOrigin = "https://room.bdon.moe"
 )
 
 type failure struct {
@@ -97,11 +93,6 @@ func (s *Server) Handler() http.Handler { return s.handler }
 func (s *Server) routes() http.Handler {
 	static := &web.Static{Roots: s.store.Roots, Site: s.site}
 	api := &web.APIProxy{Origin: s.cfg.APIOrigin, Client: &http.Client{}}
-	roomCheckOrigin := s.cfg.RoomCheckOrigin
-	if roomCheckOrigin == "" && !s.cfg.RoomCheckInvalid {
-		roomCheckOrigin = defaultRoomCheckOrigin
-	}
-	roomCheck := &web.RoomCheckProxy{Origin: roomCheckOrigin, Key: s.cfg.RoomCheckKey, APIOrigin: s.cfg.APIOrigin, Client: &http.Client{}}
 	players := &web.PlayerPages{Roots: s.store.Roots, Site: s.site, APIOrigin: s.cfg.APIOrigin, Client: &http.Client{}, Fallback: static}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
@@ -126,9 +117,10 @@ func (s *Server) routes() http.Handler {
 		case path == "/_moenotes/status":
 			w.Header().Set("Cache-Control", "no-store")
 			writeJSON(w, s.status())
-		case web.IsRoomCheckPath(path):
-			// Room Check also works before the first build, and its paths are under /api/, so they are matched first.
-			roomCheck.ServeHTTP(w, r)
+		case web.IsRetiredRoomCheckPath(path):
+			// Reject old clients before the generic API proxy or cached static pages.
+			w.Header().Set("Cache-Control", "no-store")
+			http.Error(w, http.StatusText(http.StatusGone), http.StatusGone)
 		case web.IsAPIPath(path):
 			// The account API works before the first build too: it does not depend on the site output.
 			api.ServeHTTP(w, r)
@@ -213,20 +205,6 @@ func (s *Server) Run(ctx context.Context) error {
 	} else if s.cfg.APIOrigin != "" {
 		logx.Printf("forwarding /api/* to %s", s.cfg.APIOrigin)
 	}
-	if s.cfg.RoomCheckInvalid {
-		logx.Printf("MOENOTES_ROOM_CHECK_INTERNAL is not an absolute http(s) URL; /api/room-check/* is disabled")
-	} else {
-		origin := s.cfg.RoomCheckOrigin
-		if origin == "" {
-			origin = defaultRoomCheckOrigin
-		}
-		key := "no shared key"
-		if s.cfg.RoomCheckKey != "" {
-			key = "shared key set"
-		}
-		logx.Printf("forwarding /api/room-check/* to %s (%s)", origin, key)
-	}
-
 	scheduled := make(chan struct{})
 	go func() {
 		defer close(scheduled)

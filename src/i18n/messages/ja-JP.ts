@@ -1817,6 +1817,7 @@ export const jaJP = {
     preview3d: "3D プレビュー",
     preview3dLabel: "{difficulty} 譜面を 3D プレビュー",
     picker: { title: "楽曲を選ぶ", songHint: "ジャケットをクリックして楽曲を選びます。", hint: "難易度をクリックするとその譜面を選択し、ジャケットをクリックすると現在の難易度のまま選択します。", pickSong: "「{title}」を選択", pickDifficulty: "「{title}」{difficulty} を選択", listLabel: "楽曲リスト" },
+    artist: "アーティスト",
     composer: "作曲",
     lyricist: "作詞",
     arranger: "編曲",

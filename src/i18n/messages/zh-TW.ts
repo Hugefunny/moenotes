@@ -1826,6 +1826,7 @@ export const zhTW = {
     preview3d: "3D 預覽",
     preview3dLabel: "3D 預覽 {difficulty} 譜面",
     picker: { title: "選擇歌曲", songHint: "點擊封面選擇這首歌。", hint: "點擊難度即可選定該譜面，點擊封面則沿用目前難度。", pickSong: "選擇《{title}》", pickDifficulty: "選擇《{title}》{difficulty}", listLabel: "樂曲清單" },
+    artist: "藝人",
     composer: "作曲",
     lyricist: "作詞",
     arranger: "編曲",

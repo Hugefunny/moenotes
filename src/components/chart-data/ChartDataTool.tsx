@@ -12,7 +12,8 @@ import { fetchMusicData } from "@/lib/chart-data/client";
 import { DIFFICULTIES, perMinute, scoreRate } from "@/lib/chart-data/ranking";
 import { inPool, parseChartDataQuery, playScenario, serializeChartDataQuery, VIEWS, type ChartDataState, type QueryContext, type View } from "@/lib/chart-data/query";
 import { scenarioSupport } from "@/lib/chart-data/scenario";
-import { localizeDataText } from "@/lib/chart-data/text";
+import { useForceJapaneseTitles } from "@/lib/music/title-preference";
+import { localizeDataSongTitle, localizeDataText } from "@/lib/chart-data/text";
 import type { MusicData } from "@/lib/chart-data/types";
 import { chartSnapProfile, snapDisplayedMeasurement, snapMeasurementPlan } from "@/lib/chart-data/snap-profile";
 import { createSnapLegalityContext } from "@/lib/chart-data/snap-legality";
@@ -48,6 +49,7 @@ const BackgroundChartsView = memo(ChartsView, (_, next) => detailOpen(next.ctx))
  */
 export default function ChartDataTool({ locale, guide }: Props) {
   const tr = useCallback((key: string, values?: Record<string, string | number>) => t(locale, `chartData.${key}`, values), [locale]);
+  const forceJapaneseTitles = useForceJapaneseTitles();
   const [load, setLoad] = useState<Load>({ status: "loading" });
   const [attempt, setAttempt] = useState(0);
   const [view, setView] = useState<View>("rank");
@@ -147,7 +149,7 @@ export default function ChartDataTool({ locale, guide }: Props) {
       state: current,
       update,
       skills,
-      title: (r) => localizeDataText(r.title, locale) || String(r.musicId),
+      title: (r) => localizeDataSongTitle(r.title, locale, forceJapaneseTitles) || String(r.musicId),
       bandName: (r) => localizeDataText(r.bandName, locale) || localizeDataText(bandOf(r)?.name, locale),
       bandColor: (r) => bandOf(r)?.mainColor ?? "var(--md-sys-color-on-surface-variant)",
       jacketUrl: (r) => (r.song.jacket ? getMusicJacketUrl(r.song.jacket) : null),
@@ -161,7 +163,7 @@ export default function ChartDataTool({ locale, guide }: Props) {
       pool: rows.filter((r) => inPool(r, current)),
       snap: snapEvaluation ? { active: snapActive, profile: snapEvaluation.profile, measurement: snapDisplayedMeasurement(snapEvaluation, snapSource, snapMeasurement, snapAnalysis), source: snapSource, analysis: snapAnalysis } : undefined,
     };
-  }, [data, current, rows, locale, tr, hasStats, support, update, snapEvaluation, snapActive, snapMeasurement, snapSource, snapAnalysis]);
+  }, [data, current, rows, locale, forceJapaneseTitles, tr, hasStats, support, update, snapEvaluation, snapActive, snapMeasurement, snapSource, snapAnalysis]);
 
   const detail = ctx && current?.chart ? ctx.byScore.get(current.chart) ?? null : null;
 
