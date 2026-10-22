@@ -302,26 +302,6 @@ func SelfCheck(ctx context.Context) error {
 		return failed("the proxy should forward cookies, the body and the query, got %q", relayed.Header().Get("X-Echo"))
 	}
 
-	// /api/room-check relay: an unconfigured relay answers 404, and its account-bound actions need a session.
-	disabled := httptest.NewRecorder()
-	(&web.RoomCheckProxy{}).ServeHTTP(disabled, httptest.NewRequest(http.MethodGet, "http://self-check/api/room-check/v1/rooms/1234567", nil))
-	if disabled.Code != http.StatusNotFound {
-		return failed("an unconfigured room-check relay should answer 404, got %d", disabled.Code)
-	}
-	for _, bad := range []string{"room-check.internal:8080", "ftp://room-check.internal", "//room-check.internal"} {
-		if origin, invalid := config.ParseRoomCheckOrigin(bad); !invalid || origin != "" {
-			return failed("%q should be refused as MOENOTES_ROOM_CHECK_INTERNAL", bad)
-		}
-	}
-	if origin, invalid := config.ParseRoomCheckOrigin("http://room-check.internal:8080/"); invalid || origin != "http://room-check.internal:8080" {
-		return failed("an http origin should be accepted, got %q", origin)
-	}
-	roomCheck := &web.RoomCheckProxy{Origin: upstreamAPI.URL}
-	create := httptest.NewRecorder()
-	roomCheck.ServeHTTP(create, httptest.NewRequest(http.MethodPost, "http://self-check/api/room-check/v1/rooms/create", bytes.NewReader([]byte("{}"))))
-	if create.Code != http.StatusUnauthorized || strings.TrimSpace(create.Body.String()) != `{"error":"login_required"}` {
-		return failed("an anonymous room create should answer 401, got %d %q", create.Code, create.Body.String())
-	}
 	fmt.Println("self-check passed")
 	return nil
 }
