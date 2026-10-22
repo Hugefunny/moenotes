@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import type { AppLocale } from "@/config/locales";
 import { t } from "@/i18n";
-import BaseFilters, { AttributeFilter, BandFilter, FilterButton, FilterSection, RangeFilter, toggleArrayItem } from "@/components/shared/BaseFilters";
+import BaseFilters, { AttributeFilter, FilterButton, FilterSection, RangeFilter, toggleArrayItem } from "@/components/shared/BaseFilters";
 import { difficultyStyles } from "@/components/music/difficulty-styles";
 import { sortEntries } from "@/lib/filter/list-sort";
 import { useListSort, type NumericSortField } from "@/lib/filter/use-list-sort";
@@ -123,8 +123,6 @@ interface MusicFiltersProps {
   onReset?: () => void;
 }
 
-/** Credit options shown before "show all". */
-const CREDIT_PREVIEW = 10;
 
 export default function MusicFilters({ locale, controller, variant = "plain", onReset }: MusicFiltersProps) {
   const { songs, filters, setFilters, sort, bands, hasOtherBand, levelBounds, categories, credits, filtered, hasActiveFilters, reset } = controller;
@@ -157,12 +155,12 @@ export default function MusicFilters({ locale, controller, variant = "plain", on
         getAttributeLabel={(value) => t(locale, `cards.attributes.${value}`)}
       />
 
-      <BandFilter
-        title={t(locale, "cards.band")}
-        bands={bands}
-        selectedBands={filters.bands}
-        onChange={(selected) => setFilters((current) => ({ ...current, bands: selected }))}
-        extraOption={hasOtherBand ? { id: MUSIC_OTHER_BAND, label: t(locale, "music.filters.bandOther") } : undefined}
+      <PeopleDropdown
+        title={t(locale, "music.artist")}
+        options={[...bands.map(([id, name]) => ({ value: String(id), label: name })),
+          ...(hasOtherBand ? [{ value: String(MUSIC_OTHER_BAND), label: t(locale, "music.filters.bandOther") }] : [])]}
+        selected={filters.bands.map(String)}
+        onChange={(selected) => setFilters((current) => ({ ...current, bands: selected.map(Number) }))}
       />
 
       {categories.length > 1 && (
@@ -225,7 +223,6 @@ export default function MusicFilters({ locale, controller, variant = "plain", on
       {MUSIC_CREDIT_FIELDS.map((field) => credits[field].length > 0 && (
         <CreditFilter
           key={field}
-          locale={locale}
           title={t(locale, `music.${field}`)}
           options={credits[field]}
           selected={filters[CREDIT_FILTER_KEYS[field]]}
@@ -240,38 +237,45 @@ function CountBadge({ count }: { count: number }) {
   return <span className="ml-1.5 font-mono text-label-small opacity-70">{count}</span>;
 }
 
-/** People of one credit field, most credited first; the rest behind "show all" (selected ones always shown). */
-function CreditFilter({ locale, title, options, selected, onChange }: {
-  locale: AppLocale;
+/** Compact searchable dropdowns retain the existing multi-selection semantics. */
+function PeopleDropdown({ title, options, selected, onChange }: {
+  title: string;
+  options: ReadonlyArray<{ value: string; label: string; count?: number }>;
+  selected: readonly string[];
+  onChange: (values: string[]) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const shown = options.filter((option) => option.label.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
+  const selection = selected.map((value) => options.find((option) => option.value === value)?.label ?? value).join(", ");
+  return (
+    <FilterSection title={title}>
+      <details className="relative w-full">
+        <summary aria-label={title} className="cursor-pointer truncate rounded-shape-sm border border-outline-variant px-3 py-2" title={selection || title}>
+          {selection || "ALL"}
+        </summary>
+        <div className="mt-1 rounded-shape-sm border border-outline-variant bg-surface-container p-2 shadow-md">
+          <input type="search" aria-label={title} value={query} onChange={(event) => setQuery(event.target.value)} className="md3-input mb-2 w-full" />
+          <FilterButton active={selected.length === 0} onClick={() => { onChange([]); setQuery(""); }}>ALL</FilterButton>
+          <div className="max-h-48 overflow-y-auto">
+            {shown.map((option) => (
+              <label key={option.value} className="flex cursor-pointer items-center gap-2 rounded-shape-sm px-2 py-2 hover:bg-surface-container-high">
+                <input type="checkbox" className="md3-checkbox" checked={selected.includes(option.value)} onChange={() => onChange(toggleArrayItem(selected, option.value))} />
+                <span>{option.label}</span>
+                {option.count !== undefined && <CountBadge count={option.count} />}
+              </label>
+            ))}
+          </div>
+        </div>
+      </details>
+    </FilterSection>
+  );
+}
+
+function CreditFilter({ title, options, selected, onChange }: {
   title: string;
   options: ReadonlyArray<{ name: string; count: number }>;
   selected: readonly string[];
   onChange: (names: string[]) => void;
 }) {
-  const [expanded, setExpanded] = useState(false);
-  const shown = expanded ? options : options.filter((option, index) => index < CREDIT_PREVIEW || selected.includes(option.name));
-  const hidden = options.length - shown.length;
-  return (
-    <FilterSection title={title}>
-      <div className="flex flex-wrap gap-2">
-        <FilterButton active={selected.length === 0} onClick={() => onChange([])}>ALL</FilterButton>
-        {shown.map((option) => (
-          <FilterButton key={option.name} active={selected.includes(option.name)} onClick={() => onChange(toggleArrayItem(selected, option.name))}>
-            {option.name}
-            <CountBadge count={option.count} />
-          </FilterButton>
-        ))}
-        {(hidden > 0 || expanded) && options.length > CREDIT_PREVIEW && (
-          <button
-            type="button"
-            onClick={() => setExpanded((value) => !value)}
-            aria-expanded={expanded}
-            className="md3-button md3-button--text md3-button--small"
-          >
-            {expanded ? t(locale, "music.filters.showFewer") : t(locale, "music.filters.showAll", { count: options.length })}
-          </button>
-        )}
-      </div>
-    </FilterSection>
-  );
+  return <PeopleDropdown title={title} options={options.map(({ name, count }) => ({ value: name, label: name, count }))} selected={selected} onChange={onChange} />;
 }

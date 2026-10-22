@@ -16,3 +16,9 @@ export function localizeDataText(text: DataText | null | undefined, locale: AppL
   if (text.ko !== undefined) row.korean = text.ko;
   return localizeMasterText(row, locale);
 }
+
+/** Song titles obey the shared Japanese-title preference, falling back to the locale when Japanese is absent. */
+export function localizeDataSongTitle(text: DataText | null | undefined, locale: AppLocale, forceJapanese: boolean): string {
+  const japanese = text?.ja ? localizeDataText({ ja: text.ja }, "ja-JP") : "";
+  return (forceJapanese && japanese) || localizeDataText(text, locale);
+}

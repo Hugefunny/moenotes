@@ -1783,6 +1783,7 @@ export const enUS = {
     preview3d: "3D preview",
     preview3dLabel: "Preview the {difficulty} chart in 3D",
     picker: { title: "Choose a song", songHint: "Click a cover to pick that song.", hint: "Click a difficulty to pick that chart, or the cover to keep the current difficulty.", pickSong: "Choose {title}", pickDifficulty: "Choose {title} {difficulty}", listLabel: "Song list" },
+    artist: "Artist",
     composer: "Composer",
     lyricist: "Lyricist",
     arranger: "Arranger",
