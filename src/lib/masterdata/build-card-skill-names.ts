@@ -1,3 +1,5 @@
+import { liveCategory, supportCategories, type SkillFilterCatalog } from "@/lib/filter/skill-category";
+import type { GameServer } from "@/config/servers";
 import type { AppLocale } from "@/config/locales";
 import type { RawSkillDefinition } from "@/lib/cards/skills";
 import { eachServer, memo, table, texts } from "@/lib/masterdata/build-core";
@@ -9,20 +11,29 @@ import { localizeMasterText } from "@/lib/masterdata/localize-text";
  */
 
 export interface CardSkillNames {
+  filters?: Partial<Record<GameServer, SkillFilterCatalog>>;
   live: Record<string, string>;
   support: Record<string, string>;
 }
 
 export function getBuildCardSkillNames(locale: AppLocale): Promise<CardSkillNames> {
   return memo(`card-skill-names:${locale}`, async () => {
-    const names: CardSkillNames = { live: {}, support: {} };
+    const names: CardSkillNames = { live: {}, support: {}, filters: {} };
     const perServer = await eachServer((server) => Promise.all([
       table<RawSkillDefinition>("MasterLiveSkill.json", server).catch(() => ({ _allData: [] as RawSkillDefinition[] })),
       table<RawSkillDefinition>("MasterSupportSkill.json", server).catch(() => ({ _allData: [] as RawSkillDefinition[] })),
       texts(server),
+      table<RawSkillDefinition & { gekisouMissionType: number }>("MasterGekisouSkill.json", server),
+      table<RawSkillDefinition & { gekisouMissionType: number }>("MasterGekisouSupportSkill.json", server),
     ]));
-    for (const [, [live, support, textTable]] of perServer) {
+    for (const [server, [live, support, textTable, gekisou, gekisouSupport]] of perServer) {
       const textMap = new Map(textTable._allData.map((row) => [row.id, row]));
+      names.filters![server] = {
+        live: Object.fromEntries(live._allData.map((skill) => [skill.id, liveCategory(textMap.get(skill.descriptionTextFormatID)?.japanese ?? "")])),
+        support: Object.fromEntries(support._allData.map((skill) => [skill.id, supportCategories((skill as RawSkillDefinition & { displaySkillCategories?: number[] }).displaySkillCategories, skill.skillIconID)])),
+        gekisou: Object.fromEntries(gekisou._allData.map((skill) => [skill.id, [skill.gekisouMissionType].filter((id) => [1, 2, 3].includes(id))])),
+        gekisouSupport: Object.fromEntries(gekisouSupport._allData.map((skill) => [skill.id, [skill.gekisouMissionType].filter((id) => [1, 2, 3].includes(id))])),
+      };
       for (const [target, rows] of [[names.live, live._allData], [names.support, support._allData]] as const) {
         for (const skill of rows) {
           const key = String(skill.id);

@@ -39,7 +39,14 @@ export default function SupportCardsExplorer({ locale, servers, initialSupportCa
   }, [cards, showSpoiler, now]);
   const skillOf = useCallback((card: SupportCardViewModel) => skillNames.support[String(card.supportSkillId01)] ?? "", [skillNames]);
   const numericSort = useMemo(() => ({ fields: CARD_SORT_FIELDS, read: cardSortReaders(skillOf, Object.values(skillNames.support), locale) }), [skillOf, skillNames, locale]);
-  const controller = useCardFilters(visibleCards, locale, "support-cards", supportCardSubject, { numericSort });
+  const describe = useCallback((card: SupportCardViewModel) => {
+    const catalog = skillNames.filters?.[server];
+    return { ...supportCardSubject(card),
+      skillCategories: [...(catalog?.support[String(card.supportSkillId01)] ?? []), ...(catalog?.support[String(card.supportSkillId02)] ?? [])],
+      skillMissions: [...(catalog?.gekisouSupport[String(card.gekisouSupportSkillId01)] ?? []), ...(catalog?.gekisouSupport[String(card.gekisouSupportSkillId02)] ?? [])],
+    };
+  }, [skillNames, server]);
+  const controller = useCardFilters(visibleCards, locale, "support-cards", describe, { numericSort });
   const { filters, setFilters, sorted, filtered, reset, hasActiveFilters, bands, characters } = controller;
   const [view, setView] = useCardView("support-cards");
 
@@ -77,7 +84,7 @@ export default function SupportCardsExplorer({ locale, servers, initialSupportCa
     memory.clearState();
   };
 
-  useQuickFilter(t(locale, "supportCards.filterTitle"), <CardFilters locale={locale} controller={controller} kind="support" onReset={resetFilters} />, [
+  useQuickFilter(t(locale, "supportCards.filterTitle"), <CardFilters locale={locale} controller={controller} kind="support" skillFilters onReset={resetFilters} />, [
     controller.sort.value,
     filters,
     bands,

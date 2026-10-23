@@ -3196,6 +3196,7 @@ export const zhTW = {
       description: "Moenotes 會在你的瀏覽器裡保存哪些資料、為什麼保存，以及登入 StarMoe Passport 後涉及的帳號資訊說明。",
     },
   },
+  skillFilters: {"all": "全部", "live": "演出技能", "support": "演出支援", "gekisou": "激奏技能", "gekisouSupport": "激奏支援", "simple": "簡單", "life": "生命值", "judgement": "判定", "score": "提升得分", "recovery": "LIFE回復", "judgementSupport": "強化判定", "just": "JUST", "combo": "COMBO", "luck": "LUCK"},
   pageTitleHighlights: {
     search: "搜尋",
     events: "活動",

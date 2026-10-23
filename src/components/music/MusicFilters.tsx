@@ -1,7 +1,10 @@
+import TextField from "@mui/material/TextField";
+import MenuItem from "@mui/material/MenuItem";
+import { Md3Provider } from "@/components/md3/Md3Provider";
 import { useCallback, useMemo, useState } from "react";
 import type { AppLocale } from "@/config/locales";
 import { t } from "@/i18n";
-import BaseFilters, { AttributeFilter, FilterButton, FilterSection, RangeFilter, toggleArrayItem } from "@/components/shared/BaseFilters";
+import BaseFilters, { AttributeFilter, BandFilter, FilterButton, FilterSection, RangeFilter, toggleArrayItem } from "@/components/shared/BaseFilters";
 import { difficultyStyles } from "@/components/music/difficulty-styles";
 import { sortEntries } from "@/lib/filter/list-sort";
 import { useListSort, type NumericSortField } from "@/lib/filter/use-list-sort";
@@ -155,12 +158,12 @@ export default function MusicFilters({ locale, controller, variant = "plain", on
         getAttributeLabel={(value) => t(locale, `cards.attributes.${value}`)}
       />
 
-      <PeopleDropdown
-        title={t(locale, "music.artist")}
-        options={[...bands.map(([id, name]) => ({ value: String(id), label: name })),
-          ...(hasOtherBand ? [{ value: String(MUSIC_OTHER_BAND), label: t(locale, "music.filters.bandOther") }] : [])]}
-        selected={filters.bands.map(String)}
-        onChange={(selected) => setFilters((current) => ({ ...current, bands: selected.map(Number) }))}
+      <BandFilter
+        title={t(locale, "cards.band")}
+        bands={bands}
+        selectedBands={filters.bands}
+        onChange={(selected) => setFilters((current) => ({ ...current, bands: selected }))}
+        extraOption={hasOtherBand ? { id: MUSIC_OTHER_BAND, label: t(locale, "music.filters.bandOther") } : undefined}
       />
 
       {categories.length > 1 && (
@@ -237,36 +240,27 @@ function CountBadge({ count }: { count: number }) {
   return <span className="ml-1.5 font-mono text-label-small opacity-70">{count}</span>;
 }
 
-/** Compact searchable dropdowns retain the existing multi-selection semantics. */
+/** Compact popup multi-selects retain the existing multi-selection semantics. */
 function PeopleDropdown({ title, options, selected, onChange }: {
   title: string;
   options: ReadonlyArray<{ value: string; label: string; count?: number }>;
   selected: readonly string[];
   onChange: (values: string[]) => void;
 }) {
-  const [query, setQuery] = useState("");
-  const shown = options.filter((option) => option.label.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
-  const selection = selected.map((value) => options.find((option) => option.value === value)?.label ?? value).join(", ");
   return (
     <FilterSection title={title}>
-      <details className="relative w-full">
-        <summary aria-label={title} className="cursor-pointer truncate rounded-shape-sm border border-outline-variant px-3 py-2" title={selection || title}>
-          {selection || "ALL"}
-        </summary>
-        <div className="mt-1 rounded-shape-sm border border-outline-variant bg-surface-container p-2 shadow-md">
-          <input type="search" aria-label={title} value={query} onChange={(event) => setQuery(event.target.value)} className="md3-input mb-2 w-full" />
-          <FilterButton active={selected.length === 0} onClick={() => { onChange([]); setQuery(""); }}>ALL</FilterButton>
-          <div className="max-h-48 overflow-y-auto">
-            {shown.map((option) => (
-              <label key={option.value} className="flex cursor-pointer items-center gap-2 rounded-shape-sm px-2 py-2 hover:bg-surface-container-high">
-                <input type="checkbox" className="md3-checkbox" checked={selected.includes(option.value)} onChange={() => onChange(toggleArrayItem(selected, option.value))} />
-                <span>{option.label}</span>
-                {option.count !== undefined && <CountBadge count={option.count} />}
-              </label>
-            ))}
-          </div>
-        </div>
-      </details>
+      <Md3Provider>
+        <TextField select fullWidth size="small" value={[...selected]}
+          onChange={(event) => { const value = event.target.value as unknown; const values: string[] = Array.isArray(value) ? value : String(value).split(","); onChange(values.includes("__all__") ? [] : values); }}
+          slotProps={{ select: { multiple: true, displayEmpty: true,
+            renderValue: (value) => (value as string[]).map((id) => options.find((option) => option.value === id)?.label ?? id).join(", ") || "ALL" },
+            htmlInput: { "aria-label": title } }}>
+          <MenuItem value="__all__" selected={selected.length === 0}>ALL</MenuItem>
+          {options.map((option) => <MenuItem key={option.value} value={option.value}>
+            {option.label}{option.count !== undefined && <CountBadge count={option.count} />}
+          </MenuItem>)}
+        </TextField>
+      </Md3Provider>
     </FilterSection>
   );
 }

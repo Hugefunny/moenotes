@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import type { AppLocale } from "@/config/locales";
 import { t } from "@/i18n";
-import BaseFilters, { AttributeFilter, BandFilter, CharacterFilter, RarityFilter } from "@/components/shared/BaseFilters";
+import BaseFilters, { AttributeFilter, BandFilter, CharacterFilter, RarityFilter, FilterSection, FilterButton, toggleArrayItem } from "@/components/shared/BaseFilters";
 import { getSupportCardTypeIconUrl, getSupportRarityIconUrl } from "@/lib/support-cards/assets";
 import {
   EMPTY_CARD_FILTERS,
@@ -95,6 +95,7 @@ interface CardFiltersProps<T> {
   locale: AppLocale;
   controller: CardFiltersController<T>;
   kind: CardFilterKind;
+  skillFilters?: boolean;
   variant?: "card" | "plain";
   title?: string;
   searchPlaceholder?: string;
@@ -105,7 +106,7 @@ interface CardFiltersProps<T> {
 }
 
 /** The member / support card list's filter panel, shared by the list pages and the card pickers. */
-export default function CardFilters<T>({ locale, controller, kind, variant = "plain", title, searchPlaceholder, onReset, children }: CardFiltersProps<T>) {
+export default function CardFilters<T>({ locale, controller, kind, skillFilters = false, variant = "plain", title, searchPlaceholder, onReset, children }: CardFiltersProps<T>) {
   const { items, filters, setFilters, sort, bands, characters, filtered, hasActiveFilters, toggleBand, reset } = controller;
   const pack = kind === "member" ? "cards" : "supportCards";
   const support = kind === "support";
@@ -159,6 +160,22 @@ export default function CardFilters<T>({ locale, controller, kind, variant = "pl
         onChange={(selected) => setFilters((current) => ({ ...current, characters: selected }))}
       />
 
+      {skillFilters && (["skillCategories", "skillMissions"] as const).map((field) => {
+        const selected = filters[field] ?? [];
+        const labels = field === "skillCategories" ? (support ? ["score", "recovery", "judgementSupport"] : ["simple", "life", "judgement"]) : ["combo", "luck", "just"];
+        const ids = field === "skillMissions" ? [3, 1, 2] : [1, 2, 3];
+        const title = field === "skillCategories" ? (support ? "support" : "live") : (support ? "gekisouSupport" : "gekisou");
+        return <FilterSection key={field} title={t(locale, `skillFilters.${title}`)}>
+          <div className="flex flex-wrap gap-2">
+            <FilterButton active={!selected.length} onClick={() => setFilters((current) => ({ ...current, [field]: [] }))}>{t(locale, "skillFilters.all")}</FilterButton>
+            {ids.map((id) => <FilterButton key={id} active={!selected.length || selected.includes(id)} onClick={() => setFilters((current) => {
+              const values = current[field]?.length ? current[field]!.filter((id) => id !== 0) : [1, 2, 3];
+              const next = toggleArrayItem(values, id);
+              return { ...current, [field]: next.length === 3 ? [] : next.length ? next : [0] };
+            })}>{t(locale, `skillFilters.${labels[id - 1]}`)}</FilterButton>)}
+          </div>
+        </FilterSection>;
+      })}
       {children}
     </BaseFilters>
   );
