@@ -167,7 +167,6 @@ export default function CardFilters<T>({ locale, controller, kind, skillFilters 
         const title = field === "skillCategories" ? (support ? "support" : "live") : (support ? "gekisouSupport" : "gekisou");
         return <FilterSection key={field} title={t(locale, `skillFilters.${title}`)}>
           <div className="flex flex-wrap gap-2">
-            <FilterButton active={!selected.length} onClick={() => setFilters((current) => ({ ...current, [field]: [] }))}>{t(locale, "skillFilters.all")}</FilterButton>
             {ids.map((id) => <FilterButton key={id} active={!selected.length || selected.includes(id)} onClick={() => setFilters((current) => {
               const values = current[field]?.length ? current[field]!.filter((id) => id !== 0) : [1, 2, 3];
               const next = toggleArrayItem(values, id);
