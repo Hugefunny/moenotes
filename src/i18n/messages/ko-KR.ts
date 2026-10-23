@@ -3142,6 +3142,7 @@ export const koKR = {
       description: "Moenotes가 브라우저에 저장하는 데이터와 그 목적, 접속 통계, StarMoe Passport로 로그인할 때 다루는 계정 정보 안내.",
     },
   },
+  skillFilters: {"all": "전체", "live": "라이브 스킬", "support": "라이브 서포트", "gekisou": "격주 스킬", "gekisouSupport": "격주 서포트", "simple": "심플", "life": "라이프", "judgement": "판정", "score": "점수 증가", "recovery": "LIFE 회복", "judgementSupport": "판정 강화", "just": "JUST", "combo": "COMBO", "luck": "LUCK"},
   pageTitleHighlights: {
     search: "검색",
     events: "이벤트",

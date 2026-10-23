@@ -3153,6 +3153,7 @@ export const enUS = {
       description: "What Moenotes stores and why: browser storage, analytics and the data of a signed-in StarMoe Passport.",
     },
   },
+  skillFilters: {"all": "All", "live": "Live skill", "support": "Live support", "gekisou": "Gekisou skill", "gekisouSupport": "Gekisou support", "simple": "Simple", "life": "Life", "judgement": "Judgement", "score": "Score boost", "recovery": "LIFE recovery", "judgementSupport": "Judgement boost", "just": "JUST", "combo": "COMBO", "luck": "LUCK"},
   pageTitleHighlights: {
     search: "Search",
     events: "Events",

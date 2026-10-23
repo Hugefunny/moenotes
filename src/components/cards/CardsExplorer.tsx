@@ -39,7 +39,14 @@ export default function CardsExplorer({ locale, initialCards, servers, skillName
   }, [cards, showSpoiler, now]);
   const skillOf = useCallback((card: CardViewModel) => skillNames.live[String(card.liveSkillId)] ?? "", [skillNames]);
   const numericSort = useMemo(() => ({ fields: CARD_SORT_FIELDS, read: cardSortReaders(skillOf, Object.values(skillNames.live), locale) }), [skillOf, skillNames, locale]);
-  const controller = useCardFilters(visibleCards, locale, "cards", memberCardSubject, { numericSort });
+  const describe = useCallback((card: CardViewModel) => {
+    const catalog = skillNames.filters?.[server];
+    return { ...memberCardSubject(card),
+      skillCategories: catalog?.live[String(card.liveSkillId)] ?? [],
+      skillMissions: catalog?.gekisou[String(card.gekisouSkillId)] ?? [],
+    };
+  }, [skillNames, server]);
+  const controller = useCardFilters(visibleCards, locale, "cards", describe, { numericSort });
   const { filters, setFilters, sorted, filtered, reset, hasActiveFilters, bands, characters } = controller;
   const [view, setView] = useCardView("cards");
 
@@ -77,7 +84,7 @@ export default function CardsExplorer({ locale, initialCards, servers, skillName
     memory.clearState();
   };
 
-  useQuickFilter(t(locale, "cards.filterTitle"), <CardFilters locale={locale} controller={controller} kind="member" onReset={resetFilters} />, [
+  useQuickFilter(t(locale, "cards.filterTitle"), <CardFilters locale={locale} controller={controller} kind="member" skillFilters onReset={resetFilters} />, [
     controller.sort.value,
     filters,
     bands,

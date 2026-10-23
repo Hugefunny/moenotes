@@ -13,9 +13,13 @@ export interface CardFilterSubject {
   bandName: string;
   characters: readonly { id: number; name: string }[];
   searchText: string;
+  skillCategories?: readonly number[];
+  skillMissions?: readonly number[];
 }
 
 export interface CardFilterState {
+  skillCategories?: number[];
+  skillMissions?: number[];
   query: string;
   rarities: number[];
   cardTypes: number[];
@@ -26,13 +30,15 @@ export interface CardFilterState {
 export const EMPTY_CARD_FILTERS: CardFilterState = { query: "", rarities: [], cardTypes: [], bands: [], characters: [] };
 
 export function hasCardFilters(state: CardFilterState): boolean {
-  return Boolean(state.query.trim()) || state.rarities.length > 0 || state.cardTypes.length > 0 || state.bands.length > 0 || state.characters.length > 0;
+  return (state.skillCategories?.length ?? 0) > 0 || (state.skillMissions?.length ?? 0) > 0 || Boolean(state.query.trim()) || state.rarities.length > 0 || state.cardTypes.length > 0 || state.bands.length > 0 || state.characters.length > 0;
 }
 
 const normalized = (text: string) => text.normalize("NFKC").toLocaleLowerCase().replace(/\s+/g, " ").trim();
 
 /** Every search word must appear (in any order). */
 export function matchesCardFilters(subject: CardFilterSubject, state: CardFilterState): boolean {
+  if (state.skillCategories?.length && !subject.skillCategories?.some((id) => state.skillCategories!.includes(id))) return false;
+  if (state.skillMissions?.length && !subject.skillMissions?.some((id) => state.skillMissions!.includes(id))) return false;
   if (state.rarities.length > 0 && !state.rarities.includes(subject.rarity)) return false;
   if (state.cardTypes.length > 0 && !state.cardTypes.includes(subject.cardType)) return false;
   if (state.bands.length > 0 && !state.bands.includes(subject.bandId)) return false;
@@ -94,6 +100,8 @@ export function parseCardFilterState(raw: string | undefined): CardFilterState {
     const parsed = JSON.parse(raw) as Partial<CardFilterState>;
     const numbers = (value: unknown) => Array.isArray(value) ? value.filter((entry): entry is number => typeof entry === "number") : [];
     return {
+      ...(Array.isArray(parsed.skillCategories) ? { skillCategories: numbers(parsed.skillCategories).filter((id) => [0, 1, 2, 3].includes(id)) } : {}),
+      ...(Array.isArray(parsed.skillMissions) ? { skillMissions: numbers(parsed.skillMissions).filter((id) => [0, 1, 2, 3].includes(id)) } : {}),
       query: typeof parsed.query === "string" ? parsed.query : "",
       rarities: numbers(parsed.rarities),
       cardTypes: numbers(parsed.cardTypes),

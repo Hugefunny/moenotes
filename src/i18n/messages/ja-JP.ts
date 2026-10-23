@@ -3187,6 +3187,7 @@ export const jaJP = {
       description: "Moenotes がブラウザに保存するデータとその目的、アクセス解析、StarMoe Passport でログインした際のアカウント情報について。",
     },
   },
+  skillFilters: {"all": "すべて", "live": "ライブスキル", "support": "ライブサポート", "gekisou": "撃奏スキル", "gekisouSupport": "撃奏サポート", "simple": "シンプル", "life": "ライフ", "judgement": "判定", "score": "スコアアップ", "recovery": "LIFE回復", "judgementSupport": "判定強化", "just": "JUST", "combo": "COMBO", "luck": "LUCK"},
   pageTitleHighlights: {
     search: "検索",
     events: "イベント",
