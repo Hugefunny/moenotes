@@ -316,8 +316,6 @@ export const enUS = {
       "constraintsTitle": "Cards used in searches",
       "constraintDescription": "Require or exclude cards for this search. Ownership in your card box stays unchanged.",
       "constraintKind": "Card kind",
-      "constraintCount": "{filtered} / {total} cards",
-      "constraintEmpty": "No cards match these filters.",
     },
     "catalogueResults": "{count} cards",
     "alreadyInBox": "Already in your card box",

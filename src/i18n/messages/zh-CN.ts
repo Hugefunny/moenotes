@@ -308,8 +308,6 @@ export const zhCN = {
       "constraintsTitle": "搜索可使用的卡牌",
       "constraintDescription": "设置这次组卡必须上场或不用的卡牌，不改变卡池里的持有状态。",
       "constraintKind": "卡牌类别",
-      "constraintCount": "{filtered} / {total} 张卡牌",
-      "constraintEmpty": "没有符合筛选条件的卡牌。",
     },
     "catalogueResults": "{count} 张卡牌",
     "alreadyInBox": "已在你的卡池中",

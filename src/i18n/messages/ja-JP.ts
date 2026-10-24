@@ -305,8 +305,6 @@ export const jaJP = {
       "constraintsTitle": "検索に使用するカード",
       "constraintDescription": "今回の編成で必須・除外するカードを指定します。所持状態は変更されません。",
       "constraintKind": "カード種別",
-      "constraintCount": "{filtered} / {total} 枚",
-      "constraintEmpty": "フィルターに一致するカードがありません。",
     },
     "catalogueResults": "カード {count} 枚",
     "alreadyInBox": "カード所持一覧に登録済み",
