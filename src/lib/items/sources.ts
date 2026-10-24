@@ -196,6 +196,16 @@ export interface RawRewardRow extends RawResource {
   id: number;
 }
 
+function rowsByGroup<T extends { group: number }>(rows: readonly T[]): Map<number, T[]> {
+  const byGroup = new Map<number, T[]>();
+  for (const row of rows) {
+    const list = byGroup.get(row.group);
+    if (list) list.push(row);
+    else byGroup.set(row.group, [row]);
+  }
+  return byGroup;
+}
+
 function rowsById<T extends { id: number }>(rows: readonly T[]): Map<number, T> {
   return new Map(rows.map((row) => [row.id, row]));
 }
@@ -290,26 +300,26 @@ export function addStorySources(
   }
 }
 
-/** MasterLiveMusic's score-rank and full-combo reward ids (MasterReward). */
+/** MasterLiveMusic's score-rank and combo reward groups (MasterLiveMusicScoreReward / MasterLiveMusicComboReward). */
 export interface MusicRewardSource {
   id: number;
   title: string;
-  scoreRewardIds: number[];
-  comboRewardIds: number[];
+  scoreRewardGroup?: number | undefined;
+  comboRewardGroup?: number | undefined;
 }
 
-export function addMusicSources(collector: ItemSourceCollector, songs: readonly MusicRewardSource[], rewardRows: readonly RawRewardRow[]): void {
-  const rewards = rowsById(rewardRows);
+export function addMusicSources(
+  collector: ItemSourceCollector,
+  songs: readonly MusicRewardSource[],
+  scoreRows: ReadonlyArray<RawResource & { group: number }>,
+  comboRows: ReadonlyArray<RawResource & { group: number }>,
+): void {
+  const scoreGroups = rowsByGroup(scoreRows);
+  const comboGroups = rowsByGroup(comboRows);
   for (const song of songs) {
     const ref = (detail: ItemSourceDetail): ItemSourceRef => ({ kind: "music", key: String(song.id), name: song.title, detail, link: { routeId: "music", detailId: song.id } });
-    for (const id of song.scoreRewardIds) {
-      const row = rewards.get(id);
-      if (row) collector.addResource(row, ref("scoreReward"));
-    }
-    for (const id of song.comboRewardIds) {
-      const row = rewards.get(id);
-      if (row) collector.addResource(row, ref("comboReward"));
-    }
+    for (const row of scoreGroups.get(song.scoreRewardGroup ?? 0) ?? []) collector.addResource(row, ref("scoreReward"));
+    for (const row of comboGroups.get(song.comboRewardGroup ?? 0) ?? []) collector.addResource(row, ref("comboReward"));
   }
 }
 

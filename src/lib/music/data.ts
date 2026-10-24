@@ -37,17 +37,12 @@ export interface RawMusic {
   liveScoreRankGroup: number;
   /** Alternate-vocal song ids offered for this track. */
   anotherVocalIDs: number[];
-  /** MasterReward.id entries paid per achieved score rank (D has none). */
-  scoreCLiveMusicRewardID: number;
-  scoreBLiveMusicRewardID: number;
-  scoreALiveMusicRewardID: number;
-  scoreSLiveMusicRewardID: number;
-  scoreSSLiveMusicRewardID: number;
-  /** MasterReward.id entries paid per difficulty's full-combo reward. */
-  comboEasyLiveMusicRewardID: number;
-  comboNormalLiveMusicRewardID: number;
-  comboHardLiveMusicRewardID: number;
-  comboExpertLiveMusicRewardID: number;
+  /*
+   * The row also carries score{C,B,A,S,SS}LiveMusicRewardID / combo{Easy,…}LiveMusicRewardID: MasterReward ids 1–9 on
+   * every song, which the game does not pay out. The rewards a live pays come from the two groups below.
+   */
+  /** Group key into MasterLiveMusicScoreReward (the C–SS score-rank rewards). */
+  scoreRankRewardGroup?: number;
   /** Group key into MasterLiveMusicComboReward (the 25 / 50 / 75 / 100 % combo tiers). */
   comboRewardGroup?: number;
   /** Gekisou mission of each of the three ranges: 1 Combo, 2 Luck, 3 Just count. */
@@ -191,12 +186,6 @@ export interface MusicLiveDetail {
   categories: MusicCategoryModel[];
   scoreRanks: MusicScoreRankModel[];
   anotherVocals: MusicAnotherVocalModel[];
-  /**
-   * Reward ids (into MasterReward) paid for each difficulty's full combo and for each achieved
-   * score rank; resolved to names / icons by the caller, which has the full reward sources.
-   */
-  comboRewardIds: Array<{ difficulty: SongDifficultyModel["difficulty"]; rewardId: number }>;
-  scoreRewardIds: Array<{ rank: string; liveScoreRank: number; rewardId: number }>;
 }
 
 /** Raw inputs the live detail is built from (all already-normalized tables). */
@@ -206,9 +195,9 @@ export interface MusicLiveSources {
 }
 
 /**
- * Reads the song's live-system extras out of its raw row and the shared tables. The reward rows
- * stay as MasterReward ids; the build layer resolves them against items / cards / … because the
- * reward resolver needs every reward source (and through them the music list itself).
+ * Reads the song's live-system extras out of its raw row and the shared tables. The live rewards are
+ * built by the build layer (src/lib/music/live-rewards.ts), because the reward resolver needs every
+ * reward source (and through them the music list itself).
  */
 export function buildMusicLiveDetail(
   music: RawMusic,
@@ -242,24 +231,7 @@ export function buildMusicLiveDetail(
     return { characterId, name: character ? resolveText(character.nameTextID) : `Char #${characterId}` };
   });
 
-  const comboRewardIds: MusicLiveDetail["comboRewardIds"] = (
-    [
-      { difficulty: "easy", rewardId: music.comboEasyLiveMusicRewardID },
-      { difficulty: "normal", rewardId: music.comboNormalLiveMusicRewardID },
-      { difficulty: "hard", rewardId: music.comboHardLiveMusicRewardID },
-      { difficulty: "expert", rewardId: music.comboExpertLiveMusicRewardID },
-    ] as const
-  ).filter((entry) => entry.rewardId > 0) as MusicLiveDetail["comboRewardIds"];
-
-  const scoreRewardIds: MusicLiveDetail["scoreRewardIds"] = [
-    { rank: "C", liveScoreRank: 3, rewardId: music.scoreCLiveMusicRewardID },
-    { rank: "B", liveScoreRank: 4, rewardId: music.scoreBLiveMusicRewardID },
-    { rank: "A", liveScoreRank: 5, rewardId: music.scoreALiveMusicRewardID },
-    { rank: "S", liveScoreRank: 6, rewardId: music.scoreSLiveMusicRewardID },
-    { rank: "SS", liveScoreRank: 7, rewardId: music.scoreSSLiveMusicRewardID },
-  ].filter((entry) => entry.rewardId > 0);
-
-  return { categories, scoreRanks, anotherVocals, comboRewardIds, scoreRewardIds };
+  return { categories, scoreRanks, anotherVocals };
 }
 
 

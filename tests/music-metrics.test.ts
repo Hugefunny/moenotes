@@ -12,7 +12,7 @@ import {
   serializeMusicFilters,
   type MusicFilterState,
 } from "../src/lib/music/filter";
-import { buildComboTiers, buildExpRewards } from "../src/lib/music/live-rewards";
+import { buildComboTiers, buildExpRewards, buildScoreRewards, fullComboRewards } from "../src/lib/music/live-rewards";
 import { buildMetricsIndex, chartMetrics, formatBpm, formatDuration, lookupMetrics } from "../src/lib/music/metrics";
 import { songTitle } from "../src/lib/music/title-preference";
 import { songMetaRows } from "../src/lib/music/song-meta";
@@ -160,6 +160,19 @@ describe("live rewards", () => {
     expect(tiers[1]!.tiers.map((tier) => [tier.percent, tier.rewards[0]!.count])).toEqual([[25, 2000], [100, 25]]);
     expect(buildComboTiers([row(1, 1, 0, 0, 1)], 0, resolve)).toEqual([]);
     expect(buildComboTiers([], 1, resolve)).toEqual([]);
+  });
+
+  test("full combo rewards are the 100 % tier of each difficulty", () => {
+    const tiers = buildComboTiers([row(1, 1, 2, 0, 1500), row(2, 1, 2, 3, 25), row(3, 1, 3, 3, 25), row(4, 1, 0, 1, 1500)], 1, resolve);
+    expect(fullComboRewards(tiers).map((entry) => [entry.difficulty, entry.reward.count])).toEqual([["hard", 25], ["expert", 25]]);
+  });
+
+  test("score rewards come from the song's score reward group, C to SS", () => {
+    const score = (id: number, group: number, liveScoreRank: number, resourceCount: number) =>
+      ({ id, group, liveScoreRank, resourceType: 1, resourceId: 1, resourceCount });
+    const rewards = buildScoreRewards([score(5, 1, 7, 30), score(1, 1, 3, 5), score(9, 2, 3, 99), score(3, 1, 5, 15)], 1, resolve);
+    expect(rewards.map((entry) => [entry.rank, entry.reward.count])).toEqual([["C", 5], ["A", 15], ["SS", 30]]);
+    expect(buildScoreRewards([score(1, 1, 3, 5)], undefined, resolve)).toEqual([]);
   });
 
   test("exp rewards keep rank order and drop all-zero figures", () => {

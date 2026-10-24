@@ -114,15 +114,6 @@ describe("music default sorting", () => {
       musicCategories: [],
       liveScoreRankGroup: 0,
       anotherVocalIDs: [],
-      scoreCLiveMusicRewardID: 0,
-      scoreBLiveMusicRewardID: 0,
-      scoreALiveMusicRewardID: 0,
-      scoreSLiveMusicRewardID: 0,
-      scoreSSLiveMusicRewardID: 0,
-      comboEasyLiveMusicRewardID: 0,
-      comboNormalLiveMusicRewardID: 0,
-      comboHardLiveMusicRewardID: 0,
-      comboExpertLiveMusicRewardID: 0,
     };
     const rawList: RawMusic[] = [
       { ...baseRaw, id: 10, startAt: "2018/01/01 00:00:00" },

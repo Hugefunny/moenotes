@@ -293,8 +293,8 @@ function LiveSystemSections({ locale, detail }: { locale: AppLocale; detail: Mus
               <div>
                 <h4 className="text-label-medium text-on-surface-variant">{t(locale, "music.live.scoreRewards")}</h4>
                 <ul className="mt-2 space-y-2">
-                  {scoreRewards.map((entry) => (
-                    <li key={entry.liveScoreRank} className="flex items-center justify-between gap-3 rounded-shape-md border border-outline-variant bg-surface-container-low px-3 py-2">
+                  {scoreRewards.map((entry, index) => (
+                    <li key={`${entry.liveScoreRank}-${index}`} className="flex items-center justify-between gap-3 rounded-shape-md border border-outline-variant bg-surface-container-low px-3 py-2">
                       <span className="font-black text-primary">{entry.rank}</span>
                       <span className="min-w-0 flex-1 truncate text-right text-label-large text-on-surface">{rewardName(entry.reward, locale)}<span className="ml-1.5 font-mono text-body-small text-on-surface-variant">×{entry.reward.count.toLocaleString(locale)}</span></span>
                     </li>
@@ -306,8 +306,8 @@ function LiveSystemSections({ locale, detail }: { locale: AppLocale; detail: Mus
               <div>
                 <h4 className="text-label-medium text-on-surface-variant">{t(locale, "music.live.comboRewards")}</h4>
                 <ul className="mt-2 space-y-2">
-                  {comboRewards.map((entry) => (
-                    <li key={entry.difficulty} className="flex items-center justify-between gap-3 rounded-shape-md border border-outline-variant bg-surface-container-low px-3 py-2">
+                  {comboRewards.map((entry, index) => (
+                    <li key={`${entry.difficulty}-${index}`} className="flex items-center justify-between gap-3 rounded-shape-md border border-outline-variant bg-surface-container-low px-3 py-2">
                       <span className="text-label-medium text-primary">{t(locale, `music.difficultyLevels.${entry.difficulty}`)}</span>
                       <span className="min-w-0 flex-1 truncate text-right text-label-large text-on-surface">{rewardName(entry.reward, locale)}<span className="ml-1.5 font-mono text-body-small text-on-surface-variant">×{entry.reward.count.toLocaleString(locale)}</span></span>
                     </li>
