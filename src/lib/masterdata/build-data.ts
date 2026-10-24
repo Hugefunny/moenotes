@@ -77,6 +77,15 @@ import {
   type RawMusic,
   type RawMusicScore,
 } from "@/lib/music/data";
+import type { MusicDifficulty } from "@/lib/music/difficulty";
+import {
+  buildComboTiers,
+  buildScoreRewards,
+  fullComboRewards,
+  type MusicScoreRewardModel,
+  type RawLiveMusicComboReward,
+  type RawLiveMusicScoreReward,
+} from "@/lib/music/live-rewards";
 import { normalizeItems, type ItemViewModel, type RawItem } from "@/lib/items/data";
 import {
   normalizeBandItems,
@@ -1068,20 +1077,22 @@ export interface MusicDetailData {
   song: MusicViewModel;
   /** Live-system extras of the song's row on that server. */
   live: MusicLiveDetail;
-  /** Rewards paid for each difficulty's full combo, resolved to names and icons. */
-  comboRewards: Array<{ difficulty: "easy" | "normal" | "hard" | "expert"; reward: RewardViewModel }>;
-  /** Rewards paid for each achieved score rank (C–SS), resolved to names and icons. */
-  scoreRewards: Array<{ rank: string; liveScoreRank: number; reward: RewardViewModel }>;
+  /** Rewards paid for each difficulty's full combo (the 100 % tier of the song's combo reward group). */
+  comboRewards: Array<{ difficulty: MusicDifficulty; reward: RewardViewModel }>;
+  /** Rewards paid for each achieved score rank (C–SS) by the song's score reward group. */
+  scoreRewards: MusicScoreRewardModel[];
 }
 
 export function musicDetailOn(server: GameServer, locale: AppLocale, songId: number): Promise<MusicDetailData | null> {
   return memo(`music-detail:${server}:${locale}:${songId}`, async () => {
-    const [songs, rawMusic, categories, scoreRankTable, rewardTable, textTable, characterTable, resolve] = await Promise.all([
+    const [songs, rawMusic, categories, scoreRankTable, scoreRewardTable, comboRewardTable, textTable, characterTable, resolve] = await Promise.all([
       musicOn(server, locale),
       table<RawMusic>("MasterLiveMusic.json", server),
       table<RawLiveMusicCategory>("MasterLiveMusicCategory.json", server),
       table<RawLiveScoreRank>("MasterLiveScoreRank.json", server),
-      table<RawRewardRow>("MasterReward.json", server),
+      // Some servers serve these broken (kr's MasterLiveMusicComboReward); the section is then left out.
+      table<RawLiveMusicScoreReward>("MasterLiveMusicScoreReward.json", server).catch(() => ({ _allData: [] })),
+      table<RawLiveMusicComboReward>("MasterLiveMusicComboReward.json", server).catch(() => ({ _allData: [] })),
       texts(server),
       table<RawMusicCharacter>("MasterCharacter.json", server),
       rewardResolverOn(server, locale),
@@ -1096,15 +1107,8 @@ export function musicDetailOn(server: GameServer, locale: AppLocale, songId: num
       characterTable._allData,
       locale,
     );
-    const rewardMap = new Map(rewardTable._allData.map((row) => [row.id, row]));
-    const comboRewards = detail.comboRewardIds.flatMap(({ difficulty, rewardId }) => {
-      const row = rewardMap.get(rewardId);
-      return row ? [{ difficulty, reward: resolve(row) }] : [];
-    });
-    const scoreRewards = detail.scoreRewardIds.flatMap(({ rank, liveScoreRank, rewardId }) => {
-      const row = rewardMap.get(rewardId);
-      return row ? [{ rank, liveScoreRank, reward: resolve(row) }] : [];
-    });
+    const comboRewards = fullComboRewards(buildComboTiers(comboRewardTable._allData, raw.comboRewardGroup, resolve));
+    const scoreRewards = buildScoreRewards(scoreRewardTable._allData, raw.scoreRankRewardGroup, resolve);
     return { song, live: detail, comboRewards, scoreRewards };
   });
 }

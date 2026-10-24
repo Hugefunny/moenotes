@@ -97,7 +97,7 @@ function itemSourcesOn(server: GameServer, locale: AppLocale): Promise<Map<numbe
     const [
       events, exchanges, gachas, rewardEntries, stories, music, textTable,
       characters, friendships, rankRewards, friendshipRewards, characterMissions, missions, missionRewards,
-      storyRewards, rewards, rawMusic, shops, shopProducts,
+      storyRewards, rawMusic, musicScoreRewards, musicComboRewards, shops, shopProducts,
     ] = await Promise.all([
       eventDetailsOn(server, locale).catch(() => []),
       exchangesOn(server, locale).then((value) => value.details).catch(() => []),
@@ -114,8 +114,9 @@ function itemSourcesOn(server: GameServer, locale: AppLocale): Promise<Map<numbe
       optionalTable<{ missionCategory: number; missionRewardIds?: number[] }>("MasterMission.json", server),
       optionalTable<RawRewardRow>("MasterMissionReward.json", server),
       optionalTable<RawResource & { group: number }>("MasterStoryReward.json", server),
-      optionalTable<RawRewardRow>("MasterReward.json", server),
       optionalTable<RawMusic>("MasterLiveMusic.json", server),
+      optionalTable<RawResource & { group: number }>("MasterLiveMusicScoreReward.json", server),
+      optionalTable<RawResource & { group: number }>("MasterLiveMusicComboReward.json", server),
       optionalTable<{ id: number; nameTextId: string }>("MasterShop.json", server),
       optionalTable<RawResource & { shopId: number }>("MasterShopProduct.json", server),
     ]);
@@ -145,9 +146,9 @@ function itemSourcesOn(server: GameServer, locale: AppLocale): Promise<Map<numbe
     addMusicSources(collector, rawMusic._allData.filter((song) => titles.has(song.id)).map((song) => ({
       id: song.id,
       title: titles.get(song.id) ?? "",
-      scoreRewardIds: [song.scoreCLiveMusicRewardID, song.scoreBLiveMusicRewardID, song.scoreALiveMusicRewardID, song.scoreSLiveMusicRewardID, song.scoreSSLiveMusicRewardID].filter((id) => id > 0),
-      comboRewardIds: [song.comboEasyLiveMusicRewardID, song.comboNormalLiveMusicRewardID, song.comboHardLiveMusicRewardID, song.comboExpertLiveMusicRewardID].filter((id) => id > 0),
-    })), rewards._allData);
+      scoreRewardGroup: song.scoreRankRewardGroup,
+      comboRewardGroup: song.comboRewardGroup,
+    })), musicScoreRewards._allData, musicComboRewards._allData);
     return collector.result();
   });
 }

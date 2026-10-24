@@ -4,6 +4,7 @@ import {
   addEventSources,
   addExchangeSources,
   addFriendshipRankSources,
+  addMusicSources,
   addStorySources,
   collectItemUsages,
   createItemSourceCollector,
@@ -59,6 +60,24 @@ describe("item sources", () => {
     const result = collector.result();
     expect(result.get(36)).toEqual([{ kind: "story", key: "main", name: "", details: ["episodeReward"], total: 2, times: 2, link: { routeId: "main-story" } }]);
     expect(result.get(1)![0]!.link).toEqual({ routeId: "friendship-story" });
+  });
+
+  test("music rewards read the song's score and combo reward groups", () => {
+    const collector = createItemSourceCollector();
+    addMusicSources(collector, [
+      { id: 100111, title: "Odd Dice", scoreRewardGroup: 1, comboRewardGroup: 1 },
+      { id: 100112, title: "No groups" },
+    ], [
+      { group: 1, resourceType: 1, resourceId: 1, resourceCount: 5 },
+      { group: 1, resourceType: 1, resourceId: 1, resourceCount: 30 },
+      { group: 2, resourceType: 1, resourceId: 1, resourceCount: 99 },
+    ], [
+      { group: 1, resourceType: 1, resourceId: 3, resourceCount: 1500 },
+      { group: 1, resourceType: 1, resourceId: 1, resourceCount: 25 },
+    ]);
+    const result = collector.result();
+    expect(result.get(1)).toEqual([{ kind: "music", key: "100111", name: "Odd Dice", details: ["scoreReward", "comboReward"], total: 60, times: 3, link: { routeId: "music", detailId: 100111 } }]);
+    expect(result.get(3)!.map((source) => [source.key, source.total])).toEqual([["100111", 1500]]);
   });
 });
 

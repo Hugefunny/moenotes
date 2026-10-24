@@ -12,6 +12,14 @@ export interface RawLiveMusicComboReward extends RawResource {
   comboRateType: number;
 }
 
+/** MasterLiveMusicScoreReward row: one reward of one score rank (C–SS) in a reward group. */
+export interface RawLiveMusicScoreReward extends RawResource {
+  id: number;
+  group: number;
+  /** MasterLiveScoreRank.liveScoreRank: 3 C … 7 SS. */
+  liveScoreRank: number;
+}
+
 /** MasterLiveMusicExpReward row: what a live pays per score rank (every song alike). */
 export interface RawLiveMusicExpReward {
   id: number;
@@ -62,6 +70,32 @@ export function buildComboTiers(rows: readonly RawLiveMusicComboReward[], group:
     if (!tiers) return [];
     return [{ difficulty, tiers: [...tiers].sort(([a], [b]) => a - b).map(([percent, rewards]) => ({ percent, rewards })) }];
   });
+}
+
+/** The full-combo (100 %) rewards of each difficulty, in difficulty order; difficulties without that tier are left out. */
+export function fullComboRewards(tiers: readonly MusicComboTiersModel[]): Array<{ difficulty: MusicDifficulty; reward: RewardViewModel }> {
+  return tiers.flatMap(({ difficulty, tiers: list }) =>
+    (list.find((tier) => tier.percent === 100)?.rewards ?? []).map((reward) => ({ difficulty, reward })));
+}
+
+export interface MusicScoreRewardModel {
+  /** "C" … "SS". */
+  rank: string;
+  liveScoreRank: number;
+  reward: RewardViewModel;
+}
+
+/** The score-rank rewards of a song's reward group (MasterLiveMusic.scoreRankRewardGroup), C → SS. */
+export function buildScoreRewards(rows: readonly RawLiveMusicScoreReward[], group: number | null | undefined, resolve: RewardResolver): MusicScoreRewardModel[] {
+  if (typeof group !== "number" || group <= 0) return [];
+  return rows
+    .filter((row) => row.group === group && typeof row.liveScoreRank === "number")
+    .sort((a, b) => a.liveScoreRank - b.liveScoreRank || a.id - b.id)
+    .map((row) => ({
+      rank: SCORE_RANK_LABELS[row.liveScoreRank] ?? String(row.liveScoreRank),
+      liveScoreRank: row.liveScoreRank,
+      reward: resolve(row),
+    }));
 }
 
 /** The figures an exp reward row pays, in display order; zero figures are kept so that every rank lines up. */
