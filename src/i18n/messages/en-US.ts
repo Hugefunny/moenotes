@@ -315,6 +315,7 @@ export const enUS = {
       "manualShort": "Add cards manually",
       "constraintsTitle": "Cards used in searches",
       "constraintDescription": "Require or exclude cards for this search. Ownership in your card box stays unchanged.",
+      "constraintKind": "Card kind",
     },
     "catalogueResults": "{count} cards",
     "alreadyInBox": "Already in your card box",

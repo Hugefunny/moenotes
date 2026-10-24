@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent } from "react";
 import Button from "@mui/material/Button";
 import { withMd3 } from "@/components/md3/Md3Provider";
 import type { AppLocale } from "@/config/locales";
@@ -11,6 +11,7 @@ import type { SupportCardViewModel } from "@/lib/support-cards/data";
 import type { MusicViewModel } from "@/lib/music/data";
 import { listForServer, type ServerFaceted } from "@/lib/servers/facets";
 import { ContentServerProvider, useContentServer } from "@/lib/servers/use-content-server";
+import { EMPTY_CARD_FILTERS, memberCardSubject, supportCardSubject, type CardFilterSubject } from "@/lib/filter/card-filter";
 import { mergeBoxBackup, parseBox, type BoxCard, type BoxSaveLink, type CardBox, type CardFieldName, type CardKind } from "@/lib/box/model";
 import { answerDeckFields } from "@/lib/box/deck-answers";
 import { boxAccountJson, gameSaveAccountJson } from "@/lib/deck/account-envelope";
@@ -34,6 +35,7 @@ import DeckGoalConditions from "./DeckGoalConditions";
 import DeckRewardMix from "./DeckRewardMix";
 import DeckObjective from "./DeckObjective";
 import Modal from "@/components/shared/Modal";
+import CardFilters, { useCardFilters } from "@/components/shared/CardFilters";
 import type { PlayerFieldCatalogue } from "@/lib/box/player-catalog";
 import { getCardBoxSession } from "@/lib/box/session";
 import { mergeRecognizedBox, type RecognitionSourceStamp } from "@/lib/recognition/protocol";
@@ -94,6 +96,9 @@ const GOAL_ICONS: Readonly<Record<DeckGoal, string>> = {
 };
 /** The goal card of the three event rewards; the reward plan chooses which of them is the goal. */
 const REWARDS_CARD = "eventRewards";
+/** A box card of the restriction list with the catalogue facts the shared card filters read. */
+type ConstraintEntry = { card: BoxCard; subject: CardFilterSubject };
+const describeConstraint = (entry: ConstraintEntry) => entry.subject;
 function readStoredGoal(): DeckGoal {
   const value = safeGetLocalStorage(GOAL_STORAGE_KEY);
   return value && ([...EVENT_GOALS, ...EVERYDAY_GOALS] as string[]).includes(value) ? value as DeckGoal : DEFAULT_DECK_GOAL;
@@ -143,8 +148,8 @@ function DeckWorkspace(props: DeckWorkspaceProps) {
   const [management, setManagement] = useState(false);
   const [importing, setImporting] = useState(false);
   const [constraintsOpen, setConstraintsOpen] = useState(false);
-  const [constraintQuery, setConstraintQuery] = useState("");
   const [constraintFilter, setConstraintFilter] = useState<"all" | "required" | "excluded">("all");
+  const [constraintKind, setConstraintKind] = useState<CardKind>("member");
   const [songPicker, setSongPicker] = useState(false);
   const [playerSettings, setPlayerSettings] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
@@ -173,6 +178,29 @@ function DeckWorkspace(props: DeckWorkspaceProps) {
     return card?.identity.value ? [card.identity.value] : [];
   });
   const constraints = { includeMembers: idsOf(required, "member"), excludeMembers: idsOf(excluded, "member"), excludeSnaps: idsOf(excluded, "snap") };
+  /** The kind the restriction list shows: one at a time, since members and Snaps rate on different rarity scales. */
+  const shownConstraintKind: CardKind = ownedMembers.length && ownedSnaps.length ? constraintKind : ownedMembers.length ? "member" : "snap";
+  const constraintEntries = useMemo<ConstraintEntry[]>(() => {
+    const memberById = new Map(members.map(card => [String(card.id), card]));
+    const snapById = new Map(snaps.map(card => [String(card.id), card]));
+    return (box?.cards ?? []).filter(card => card.kind === shownConstraintKind).map(card => {
+      const id = card.identity.value ?? "";
+      const member = card.kind === "member" ? memberById.get(id) : undefined;
+      const snap = card.kind === "snap" ? snapById.get(id) : undefined;
+      const known = member ? memberCardSubject(member) : snap ? supportCardSubject(snap) : null;
+      // Unidentified cards keep rarity 0, so they show only while no rarity, attribute or band is chosen.
+      const subject = known ?? { id: 0, title: cardTitle(card, catalog), rarity: 0, cardType: 0, bandId: 0, bandName: "", characters: [], searchText: "" };
+      return { card, subject: { ...subject, searchText: `${subject.searchText} ${cardTitle(card, catalog)} ${cardSubtitle(card, catalog)} ${id}` } };
+    });
+  }, [box, members, snaps, catalog, shownConstraintKind]);
+  // The all / required / excluded tab narrows the list without changing the filter options it offers.
+  const matchConstraintScope = useCallback((entry: ConstraintEntry) => constraintFilter === "all"
+    || (constraintFilter === "required" ? required : excluded).includes(entry.card.key), [constraintFilter, required, excluded]);
+  const constraintCards = useCardFilters(constraintEntries, locale, "deck-constraints", describeConstraint, { match: matchConstraintScope });
+  const { setFilters: setConstraintCardFilters } = constraintCards;
+  // Rarity scales and bands differ between members and Snaps: whenever the shown kind changes (picked, or the box lost
+  // the other kind), start from no filters but keep the search, so no filter stays on without its chip.
+  useEffect(() => { setConstraintCardFilters(current => ({ ...EMPTY_CARD_FILTERS, query: current.query })); }, [shownConstraintKind, setConstraintCardFilters]);
   const runKey = JSON.stringify([server, box?.id, box?.revision, stored?.save?.sha256 ?? null, solver.engine.status === "ready" ? solver.engine.datasetId : null, effectiveInput, constraints, event?.id ?? null]);
   const job = solver.job;
   const stale = job.status !== "idle" && job.status !== "running" && job.key !== runKey;
@@ -216,7 +244,8 @@ function DeckWorkspace(props: DeckWorkspaceProps) {
     return () => window.removeEventListener("popstate", back);
   }, [locale]);
   useEffect(() => { setExcluded([]); setRequired([]); updateGoal({ musicId: null, challengeMusicId: null, arenaMusicId: null }); setRunError(""); setManagement(false); setSetup(false); setDeleting(false); setImporting(false);
-    setConstraintsOpen(false); setEditingCardKey(null); setPlayerSettings(false); setGuideOpen(false); setBackupError(false); setSongPicker(false); setConstraintQuery(""); setConstraintFilter("all"); setPendingScreenshots([]); setDraggingScreenshots(false); setSavePicker(false); }, [server]);
+    setConstraintsOpen(false); setEditingCardKey(null); setPlayerSettings(false); setGuideOpen(false); setBackupError(false); setSongPicker(false); setConstraintFilter("all");
+    setConstraintKind("member"); setConstraintCardFilters(EMPTY_CARD_FILTERS); setPendingScreenshots([]); setDraggingScreenshots(false); setSavePicker(false); }, [server]);
   function openScreenshotImport() { if (linked) return; setManagement(false); setGuideOpen(false); setImporting(true); }
   function openGuide() { setManagement(false); setGuideOpen(true); }
   function openStorage() { setChoice(mode); setSetup(true); }
@@ -525,11 +554,12 @@ function DeckWorkspace(props: DeckWorkspaceProps) {
     <GameSavePicker locale={locale} server={server} isOpen={savePicker} onClose={() => setSavePicker(false)} list={saveList} busy={busy} onLink={pickGameSave} returnTo={returnTo} onScreenshot={openScreenshotImport} />
     <Modal historyNavigation={false} isOpen={constraintsOpen} onClose={() => setConstraintsOpen(false)} title={composer("constraintsTitle")} closeLabel={tr("close")} size="lg"><div className="dw-dialog dc-options">
         <p className="dw-muted">{composer("constraintDescription")}</p>
-        <input className="dc-option-search" aria-label={tr("searchCards")} placeholder={tr("searchCards")} value={constraintQuery} onChange={event => setConstraintQuery(event.target.value)} />
+        {ownedMembers.length > 0 && ownedSnaps.length > 0 && <div className="dc-option-tabs" role="group" aria-label={composer("constraintKind")}>{(["member", "snap"] as const).map(kind => <button type="button" key={kind} aria-pressed={shownConstraintKind === kind} onClick={() => setConstraintKind(kind)}>{tr(kind)}</button>)}</div>}
         <div className="dc-option-tabs" role="group" aria-label={composer("constraintsTitle")}>{(["all", "required", "excluded"] as const).map(value => <button type="button" key={value} aria-pressed={constraintFilter === value} onClick={() => setConstraintFilter(value)}>{composer(value === "all" ? "constraintAll" : value === "required" ? "constraintRequired" : "constraintExcluded")}</button>)}</div>
-        <div className="dc-constraint-list">{(box?.cards ?? []).filter(card => (constraintFilter === "all" || (constraintFilter === "required" ? required : excluded).includes(card.key))
-          && `${cardTitle(card, catalog)} ${cardSubtitle(card, catalog)} ${card.identity.value ?? ""}`.toLowerCase().includes(constraintQuery.toLowerCase())).map(card => <div key={card.key} className="dc-constraint-card"><BoxArtwork card={card} catalog={catalog} locale={locale} square /><div className="dc-constraint-info"><strong>{cardTitle(card, catalog)}</strong><small>{cardSubtitle(card, catalog)}</small></div>
+        <CardFilters locale={locale} kind={shownConstraintKind === "member" ? "member" : "support"} controller={constraintCards} variant="card" searchPlaceholder={tr("searchCards")} />
+        <div className="dc-constraint-list">{constraintCards.sorted.map(({ card }) => <div key={card.key} className="dc-constraint-card"><BoxArtwork card={card} catalog={catalog} locale={locale} square /><div className="dc-constraint-info"><strong>{cardTitle(card, catalog)}</strong><small>{cardSubtitle(card, catalog)}</small></div>
             <div className="dc-constraint-actions">{card.kind === "member" && <label><input type="checkbox" className="md3-checkbox" checked={required.includes(card.key)} disabled={excluded.includes(card.key) || required.filter(key => box?.cards.find(other => other.key === key)?.kind === card.kind).length >= 5 && !required.includes(card.key)} onChange={() => toggle(required, card.key, setRequired)} />{tr("required")}</label>}<label><input type="checkbox" className="md3-checkbox" checked={excluded.includes(card.key)} disabled={required.includes(card.key)} onChange={() => toggle(excluded, card.key, setExcluded)} />{tr("excluded")}</label></div></div>)}</div>
+        {!constraintCards.sorted.length && <p className="dw-muted">{tr("emptyCards")}</p>}
       <Button variant="tonal" onClick={() => setConstraintsOpen(false)}>{tr("done")}</Button></div></Modal>
     <Modal historyNavigation={false} isOpen={deleting} onClose={() => setDeleting(false)} title={tr("deleteBox")} closeLabel={tr("close")}><div className="dw-dialog"><p>{tr("deleteNote")}</p><button className="dw-danger" disabled={busy} onClick={async () => { if (await storage.remove()) setDeleting(false); }}>{tr("confirmDelete")}</button></div></Modal>
   </div></ContentServerProvider>;

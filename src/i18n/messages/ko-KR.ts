@@ -305,6 +305,7 @@ export const koKR = {
       "manualShort": "카드 수동 추가",
       "constraintsTitle": "검색에 사용할 카드",
       "constraintDescription": "이번 검색에서 필수 또는 제외할 카드를 지정합니다. 카드 목록의 보유 상태는 바뀌지 않습니다.",
+      "constraintKind": "카드 종류",
     },
     "catalogueResults": "카드 {count}장",
     "alreadyInBox": "이미 카드 보관함에 있습니다",

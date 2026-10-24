@@ -306,6 +306,7 @@ export const zhTW = {
       "manualShort": "手動新增卡牌",
       "constraintsTitle": "搜尋可使用的卡牌",
       "constraintDescription": "設定這次組卡必須上場或不用的卡牌，不改變卡池裡的持有狀態。",
+      "constraintKind": "卡牌類別",
     },
     "catalogueResults": "{count} 張卡牌",
     "alreadyInBox": "已在你的卡池中",
