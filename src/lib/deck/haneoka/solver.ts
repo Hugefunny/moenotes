@@ -100,7 +100,7 @@ export class DeckSolver {
       response.elapsedMs = performance.now() - started;
       return answer(response, request, box.coversAllOwnedCards, true);
     } catch (error) {
-      if (!(error instanceof Error) || !["combined-reward-levels", "combined-reward-range", "combined-item-lottery"].includes(error.message)) throw error;
+      if (!(error instanceof Error) || !["combined-reward-levels", "combined-reward-range", "combined-item-lottery", "skip-score-nonmonotone"].includes(error.message)) throw error;
       return JSON.stringify({ format: "ournotes-deck.account-recommendation/1", final: true, status: "invalid", missing: [],
         errors: [{ path: "request", code: "unsupported_request", message: error.message }], result: null });
     } finally { engine!.onProgress = null; }

@@ -214,3 +214,8 @@ results and progress include `team.levels` with exact per-level and per-term pay
 leaders and member-to-Snapshot assignments. A time limit retains the available formations without proof.
 The page's automatic CP conversion uses its existing challenge-rate request, exact payoff/cost extraction,
 and subsequent combined request. This capability does not add maximum-reward or other event-scene support.
+
+The adapter also accepts ordinary / challenge Skip `score` requests and power with one selected event's
+parameter bonuses. Skip score has one deterministic result and no skill-order statistics; expected and maximum
+aggregation select the same value. Parameter bonuses do not change normal song typing. Native search compares
+Skip score directly, and progress retains the same score field as final output.

@@ -42,7 +42,14 @@ music duration. No chart approximation or independent scoring formula is introdu
 
 ## Current capability boundary
 
-- Power without event parameter bonuses; Free Live, Challenge Live, Battle Live and Mission Live score searches.
+- Power with optional parameter bonuses from one selected known event, with or without a normal song context.
+  Parameter bonuses do not select challenge-song typing. Free Live, Challenge Live, Battle Live and Mission Live
+  score searches; ordinary and Challenge Skip deterministic score searches (expected and maximum are identical).
+- Skip score uses the native deterministic formula as its objective and bound. Nonnegative finite score factors
+  are required for the power bound to remain monotone; an unsupported factor produces a diagnostic request error.
+  It reads growth/player bonuses without requiring unused live skills, and returns no random-order statistics.
+  Challenge Skip score uses challenge-song typing; parameter bonuses apply only when that challenge event is
+  selected in `eventIds`, matching the source model. Ordinary Skip score ignores event parameter context.
 - Free Live and Challenge Live single PT / event-item expected rewards; Free Live CP; ordinary Skip PT / CP /
   event items; Challenge Skip PT / event items. Ordinary consumption is 0 through 10; Challenge consumption is
   200/400/800/1600. Every positive cost must have exactly one matching source row.
@@ -78,10 +85,16 @@ music duration. No chart approximation or independent scoring formula is introdu
 - The verified JP and international snapshots have empty memory tables. Nonempty active memory
   tables are explicitly unsupported until their saved-state mapping is implemented.
 
-Pending before production switching: other event scenes, maximum rewards, Skip score optimization, Arena scene
-mapping, memory activation, cross-song UI and stopped-search continuation, event-parameter power, full-range
+Pending before production switching: other event scenes, maximum rewards, noncanonical Skip reward-rank parsing, Arena scene
+mapping, memory activation, cross-song UI and stopped-search continuation, full-range
 performance and phone/browser acceptance. Existing production capabilities remain available
 through the original provider during this work.
+
+## Performance evidence
+
+[Full-card-pool validation](haneoka-performance.md) records both servers, declared growth, exact model identities,
+candidate/proof states, Worker-core coverage, and remaining latency and memory limits. Full-pool execution is
+separate from complete browser/phone acceptance.
 
 ## Attribution
 

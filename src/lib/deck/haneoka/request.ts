@@ -16,13 +16,13 @@ export interface RecommendationRequest {
   limits?: { timeLimitMs: number | null };
 }
 export const HANEOKA_COMMIT = "c91e6459a5ed43d55dc2b75e6a9d4f55b3edc62a";
-export const HANEOKA_PATCH_SHA = "53226cdad99bf881a5a1d2243f0625287c4a54913352c361e8efc3acdd586d5d";
+export const HANEOKA_PATCH_SHA = "02ece9bd681b0f9c3b177a47b5bb2c25800cd81822822c78c15abd3ae40ff8de";
 export const CAPABILITIES = {
   goals: ["power", "freeLive", "challengeLive", "battleLive", "missionLive", "skip"],
-  metrics: { freeLive: ["score", "eventPoints", "eventItems", "challengePoints"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score"], missionLive: ["score"], skip: ["eventPoints", "eventItems", "challengePoints"] },
+  metrics: { freeLive: ["score", "eventPoints", "eventItems", "challengePoints"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score"], missionLive: ["score"], skip: ["score", "eventPoints", "eventItems", "challengePoints"] },
   aggregations: {
-    expected: { freeLive: ["score", "eventPoints", "eventItems", "challengePoints"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score"], missionLive: ["score"], skip: ["eventPoints", "eventItems", "challengePoints"] },
-    maximum: { freeLive: ["score"], challengeLive: ["score"], battleLive: ["score"], missionLive: ["score"] },
+    expected: { freeLive: ["score", "eventPoints", "eventItems", "challengePoints"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score"], missionLive: ["score"], skip: ["score", "eventPoints", "eventItems", "challengePoints"] },
+    maximum: { freeLive: ["score"], challengeLive: ["score"], battleLive: ["score"], missionLive: ["score"], skip: ["score"] },
   },
   combinedMetric: { kind: "combined", objective: "lexicographicWeightedExpectedSums", weights: "integer", maxLevels: 3, maxTerms: 9, maxWeight: 1_000_000_000 },
   eventItemRewards: { selection: "exactResultGrade", eventGroupField: "eventGroup", rowsPerGrade: 1, probabilityMarker: 10000 },
@@ -37,13 +37,13 @@ export function adaptRequest(data: DeckData, request: RecommendationRequest) {
   const kind: string = request.goal.kind;
   const rewards = ["eventPoints", "eventItems", "challengePoints", "combined"].includes(request.metric?.kind ?? "");
   const skip = kind === "skip";
-  if (skip && !rewards) throw new Error("haneoka-unsupported-skip-score");
   if (rewards && (!["freeLive", "challengeLive", "skip"].includes(kind) || request.aggregation === "maximum"))
     throw new Error("haneoka-unsupported-reward-scene");
   const gekiso = ["battleLive", "missionLive"].includes(kind);
   if (gekiso && request.goal.rank !== undefined && request.goal.rank !== 1) throw new Error("haneoka-unsupported-rank");
-  // The power API's challenge context also selects challenge-song typing. Event-only parameter goals are not equivalent.
-  if (kind === "power" && request.goal.eventParameter && request.eventIds?.length) throw new Error("haneoka-unsupported-event-power");
+  const parameterEvents = kind === "power" && request.goal.eventParameter ? request.eventIds ?? [] : [];
+  if (parameterEvents.length > 1 || parameterEvents.some(id => !table(data, "MasterEvent").some(event => event.id === id)))
+    throw new Error("haneoka-power-event");
   const difficulty = ["easy", "normal", "hard", "expert"].indexOf(request.goal.difficulty ?? "");
   let musicId: unknown = request.goal.musicId, challengeEventId: number | null = null;
   if (kind === "challengeLive" || skip && request.goal.challengeMusicId !== undefined) {
@@ -66,7 +66,9 @@ export function adaptRequest(data: DeckData, request: RecommendationRequest) {
   if (![great, just].every(value => typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 1)
     || gekiso && great + just > 1) throw new Error("haneoka-accuracy");
   const criterion = request.aggregation === "maximum" ? "max" : "mean";
-  const scoreGoal = kind === "power" ? { kind: "power", song, challengeEventId: null }
+  const scoreGoal = kind === "power" || skip && !rewards ? { kind: skip ? "skip-score" : "power", song, challengeEventId,
+    ...(parameterEvents.length ? { parameterEventId: parameterEvents[0] }
+      : skip && challengeEventId !== null && request.eventIds?.includes(challengeEventId) ? { parameterEventId: challengeEventId } : {}) }
     : gekiso ? { kind: "gekiso", songs: [song], criterion, rank: 1, seeds: 0, accuracy: {
       great, just: great === 1 ? 0 : just / (1 - great), missEvery: play.missEvery ?? 0,
     } }
