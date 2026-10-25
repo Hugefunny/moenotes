@@ -12,7 +12,7 @@ const list = (value: unknown): Row[] => {
 };
 export function adaptAccount(data: DeckData, account: AccountInput, request: RecommendationRequest, datasetId: string) {
   if (account.format !== "ournotes.account/1" || account.datasetId !== datasetId
-    || account.server !== (data.provenance.region === "jp" ? "jp" : "hk-tw-mo")) throw new Error("haneoka-account-identity");
+    || account.server !== (data.provenance.region === "jp" ? "jp" : "intl")) throw new Error("haneoka-account-identity");
   const missing: Issue[] = [], errors: Issue[] = [];
   const issue = (path: string, code: string, message = code) => {
     const card = /^_player\._(memberCards|supportCards)\[(\d+)\]/.exec(path);
@@ -35,7 +35,7 @@ export function adaptAccount(data: DeckData, account: AccountInput, request: Rec
     return Number(row.level ?? row.rank);
   };
   const p = account.account._player;
-  const power = request.goal.kind === "power";
+  const power = request.goal.kind === "power" || request.goal.kind === "skip";
   const gekiso = ["battleLive", "missionLive"].includes(request.goal.kind);
   const excludeMembers = new Set((request.constraints?.excludeMembers ?? []).map(String));
   const excludeSnaps = new Set((request.constraints?.excludeSnaps ?? []).map(String));

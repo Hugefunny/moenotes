@@ -2,7 +2,7 @@
 
 The Haneoka engine is pinned at `c91e6459a5ed43d55dc2b75e6a9d4f55b3edc62a`.
 The existing Moenotes card pool, account envelopes, Worker lifecycle and result components are reused.
-The independent Rust engine owns scoring and search; the adapter translates documents, goals and results.
+The Rust engine, with the Moenotes reward patch, owns scoring and search; the adapter translates documents, goals and results.
 
 ## Local runtime
 
@@ -17,7 +17,11 @@ PUBLIC_DECK_RECOMMEND_ENGINE=/haneoka-team-engine/runtime.json bun run dev
 
 In PowerShell, set `$env:PUBLIC_DECK_RECOMMEND_ENGINE='/haneoka-team-engine/runtime.json'` before `bun run dev`.
 
-The build writes the external checkout and Cargo output under ignored `.haneoka/`.
+The build keeps the pinned external checkout unchanged under ignored `.haneoka/engine`.
+`patches/haneoka-rewards.patch` is applied to an independent generated source directory, whose file hashes
+are checked before reuse. Cargo output also lives under `.haneoka/`. A changed generated source fails the build.
+The patch uses LF on every checkout. The adapter's `HANEOKA_PATCH_SHA` must match the patch bytes. The runtime descriptor and answers record both
+the upstream commit and patch SHA-256; the complete patch is copied beside the runtime as `moenotes.patch`.
 Generated WASM, bundled adapter, runtime descriptor, license and NOTICE live under ignored
 `public/haneoka-team-engine/`. These outputs must be built together; the descriptor binds their sizes and hashes.
 
@@ -39,12 +43,18 @@ music duration. No chart approximation or independent scoring formula is introdu
 ## Current capability boundary
 
 - Power without event parameter bonuses; Free Live, Challenge Live, Battle Live and Mission Live score searches.
-- Free Live and Challenge Live single event-point / event-item expected rewards. The adapter checks the selected
-  event, its challenge-song join, consumption row and the event item's exact-grade, guaranteed single-row table.
-  Ordinary consumption is currently 0 through 5 or 10; Challenge consumption is 200/400/800/1600. Other settings are rejected.
-- Reward results retain the ordinary mean score in `value.score` and the selected expected reward in `value.payoff.score`.
-  Exact rational certificates require the engine API to expose integer reward sums for this general route.
-  Reward requests currently accept the page's played `rewardProjection: true` context only.
+- Free Live and Challenge Live single PT / event-item expected rewards; Free Live CP; ordinary Skip PT / CP /
+  event items; Challenge Skip PT / event items. Ordinary consumption is 0 through 10; Challenge consumption is
+  200/400/800/1600. Every positive cost must have exactly one matching source row.
+- Reward results retain mean played score or deterministic Skip score in `value.score`, and selected expected
+  reward in `value.payoff.score`. `value.payoff.exact` contains the integer reward sum and observation count.
+  CP ranking compares CP directly. The score tie used by the upstream CP objective is disabled for these requests.
+- Rewards use the page's `rewardProjection: true` and played/Skip clock. Projection excludes saved balances;
+  the original model's half-open event window still applies. Int64 tick tokens are preserved before comparison,
+  including the final 100 ns before an event ends. Dates follow the model's canonical no-offset JST interpretation.
+- The account envelope uses the page's `jp` / `intl` identifiers. Skip reads growth and player bonuses without
+  requiring unused live/Gekisou skill levels. Only canonical named Skip result-rank parameters are supported;
+  an unknown/numeric/comma-separated value is rejected pending its native enum-parser mapping.
 - Expected or maximum skill-order score; declared Great/Just distributions and periodic misses.
 - Required/excluded members, excluded Snaps, fixed leader and no-Snap requests.
 - Progress, time limits and intermediate candidates use the existing Worker lifecycle. Only a
@@ -54,12 +64,12 @@ music duration. No chart approximation or independent scoring formula is introdu
 - The verified JP and international snapshots have empty memory tables. Nonempty active memory
   tables are explicitly unsupported until their saved-state mapping is implemented.
 
-Pending before production switching: other event scenes, maximum rewards, CP and Skip goals, arbitrary reward priority levels and
+Pending before production switching: other event scenes, maximum rewards, Skip score optimization, arbitrary reward priority levels and
 CP conversion, Arena scene mapping, memory activation, cross-song UI and stopped-search continuation,
 event-parameter power, full-range performance and phone/browser acceptance. Existing production capabilities remain available
 through the original provider during this work.
 
 ## Attribution
 
-The engine's AGPL-3.0-only LICENSE and NOTICE are copied with the runtime. Haneoka result rendering
+The engine's AGPL-3.0-only LICENSE and NOTICE are copied with the runtime and downstream patch. Changed Rust files carry a dated Moenotes modification notice. Haneoka result rendering
 includes the NOTICE's translated attribution and an explicit link to https://haneoka.org. The site's license page also links to the pinned engine LICENSE and NOTICE.

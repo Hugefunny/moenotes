@@ -195,3 +195,15 @@ other files is refused, and a repeated identical `init` answers with the same `r
   as `stopped` with its last `progress` result (or `null`), which the page shows as the answer. A new `run` while one
   is running does the same, resolving the old job as `superseded`. Stopping a job that still waits for `ready` keeps
   the Worker for the next run.
+
+
+### Haneoka reward extension identity
+
+The development Haneoka runtime records the pinned upstream commit plus `model.patchSha256` and a downloadable
+`model.patch` file entry. `patches/haneoka-rewards.patch` adds exact reward sums, primary CP ranking, ordinary
+costs 6 through 9, and ordinary / challenge Skip reward contexts. Answers retain `engine.patchSha256` for this
+model identity. The source dataset identity and production provider commit checks remain the original ones.
+
+The adapter consumes the existing `jp` / `intl` account envelopes and the page's numeric Int64 clock tokens.
+Reward projection isolates saved balances but preserves the reference event window. The adapter retains tick
+precision during parsing; Skip progress includes deterministic Skip score and exact payoff just like final output.

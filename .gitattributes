@@ -2,3 +2,4 @@
 
 # Third-party license texts are kept byte for byte as published.
 /public/recognition/licenses/** -text -diff
+patches/*.patch text eol=lf
