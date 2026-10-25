@@ -1,5 +1,5 @@
 import { parseRequest } from "./clock";
-import { adaptData, type DeckData } from "./data";
+import { adaptData, table, type DeckData } from "./data";
 import { adaptAccount, type AccountInput } from "./account";
 import { adaptRequest, CAPABILITIES, HANEOKA_COMMIT, HANEOKA_PATCH_SHA, type RecommendationRequest } from "./request";
 import { HaneokaWasm } from "./wasm";
@@ -120,7 +120,10 @@ export class DeckSolver {
             return { ...team, members: order.map(slot => team.members[slot]!), snaps: order.map(slot => team.snaps[slot]!) };
           }));
       }
-      if (converted.goal.kind === "gekiso" && performance.timeOrigin + performance.now() < deadline) {
+      const music = converted.goal.kind === "gekiso"
+        ? table(this.data, "MasterLiveMusic").find(row => row.id === converted.goal.songs![0]!.songId)! : null;
+      if (converted.goal.kind === "gekiso" && [music!.gekisouMission1, music!.gekisouMission2, music!.gekisouMission3].includes(2)
+        && performance.timeOrigin + performance.now() < deadline) {
         const song = converted.charts[0]!.song;
         const proposals = engine!.invoke<EngineResponse>({ op: "run", handle: this.handle, charts: converted.charts,
           request: { ...prepared, goal: { kind: "power", song, challengeEventId: null },

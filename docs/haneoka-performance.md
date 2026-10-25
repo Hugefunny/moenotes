@@ -1,7 +1,7 @@
 # Full-card-pool validation - 2026-10-26
 
-The latest full-pool follow-up completes Challenge/Skip combined proofs and retains early Gekisou candidates.
-See [the follow-up](#proof-bounds-and-cold-start-follow-up---2026-10-26) for current results and remaining gaps.
+The latest follow-up completes Free combined proofs within two seconds, shortens item proof and tightens Battle deadlines.
+See [the latest results](#free-proofs-and-battle-deadlines---2026-10-26) for current measurements and remaining gaps.
 
 The baseline `8bb4f9e94959b1f9c618e07d0a6c382af19e6df6` returns candidates for all measured scenes.
 Free score, power, CP and PT complete their top-three proof within the two-second budget.
@@ -199,3 +199,104 @@ Free combined/item proof time, tighter Gekisou interruption latency, isolated pe
 maximum rewards, Arena (the frozen tables are empty), active memories, cross-song UI and stopped-search
 continuation remain open. Production provider selection is unchanged; no browser/phone acceptance is added
 by these Worker-core and WASM measurements.
+
+
+## Free proofs and Battle deadlines - 2026-10-26
+
+Account validation now decodes each Master table once per request. A ten-call comparison on both servers and
+two growth profiles preserves every adapter field; mean validation drops from 62-76 ms to 2-5 ms. The cache
+ends with the request, so later requests re-read their input tables.
+
+This follow-up uses the same frozen full-pool accounts and requests as downstream commit
+`9107698479d8285dd08e9e5af0350f18203a8445`. All 60 request, dataset and account identities match that baseline;
+all return three legal teams and no primary objective value regresses. The 20 additional maximum Skip runs use
+the same complete pools and declared growth. Performance runs were sequential with no concurrent build or test.
+
+- Native patch: `6ecb8e522b50fc0f0d716c7bf1c17498bd0e595b237e2a0749e337f92187c4b3`.
+- WASM: `610800af56fda00da8f7926474f09eefb1c5a247b0eda6f0df8eb4823c0f5431` (6911616 bytes).
+- Adapter: `8a90405cf92db9c8b5feab18cb4e88479a14ede30d585ffd87f822cd64d7abd5`.
+
+### Complete-pool two-second requests
+
+| Scene | Wall time, ms | Proven / runs | Best primary value |
+| --- | ---: | ---: | ---: |
+| free-combined | 1670-1877 | 4 / 4 | 2500 |
+| free-items | 2004-2008 | 0 / 4 | 2184 |
+| battle | 2002-2003 | 0 / 4 | 36087609.8 |
+| mission | 2006-2034 | 0 / 4 | 35959251.398098335 |
+| free-pt | 143-204 | 4 / 4 | 1541 |
+| free-cp | 55-78 | 4 / 4 | 50 |
+| challenge-combined | 32-43 | 4 / 4 | 23750 |
+| skip-combined | 10-15 | 4 / 4 | 993 |
+
+Free combined is PT + 20 CP, then items, with three physical formations. Its best primary payoff rises from
+2000 to 2500. Native search proves the first-level top K before fixing an exact prefix; the remaining levels
+are searched over the original pool. A failed or incomplete prefix stage supplies seeds only. Coupled power/skill
+and per-order profile bounds tighten the complete grade vectors without scalarizing priorities.
+
+Single PT/items now use the published model's payoff-then-power ordering, instead of the donor's implicit
+other-reward and mean-score refinements. Power refinement uses a power upper bound: the generic score-product
+relaxation is disabled because dividing its product bound by a skill upper bound can underestimate power.
+An independent frozen WASM enumerated 600 leader/Snapshot formations per server. Both constrained searches
+match its exact best payoff 2184 and power 1,388,380; the unrestricted pool retains that witness.
+
+### Item proof with a longer budget
+
+The preserved baseline bundle and final bundle run alternately on the same frozen inputs, with a 10-second
+budget. Both keep the same primary payoff 2184. Payoff ties now select power, so secondary score values and
+lower-ranked formations may differ from the old PT/score order.
+
+| Server | Baseline wall, ms | Baseline proven | Final wall, ms | Final proven |
+| --- | ---: | --- | ---: | --- |
+| intl | 10004 | false | 4790 | true |
+| jp | 9436 | true | 4509 | true |
+
+Item top-three proof still exceeds two seconds. A short request preserves its three candidates with incomplete
+proof. The timings above certify the recorded full-pool requests, not all songs, growth states or devices.
+
+### Frame interruption and actual Worker
+
+WASM Gekisou replay checks the absolute deadline during frames, maximum-order completion and MISS replay.
+Interruption retains completed candidates and reports incomplete proof with unknown bound/counters. The same
+context can run again. The MISS replay objective also forwards Snapshot power preparation to its bound, fixing
+a baseline out-of-bounds failure. Fixed-formation replay stays identical for all 120 orders under the tested
+expected/maximum and Great/Just/MISS inputs.
+
+Non-LUCK Battle enters native search directly; LUCK keeps a scored power fallback. The measured Battle budget
+overrun is now a few milliseconds, with its prior best score retained. First progress is later than the sixth
+milestone's bootstrap path. Mission/LUCK can still overrun during bootstrap/finalization. The budget remains cooperative.
+
+| Bundled Worker request | Wall, ms | First progress, ms | Proven |
+| --- | ---: | ---: | --- |
+| mission | 2019 | 158 | false |
+| battle | 2003 | 628 | false |
+| free-expert | 31 | 19 | true |
+| free-items | 2005 | 44 | false |
+| free-combined | 1736 | 639 | true |
+| challenge-combined | 34 | 16 | true |
+| skip-combined | 12 | 8 | true |
+
+These Worker-core calls load the final JS/WASM bytes with the existing integrity checks. Native counter probes
+are separate calls without adapter score seeds; a raw Free combined probe can retain 2500 while its proof is
+still incomplete at two seconds. It is not the adapter/Worker proof receipt.
+
+### Remaining-scene migration
+
+Ordinary Skip maximum PT/items/CP and Challenge Skip maximum PT/items now use the deterministic one-settlement
+contract. All 20 complete-pool runs return three teams and proven results, with exact denominator 1 and no
+skill-order statistics. Their measured wall-time range is 12-239 ms.
+The page still normalizes Skip to expected; this adds request/Worker capability. Played maximum rewards and
+combined maximum remain unsupported. Skip payoff ties compare power, including constant CP.
+
+### Verification and acceptance
+
+- Final adapter/native/Worker validation: 259 passed, 0 failed, 6226 assertions.
+- Includes frozen 1200-formation power oracles, earlier exact-vector/overflow and physical-formation oracles,
+  source-model reward comparisons, deadline recovery and actual bundled Worker paths.
+- Existing repository suite: 896 passed, one existing Windows/GNU-time skip. Type-check: 668 files, zero errors
+  and warnings, nine existing hints. Lint and search/SEO checks pass (44 routes, 22308 URLs).
+- New tests, inputs, generated runtimes and raw receipts remain ignored local verification artifacts.
+
+Further work includes item proof within short budgets, Mission/LUCK interruption latency, other played reward
+scenes/maximum rewards, Arena and active-memory source coverage, cross-song UI and stopped-search continuation.
+Peak memory, real-account import and browser/phone acceptance remain separate. Production still uses the original provider.

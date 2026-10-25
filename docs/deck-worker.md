@@ -213,7 +213,12 @@ nine terms, weights 1 through 1,000,000,000). Native comparison is lexicographic
 results and progress include `team.levels` with exact per-level and per-term payoffs. Top-K distinguishes
 leaders and member-to-Snapshot assignments. A time limit retains the available formations without proof.
 The page's automatic CP conversion uses its existing challenge-rate request, exact payoff/cost extraction,
-and subsequent combined request. This capability does not add maximum-reward or other event-scene support.
+and subsequent combined request. This combined capability remains expected-only.
+Single ordinary Skip PT/items/CP and Challenge Skip PT/items also accept maximum aggregation; one deterministic
+settlement gives the same payoff as expected, with denominator 1. The existing page normalizes Skip to expected.
+Played maximum rewards and other event scenes remain outside this adapter's advertised capability.
+Single PT/item payoff ties compare power over the complete primary tier; they do not implicitly rank the other
+reward or played score. Single Skip CP is constant by result grade and ranks equal-payoff teams by power.
 
 The adapter also accepts ordinary / challenge Skip `score` requests and power with one selected event's
 parameter bonuses. Skip score has one deterministic result and no skill-order statistics; expected and maximum
@@ -225,13 +230,16 @@ Skip score directly, and progress retains the same score field as final output.
 The development adapter uses one absolute request deadline, including validation and proposal generation.
 Free combined rewards may use a native score search with a 100 ms budget to propose seeds; every seed is evaluated
 by the original full reward objective. Exact multi-level upper vectors prune only against `k` retained legal
-formations. The candidate pool and weighted-priority semantics remain complete.
+formations. A separate first-level stage may fix a prefix only after proving K physical formations share its
+exact optimum. Otherwise it supplies seeds to the original objective. The remaining-level search retains the
+complete pool and checks the fixed certificate on every accepted exact candidate.
 
-For Gekisou, one legal proposal is scored through native fixed-team replay before full preparation. The replay
-uses the requested accuracy and expected/maximum aggregation and leaves the full-search cache intact. Early
-progress and retained fallback candidates do not carry the constrained calculation's proof into the full request.
-Preparation expiry retains those scored candidates. Native work checks deadlines at job boundaries, so the
-budget is not a hard wall-clock cutoff. See [the full-pool report](haneoka-performance.md) for measured overhead.
+For LUCK Gekisou, one legal proposal is scored through native fixed-team replay before full preparation. Other
+Gekisou requests enter native search directly. The replay uses the requested accuracy and expected/maximum
+aggregation and leaves the full-search cache intact. Early candidates do not carry proof into the full request.
+Frame replay and order completion also check the absolute deadline, including periodic MISS replay. Interruption
+retains completed candidates with incomplete proof and unknown counters/bound. The same context can search again.
+Preparation and finalization remain cooperative, so the budget is not a hard wall-clock cutoff. See [the full-pool report](haneoka-performance.md) for measured overhead.
 
 Skip reward grades also accept the source model's numeric and comma-separated named enum forms. A missing
 settlement row for the parsed grade is an invalid request, rather than a zero-reward result.

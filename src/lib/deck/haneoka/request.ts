@@ -16,13 +16,13 @@ export interface RecommendationRequest {
   limits?: { timeLimitMs: number | null };
 }
 export const HANEOKA_COMMIT = "c91e6459a5ed43d55dc2b75e6a9d4f55b3edc62a";
-export const HANEOKA_PATCH_SHA = "b14d1682e5f9904bcf780bf2548b740b2b53b52c9342a24289cc44a5664a674d";
+export const HANEOKA_PATCH_SHA = "6ecb8e522b50fc0f0d716c7bf1c17498bd0e595b237e2a0749e337f92187c4b3";
 export const CAPABILITIES = {
   goals: ["power", "freeLive", "challengeLive", "battleLive", "missionLive", "skip"],
   metrics: { freeLive: ["score", "eventPoints", "eventItems", "challengePoints"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score"], missionLive: ["score"], skip: ["score", "eventPoints", "eventItems", "challengePoints"] },
   aggregations: {
     expected: { freeLive: ["score", "eventPoints", "eventItems", "challengePoints"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score"], missionLive: ["score"], skip: ["score", "eventPoints", "eventItems", "challengePoints"] },
-    maximum: { freeLive: ["score"], challengeLive: ["score"], battleLive: ["score"], missionLive: ["score"], skip: ["score"] },
+    maximum: { freeLive: ["score"], challengeLive: ["score"], battleLive: ["score"], missionLive: ["score"], skip: ["score", "eventPoints", "eventItems", "challengePoints"] },
   },
   combinedMetric: { kind: "combined", objective: "lexicographicWeightedExpectedSums", weights: "integer", maxLevels: 3, maxTerms: 9, maxWeight: 1_000_000_000 },
   eventItemRewards: { selection: "exactResultGrade", eventGroupField: "eventGroup", rowsPerGrade: 1, probabilityMarker: 10000 },
@@ -37,7 +37,7 @@ export function adaptRequest(data: DeckData, request: RecommendationRequest) {
   const kind: string = request.goal.kind;
   const rewards = ["eventPoints", "eventItems", "challengePoints", "combined"].includes(request.metric?.kind ?? "");
   const skip = kind === "skip";
-  if (rewards && (!["freeLive", "challengeLive", "skip"].includes(kind) || request.aggregation === "maximum"))
+  if (rewards && (!["freeLive", "challengeLive", "skip"].includes(kind) || request.aggregation === "maximum" && (!skip || request.metric?.kind === "combined")))
     throw new Error("haneoka-unsupported-reward-scene");
   const gekiso = ["battleLive", "missionLive"].includes(kind);
   if (gekiso && request.goal.rank !== undefined && request.goal.rank !== 1) throw new Error("haneoka-unsupported-rank");

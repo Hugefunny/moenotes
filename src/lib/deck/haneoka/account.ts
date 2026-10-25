@@ -24,7 +24,11 @@ export function adaptAccount(data: DeckData, account: AccountInput, request: Rec
     if (value === null || value === undefined) { issue(path, "missing"); return null; }
     try { return integer(value, path); } catch { issue(path, "invalid_value"); return null; }
   };
-  const rows = (name: string) => table(data, name);
+  const rowCache = new Map<string, Row[]>();
+  const rows = (name: string) => {
+    if (!rowCache.has(name)) rowCache.set(name, table(data, name));
+    return rowCache.get(name)!;
+  };
   const level = (exp: unknown, group: unknown, name: string, path: string): number | null => {
     const value = known(exp, path);
     if (value === null) return null;

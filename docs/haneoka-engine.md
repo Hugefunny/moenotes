@@ -62,7 +62,12 @@ music duration. No chart approximation or independent scoring formula is introdu
   multiplication can wrap, PT/items use the universal settlement bound instead of assuming bonus monotonicity.
   Exact upper vectors cover every priority level; a branch is discarded only after `k` legal physical formations
   exist and its vector cannot beat the retained frontier. Character suffixes and remaining Snapshot matching
-  tighten both PT and item bonuses while preserving the complete candidate pool.
+  tighten both PT and item bonuses while preserving the complete candidate pool. Per-order profile and coupled
+  power/skill bounds also constrain reachable grade vectors.
+  Free combined searches with multiple levels may first prove the first-level top K within a 1000 ms stage.
+  Only a completed proof whose retained K formations share the same exact primary sum can fix that prefix.
+  The full remaining-level search then visits the original pool and rejects candidates outside that certificate.
+  An incomplete prefix stage supplies seeds only; its candidates never become an assumed global bound.
 - Combined top-K retains physical formations: leader, members and member-to-Snapshot assignments. It preserves
   Snapshot options and disables roster-level lower bounds that would otherwise discard distinct formations.
   Progress and final answers expose each level and term's exact sum/count. Played rewards average 120 skill orders;
@@ -73,6 +78,13 @@ music duration. No chart approximation or independent scoring formula is introdu
 - Reward results retain mean played score or deterministic Skip score in `value.score`, and selected expected
   reward in `value.payoff.score`. `value.payoff.exact` contains the integer reward sum and observation count.
   CP ranking compares CP directly. The score tie used by the upstream CP objective is disabled for these requests.
+  Single PT/item rewards resolve payoff ties by power, matching the published model; the donor's implicit other-reward
+  and score refinement is not applied. Search refines each complete primary tier over the original card pool.
+  Single rewards retain distinct member rosters; combined rewards retain physical formations.
+- Ordinary Skip PT/items/CP and Challenge Skip PT/items also accept `maximum`. Their one deterministic settlement
+  is identical under expected and maximum aggregation, with exact denominator 1 and no skill-order statistics.
+  Skip CP uses power to choose among its equal-payoff teams. Combined maximum and played maximum rewards remain unsupported.
+  The existing page still normalizes Skip aggregation to expected; this adds the request/Worker capability.
 - Rewards use the page's `rewardProjection: true` and played/Skip clock. Projection excludes saved balances;
   the original model's half-open event window still applies. Int64 tick tokens are preserved before comparison,
   including the final 100 ns before an event ends. Dates follow the model's canonical no-offset JST interpretation.
@@ -88,17 +100,21 @@ music duration. No chart approximation or independent scoring formula is introdu
 - The time budget starts before request/account adaptation. Combined played rewards skip the unrestricted
   score-cap preparation pass. Free combined requests generate native score seeds with a 100 ms search budget, including
   legal leader rotations with Snapshot bindings preserved; the original full search evaluates every seed.
-- Gekisou first replays one legal power proposal through native `evaluateAll`, with the requested accuracy and
-  aggregation. This keeps the complete-search cache intact. Its scored candidate survives later preparation
-  expiry and is always unproven until the original full request completes. It does not narrow that request.
-  Preparation checks deadlines between member/Snapshot jobs and WASM support contexts. The budget is cooperative:
-  one native operation and final result completion can exceed it. A zero budget returns no fabricated team.
+- LUCK Gekisou requests first replay one legal power proposal through native `evaluateAll`, with the requested
+  accuracy and aggregation. Its scored candidate survives later preparation expiry and remains unproven until
+  the complete request finishes. Other Gekisou requests use their native seeds directly.
+  Frame replay, maximum-order completion and MISS replay check the absolute search deadline. An interrupted
+  replay returns the last completed candidates, incomplete proof and unknown bound/counters; it never reports
+  an unfinished replay as zero evaluations. The chart context remains reusable for a subsequent search.
+  The MISS replay objective now forwards Snapshot power preparation to its deterministic bound.
+  Preparation checks deadlines between member/Snapshot jobs and WASM support contexts. The budget remains
+  cooperative: initialization and finalization can exceed it. A zero budget returns no fabricated team.
 - Unknown or conflicting account inputs remain missing/invalid. Relevant fields are checked before
   the engine's min/max growth policy can fill them.
 - The verified JP and international snapshots have empty memory tables. Nonempty active memory
   tables are explicitly unsupported until their saved-state mapping is implemented.
 
-Pending before production switching: other event scenes, maximum rewards, Arena scene
+Pending before production switching: other event scenes, played maximum rewards, Arena scene
 mapping, memory activation, cross-song UI and stopped-search continuation, full-range
 performance and phone/browser acceptance. Existing production capabilities remain available
 through the original provider during this work.
