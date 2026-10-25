@@ -87,16 +87,62 @@ export class DeckSolver {
       status: box.errors.length ? "invalid" : "incomplete", missing: box.missing, errors: box.errors, result: null,
     });
     let last = -Infinity;
+    const deadline = converted.timeLimitMs === null ? Infinity : performance.timeOrigin + started + converted.timeLimitMs;
+    const warm: EngineHit[] = [];
+    const mergeWarm = (hits: EngineHit[]) => {
+      if (!warm.length) return hits;
+      const rosters = new Map<string, EngineHit>();
+      for (const hit of [...warm, ...hits]) {
+        const key = [...hit.members].sort().join("|");
+        if (!rosters.has(key) || hit.key > rosters.get(key)!.key) rosters.set(key, hit);
+      }
+      return [...rosters.values()].sort((a, b) => b.key - a.key).slice(0, converted.k);
+    };
     engine!.onProgress = value => {
       const now = performance.now();
       if (!progress || now - last < intervalMs) return;
       last = now;
-      const hits = (value.hits ?? []) as EngineHit[];
+      const hits = mergeWarm((value.hits ?? []) as EngineHit[]);
       progress(answer({ overall: hits, results: [], elapsedMs: performance.now() - started }, request, box.coversAllOwnedCards, false));
     };
     try {
+      const prepared: ReturnType<typeof adaptRequest> & { members: typeof box.members; snaps: typeof box.snaps; player: typeof box.player;
+        unknownPolicy: string; deadline?: number; seeds?: EngineHit[] } = { ...converted, ...(Number.isFinite(deadline) ? { deadline } : {}),
+        members: box.members, snaps: box.snaps, player: box.player, unknownPolicy: "min" };
+      if (request.goal.kind === "freeLive" && request.metric?.kind === "combined"
+        && performance.timeOrigin + performance.now() < deadline) {
+        const proposals = engine!.invoke<EngineResponse>({ op: "run", handle: this.handle, charts: converted.charts,
+          request: { ...prepared, goal: { kind: "score", songs: converted.goal.songs, criterion: "max", play: converted.goal.play },
+            deadline: Math.min(deadline, performance.timeOrigin + performance.now() + 100) } });
+        prepared.seeds = proposals.overall.flatMap(team => converted.constraints.leader !== null ? [team]
+          : team.members.map((_, leader) => {
+            const order = [leader, ...[0, 1, 2, 3, 4].filter(slot => slot !== leader)];
+            return { ...team, members: order.map(slot => team.members[slot]!), snaps: order.map(slot => team.snaps[slot]!) };
+          }));
+      }
+      if (converted.goal.kind === "gekiso" && performance.timeOrigin + performance.now() < deadline) {
+        const song = converted.charts[0]!.song;
+        const proposals = engine!.invoke<EngineResponse>({ op: "run", handle: this.handle, charts: converted.charts,
+          request: { ...prepared, goal: { kind: "power", song, challengeEventId: null },
+            deadline: Math.min(deadline, performance.timeOrigin + performance.now() + 100) } });
+        for (const team of proposals.overall.slice(0, 1)) {
+          if (performance.timeOrigin + performance.now() >= deadline) break;
+          const preview = engine!.invoke<{ evaluations: { power: number; score: { mean: number; max: number; orders: number[] } }[] }>({
+            op: "evaluateAll", handle: this.handle, charts: converted.charts, request: { ...prepared,
+              team: { members: team.members, snaps: team.snaps, leader: team.members[0] }, songs: converted.goal.songs,
+              gekiso: { accuracy: converted.goal.accuracy, rank: 1, seeds: 0 }, event: null } }).evaluations[0]!;
+          warm.push({ ...team, power: preview.power, score: preview.score,
+            key: converted.goal.criterion === "max" ? preview.score.max : preview.score.mean });
+          if (progress && warm.length && performance.now() - last >= intervalMs) {
+            last = performance.now();
+            progress(answer({ results: [], overall: mergeWarm([]), elapsedMs: performance.now() - started }, request, box.coversAllOwnedCards, false));
+          }
+        }
+        prepared.seeds = warm;
+      }
       const response = engine!.invoke<EngineResponse>({ op: "run", handle: this.handle, charts: converted.charts,
-        request: { ...converted, ...(converted.timeLimitMs === null ? {} : { deadline: performance.timeOrigin + started + converted.timeLimitMs }), members: box.members, snaps: box.snaps, player: box.player, unknownPolicy: "min" } }, true);
+        request: prepared }, true);
+      response.overall = mergeWarm(response.overall);
       response.elapsedMs = performance.now() - started;
       return answer(response, request, box.coversAllOwnedCards, true);
     } catch (error) {

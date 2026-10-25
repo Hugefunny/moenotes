@@ -60,6 +60,9 @@ music duration. No chart approximation or independent scoring formula is introdu
   monotone floating search key; exact vectors decide projected ties and final ordering. Lexicographic levels are
   never flattened into a large scalar. Bounds cover all reachable grades, with outward rounding. If signed Int32
   multiplication can wrap, PT/items use the universal settlement bound instead of assuming bonus monotonicity.
+  Exact upper vectors cover every priority level; a branch is discarded only after `k` legal physical formations
+  exist and its vector cannot beat the retained frontier. Character suffixes and remaining Snapshot matching
+  tighten both PT and item bonuses while preserving the complete candidate pool.
 - Combined top-K retains physical formations: leader, members and member-to-Snapshot assignments. It preserves
   Snapshot options and disables roster-level lower bounds that would otherwise discard distinct formations.
   Progress and final answers expose each level and term's exact sum/count. Played rewards average 120 skill orders;
@@ -74,18 +77,28 @@ music duration. No chart approximation or independent scoring formula is introdu
   the original model's half-open event window still applies. Int64 tick tokens are preserved before comparison,
   including the final 100 ns before an event ends. Dates follow the model's canonical no-offset JST interpretation.
 - The account envelope uses the page's `jp` / `intl` identifiers. Skip reads growth and player bonuses without
-  requiring unused live/Gekisou skill levels. Only canonical named Skip result-rank parameters are supported;
-  an unknown/numeric/comma-separated value is rejected pending its native enum-parser mapping.
+  requiring unused live/Gekisou skill levels. Skip result grades follow the source enum parser: case-sensitive
+  names, signed Int32 decimal strings and comma-separated named values combined with bitwise OR. Whitespace
+  follows Unicode White_Space. Invalid or overflowing tokens resolve to enum zero, as in the source model;
+  a selected grade missing from a requested PT/item/CP table is diagnosed before search.
 - Expected or maximum skill-order score; declared Great/Just distributions and periodic misses.
 - Required/excluded members, excluded Snaps, fixed leader and no-Snap requests.
 - Progress, time limits and intermediate candidates use the existing Worker lifecycle. Only a
   completed Haneoka proof becomes a proven result. Formation slot 2 holds the leader.
+- The time budget starts before request/account adaptation. Combined played rewards skip the unrestricted
+  score-cap preparation pass. Free combined requests generate native score seeds with a 100 ms search budget, including
+  legal leader rotations with Snapshot bindings preserved; the original full search evaluates every seed.
+- Gekisou first replays one legal power proposal through native `evaluateAll`, with the requested accuracy and
+  aggregation. This keeps the complete-search cache intact. Its scored candidate survives later preparation
+  expiry and is always unproven until the original full request completes. It does not narrow that request.
+  Preparation checks deadlines between member/Snapshot jobs and WASM support contexts. The budget is cooperative:
+  one native operation and final result completion can exceed it. A zero budget returns no fabricated team.
 - Unknown or conflicting account inputs remain missing/invalid. Relevant fields are checked before
   the engine's min/max growth policy can fill them.
 - The verified JP and international snapshots have empty memory tables. Nonempty active memory
   tables are explicitly unsupported until their saved-state mapping is implemented.
 
-Pending before production switching: other event scenes, maximum rewards, noncanonical Skip reward-rank parsing, Arena scene
+Pending before production switching: other event scenes, maximum rewards, Arena scene
 mapping, memory activation, cross-song UI and stopped-search continuation, full-range
 performance and phone/browser acceptance. Existing production capabilities remain available
 through the original provider during this work.

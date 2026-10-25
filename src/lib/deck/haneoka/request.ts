@@ -16,7 +16,7 @@ export interface RecommendationRequest {
   limits?: { timeLimitMs: number | null };
 }
 export const HANEOKA_COMMIT = "c91e6459a5ed43d55dc2b75e6a9d4f55b3edc62a";
-export const HANEOKA_PATCH_SHA = "02ece9bd681b0f9c3b177a47b5bb2c25800cd81822822c78c15abd3ae40ff8de";
+export const HANEOKA_PATCH_SHA = "b14d1682e5f9904bcf780bf2548b740b2b53b52c9342a24289cc44a5664a674d";
 export const CAPABILITIES = {
   goals: ["power", "freeLive", "challengeLive", "battleLive", "missionLive", "skip"],
   metrics: { freeLive: ["score", "eventPoints", "eventItems", "challengePoints"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score"], missionLive: ["score"], skip: ["score", "eventPoints", "eventItems", "challengePoints"] },
@@ -66,13 +66,13 @@ export function adaptRequest(data: DeckData, request: RecommendationRequest) {
   if (![great, just].every(value => typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 1)
     || gekiso && great + just > 1) throw new Error("haneoka-accuracy");
   const criterion = request.aggregation === "maximum" ? "max" : "mean";
-  const scoreGoal = kind === "power" || skip && !rewards ? { kind: skip ? "skip-score" : "power", song, challengeEventId,
+  const scoreGoal = kind === "power" || skip && !rewards ? { kind: skip ? "skip-score" as const : "power" as const, song, challengeEventId,
     ...(parameterEvents.length ? { parameterEventId: parameterEvents[0] }
       : skip && challengeEventId !== null && request.eventIds?.includes(challengeEventId) ? { parameterEventId: challengeEventId } : {}) }
-    : gekiso ? { kind: "gekiso", songs: [song], criterion, rank: 1, seeds: 0, accuracy: {
+    : gekiso ? { kind: "gekiso" as const, songs: [song], criterion, rank: 1, seeds: 0, accuracy: {
       great, just: great === 1 ? 0 : just / (1 - great), missEvery: play.missEvery ?? 0,
     } }
-      : { kind: "score", songs: [song], criterion, challengeEventId, play: {
+      : { kind: "score" as const, songs: [song], criterion, challengeEventId, play: {
         kind: "custom", great, good: 0, bad: 0, miss: 0, missEvery: play.missEvery ?? 0,
       } };
   const key = (id: unknown, prefix: string) => prefix + integer(typeof id === "string" ? Number(id) : id, "constraint");
@@ -119,21 +119,31 @@ function eventGoal(data: DeckData, request: RecommendationRequest, song: { songI
   const boosts = table(data, challenge ? "MasterChallengeMusicBoostBonus" : "MasterLiveMusicBoostBonus",
     [costField, "eventPointRate", "liveMusicRewardRate"]).filter(row => row[costField] === consumption);
   if (consumption > 0 && boosts.length !== 1) throw new Error("haneoka-reward-boost-data");
+  let skipRank: number | null = null;
   if (skip) {
     const parameter = table(data, "MasterParameter").find(row => row.id === "live_skip_result_score_rank");
-    if (parameter?.type !== "String" || typeof parameter.value !== "string"
-      || !["None", "E", "D", "C", "B", "A", "S", "SS"].includes(parameter.value.trim()))
-      throw new Error("haneoka-unsupported-skip-rank");
+    if (parameter?.type !== "String" || typeof parameter.value !== "string") throw new Error("haneoka-unsupported-skip-rank");
+    const trim = (value: string) => value.replace(/^\p{White_Space}+|\p{White_Space}+$/gu, "");
+    const value = trim(parameter.value), names = ["None", "E", "D", "C", "B", "A", "S", "SS"];
+    if (/^[+-]?\d+$/.test(value)) {
+      const parsed = Number(value);
+      skipRank = Number.isInteger(parsed) && parsed >= -2147483648 && parsed <= 2147483647 ? parsed : 0;
+    } else {
+      const ranks = value.split(",").map(name => names.indexOf(trim(name)));
+      skipRank = ranks.includes(-1) ? 0 : ranks.reduce((rank, next) => rank | next, 0);
+    }
   }
   if (terms.some(term => term.kind === "challengePoints")) {
     if (challenge) throw new Error("haneoka-challenge-spends-cp");
     const rows = table(data, "MasterLiveChallengePoint", ["scoreRank", "value"]);
-    if (!rows.length || new Set(rows.map(row => row.scoreRank)).size !== rows.length) throw new Error("haneoka-reward-cp-table");
+    if (!rows.length || new Set(rows.map(row => row.scoreRank)).size !== rows.length
+      || skipRank !== null && !rows.some(row => row.scoreRank === skipRank)) throw new Error("haneoka-reward-cp-table");
   }
   if (terms.some(term => term.kind === "eventPoints")) {
     const rows = table(data, challenge ? "MasterChallengeLiveEventPoint" : "MasterLiveEventPoint", ["group", "scoreRank", "value"])
       .filter(row => row.group === event[challenge ? "challengeLiveEventPointGroup" : "liveEventPointGroup"]);
-    if (!rows.length || new Set(rows.map(row => row.scoreRank)).size !== rows.length) throw new Error("haneoka-reward-point-table");
+    if (!rows.length || new Set(rows.map(row => row.scoreRank)).size !== rows.length
+      || skipRank !== null && !rows.some(row => row.scoreRank === skipRank)) throw new Error("haneoka-reward-point-table");
   }
   const items = terms.filter(term => term.kind === "eventItems");
   if (items.length) {
@@ -144,10 +154,10 @@ function eventGoal(data: DeckData, request: RecommendationRequest, song: { songI
       ["eventGroup", "scoreRank", "probability", "resourceType", "resourceId", "resourceCount"])
       .filter(row => row.eventGroup === group);
     const grades = new Set(rows.map(row => row.scoreRank));
-    if (!rows.length || grades.size !== rows.length || rows.some(row => row.probability !== 10000
+    if (!rows.length || grades.size !== rows.length || skipRank !== null && !grades.has(skipRank) || rows.some(row => row.probability !== 10000
       || row.resourceType !== 1 || row.resourceId !== event.eventItemId)) throw new Error("haneoka-reward-item-table");
   }
-  return { kind: "event", route: skip ? "skip" : challenge ? "challenge" : "live", eventId, consumption, songs: [song],
+  return { kind: "event" as const, route: skip ? "skip" : challenge ? "challenge" : "live", eventId, consumption, songs: [song],
     measure: combined ? "combined" : metric.kind === "eventItems" ? "items" : metric.kind === "challengePoints" ? "challenge-points" : "points",
     levels: levels?.map(level => level.map(term => ({ kind: ["eventPoints", "eventItems", "challengePoints"].indexOf(term.kind), weight: term.weight }))),
     rewardSemantics: "moenotes-v1", rewardActive: rewardActive(event.startAt, event.endAt, context.resultClock!.serverNowJstTicks!), challengeEventId, play };

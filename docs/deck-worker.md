@@ -219,3 +219,19 @@ The adapter also accepts ordinary / challenge Skip `score` requests and power wi
 parameter bonuses. Skip score has one deterministic result and no skill-order statistics; expected and maximum
 aggregation select the same value. Parameter bonuses do not change normal song typing. Native search compares
 Skip score directly, and progress retains the same score field as final output.
+
+### Haneoka preparation and early candidates
+
+The development adapter uses one absolute request deadline, including validation and proposal generation.
+Free combined rewards may use a native score search with a 100 ms budget to propose seeds; every seed is evaluated
+by the original full reward objective. Exact multi-level upper vectors prune only against `k` retained legal
+formations. The candidate pool and weighted-priority semantics remain complete.
+
+For Gekisou, one legal proposal is scored through native fixed-team replay before full preparation. The replay
+uses the requested accuracy and expected/maximum aggregation and leaves the full-search cache intact. Early
+progress and retained fallback candidates do not carry the constrained calculation's proof into the full request.
+Preparation expiry retains those scored candidates. Native work checks deadlines at job boundaries, so the
+budget is not a hard wall-clock cutoff. See [the full-pool report](haneoka-performance.md) for measured overhead.
+
+Skip reward grades also accept the source model's numeric and comma-separated named enum forms. A missing
+settlement row for the parsed grade is an invalid request, rather than a zero-reward result.

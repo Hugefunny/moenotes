@@ -1,5 +1,8 @@
 # Full-card-pool validation - 2026-10-26
 
+The latest full-pool follow-up completes Challenge/Skip combined proofs and retains early Gekisou candidates.
+See [the follow-up](#proof-bounds-and-cold-start-follow-up---2026-10-26) for current results and remaining gaps.
+
 The baseline `8bb4f9e94959b1f9c618e07d0a6c382af19e6df6` returns candidates for all measured scenes.
 Free score, power, CP and PT complete their top-three proof within the two-second budget.
 Items, combined rewards and Gekisou need further work on proof time; several combined requests also find lower
@@ -122,3 +125,77 @@ The final input/answer/progress receipts are `full-pool-after.jsonl`; original W
 in `full-pool-entries-baseline.json`. Final Worker/counter receipts are `full-pool-entries.json`, with its own
 patch/WASM identity. These ignored local files accompany the public findings; new local verification tests
 are not part of the commit.
+
+## Proof bounds and cold-start follow-up - 2026-10-26
+
+This revision compares against `a64402ac62e1fcef0e8f75dbe9ed8eaaa4ddbbeb` above. The final isolated run uses
+the same 60 requests, dataset hashes, complete card pools, account hashes and two-second budgets. No tests,
+type checks or native builds ran alongside that final measurement. All 60 requests return three teams and
+retain or improve the previous best objective value. This remains a declared full-ownership desktop fixture;
+it does not establish all-song, actual-account, phone or isolated peak-memory acceptance.
+
+- Downstream patch: `b14d1682e5f9904bcf780bf2548b740b2b53b52c9342a24289cc44a5664a674d`.
+- WASM: `9557fe7d2eb3b24496911ed04929d6a67f63b51bff960e57977aba5cce72e502`.
+- Bundle: `fe2fbb621b634c1eed46f0360e264e9c30af758a57bad7f93984d07eabecc3bf`.
+- Raw receipts: ignored/local `full-pool-proof-isolated.jsonl`, `full-pool-entries-proof.json` and
+  `proof-entries-isolated.log`; earlier and intermediate measurements remain separate.
+
+| Scene | Previous wall time, ms | Current wall time, ms | First candidate, ms | Current proven / runs |
+| --- | ---: | ---: | ---: | ---: |
+| free-combined | 2003-2006 | 2003-2005 | 86-107 | 0 / 4 |
+| challenge-combined | 2002-2006 | 76-80 | 71-74 | 4 / 4 |
+| skip-combined | 2001-2004 | 59-77 | 56-73 | 4 / 4 |
+| battle | 2019-2078 | 2051-2265 | 265-320 | 0 / 4 |
+| mission | 2015-3240 | 2007-2067 | 185-209 | 0 / 4 |
+
+Challenge combined retains 23750 and Skip combined retains 993, now with complete top-three proofs in both
+servers and both repeats. Free combined retains 2000, including a second seeded physical formation at that
+primary value, but its top-three proof remains incomplete. Items and Gekisou also remain unproven.
+
+Exact weighted reward vectors now bound every priority level against the Kth retained physical formation.
+Character suffix bounds and remaining-Snapshot matching tighten both reward bonuses. Equal upper vectors
+can be pruned only after K legal formations exist; no physical pool reduction or scalar flattening is used.
+
+The unrestricted combined score-cap pass previously consumed preparation time before any candidate could be
+retained. It is skipped. Free combined instead uses a native score proposal with a 100 ms budget and legal leader
+rotations, preserving every member/Snapshot binding, before the unchanged full reward search evaluates seeds.
+The raw native `run` counter probe deliberately omits these adapter seeds: its Free combined best is 1331;
+the adapter and actual Worker retain 2000. These are different entry paths, not interchangeable quality evidence.
+
+Gekisou replays one legal power proposal through native `evaluateAll` before full preparation. This supplies
+an actual goal score without replacing the full-search cache. Its proof never certifies the full pool. The
+complete search keeps its original pool and receives the proposal as a seed. Preparation checks between
+member/Snapshot jobs and WASM support contexts; expired leader traversal stops with an unknown upper bound.
+Battle and Mission retain the previous best scores, 36087609.8 and 35959251.398098335 respectively, in all four
+measurements each. The earlier constrained-search bootstrap degraded those candidates by replacing the cache;
+fixed replay and a single proposal remove that regression.
+
+The budget is cooperative. A native operation or final result completion may overrun the deadline. A zero
+budget can validly return no candidates. The measured two-second requests all return candidates, including
+the previously empty cold Challenge combined case; this does not guarantee candidates at every shorter budget.
+
+### Actual bundled Worker and native counters
+
+- Worker `mission`: 2091 ms, first progress 260 ms, 3 teams, proven `false`.
+- Worker `battle`: 2108 ms, first progress 288 ms, 3 teams, proven `false`.
+- Worker `free-expert`: 112 ms, first progress 100 ms, 3 teams, proven `true`.
+- Worker `free-combined`: 2005 ms, first progress 96 ms, 3 teams, proven `false`.
+- Worker `challenge-combined`: 81 ms, first progress 73 ms, 3 teams, proven `true`.
+- Worker `skip-combined`: 58 ms, first progress 54 ms, 3 teams, proven `true`.
+
+The native Challenge combined probe performs 5 exact evaluations and Skip combined 13, each with 15 member
+nodes. The previous Skip probe spent hundreds of thousands of exact evaluations under the first few member
+nodes. Native counter timing excludes adapter and Worker initialization; the table above includes adapter
+validation and native work. Worker initialization is recorded separately in the raw log.
+
+### Remaining migration and acceptance
+
+Skip grade parsing now covers case-sensitive names, signed Int32 numeric tokens and comma-separated named
+enum OR combinations. Both servers' ordinary/challenge Skip combined settlements and single PT/items/CP
+settlements match the published model. Unicode whitespace, numeric overflow and unknown/missing grades are
+covered; missing settlement rows remain diagnostic.
+
+Free combined/item proof time, tighter Gekisou interruption latency, isolated peak memory, other event scenes,
+maximum rewards, Arena (the frozen tables are empty), active memories, cross-song UI and stopped-search
+continuation remain open. Production provider selection is unchanged; no browser/phone acceptance is added
+by these Worker-core and WASM measurements.
