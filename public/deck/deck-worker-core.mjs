@@ -178,7 +178,7 @@ export function createDeckWorkerCore({
       let DeckSolver, created;
       try { DeckSolver = await loadSolver({ glue, wasm }); }
       catch (error) { throw new Failure('init', 'Engine: ' + describe(error)); }
-      try { created = new DeckSolver(new Uint8Array(deckData)); }
+      try { created = new DeckSolver(new Uint8Array(deckData), { datasetId: message.deckDataSha256 }); }
       catch (error) { throw new Failure('init', 'DeckSolver: ' + describe(error)); }
       const datasetId = typeof created.datasetId === 'string' ? created.datasetId : '';
       if (datasetId !== message.deckDataSha256) {

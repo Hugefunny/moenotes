@@ -569,6 +569,7 @@ export const jaJP = {
     "othersAverage": "ルームの他プレイヤーの平均スコア",
     "othersAverageSame": "空欄なら自分と同じスコア",
     "solver": {
+      "haneokaAttribution": "編成アルゴリズム提供：Haneoka",
       "eventItemsUnsupported": "このエンジンは、確定した結果ランクに基づくイベントバッジ計算に未対応です。",
       "eventItemRewardsUnsupported": "このモードのイベント報酬データには未対応です。各ランクの報酬行はちょうど1件で、確率マーカーが 10000 である必要があります。",
       "maximumLabel": {"score": "最適な順の平均スコア", "challengePoints": "最適な順の平均獲得 CP", "eventPoints": "最適な順の平均 PT", "eventItems": "最適な順の平均バッジ数"},

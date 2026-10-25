@@ -24,7 +24,8 @@
     "release": "bun scripts/release.mjs",
     "prepare": "git config core.hooksPath .githooks 2>/dev/null || true",
     "lint:server-config": "bun scripts/generate-runtime-config.ts --check",
-    "gen:server-config": "bun scripts/generate-runtime-config.ts"
+    "gen:server-config": "bun scripts/generate-runtime-config.ts",
+    "build:haneoka-engine": "bun scripts/build-haneoka-engine.mjs"
   },
   "dependencies": {
     "@astrojs/react": "7.0.0",

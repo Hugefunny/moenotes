@@ -1,7 +1,9 @@
 ---
 import PageLayout from "@/layouts/PageLayout.astro";
 import type { AppLocale } from "@/config/locales";
-import { siteConfig } from "@/config/site";
+import { siteConfig, haneokaUrl, haneokaEngineDocument } from "@/config/site";
+import { t } from "@/i18n";
+import { HANEOKA_COMMIT } from "@/lib/deck/haneoka/request";
 import { getLegalTexts } from "@/i18n/legal";
 
 export type LegalDocument = "license" | "terms" | "privacy";
@@ -48,5 +50,10 @@ const parts = (text: string) => text.split("{repo}");
         </section>
       ))}
     </div>
+    {document === "license" && <p class="mt-6 text-body-medium leading-7 text-on-surface-variant">
+      {t(locale, "deckWorkspace.solver.haneokaAttribution")} — <a href={haneokaUrl} class="text-primary underline">{haneokaUrl}</a>
+      {" · AGPL-3.0-only · "}<a href={haneokaEngineDocument(HANEOKA_COMMIT, "LICENSE")} class="text-primary underline">LICENSE</a>
+      {" · "}<a href={haneokaEngineDocument(HANEOKA_COMMIT, "NOTICE")} class="text-primary underline">NOTICE</a>
+    </p>}
   </article>
 </PageLayout>

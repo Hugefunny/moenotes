@@ -1,5 +1,6 @@
 import Button from "@mui/material/Button";
 import type { AppLocale } from "@/config/locales";
+import { haneokaUrl } from "@/config/site";
 import { t } from "@/i18n";
 import { localizePath } from "@/i18n/routing";
 import { getRoutePathById } from "@/lib/route/registry";
@@ -73,6 +74,7 @@ export default function DeckResult(props: DeckResultProps) {
   const elapsed = result?.elapsedMs ?? null;
   const teams = result?.teams ?? [];
   return <div className="dr-result" data-state={running ? "running" : "done"} aria-busy={running}>
+    {answer?.engine?.name === "Haneoka" && <small className="dr-muted">{tr("haneokaAttribution")} — <a href={haneokaUrl}>{haneokaUrl}</a></small>}
     {props.stale && !running && <div className="dr-stale" role="status"><strong>{tr("stale")}</strong><Button variant="text" size="small" onClick={props.onRerun}>{tr("rerun")}</Button></div>}
     <div className="dr-status" data-proof={running ? "running" : optimality?.proven && rateProven ? "proven" : "unproven"}>
       {running ? <>
@@ -266,7 +268,7 @@ function SkillOrders(props: DeckResultProps & { team: DeckTeam; aggregation: Dec
     <OrderRange locale={locale} min={orders.min.score} median={orders.median.score} max={orders.max.score} mean={mean} />
     <dl className="dr-order-list">{rows.map(({ key, stat }) => <div key={key} data-order={key}>
       <dt>{tr(`orderRow.${key}`)}</dt>
-      <dd><OrderSequence locale={locale} order={stat.order} catalog={catalog} /><strong>{formatValue(stat.score, "score", locale)}</strong></dd>
+      <dd>{stat.order.length ? <OrderSequence locale={locale} order={stat.order} catalog={catalog} /> : <span>—</span>}<strong>{formatValue(stat.score, "score", locale)}</strong></dd>
     </div>)}</dl>
     <p className="dr-muted">{tr("ordersNote")}</p>
   </section>;

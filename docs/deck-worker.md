@@ -84,7 +84,9 @@ against the message before using it. Then it:
    then checks the commit against `modelCommit` (unless `null`);
 2. imports the glue, a wasm-bindgen `--target web` ES module, from a `blob:` URL of its verified bytes, and calls its
    default export with `{ module_or_path: wasmBytes }`, so the WASM is never fetched again unverified;
-3. constructs `new DeckSolver(deckDataBytes)` with the deck data as a `Uint8Array`;
+3. constructs `new DeckSolver(deckDataBytes, { datasetId: deckDataSha256 })` with the verified data as a
+   `Uint8Array`; existing wasm-bindgen engines ignore the extra options argument. The
+   [Haneoka development adapter](haneoka-engine.md) binds its context to this verified hash;
 4. checks that `solver.datasetId`, the lowercase hex SHA-256 of the deck data bytes, equals `deckDataSha256`;
 5. reads `solver.capabilities()` as JSON text, when the solver has it, and returns the dataset catalogue in `ready`.
 

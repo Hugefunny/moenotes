@@ -30,6 +30,7 @@ export interface DeckOptimality { proven: boolean; lowerBound: number | null; up
 export interface DeckIssue { path: string; code: string; message: string }
 export type DeckPhase = "preprocess" | "search" | "proof" | "done";
 export interface DeckAnswer {
+  engine?: { name: "Haneoka"; commit: string };
   final: boolean;
   status: "ok" | "incomplete" | "invalid" | "failed";
   missing: DeckIssue[];
@@ -133,7 +134,7 @@ export function parseDeckAnswer(json: string): DeckAnswer {
       coversAllOwnedCards: account.coversAllOwnedCards !== false,
     };
   }
-  return { final: raw.final === true, status, missing: issues(raw.missing), errors: issues(raw.errors), result };
+  return { ...(record(raw.engine) && raw.engine.name === "Haneoka" && typeof raw.engine.commit === "string" ? { engine: { name: "Haneoka" as const, commit: raw.engine.commit } } : {}), final: raw.final === true, status, missing: issues(raw.missing), errors: issues(raw.errors), result };
 }
 
 /**

@@ -572,6 +572,7 @@ export const zhCN = {
     "othersAverage": "房间里其他人的平均分",
     "othersAverageSame": "留空表示与你同分",
     "solver": {
+      "haneokaAttribution": "组卡算法来自 Haneoka",
       "eventItemsUnsupported": "当前引擎不支持按确切结算评级计算活动徽章。",
       "eventItemRewardsUnsupported": "当前场景的活动奖励数据不受支持：每个评级必须恰好有一条奖励，且概率标记为 10000。",
       "maximumLabel": {"score": "最佳顺序平均分数", "challengePoints": "最佳顺序平均新增 CP", "eventPoints": "最佳顺序平均 PT", "eventItems": "最佳顺序平均徽章"},
