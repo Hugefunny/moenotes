@@ -46,6 +46,20 @@ music duration. No chart approximation or independent scoring formula is introdu
 - Free Live and Challenge Live single PT / event-item expected rewards; Free Live CP; ordinary Skip PT / CP /
   event items; Challenge Skip PT / event items. Ordinary consumption is 0 through 10; Challenge consumption is
   200/400/800/1600. Every positive cost must have exactly one matching source row.
+- Combined expected rewards use up to three lexicographic levels, nine total PT / event-item / CP terms,
+  and positive integer weights through 1,000,000,000. All terms refer to the same event. The existing page's
+  manual conversion and automatic two-stage CP worth requests use this capability. Challenge routes cannot earn CP.
+- Each combined level keeps an `i128` weighted sum of integer settlements. Only one level is projected to a
+  monotone floating search key; exact vectors decide projected ties and final ordering. Lexicographic levels are
+  never flattened into a large scalar. Bounds cover all reachable grades, with outward rounding. If signed Int32
+  multiplication can wrap, PT/items use the universal settlement bound instead of assuming bonus monotonicity.
+- Combined top-K retains physical formations: leader, members and member-to-Snapshot assignments. It preserves
+  Snapshot options and disables roster-level lower bounds that would otherwise discard distinct formations.
+  Progress and final answers expose each level and term's exact sum/count. Played rewards average 120 skill orders;
+  Skip has one deterministic settlement. A deadline preserves candidates and leaves the proof incomplete.
+- Automatic CP conversion first computes the selected challenge reward, then passes its exact payoff/cost through
+  the existing page request producer. Its worth remains the best found value if that first search is incomplete;
+  downstream proof certifies the emitted weighted objective, not optimality of an unfinished challenge search.
 - Reward results retain mean played score or deterministic Skip score in `value.score`, and selected expected
   reward in `value.payoff.score`. `value.payoff.exact` contains the integer reward sum and observation count.
   CP ranking compares CP directly. The score tie used by the upstream CP objective is disabled for these requests.
@@ -64,9 +78,9 @@ music duration. No chart approximation or independent scoring formula is introdu
 - The verified JP and international snapshots have empty memory tables. Nonempty active memory
   tables are explicitly unsupported until their saved-state mapping is implemented.
 
-Pending before production switching: other event scenes, maximum rewards, Skip score optimization, arbitrary reward priority levels and
-CP conversion, Arena scene mapping, memory activation, cross-song UI and stopped-search continuation,
-event-parameter power, full-range performance and phone/browser acceptance. Existing production capabilities remain available
+Pending before production switching: other event scenes, maximum rewards, Skip score optimization, Arena scene
+mapping, memory activation, cross-song UI and stopped-search continuation, event-parameter power, full-range
+performance and phone/browser acceptance. Existing production capabilities remain available
 through the original provider during this work.
 
 ## Attribution

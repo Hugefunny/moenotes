@@ -17,7 +17,7 @@ function orders(): number[][] {
 }
 const ORDERS = orders();
 function id(key: string): number { return Number(key.slice(1)); }
-interface EngineHit { members: string[]; snaps: (string | null)[]; power: number; key: number; skipScore?: number; score?: { orders: number[]; mean?: number } | null; event?: { mean: number; rewardSum: number; orders: number } }
+interface EngineHit { members: string[]; snaps: (string | null)[]; power: number; key: number; skipScore?: number; score?: { orders: number[]; mean?: number } | null; event?: { mean: number; rewardSum: number | string; orders: number }; levels?: { sum: string; terms: string[] }[] }
 interface EngineResponse { results: { proven: boolean; bound: number | null }[]; overall: EngineHit[]; elapsedMs: number | null }
 function answer(response: EngineResponse, request: RecommendationRequest, coversAllOwnedCards: boolean, final: boolean) {
   const rows = response.results ?? [];
@@ -29,15 +29,19 @@ function answer(response: EngineResponse, request: RecommendationRequest, covers
     const values = ranked.length === 120 ? { count: 120, min: ranked[0], median: {
       score: (ranked[59]!.score + ranked[60]!.score) / 2, order: ranked[59]!.score === ranked[60]!.score ? ranked[59]!.order : [],
     }, max: ranked[119] } : null;
-    const reward = ["eventPoints", "eventItems", "challengePoints"].includes(request.metric?.kind ?? "");
+    const reward = ["eventPoints", "eventItems", "challengePoints", "combined"].includes(request.metric?.kind ?? "");
+    const combined = request.metric?.kind === "combined";
     const settlement = hit.event;
-    if (reward && (!settlement || !Number.isSafeInteger(settlement.rewardSum) || !Number.isSafeInteger(settlement.orders) || settlement.orders < 1))
+    if (reward && (!settlement || !(typeof settlement.rewardSum === "number" ? Number.isSafeInteger(settlement.rewardSum) : combined && /^-?\d+$/.test(settlement.rewardSum)) || !Number.isSafeInteger(settlement.orders) || settlement.orders < 1))
       throw new Error("haneoka-reward-certificate");
+    const payoff = (sum: number | string) => ({ score: Number(sum) / settlement!.orders,
+      exact: { numerator: String(sum), denominator: String(settlement!.orders) }, interval: null });
     const pair = (i: number) => ({ member: members[i], snap: snaps[i] });
     return {
       rank: index + 1, rankCertified: proven, leader: pair(0), others: [1, 2, 3, 4].map(pair),
       power: hit.power, value: { score: request.goal.kind === "skip" ? hit.skipScore! : reward ? hit.score!.mean! : hit.key, exact: null, interval: null,
-        payoff: reward ? { score: settlement!.mean, exact: { numerator: String(settlement!.rewardSum), denominator: String(settlement!.orders) }, interval: null } : null }, orders: values,
+        payoff: reward ? payoff(settlement!.rewardSum) : null }, orders: values,
+      ...(combined ? { levels: hit.levels!.map(level => ({ value: payoff(level.sum), terms: level.terms.map(payoff) })) } : {}),
       bestOrder: values?.max ?? null,
       layout: { members: [members[1], members[2], members[0], members[3], members[4]],
         snaps: [snaps[1], snaps[2], snaps[0], snaps[3], snaps[4]] },
@@ -95,6 +99,10 @@ export class DeckSolver {
         request: { ...converted, ...(converted.timeLimitMs === null ? {} : { deadline: performance.timeOrigin + started + converted.timeLimitMs }), members: box.members, snaps: box.snaps, player: box.player, unknownPolicy: "min" } }, true);
       response.elapsedMs = performance.now() - started;
       return answer(response, request, box.coversAllOwnedCards, true);
+    } catch (error) {
+      if (!(error instanceof Error) || !["combined-reward-levels", "combined-reward-range", "combined-item-lottery"].includes(error.message)) throw error;
+      return JSON.stringify({ format: "ournotes-deck.account-recommendation/1", final: true, status: "invalid", missing: [],
+        errors: [{ path: "request", code: "unsupported_request", message: error.message }], result: null });
     } finally { engine!.onProgress = null; }
   }
   free() { engine!.invoke({ op: "dispose", handle: this.handle }); }

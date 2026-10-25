@@ -137,7 +137,7 @@
          )
      }
      fn exact(&mut self, team: &Team, power: f64, slots: &[f64]) -> Result<Exact, String> {
-@@ -2118,10 +2142,24 @@
+@@ -2118,10 +2142,174 @@
              .into_iter()
              .map(|s| self.value(crate::master::number(s, 0.0)))
              .collect();
@@ -163,6 +163,156 @@
 +    fn interval(&mut self, _: &Team, _: Totals) -> (f64, f64) { (self.value, self.value) }
 +    fn exact(&mut self, _: &Team, power: f64, _: &[f64]) -> Result<Exact, String> {
 +        Ok(Exact { key: self.value, detail: json!({"skipScore":chart::skip_score(&self.master, &self.chart, power as i32),"mean":self.value,"rewardSum":self.value,"orders":1,"bonus":0,"challengePoints":self.value}) })
++    }
++}
++
++#[derive(Clone, serde::Deserialize)]
++pub struct RewardTerm { pub kind: usize, pub weight: i128 }
++
++pub fn compare_reward_keys(a: &Value, b: &Value) -> std::cmp::Ordering {
++    let values = |v: &Value| crate::master::rows(v).iter().map(|v| v.as_str().unwrap().parse::<i128>().unwrap()).collect::<Vec<_>>();
++    values(a).cmp(&values(b))
++}
++
++// Search keys project one integer sum monotonically; exact vectors resolve every projected tie.
++pub struct LexRewards {
++    master: Master,
++    chart: Chart,
++    core: Option<LiveCore>,
++    route: Route,
++    levels: Vec<Vec<RewardTerm>>,
++    used: [bool; 3],
++    members: [Vec<f64>; 2],
++    snaps: [Vec<f64>; 2],
++    selected: usize,
++    max_bonus: [f64; 2],
++    monotone: [bool; 2],
++    eligible: Vec<(i32, i32)>,
++    pub observations: usize,
++    pub search_level: usize,
++    pub primary_upper: i128,
++    constant: bool,
++}
++impl LexRewards {
++    pub fn new(master: &Master, members: &[Member], snaps: &[Snap], chart: &Chart, route: Route,
++        play: &Value, levels: &Value, score_cap: f64) -> Result<Self, String> {
++        let levels: Vec<Vec<RewardTerm>> = serde_json::from_value(levels.clone()).map_err(|e| e.to_string())?;
++        if levels.is_empty() || levels.len() > 3 || levels.iter().any(|l| l.is_empty())
++            || levels.iter().map(Vec::len).sum::<usize>() > 9
++            || levels.iter().flatten().any(|t| t.kind > 2 || t.weight < 1 || t.weight > 1_000_000_000) {
++            return Err("combined-reward-levels".into());
++        }
++        let used = std::array::from_fn(|kind| levels.iter().flatten().any(|t| t.kind == kind));
++        let bonuses = |kind: usize| members.iter().map(|m| if used[kind] { power::member_event_percent(&route.effects,m,kind as i32) as f64 } else { 0.0 }).collect::<Vec<_>>();
++        let support = |kind: usize| snaps.iter().map(|s| if used[kind] { power::snap_event_percent(&route.effects,s,kind as i32) as f64 } else { 0.0 }).collect::<Vec<_>>();
++        let member_bonus = [bonuses(0),bonuses(1)];
++        let snap_bonus = [support(0),support(1)];
++        let monotone=std::array::from_fn(|kind| member_bonus[kind].iter().chain(&snap_bonus[kind]).all(|v|*v>=0.0));
++        let max_bonus = std::array::from_fn(|kind| top_character_bonus(members,&member_bonus[kind]) + top_five(snap_bonus[kind].iter().copied()));
++        let played = route.kind != RouteKind::Skip;
++        let eligible = if played {
++            std::iter::once((2,0)).chain(chart.ranks.iter().filter(|r| r.rank > 2 && r.required as f64 <= score_cap).map(|r|(r.rank,r.required))).collect::<Vec<_>>()
++        } else { vec![(master.params.skip_rank,0)] };
++        let observations = if played { 120 } else { 1 };
++        let selected = levels.iter().flatten().find(|t| t.kind < 2).map_or(0,|t|t.kind);
++        let mut out = Self { master:master.clone(),chart:chart.clone(),core:played.then(||LiveCore::new(master,chart,members,snaps,play)),route,levels,used,
++            members:member_bonus,snaps:snap_bonus,selected,max_bonus,monotone,eligible,observations,search_level:0,primary_upper:0,constant:false };
++        out.check_domain()?;
++        let (low, high) = out.global_range()?;
++        out.primary_upper = out.sum(&out.levels[0],&high) * observations as i128;
++        out.search_level = out.levels.iter().position(|level|out.sum(level,&low) != out.sum(level,&high)).unwrap_or(0);
++        out.constant = out.levels.iter().all(|level|out.sum(level,&low) == out.sum(level,&high));
++        Ok(out)
++    }
++    fn reward(&self, kind: usize, bonus: f64, rank: i32) -> f64 {
++        match kind { 0=>self.route.points(bonus,rank),1=>self.route.items(bonus,rank),_=>self.route.cp(rank) }
++    }
++    fn whole(value: f64) -> Result<i128,String> {
++        if !value.is_finite() || value.fract() != 0.0 || value < i32::MIN as f64 || value > i32::MAX as f64 {
++            return Err("combined-reward-range".into());
++        }
++        Ok(value as i128)
++    }
++    fn check_domain(&mut self) -> Result<(),String> {
++        let rate=Self::whole(self.route.rate)?;
++        let item_rate=Self::whole(self.route.reward_rate)?;
++        for &(rank,_) in &self.eligible {
++            let row=self.route.rank_row(rank);
++            if self.used[0] {
++                let base=row.map_or(0,|r|r.points) as i128;
++                let bonus=(self.max_bonus[0]+10000.0) as i128;
++                let first=if self.route.kind==RouteKind::Challenge {base*rate} else {bonus*rate};
++                self.monotone[0] &= base>=0 && rate>=0 && bonus<=i32::MAX as i128 && (base==0 || first<=i32::MAX as i128 && base*rate*bonus<=i32::MAX as i128);
++            }
++            if self.used[1] {
++                if row.is_some_and(|r|r.items.len()>1) {return Err("combined-item-lottery".into());}
++                for &(count,probability) in row.map(|r|r.items.as_slice()).unwrap_or_default() {
++                    if probability!=10000.0 {return Err("combined-item-lottery".into());}
++                    let bonus=(self.max_bonus[1]+10000.0) as i128;
++                    self.monotone[1] &= count>=0 && item_rate>=0 && bonus<=i32::MAX as i128 && count as i128*bonus*item_rate<=i32::MAX as i128;
++                }
++            }
++            for kind in 0..3 { if self.used[kind] { Self::whole(self.reward(kind,self.max_bonus[kind.min(1)],rank))?; } }
++        }
++        Ok(())
++    }
++    fn global_range(&self) -> Result<([i128;3],[i128;3]),String> {
++        let mut low=[i128::MAX;3];let mut high=[0;3];
++        for &(rank,_) in &self.eligible { for kind in 0..3 { if self.used[kind] {
++            if kind<2 && !self.monotone[kind] {low[kind]=-214748;high[kind]=214748;}else{
++                low[kind]=low[kind].min(Self::whole(self.reward(kind,0.0,rank))?);
++                high[kind]=high[kind].max(Self::whole(self.reward(kind,self.max_bonus[kind.min(1)],rank))?);
++            }
++        } } }
++        for kind in 0..3 { if !self.used[kind] {low[kind]=0;} }
++        Ok((low,high))
++    }
++    fn sum(&self, level: &[RewardTerm], values: &[i128;3]) -> i128 {
++        level.iter().map(|t|values[t.kind]*t.weight).sum()
++    }
++    fn team_bonus(&self,team:&Team,kind:usize)->f64 {
++        team.members.iter().map(|&m|self.members[kind][m]).sum::<f64>()
++            + team.snaps.iter().filter(|&&s|s>=0).map(|&s|self.snaps[kind][s as usize]).sum::<f64>()
++    }
++}
++impl Objective for LexRewards {
++    fn score_ties(&self)->bool { !self.constant }
++    fn physical_teams(&self)->bool { true }
++    fn compare_ties(&self,a:&crate::search::Hit,b:&crate::search::Hit)->std::cmp::Ordering {
++        compare_reward_keys(&a.detail["lexVector"],&b.detail["lexVector"])
++    }
++    fn preserve_snap_options(&self)->bool { true }
++    fn needs_power_cap(&self)->bool { self.core.as_ref().is_some_and(|c|c.input.judgements.is_none()) }
++    fn prepare_dominance(&mut self,power:f64) { if let Some(c)=&mut self.core {c.prepare_dominance(power);} }
++    fn skill(&mut self,m:usize,s:i32)->(f64,f64) { self.core.as_mut().map_or((0.0,0.0),|c|{let w=c.weight(m,s);(w.low.worst,w.high.best)}) }
++    fn member_bonus(&self,m:usize)->f64 { self.members[self.selected][m] }
++    fn snap_bonus(&self,s:usize)->f64 { self.snaps[self.selected][s] }
++    fn bound(&mut self,t:Totals)->f64 {
++        let high=self.core.as_ref().map_or(f64::INFINITY,|c|c.score_high(t));
++        let mut values=[0i128;3];
++        for &(rank,required) in &self.eligible {
++            if rank > 2 && !high.is_nan() && required as f64 > high {continue;}
++            for kind in 0..3 { if self.used[kind] {
++                let bonus=if kind==self.selected {t.bonus.min(self.max_bonus[kind]).ceil()} else {self.max_bonus[kind.min(1)]};
++                values[kind]=values[kind].max(if kind<2 && !self.monotone[kind] {214748} else {self.reward(kind,bonus,rank) as i128});
++            } }
++        }
++        ((self.sum(&self.levels[self.search_level],&values)*self.observations as i128) as f64).next_up()
++    }
++    fn interval(&mut self,_:&Team,t:Totals)->(f64,f64) { (f64::NEG_INFINITY,self.bound(t)) }
++    fn exact(&mut self,team:&Team,power:f64,_:&[f64])->Result<Exact,String> {
++        let bonuses=[self.team_bonus(team,0),self.team_bonus(team,1)];
++        let scores=match &mut self.core {Some(core)=>Some(core.evaluate(team,power as i32)?),None=>None};
++        let ranks=if let Some(scores)=&scores {scores.scores.iter().map(|&s|chart::score_rank(&self.chart,s)).collect::<Vec<_>>()}else{vec![self.master.params.skip_rank]};
++        let mut sums=[0i128;3];let mut per_order=Vec::new();
++        for rank in ranks {let mut values=[0i128;3];for kind in 0..3 {if self.used[kind] {
++            values[kind]=Self::whole(self.reward(kind,bonuses[kind.min(1)],rank))?;sums[kind]+=values[kind];
++        }}per_order.push(self.sum(&self.levels[0],&values) as f64);}
++        let vector=self.levels.iter().map(|l|self.sum(l,&sums)).collect::<Vec<_>>();
++        let levels=self.levels.iter().zip(&vector).map(|(l,sum)|json!({"sum":sum.to_string(),"terms":l.iter().map(|t|sums[t.kind].to_string()).collect::<Vec<_>>()})).collect::<Vec<_>>();
++        Ok(Exact {key:vector[self.search_level] as f64,detail:json!({"scores":scores,"skipScore":if self.core.is_none(){Some(chart::skip_score(&self.master,&self.chart,power as i32))}else{None},
++            "mean":vector[0] as f64/self.observations as f64,"rewardSum":vector[0].to_string(),"orders":self.observations,"levels":levels,"lexVector":vector.iter().map(ToString::to_string).collect::<Vec<_>>(),
++            "bonus":bonuses[self.selected],"challengePoints":sums[2] as f64/self.observations as f64,"directMin":per_order.iter().copied().reduce(f64::min),"directMax":per_order.iter().copied().reduce(f64::max)})})
 +    }
 +}
 --- a/src/api.rs
@@ -213,18 +363,32 @@
                      power::snap_event_percent(&route.effects, s, 2)
                  } else {
                      0
-@@ -1874,7 +1876,9 @@
+@@ -1821,7 +1823,7 @@
+                             floor_exclusive: false,
+ 
+                             streaming: true,
+-                            disable_snap_dominance: false,
++                            disable_snap_dominance: goal["measure"] == "combined",
+                             member_power_percent: Some(&member_pct),
+                             snap_power_percent: Some(&snap_pct),
+                             on_candidate: None,
+@@ -1874,7 +1876,14 @@
              {
                  return Err("event-reward-phase".into());
              }
 -            let mut objective: Box<dyn Objective> = if cp_measure {
-+            let mut objective: Box<dyn Objective> = if kind == RouteKind::Skip && goal["measure"] == "challenge-points" {
++            let mut lex_meta = None;
++            let mut objective: Box<dyn Objective> = if goal["measure"] == "combined" {
++                let lex=crate::event::LexRewards::new(&self.master,&cards.members,&cards.snaps,chart.ok_or("missing-combined-chart")?,route.clone(),&goal["play"],&goal["levels"],score_cap)?;
++                lex_meta=Some((lex.search_level,lex.primary_upper,lex.observations));
++                Box::new(lex)
++            } else if kind == RouteKind::Skip && goal["measure"] == "challenge-points" {
 +                Box::new(crate::event::FixedChallengePoints { value: route.cp(self.master.params.skip_rank), master: self.master.clone(), chart: chart.ok_or("missing-skip-chart")?.clone() })
 +            } else if cp_measure {
                  Box::new(ChallengePoints::new(
                      LiveObjective {
                          core: LiveCore::new(
-@@ -1889,7 +1893,7 @@
+@@ -1889,7 +1898,7 @@
                      },
                      chart.unwrap().clone(),
                      route.clone(),
@@ -233,25 +397,64 @@
              } else {
                  Box::new(make_event())
              };
-@@ -2097,7 +2101,7 @@
+@@ -1934,7 +1943,7 @@
+                     floor_exclusive: false,
+ 
+                     streaming: true,
+-                    disable_snap_dominance: false,
++                    disable_snap_dominance: goal["measure"] == "combined",
+                     member_power_percent: Some(&member_pct),
+                     snap_power_percent: Some(&snap_pct),
+                     on_candidate: if notify { Some(&mut publish) } else { None },
+@@ -2004,7 +2013,7 @@
+             };
+             output.stats.add(&cap_stats);
+             if let Some(tie_chart) = chart.filter(|_| {
+-                phase.is_none() && !cp_measure && kind != RouteKind::Skip && !output.hits.is_empty()
++                phase.is_none() && !cp_measure && goal["measure"] != "combined" && kind != RouteKind::Skip && !output.hits.is_empty()
+             }) {
+                 let mut keys: Vec<_> = output.hits.iter().map(|h| h.key).collect();
+                 keys.sort_by(|a, b| b.total_cmp(a));
+@@ -2097,7 +2106,7 @@
                  }
                  output.hits = ordered;
              }
 -            if kind == RouteKind::Skip && !output.hits.is_empty() {
-+            if kind == RouteKind::Skip && goal["measure"] != "challenge-points" && !output.hits.is_empty() {
++            if kind == RouteKind::Skip && goal["measure"] != "combined" && goal["measure"] != "challenge-points" && !output.hits.is_empty() {
                  let mut keys: Vec<_> = output.hits.iter().map(|h| h.key).collect();
                  keys.sort_by(|a, b| b.total_cmp(a));
                  keys.dedup();
-@@ -2139,7 +2143,8 @@
+@@ -2139,7 +2148,9 @@
                  output.hits = ordered;
              }
              let hits:Vec<_>=output.hits.iter().map(|hit|{
 -                let d=&hit.detail;let mut value=json!({"song":song,"members":hit.team.members.iter().map(|&i|&cards.members[i].key).collect::<Vec<_>>(),"snaps":hit.team.snaps.iter().map(|&j|if j<0{None}else{Some(&cards.snaps[j as usize].key)}).collect::<Vec<_>>(),"power":hit.power,"slotPowers":hit.slot_powers,"key":hit.key,"event":{"mean":master::number(&d["mean"],0.0)/exchange.map(|(_,d)|d).unwrap_or(1.0),"bonusPercent":master::number(&d["bonus"],0.0)/100.0,"challengePoints":master::number(&d["challengePoints"],0.0),"directMean":d["directMean"],"otherMean":d["otherMean"],"perPlayMin":master::number(&d["directMin"],master::rows(&d["perOrder"]).into_iter().map(|v|master::number(v,0.0)).reduce(f64::min).unwrap_or_else(||master::number(&d["mean"],0.0))),"perPlayMax":master::number(&d["directMax"],master::rows(&d["perOrder"]).into_iter().map(|v|master::number(v,0.0)).reduce(f64::max).unwrap_or_else(||master::number(&d["mean"],0.0)))}});
 +                let d=&hit.detail;let mut value=json!({"song":song,"members":hit.team.members.iter().map(|&i|&cards.members[i].key).collect::<Vec<_>>(),"snaps":hit.team.snaps.iter().map(|&j|if j<0{None}else{Some(&cards.snaps[j as usize].key)}).collect::<Vec<_>>(),"power":hit.power,"skipScore":d["skipScore"],"slotPowers":hit.slot_powers,"key":hit.key,"event":{"mean":master::number(&d["mean"],0.0)/exchange.map(|(_,d)|d).unwrap_or(1.0),"bonusPercent":master::number(&d["bonus"],0.0)/100.0,"challengePoints":master::number(&d["challengePoints"],0.0),"directMean":d["directMean"],"otherMean":d["otherMean"],"perPlayMin":master::number(&d["directMin"],master::rows(&d["perOrder"]).into_iter().map(|v|master::number(v,0.0)).reduce(f64::min).unwrap_or_else(||master::number(&d["mean"],0.0))),"perPlayMax":master::number(&d["directMax"],master::rows(&d["perOrder"]).into_iter().map(|v|master::number(v,0.0)).reduce(f64::max).unwrap_or_else(||master::number(&d["mean"],0.0)))}});
 +                value["event"]["rewardSum"]=d["rewardSum"].clone();value["event"]["orders"]=d["orders"].clone();
++                if goal["measure"] == "combined" {value["levels"]=d["levels"].clone();value["lexVector"]=d["lexVector"].clone();}
                  if pt {value["event"]["rewardSum"]=d["rewardSum"].clone();value["event"]["comparisonSum"]=d["comparisonSum"].clone();value["event"]["orders"]=json!(120);value["event"]["directMean"]=json!(master::number(&d["rewardSum"],0.0)/120.0);value["event"]["convertedMean"]=json!(exchange.map(|(n,den)|master::number(&d["challengePoints"],0.0)*n/den).unwrap_or(0.0));}
                  if let Some(chart)=chart.filter(|_|!d["scores"].is_null()){
                      let scores=&d["scores"];let values:Vec<_>=master::rows(&scores["scores"]).iter().map(|v|master::number(v,0.0)).collect();let mut sorted=values.clone();sorted.sort_by(f64::total_cmp);let mut ranks=BTreeMap::<i32,i32>::new();for &v in &values{*ranks.entry(chart::score_rank(chart,v)).or_default()+=1;}let keys=|order:usize|live::orders()[order].map(|slot|cards.members[hit.team.members[slot]].key.clone());value["score"]=json!({"mean":scores["mean"],"min":scores["min"],"max":scores["max"],"median":(sorted[59]+sorted[60])/2.0,"orders":values,"bestOrder":keys(master::int(&scores["maxOrder"]) as usize),"worstOrder":keys(master::int(&scores["minOrder"]) as usize),"ranks":ranks});
+@@ -2147,6 +2158,9 @@
+             }).collect();
+             overall.extend(hits.iter().cloned());
+             let mut part = json!({"song":song,"hits":hits,"proven":output.proven,"bound":output.bound,"stats":output.stats});
++            if let Some((level,upper,count)) = lex_meta {
++                part["bound"]=if output.proven {Value::Null} else {json!((if level==0 {output.bound.unwrap_or(upper as f64)} else {upper as f64}) / count as f64).as_f64().map(|v|json!(v.next_up())).unwrap_or(Value::Null)};
++            }
+             if let Some(phase) = phase {
+                 part["rewardPhase"] = json!(phase);
+             }
+@@ -3765,6 +3779,9 @@
+ }
+ 
+ fn compare_hits(a: &Value, b: &Value) -> std::cmp::Ordering {
++    if a["lexVector"].is_array() && b["lexVector"].is_array() {
++        return crate::event::compare_reward_keys(&b["lexVector"],&a["lexVector"]);
++    }
+     master::number(&b["key"], 0.0)
+         .total_cmp(&master::number(&a["key"], 0.0))
+         .then_with(|| {
 --- a/src/progress.rs
 +++ b/src/progress.rs
 @@ -1,3 +1,4 @@
@@ -268,11 +471,112 @@
          if state.goal["ranking"] == "pt-only" {
              value["event"]["rewardSum"] = detail["rewardSum"].clone();
              value["event"]["comparisonSum"] = detail["comparisonSum"].clone();
-@@ -149,6 +152,7 @@
+@@ -149,6 +152,8 @@
              value["event"]["convertedMean"] = json!(cp * numerator / denominator);
          }
      }
 +    if !detail["skipScore"].is_null() { value["skipScore"] = detail["skipScore"].clone(); }
++    if !detail["levels"].is_null() { value["levels"]=detail["levels"].clone();value["lexVector"]=detail["lexVector"].clone(); }
      if !detail["potential"].is_null() {
          value["potential"] = json!({"value":detail["potential"],"area":detail["area"]});
      }
+--- a/src/search.rs
++++ b/src/search.rs
+@@ -1,3 +1,4 @@
++//! Modified for Moenotes exact reward vectors and physical teams on 2026-10-25.
+ //! Exact top-K search over leaders, character-distinct member sets and snap
+ //! assignments. Bounds prune only when the retained legal teams justify it.
+ use crate::{
+@@ -40,6 +41,11 @@
+     pub product: f64,
+ }
+ pub trait Objective {
++    fn physical_teams(&self) -> bool { false }
++    fn compare_ties(&self, a: &Hit, b: &Hit) -> std::cmp::Ordering {
++        let a=self.tie_rank(a);let b=self.tie_rank(b);
++        a[0].total_cmp(&b[0]).then_with(||a[1].total_cmp(&b[1]))
++    }
+     fn score_ties(&self) -> bool {
+         false
+     }
+@@ -1004,9 +1010,7 @@
+         self.input
+             .objective
+             .complete_score_tie(&mut self.hits[index])?;
+-        let a = self.input.objective.tie_rank(hit);
+-        let b = self.input.objective.tie_rank(&self.hits[index]);
+-        Ok(a[0].total_cmp(&b[0]).then_with(|| a[1].total_cmp(&b[1])))
++        Ok(self.input.objective.compare_ties(hit, &self.hits[index]))
+     }
+     fn insert_position(&mut self, hit: &mut Hit) -> Result<usize, String> {
+         let mut i = self.hits.len();
+@@ -1022,6 +1026,14 @@
+             .collect();
+         keys.sort_by(|a, b| a.encode_utf16().cmp(b.encode_utf16()));
+         keys.join("|")
++    }
++    fn candidate_key(&self, team: &Team) -> String {
++        if !self.input.objective.physical_teams() { return self.set_key(&team.members); }
++        let mut pairs=team.members.iter().zip(&team.snaps).map(|(&m,&s)| {
++            format!("{}={}",self.input.members[m].key,if s<0 {"_"} else {&self.input.snaps[s as usize].key})
++        }).collect::<Vec<_>>();
++        pairs.sort_unstable();
++        format!("formation:{}:{}",self.input.members[team.members[0]].key,pairs.join("|"))
+     }
+     fn profile(&mut self, leader: usize) -> Arc<LeaderProfile> {
+         self.profiles
+@@ -1034,7 +1046,8 @@
+             })
+             .clone()
+     }
+-    fn retain(&mut self, candidate: Candidate, evaluated: Option<Exact>) -> Result<(), String> {
++    fn retain(&mut self, mut candidate: Candidate, evaluated: Option<Exact>) -> Result<(), String> {
++        if self.input.objective.physical_teams() { candidate.set_key=self.candidate_key(&candidate.team); }
+         if !self.input.streaming {
+             self.candidates.push(candidate);
+             return Ok(());
+@@ -1245,7 +1258,7 @@
+         }
+         let exact = self.input.objective.exact(&seed, power, &powers)?;
+         self.stats.exact += 1;
+-        let set_key = self.set_key(&seed.members);
++        let set_key = self.candidate_key(&seed);
+         self.frontier.offer(&set_key, exact.key);
+         self.retain_seed(
+             Candidate {
+@@ -1650,7 +1663,7 @@
+                     };
+                     team = next;
+                     value = next_value;
+-                    let set_key = self.set_key(&team.members);
++                    let set_key = self.candidate_key(&team);
+                     self.frontier.offer(&set_key, exact.key);
+                     self.retain_seed(
+                         Candidate {
+@@ -2179,11 +2192,11 @@
+         self.member_visit(m, index + 1, power, weight, bonus, member_part)
+     }
+     fn assignment_limit(&self, a: &Assignment) -> f64 {
+-        self.limit().max(a.set_low).max(a.exact_low)
++        if self.input.objective.physical_teams() { self.limit() } else { self.limit().max(a.set_low).max(a.exact_low) }
+     }
+     fn cannot_improve_set(&self, a: &Assignment, upper: f64) -> bool {
+         self.cannot_improve(upper)
+-            || self.input.streaming
++            || self.input.streaming && !self.input.objective.physical_teams()
+                 && (a.exact_low > upper
+                     || !self.input.objective.score_ties() && a.exact_low == upper)
+     }
+@@ -2470,8 +2483,10 @@
+         if high < self.assignment_limit(a) || self.cannot_improve_set(a, high) {
+             return Ok(());
+         }
+-        self.frontier.offer(&a.set_key, low);
+-        a.set_low = a.set_low.max(low);
++        if !self.input.objective.physical_teams() {
++            self.frontier.offer(&a.set_key, low);
++            a.set_low = a.set_low.max(low);
++        }
+         self.stats.candidates += 1;
+         if self.candidates.len() > self.compact_at {
+             self.compact();

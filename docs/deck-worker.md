@@ -201,9 +201,16 @@ other files is refused, and a repeated identical `init` answers with the same `r
 
 The development Haneoka runtime records the pinned upstream commit plus `model.patchSha256` and a downloadable
 `model.patch` file entry. `patches/haneoka-rewards.patch` adds exact reward sums, primary CP ranking, ordinary
-costs 6 through 9, and ordinary / challenge Skip reward contexts. Answers retain `engine.patchSha256` for this
-model identity. The source dataset identity and production provider commit checks remain the original ones.
+costs 6 through 9, ordinary / challenge Skip reward contexts, and exact combined reward vectors. Answers retain
+`engine.patchSha256` for this model identity. The source dataset identity and production provider commit checks remain the original ones.
 
 The adapter consumes the existing `jp` / `intl` account envelopes and the page's numeric Int64 clock tokens.
 Reward projection isolates saved balances but preserves the reference event window. The adapter retains tick
 precision during parsing; Skip progress includes deterministic Skip score and exact payoff just like final output.
+
+The adapter advertises `combinedMetric` for the existing page's weighted expected-sum requests (three levels,
+nine terms, weights 1 through 1,000,000,000). Native comparison is lexicographic with exact integer sums;
+results and progress include `team.levels` with exact per-level and per-term payoffs. Top-K distinguishes
+leaders and member-to-Snapshot assignments. A time limit retains the available formations without proof.
+The page's automatic CP conversion uses its existing challenge-rate request, exact payoff/cost extraction,
+and subsequent combined request. This capability does not add maximum-reward or other event-scene support.
