@@ -39,6 +39,12 @@ music duration. No chart approximation or independent scoring formula is introdu
 ## Current capability boundary
 
 - Power without event parameter bonuses; Free Live, Challenge Live, Battle Live and Mission Live score searches.
+- Free Live and Challenge Live single event-point / event-item expected rewards. The adapter checks the selected
+  event, its challenge-song join, consumption row and the event item's exact-grade, guaranteed single-row table.
+  Ordinary consumption is currently 0 through 5 or 10; Challenge consumption is 200/400/800/1600. Other settings are rejected.
+- Reward results retain the ordinary mean score in `value.score` and the selected expected reward in `value.payoff.score`.
+  Exact rational certificates require the engine API to expose integer reward sums for this general route.
+  Reward requests currently accept the page's played `rewardProjection: true` context only.
 - Expected or maximum skill-order score; declared Great/Just distributions and periodic misses.
 - Required/excluded members, excluded Snaps, fixed leader and no-Snap requests.
 - Progress, time limits and intermediate candidates use the existing Worker lifecycle. Only a
@@ -48,7 +54,7 @@ music duration. No chart approximation or independent scoring formula is introdu
 - The verified JP and international snapshots have empty memory tables. Nonempty active memory
   tables are explicitly unsupported until their saved-state mapping is implemented.
 
-Pending before production switching: event reward/Skip goals, arbitrary reward priority levels and
+Pending before production switching: other event scenes, maximum rewards, CP and Skip goals, arbitrary reward priority levels and
 CP conversion, Arena scene mapping, memory activation, cross-song UI and stopped-search continuation,
 event-parameter power, full-range performance and phone/browser acceptance. Existing production capabilities remain available
 through the original provider during this work.

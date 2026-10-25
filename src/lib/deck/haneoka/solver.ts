@@ -16,7 +16,7 @@ function orders(): number[][] {
 }
 const ORDERS = orders();
 function id(key: string): number { return Number(key.slice(1)); }
-interface EngineHit { members: string[]; snaps: (string | null)[]; power: number; key: number; score?: { orders: number[] } | null }
+interface EngineHit { members: string[]; snaps: (string | null)[]; power: number; key: number; score?: { orders: number[]; mean?: number } | null; event?: { mean: number } }
 interface EngineResponse { results: { proven: boolean; bound: number | null }[]; overall: EngineHit[]; elapsedMs: number | null }
 function answer(response: EngineResponse, request: RecommendationRequest, coversAllOwnedCards: boolean, final: boolean) {
   const rows = response.results ?? [];
@@ -28,10 +28,12 @@ function answer(response: EngineResponse, request: RecommendationRequest, covers
     const values = ranked.length === 120 ? { count: 120, min: ranked[0], median: {
       score: (ranked[59]!.score + ranked[60]!.score) / 2, order: ranked[59]!.score === ranked[60]!.score ? ranked[59]!.order : [],
     }, max: ranked[119] } : null;
+    const reward = request.metric?.kind === "eventPoints" || request.metric?.kind === "eventItems";
     const pair = (i: number) => ({ member: members[i], snap: snaps[i] });
     return {
       rank: index + 1, rankCertified: proven, leader: pair(0), others: [1, 2, 3, 4].map(pair),
-      power: hit.power, value: { score: hit.key, exact: null, interval: null }, orders: values,
+      power: hit.power, value: { score: reward ? hit.score!.mean! : hit.key, exact: null, interval: null,
+        payoff: reward ? { score: hit.event!.mean, exact: null, interval: null } : null }, orders: values,
       bestOrder: values?.max ?? null,
       layout: { members: [members[1], members[2], members[0], members[3], members[4]],
         snaps: [snaps[1], snaps[2], snaps[0], snaps[3], snaps[4]] },
@@ -43,7 +45,7 @@ function answer(response: EngineResponse, request: RecommendationRequest, covers
     engine: { name: "Haneoka", commit: HANEOKA_COMMIT, source: "https://github.com/haneoka-gakuen/ournotes-team-builder" },
     result: { phase: proven ? "done" : "search", elapsedMs: response.elapsedMs ?? null, teams,
       account: { cards: { coversAllOwnedCards } },
-      optimality: { proven, lowerBound: teams[0]?.value.score ?? null, upperBound: bound, fraction: null },
+      optimality: { proven, lowerBound: teams[0]?.value.payoff?.score ?? teams[0]?.value.score ?? null, upperBound: bound, fraction: null },
       goal: request.goal, metric: request.metric ?? { kind: "power" }, aggregation: request.aggregation ?? "expected",
       exitReason: final && !proven ? "timeLimit" : proven ? "complete" : null },
   });

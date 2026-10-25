@@ -4,7 +4,8 @@ export interface RecommendationRequest {
   goal: { kind: string; rank?: number; eventParameter?: boolean; musicId?: number; difficulty?: string; challengeMusicId?: number;
     play?: { kind?: string; greatFraction?: number; justFraction?: number; missEvery?: number };
     accuracy?: { greatFraction?: number; justFraction?: number } };
-  metric?: { kind: string };
+  metric?: { kind: string; eventId?: number; consumption?: number; resourceType?: number; resourceId?: number; secondaryPriority?: string };
+  eventContext?: { rewardProjection?: boolean; resultClock?: { kind?: string; liveStartJstTicks?: string | null; serverNowJstTicks?: string } };
   aggregation?: "expected" | "maximum";
   eventIds?: number[];
   constraints?: { leader?: number | null; includeMembers?: (number | string)[]; excludeMembers?: (number | string)[];
@@ -15,20 +16,24 @@ export interface RecommendationRequest {
 export const HANEOKA_COMMIT = "c91e6459a5ed43d55dc2b75e6a9d4f55b3edc62a";
 export const CAPABILITIES = {
   goals: ["power", "freeLive", "challengeLive", "battleLive", "missionLive"],
-  metrics: { freeLive: ["score"], challengeLive: ["score"], battleLive: ["score"], missionLive: ["score"] },
+  metrics: { freeLive: ["score", "eventPoints", "eventItems"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score"], missionLive: ["score"] },
   aggregations: {
-    expected: { freeLive: ["score"], challengeLive: ["score"], battleLive: ["score"], missionLive: ["score"] },
+    expected: { freeLive: ["score", "eventPoints", "eventItems"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score"], missionLive: ["score"] },
     maximum: { freeLive: ["score"], challengeLive: ["score"], battleLive: ["score"], missionLive: ["score"] },
   },
+  eventItemRewards: { selection: "exactResultGrade", eventGroupField: "eventGroup", rowsPerGrade: 1, probabilityMarker: 10000 },
   accuracy: { great: true, just: true }, patternPlay: true, luckMissions: true, luckGreatConversions: true,
 };
 export function adaptRequest(data: DeckData, request: RecommendationRequest) {
   if (request.format !== "ournotes-deck.recommendation-request/2" || !CAPABILITIES.goals.includes(request.goal?.kind)
-    || request.metric && request.metric.kind !== "score" || ![undefined, "expected", "maximum"].includes(request.aggregation))
+    || ![undefined, "score", "eventPoints", "eventItems"].includes(request.metric?.kind) || ![undefined, "expected", "maximum"].includes(request.aggregation))
     throw new Error("haneoka-unsupported-request");
   const timeLimitMs = request.limits?.timeLimitMs ?? null;
   if (timeLimitMs !== null && (typeof timeLimitMs !== "number" || !Number.isFinite(timeLimitMs) || timeLimitMs < 0)) throw new Error("haneoka-budget");
   const kind: string = request.goal.kind;
+  const rewards = request.metric?.kind === "eventPoints" || request.metric?.kind === "eventItems";
+  if (rewards && (!["freeLive", "challengeLive"].includes(kind) || request.aggregation === "maximum"))
+    throw new Error("haneoka-unsupported-reward-scene");
   const gekiso = ["battleLive", "missionLive"].includes(kind);
   if (gekiso && request.goal.rank !== undefined && request.goal.rank !== 1) throw new Error("haneoka-unsupported-rank");
   // The power API's challenge context also selects challenge-song typing. Event-only parameter goals are not equivalent.
@@ -55,7 +60,7 @@ export function adaptRequest(data: DeckData, request: RecommendationRequest) {
   if (![great, just].every(value => typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 1)
     || gekiso && great + just > 1) throw new Error("haneoka-accuracy");
   const criterion = request.aggregation === "maximum" ? "max" : "mean";
-  const goal = kind === "power" ? { kind: "power", song, challengeEventId: null }
+  const scoreGoal = kind === "power" ? { kind: "power", song, challengeEventId: null }
     : gekiso ? { kind: "gekiso", songs: [song], criterion, rank: 1, seeds: 0, accuracy: {
       great, just: great === 1 ? 0 : just / (1 - great), missEvery: play.missEvery ?? 0,
     } }
@@ -65,7 +70,7 @@ export function adaptRequest(data: DeckData, request: RecommendationRequest) {
   const key = (id: unknown, prefix: string) => prefix + integer(typeof id === "string" ? Number(id) : id, "constraint");
   const c = request.constraints ?? {};
   return {
-    goal, charts,
+    goal: rewards ? eventGoal(data, request, song!, challengeEventId, "play" in scoreGoal ? scoreGoal.play : null) : scoreGoal, charts,
     constraints: {
       requiredMembers: (c.includeMembers ?? []).map((id: unknown) => key(id, "m")),
       excludedMembers: (c.excludeMembers ?? []).map((id: unknown) => key(id, "m")),
@@ -75,4 +80,43 @@ export function adaptRequest(data: DeckData, request: RecommendationRequest) {
     },
     k: integer(request.k, "k"), timeLimitMs,
   };
+}
+
+function eventGoal(data: DeckData, request: RecommendationRequest, song: { songId: number; difficulty: number },
+  challengeEventId: number | null, play: unknown) {
+  const metric = request.metric!, context = request.eventContext;
+  // Moenotes requests a projection of the selected event, not a time-gated game settlement.
+  if (context?.rewardProjection !== true || context.resultClock?.kind !== "played"
+    || context.resultClock.liveStartJstTicks !== null || typeof context.resultClock.serverNowJstTicks !== "string"
+    || !/^\d+$/.test(context.resultClock.serverNowJstTicks) || metric.secondaryPriority !== undefined)
+    throw new Error("haneoka-reward-context");
+  const eventId = integer(metric.eventId, "eventId");
+  const event = table(data, "MasterEvent").find(row => row.id === eventId);
+  if (!event || request.eventIds?.length !== 1 || request.eventIds[0] !== eventId
+    || challengeEventId !== null && challengeEventId !== eventId) throw new Error("haneoka-reward-event");
+  const consumption = integer(metric.consumption, "consumption"), challenge = challengeEventId !== null;
+  if (!(challenge ? [200, 400, 800, 1600] : [0, 1, 2, 3, 4, 5, 10]).includes(consumption))
+    throw new Error("haneoka-unsupported-reward-consumption");
+  const costField = challenge ? "consumedChallengePointCount" : "consumedLiveBoostCount";
+  const boosts = table(data, challenge ? "MasterChallengeMusicBoostBonus" : "MasterLiveMusicBoostBonus",
+    [costField, "eventPointRate", "liveMusicRewardRate"]).filter(row => row[costField] === consumption);
+  if (consumption > 0 && boosts.length !== 1) throw new Error("haneoka-reward-boost-data");
+  if (metric.kind === "eventPoints") {
+    const rows = table(data, challenge ? "MasterChallengeLiveEventPoint" : "MasterLiveEventPoint", ["group", "scoreRank", "value"])
+      .filter(row => row.group === event[challenge ? "challengeLiveEventPointGroup" : "liveEventPointGroup"]);
+    if (!rows.length || new Set(rows.map(row => row.scoreRank)).size !== rows.length) throw new Error("haneoka-reward-point-table");
+  }
+  if (metric.kind === "eventItems") {
+    if (metric.resourceType !== 1 || metric.resourceId !== event.eventItemId || !metric.resourceId)
+      throw new Error("haneoka-reward-item");
+    const group = event[challenge ? "challengeLiveEventRewardGroup" : "liveEventRewardGroup"];
+    const rows = table(data, challenge ? "MasterChallengeLiveEventReward" : "MasterLiveEventReward",
+      ["eventGroup", "scoreRank", "probability", "resourceType", "resourceId", "resourceCount"])
+      .filter(row => row.eventGroup === group);
+    const grades = new Set(rows.map(row => row.scoreRank));
+    if (!rows.length || grades.size !== rows.length || rows.some(row => row.probability !== 10000
+      || row.resourceType !== 1 || row.resourceId !== metric.resourceId)) throw new Error("haneoka-reward-item-table");
+  }
+  return { kind: "event", route: challenge ? "challenge" : "live", eventId, consumption, songs: [song],
+    measure: metric.kind === "eventItems" ? "items" : "points", play };
 }
