@@ -182,6 +182,15 @@
                              member_power_percent: Some(&member_pct),
                              snap_power_percent: Some(&snap_pct),
                              on_candidate: None,
+@@ -1856,7 +1915,7 @@
+                     0.0,
+                     exchange,
+                     score_cap,
+-                );
++                ).with_power_ties(goal["rewardSemantics"]=="moenotes-v1" && request["rewardPhase"].is_null());
+                 match weights {
+                     Some((cp, other)) => objective.with_weights(cp, other),
+                     None => objective,
 @@ -1874,7 +1933,14 @@
              {
                  return Err("event-reward-phase".into());
@@ -248,7 +257,7 @@
              let mut output = if phase.is_some_and(|phase| phase != "primary") {
                  let target = request["rewardPhase"]["reward"]
                      .as_f64()
-@@ -1997,14 +2088,35 @@
+@@ -1997,14 +2088,18 @@
                      )]
                      .as_f64()
                      .unwrap_or(f64::NEG_INFINITY)
@@ -262,30 +271,13 @@
              output.stats.add(&cap_stats);
 +            output.stats.add(&prefix_stats);
 +            let power_ties=goal["rewardSemantics"]=="moenotes-v1" && goal["measure"]!="combined" && !cp_measure && goal["measure"]!="challenge-points";
-+            if power_ties && phase.is_none() {
-+                let mut keys=output.hits.iter().map(|hit|hit.key).collect::<Vec<_>>();
-+                keys.sort_by(|a,b|b.total_cmp(a));keys.dedup();
-+                let mut ordered=Vec::<search::Hit>::new();
-+                for key in keys {
-+                    if ordered.len()>=k {break;}
-+                    let group=output.hits.iter().filter(|hit|hit.key==key).cloned().collect::<Vec<_>>();
-+                    let excluded=ordered.iter().map(|hit|{let mut ids=hit.team.members.clone();ids.sort_unstable();ids}).collect();
-+                    let mut tie=crate::event::RewardPower {event:make_event(),target:key,excluded};
-+                    let reranked=run(&mut tie,k-ordered.len(),group.iter().map(|hit|hit.team.clone()).collect(),0.0,None,false)?;
-+                    output.stats.add(&reranked.stats);
-+                    if !reranked.proven {output.proven=false;output.bound=Some(output.bound.unwrap_or(f64::NEG_INFINITY).max(key));}
-+                    ordered.extend(power_reward_candidates(&group,&reranked.hits,key,k-ordered.len()));
-+                }
-+                output.hits=ordered;
-+                crate::progress::emit(&output.hits);
-+            }
              if let Some(tie_chart) = chart.filter(|_| {
 -                phase.is_none() && !cp_measure && kind != RouteKind::Skip && !output.hits.is_empty()
 +                !power_ties && phase.is_none() && !cp_measure && goal["measure"] != "combined" && kind != RouteKind::Skip && !output.hits.is_empty()
              }) {
                  let mut keys: Vec<_> = output.hits.iter().map(|h| h.key).collect();
                  keys.sort_by(|a, b| b.total_cmp(a));
-@@ -2097,7 +2209,7 @@
+@@ -2097,7 +2192,7 @@
                  }
                  output.hits = ordered;
              }
@@ -294,7 +286,7 @@
                  let mut keys: Vec<_> = output.hits.iter().map(|h| h.key).collect();
                  keys.sort_by(|a, b| b.total_cmp(a));
                  keys.dedup();
-@@ -2138,8 +2250,15 @@
+@@ -2138,8 +2233,15 @@
                  }
                  output.hits = ordered;
              }
@@ -311,7 +303,7 @@
                  if pt {value["event"]["rewardSum"]=d["rewardSum"].clone();value["event"]["comparisonSum"]=d["comparisonSum"].clone();value["event"]["orders"]=json!(120);value["event"]["directMean"]=json!(master::number(&d["rewardSum"],0.0)/120.0);value["event"]["convertedMean"]=json!(exchange.map(|(n,den)|master::number(&d["challengePoints"],0.0)*n/den).unwrap_or(0.0));}
                  if let Some(chart)=chart.filter(|_|!d["scores"].is_null()){
                      let scores=&d["scores"];let values:Vec<_>=master::rows(&scores["scores"]).iter().map(|v|master::number(v,0.0)).collect();let mut sorted=values.clone();sorted.sort_by(f64::total_cmp);let mut ranks=BTreeMap::<i32,i32>::new();for &v in &values{*ranks.entry(chart::score_rank(chart,v)).or_default()+=1;}let keys=|order:usize|live::orders()[order].map(|slot|cards.members[hit.team.members[slot]].key.clone());value["score"]=json!({"mean":scores["mean"],"min":scores["min"],"max":scores["max"],"median":(sorted[59]+sorted[60])/2.0,"orders":values,"bestOrder":keys(master::int(&scores["maxOrder"]) as usize),"worstOrder":keys(master::int(&scores["minOrder"]) as usize),"ranks":ranks});
-@@ -2147,6 +2266,9 @@
+@@ -2147,6 +2249,9 @@
              }).collect();
              overall.extend(hits.iter().cloned());
              let mut part = json!({"song":song,"hits":hits,"proven":output.proven,"bound":output.bound,"stats":output.stats});
@@ -321,7 +313,7 @@
              if let Some(phase) = phase {
                  part["rewardPhase"] = json!(phase);
              }
-@@ -2429,7 +2551,7 @@
+@@ -2429,7 +2534,7 @@
          if kind == "plan" {
              return self.plan(input, started, now);
          }
@@ -330,7 +322,7 @@
              vec![request["goal"]["song"].clone()]
          } else {
              master::rows(&request["goal"]["songs"])
-@@ -2442,7 +2564,7 @@
+@@ -2442,7 +2547,7 @@
          } else {
              songs
          };
@@ -339,7 +331,7 @@
              return Err(format!("unsupported-goal:{kind}"));
          }
          let deadline = request["deadline"].as_f64().unwrap_or_else(|| {
-@@ -2500,7 +2622,7 @@
+@@ -2500,7 +2605,7 @@
                  single["deadline"] = json!(song_deadline);
              }
              let mut response = match kind {
@@ -348,18 +340,9 @@
                  "score" => self.search_score(&single, started, now)?,
                  "event" => {
                      if single["goal"]["gekiso"].is_null() {
-@@ -3764,7 +3886,24 @@
-         .collect()
+@@ -3765,6 +3870,15 @@
  }
  
-+fn power_reward_candidates(original:&[crate::search::Hit],reranked:&[crate::search::Hit],target:f64,k:usize)->Vec<crate::search::Hit> {
-+    let mut hits=original.iter().cloned().chain(reranked.iter().filter(|hit|hit.key>=0.0).cloned()
-+        .map(|mut hit|{hit.key=target;hit})).collect::<Vec<_>>();
-+    hits.sort_by(|a,b|b.power.total_cmp(&a.power).then_with(||a.team.members.cmp(&b.team.members)).then_with(||a.team.snaps.cmp(&b.team.snaps)));
-+    let mut seen=std::collections::BTreeSet::new();
-+    hits.into_iter().filter(|hit|{let mut ids=hit.team.members.clone();ids.sort_unstable();seen.insert(ids)}).take(k).collect()
-+}
-+
  fn compare_hits(a: &Value, b: &Value) -> std::cmp::Ordering {
 +    if a["rewardPowerTie"]==true && b["rewardPowerTie"]==true {
 +        return master::number(&b["key"],0.0).total_cmp(&master::number(&a["key"],0.0))
@@ -373,6 +356,91 @@
      master::number(&b["key"], 0.0)
          .total_cmp(&master::number(&a["key"], 0.0))
          .then_with(|| {
+@@ -3786,6 +3900,8 @@
+ impl Engine {
+     pub fn evaluate_all(&mut self, input: &Value) -> Result<Value, String> {
+         let request = &input["request"];
++        #[cfg(target_arch="wasm32")]
++        let _deadline=crate::clock::deadline_scope(request["deadline"].as_f64());
+         let mut out = Vec::new();
+         for song in master::rows(&request["songs"]) {
+             self.load_source(input, song)?;
+--- a/src/assignment.rs
++++ b/src/assignment.rs
+@@ -1,3 +1,4 @@
++//! Modified for Moenotes ordered reward-bound matching on 2026-10-26.
+ //! Reusable maximum-weight matching scratch, including the small top-column
+ //! search used by the website for up to five remaining snap slots.
+ pub(crate) fn flagged_capacity(flags: &[Vec<bool>]) -> usize {
+@@ -110,6 +111,40 @@
+     small_used: Vec<bool>,
+ }
+ impl Scratch {
++    // With n rows, each row's n best available columns contain an optimal matching.
++    pub(crate) fn ordered_maximum(&mut self,orders:&[Vec<i32>],used:&[bool],width:usize,value:impl Fn(usize,i32)->f64)->f64 {
++        let n=orders.len();
++        if width+n>=4096 {return f64::INFINITY;}
++        if self.small_used.len()<4096 {self.small_used.resize(4096,false);}
++        for (row,order) in orders.iter().enumerate() {
++            let base=row*5;
++            for k in 0..n {self.small_columns[base+k]=(width+row) as i32;self.small_values[base+k]=-1e30;}
++            let mut count=0;
++            for &snap in order {
++                if snap>=0 && used[snap as usize] {continue;}
++                let weight=value(row,snap);if !weight.is_finite() {return f64::INFINITY;}
++                self.small_columns[base+count]=if snap<0 {(width+row) as i32} else {snap};
++                self.small_values[base+count]=weight;count+=1;if count==n {break;}
++            }
++        }
++        self.small_result::<true>(n)
++    }
++    pub(crate) fn bonus_upper(&mut self,order:&[usize],allowed:&[Vec<bool>],used:&[bool],bonus:&[f64])->f64 {
++        let n=allowed.len();let width=bonus.len();
++        if width+n>=4096 {return f64::INFINITY;}
++        if self.small_used.len()<4096 {self.small_used.resize(4096,false);}
++        for (row,choices) in allowed.iter().enumerate() {
++            let base=row*5;
++            for k in 0..n {self.small_columns[base+k]=(width+row) as i32;self.small_values[base+k]=0.0;}
++            let mut count=0;
++            for &snap in order {
++                if used[snap] || !choices[snap] {continue;}
++                self.small_columns[base+count]=snap as i32;self.small_values[base+count]=bonus[snap];
++                count+=1;if count==n {break;}
++            }
++        }
++        self.small_result::<true>(n)
++    }
+     pub(crate) fn column_prices(&self, columns: usize) -> Vec<f64> {
+         self.v[1..=columns]
+             .iter()
+--- a/src/clock.rs
++++ b/src/clock.rs
+@@ -1,3 +1,4 @@
++//! Modified for scoped Moenotes LUCK deadlines on 2026-10-26.
+ //! Runtime clock adapter; algorithms accept an injected clock.
+ #[cfg(not(target_arch = "wasm32"))]
+ pub fn milliseconds() -> f64 {
+@@ -27,3 +28,20 @@
+ pub fn milliseconds() -> f64 {
+     unsafe { haneoka_now_ms() }
+ }
++
++#[cfg(target_arch="wasm32")]
++thread_local! {static SEARCH_DEADLINE:std::cell::Cell<f64>=const {std::cell::Cell::new(f64::INFINITY)};}
++#[cfg(target_arch="wasm32")]
++pub(crate) struct DeadlineScope(f64);
++#[cfg(target_arch="wasm32")]
++impl Drop for DeadlineScope {
++    fn drop(&mut self) {SEARCH_DEADLINE.with(|value|value.set(self.0));}
++}
++#[cfg(target_arch="wasm32")]
++pub(crate) fn deadline_scope(deadline:Option<f64>)->DeadlineScope {
++    DeadlineScope(SEARCH_DEADLINE.with(|value|value.replace(deadline.unwrap_or(f64::INFINITY))))
++}
++#[cfg(target_arch="wasm32")]
++pub(crate) fn deadline_expired()->bool {
++    SEARCH_DEADLINE.with(|value|value.get().is_finite() && milliseconds()>=value.get())
++}
 --- a/src/event.rs
 +++ b/src/event.rs
 @@ -1,3 +1,6 @@
@@ -382,7 +450,33 @@
  //! Event settlement and ordinary live reward bounds, shared by native and WASM.
  use crate::{
      chart::{self, Chart},
-@@ -308,6 +311,7 @@
+@@ -278,24 +281,7 @@
+         total + (coefficients.len() - before) as f64 * value
+     }
+     fn scores(&self, scores: &[f64]) -> f64 {
+-        let total: f64 = scores
+-            .iter()
+-            .map(|&score| {
+-                let i = self
+-                    .steps
+-                    .partition_point(|&(required, _)| required <= score)
+-                    .saturating_sub(1);
+-                self.steps[i].1
+-            })
+-            .sum();
+-        let mean = total / scores.len() as f64;
+-        if self.error == 0.0 {
+-            mean
+-        } else {
+-            (mean.next_up() + self.error)
+-                .next_up()
+-                .min(self.steps.last().unwrap().1)
+-        }
++        self.partial_orders(scores,1.0,scores.len())
+     }
+ }
+ 
+@@ -308,6 +294,7 @@
  #[derive(Clone)]
  pub struct Route {
      pub kind: RouteKind,
@@ -390,7 +484,7 @@
      pub rate: f64,
      pub reward_rate: f64,
      pub points: BTreeMap<i32, i32>,
-@@ -338,7 +342,7 @@
+@@ -338,7 +325,7 @@
              .ok_or_else(|| format!("unknown-event:{event_id}"))?;
          let challenge =
              kind == RouteKind::Challenge || (kind == RouteKind::Skip && consumption > 10);
@@ -399,7 +493,7 @@
              return Err("unsupported-live-boost-cost".into());
          }
          let table = if challenge {
-@@ -359,6 +363,7 @@
+@@ -359,6 +346,7 @@
          };
          let mut route = Self {
              kind,
@@ -407,7 +501,7 @@
              rate,
              reward_rate,
              points: if challenge {
-@@ -402,6 +407,15 @@
+@@ -402,6 +390,15 @@
              .collect();
          Ok(route)
      }
@@ -423,7 +517,7 @@
      fn rank_row(&self, rank: i32) -> Option<&RankRow> {
          usize::try_from(rank).ok().and_then(|i| self.ranks.get(i))
      }
-@@ -428,7 +442,7 @@
+@@ -428,7 +425,7 @@
          })
      }
      pub fn cp(&self, rank: i32) -> f64 {
@@ -432,27 +526,155 @@
              self.rank_row(rank).map_or(0, |row| row.challenge_points) as f64 * self.rate
          } else {
              0.0
-@@ -456,6 +470,7 @@
+@@ -450,12 +447,25 @@
+     }
+     top_five(characters.into_values())
+ }
++fn paired_positions()->&'static [[usize;5];120] {
++    static POSITIONS:std::sync::OnceLock<[[usize;5];120]>=std::sync::OnceLock::new();
++    POSITIONS.get_or_init(||std::array::from_fn(|i|std::array::from_fn(|slot|crate::live::orders()[i].iter().position(|&value|value==slot).unwrap())))
++}
++// One fixed positive AM-GM scale remains conservative across descendant assignments.
++struct PairedRelaxation {
++    lambda:f64, converted:f64, selected:[i32;5], depth:usize,
++    prefix:[[f64;120];6], suffix:[[f64;120];6],
++    mean_prefix:[f64;6], mean_suffix:[f64;6],
++}
+ pub struct EventObjective {
+     pub core: Option<LiveCore>,
+     pub chart: Option<Chart>,
      pub route: Route,
      pub points_measure: bool,
++    power_ties: bool,
++    paired_cache:Option<Box<PairedRelaxation>>,
      pub skip_rank: i32,
 +    skip_score: Option<(Master, Chart)>,
      pub cp_weight: f64,
      pub exchange: Option<(f64, f64)>,
      pub score_cap: f64,
-@@ -535,6 +550,7 @@
+@@ -534,7 +544,10 @@
+             chart: chart.filter(|_| played).cloned(),
              route,
              points_measure,
++            power_ties:false,
++            paired_cache:None,
              skip_rank: master.params.skip_rank,
 +            skip_score: if played { None } else { chart.map(|chart| (master.clone(), chart.clone())) },
              cp_weight,
              exchange,
              score_cap,
-@@ -782,14 +798,13 @@
+@@ -571,6 +584,7 @@
+             mean_frontiers: vec![Vec::new(); members.len()],
+         }
+     }
++    pub(crate) fn with_power_ties(mut self,enabled:bool)->Self {self.power_ties=enabled;self}
+     /// Ranks by `measure + cp·CP + other·(the other reward)`, the weights already divided by the measure's weight.
+     pub fn with_weights(mut self, cp: f64, other: f64) -> Self {
+         self.targets.clear();
+@@ -758,6 +772,7 @@
+         from: usize,
+         t: Totals,
+         other: f64,
++        include_other: bool,
+     ) -> Option<(f64, f64)> {
+         if self.core.as_ref()?.input.judgements.is_some() {
+             return None;
+@@ -773,6 +788,7 @@
+         let primary = self
+             .curve(t.bonus, other)
+             .map_or(f64::INFINITY, |curve| curve.orders(&coefficients, t.power));
++        if !include_other {return Some((primary,0.0));}
+         let key = other.to_bits();
+         self.other_mean_bound(other, f64::INFINITY);
+         let secondary = self
+@@ -782,14 +798,97 @@
              .map_or(f64::INFINITY, |curve| curve.orders(&coefficients, t.power));
          Some((primary, secondary))
      }
 -    fn paired_projection(
++    fn cached_paired_scores(&mut self,members:&[usize],assigned:&[i32],from:usize,t:Totals)->Option<([f64;120],f64)> {
++        let positions=paired_positions();
++        let core=self.core.as_ref()?;
++        if core.input.judgements.is_some() {return None;}
++        let (base,converted)=(core.high.total,core.input.converted_count as f64);
++        let mut cache=if let Some(cache)=self.paired_cache.take() {cache} else {
++            let lambda=((base+t.skill)/t.power).sqrt();
++            if !lambda.is_finite() || lambda<=0.0 {return None;}
++            let constant=((lambda*self.base_power).next_up()+(base/lambda).next_up()).next_up();
++            let mut cache=Box::new(PairedRelaxation {lambda,converted,selected:[i32::MIN;5],depth:0,
++                prefix:[[0.0;120];6],suffix:[[0.0;120];6],mean_prefix:[0.0;6],mean_suffix:[0.0;6]});
++            cache.prefix[0]=[constant;120];cache.mean_prefix[0]=constant;
++            for slot in (0..5).rev() {
++                let member=members[slot];
++                let row:[f64;5]=std::array::from_fn(|event|self.frontiers[member][event].iter()
++                    .map(|&(power,weight)|((lambda*power).next_up()+(weight/lambda).next_up()).next_up()).fold(0.0,f64::max));
++                for i in 0..120 {
++                    let event=positions[i][slot];
++                    cache.suffix[slot][i]=(row[event]+cache.suffix[slot+1][i]).next_up();
++                }
++                let mean=self.mean_frontiers[member].iter()
++                    .map(|&(power,weight)|((lambda*power).next_up()+(weight/lambda).next_up()).next_up()).fold(0.0,f64::max);
++                cache.mean_suffix[slot]=(mean+cache.mean_suffix[slot+1]).next_up();
++            }
++            cache
++        };
++        let common=(0..from.min(cache.depth)).take_while(|&slot|cache.selected[slot]==assigned[slot]).count();
++        for slot in common..from {
++            let member=members[slot];let snap=assigned[slot];let id=self.slot_profile(member,snap);
++            let power=self.snap_power[member*self.snap_width+if snap<0 {self.snap_width-1} else {snap as usize}];
++            let row=self.profiles[id as usize].map(|weight|((cache.lambda*power).next_up()+(weight/cache.lambda).next_up()).next_up());
++            for i in 0..120 {
++                let event=positions[i][slot];
++                cache.prefix[slot+1][i]=(cache.prefix[slot][i]+row[event]).next_up();
++            }
++            let weight=self.profiles[id as usize].iter().sum::<f64>()/5.0;
++            let mean=((cache.lambda*power).next_up()+(weight/cache.lambda).next_up()).next_up();
++            cache.mean_prefix[slot+1]=(cache.mean_prefix[slot]+mean).next_up();cache.selected[slot]=snap;
++        }
++        cache.depth=from;
++        let score=|sum:f64|(((sum*sum).next_up()/(4.0*cache.converted)).next_up()*(1.0+RELATIVE_ERROR)).next_up();
++        let scores=std::array::from_fn(|i|score((cache.prefix[from][i]+cache.suffix[from][i]).next_up()));
++        let mean=score((cache.mean_prefix[from]+cache.mean_suffix[from]).next_up()).min(self.core.as_ref().unwrap().score_high(t));
++        self.paired_cache=Some(cache);Some((scores,mean))
++    }
++    fn paired_mean(&mut self,members:&[usize],assigned:&[i32],from:usize,t:Totals)->Option<f64> {
++        let core=self.core.as_ref()?;
++        if core.input.judgements.is_some() {return None;}
++        let (base,converted)=(core.high.total,core.input.converted_count as f64);
++        let lambda=((base+t.skill)/t.power).sqrt();
++        if !lambda.is_finite() || lambda<=0.0 {return None;}
++        let constant=((lambda*self.base_power).next_up()+(base/lambda).next_up()).next_up();
++        let mut mean_sum = constant;
++        for slot in 0..5 {
++            let member = members[slot];
++            let value = if slot < from {
++                let snap = assigned[slot];
++                let id = self.slot_profile(member, snap);
++                let power = self.snap_power[member * self.snap_width
++                    + if snap < 0 {
++                        self.snap_width - 1
++                    } else {
++                        snap as usize
++                    }];
++                ((lambda * power).next_up()
++                    + (self.profiles[id as usize].iter().sum::<f64>() / 5.0 / lambda).next_up())
++                .next_up()
++            } else {
++                self.mean_frontiers[member]
++                    .iter()
++                    .map(|&(power, weight)| {
++                        ((lambda * power).next_up() + (weight / lambda).next_up()).next_up()
++                    })
++                    .fold(0.0, f64::max)
++            };
++            mean_sum = (mean_sum + value).next_up();
++        }
++        let mean_bound = (((mean_sum * mean_sum).next_up() / (4.0 * converted)).next_up()
++            * (1.0 + RELATIVE_ERROR))
++            .next_up();
++        let mean = self.core.as_ref().unwrap().score_high(t).min(mean_bound);
++        Some(mean)
++    }
 +    fn paired_scores(
          &mut self,
          members: &[usize],
@@ -462,29 +684,158 @@
 -        other: f64,
 -    ) -> Option<(f64, f64, f64)> {
 +    ) -> Option<([f64;120], f64)> {
++        if self.power_ties {return self.cached_paired_scores(members,assigned,from,t);}
          let core = self.core.as_ref()?;
          if core.input.judgements.is_some() {
              return None;
-@@ -867,6 +882,10 @@
-             * (1.0 + RELATIVE_ERROR))
-             .next_up();
-         let mean = self.core.as_ref().unwrap().score_high(t).min(mean_bound);
+@@ -838,38 +937,15 @@
+             (((sum * sum).next_up() / (4.0 * converted)).next_up() * (1.0 + RELATIVE_ERROR))
+                 .next_up()
+         });
+-        let mut mean_sum = constant;
+-        for slot in 0..5 {
+-            let member = members[slot];
+-            let value = if slot < from {
+-                let snap = assigned[slot];
+-                let id = self.slot_profile(member, snap);
+-                let power = self.snap_power[member * self.snap_width
+-                    + if snap < 0 {
+-                        self.snap_width - 1
+-                    } else {
+-                        snap as usize
+-                    }];
+-                ((lambda * power).next_up()
+-                    + (self.profiles[id as usize].iter().sum::<f64>() / 5.0 / lambda).next_up())
+-                .next_up()
+-            } else {
+-                self.mean_frontiers[member]
+-                    .iter()
+-                    .map(|&(power, weight)| {
+-                        ((lambda * power).next_up() + (weight / lambda).next_up()).next_up()
+-                    })
+-                    .fold(0.0, f64::max)
+-            };
+-            mean_sum = (mean_sum + value).next_up();
+-        }
+-        let mean_bound = (((mean_sum * mean_sum).next_up() / (4.0 * converted)).next_up()
+-            * (1.0 + RELATIVE_ERROR))
+-            .next_up();
+-        let mean = self.core.as_ref().unwrap().score_high(t).min(mean_bound);
++        let mean=self.paired_mean(members,assigned,from,t)?;
 +        Some((scores,mean))
 +    }
-+    fn paired_projection(&mut self, members:&[usize], assigned:&[i32], from:usize, t:Totals, other:f64) -> Option<(f64,f64,f64)> {
++    fn paired_projection(&mut self, members:&[usize], assigned:&[i32], from:usize, t:Totals, other:f64, include_other:bool) -> Option<(f64,f64,f64)> {
 +        let (scores,mean)=self.paired_scores(members,assigned,from,t)?;
          let primary = self
              .curve(t.bonus, other)
              .map_or(f64::INFINITY, |curve| curve.scores(&scores));
-@@ -1015,6 +1034,7 @@
++        if !include_other {return Some((primary,0.0,mean));}
+         self.other_mean_bound(other, f64::INFINITY);
+         let secondary = self
+             .other_curves
+@@ -920,6 +996,7 @@
+         t: Totals,
+         from: usize,
+         other: f64,
++        include_other: bool,
+     ) -> Option<(f64, f64)> {
+         if self.core.as_ref()?.input.judgements.is_some() {
+             return None;
+@@ -935,6 +1012,7 @@
+         let primary = self
+             .curve(t.bonus, other)
+             .map_or(f64::INFINITY, |curve| curve.orders(&coefficients, t.power));
++        if !include_other {return Some((primary,0.0));}
+         self.other_mean_bound(other, f64::INFINITY);
+         let secondary = self
+             .other_curves
+@@ -1015,6 +1093,16 @@
      }
  }
  impl Objective for EventObjective {
++    fn generic_assignment_product(&self)->bool {!self.power_ties}
++    fn discrete_upper(&self,upper:f64)->f64 {
++        if !self.power_ties || !self.points_measure && self.route.rewards.iter().any(|row|(row.probability as f64)%10000.0!=0.0) || self.tie!=0.0 || self.cp_weight!=0.0 || self.exchange.is_some() || !upper.is_finite() || upper.abs()>i32::MAX as f64 {return upper;}
++        let count=if self.core.is_some() {120.0} else {1.0};
++        (upper*count).next_up().floor()/count
++    }
++    fn power_ties(&self)->bool {self.power_ties}
++    fn score_ties(&self)->bool {self.power_ties}
++    fn tie_rank(&self,hit:&crate::search::Hit)->[f64;2] {[hit.power,0.0]}
 +    fn member_snapshot_prices(&self) -> bool { self.snap_bonus.iter().any(|&bonus|bonus!=0.0) }
      fn seed_objective(&self) -> Option<Box<dyn Objective>> {
          (!self.points_measure
              && self
-@@ -1409,9 +1429,10 @@
+@@ -1071,7 +1159,7 @@
+         true
+     }
+     fn numeric_member_dominance(&mut self, better: usize, worse: usize, power_delta: f64) -> bool {
+-        self.other_member[better] >= self.other_member[worse]
++        (self.power_ties && self.tie == 0.0 || self.other_member[better] >= self.other_member[worse])
+             && self
+                 .core
+                 .as_mut()
+@@ -1094,7 +1182,7 @@
+         worse: i32,
+         power_delta: f64,
+     ) -> bool {
+-        self.other_snap(better) >= self.other_snap(worse)
++        (self.power_ties && self.tie == 0.0 || self.other_snap(better) >= self.other_snap(worse))
+             && self
+                 .core
+                 .as_mut()
+@@ -1140,6 +1228,7 @@
+         self.snap_width = width;
+     }
+     fn prepare_assignment_power(&mut self, power: f64) {
++        self.paired_cache=None;
+         self.base_power = power;
+     }
+     fn prepare_members(&mut self, characters: &[Vec<usize>]) {
+@@ -1176,7 +1265,7 @@
+                 + self.other_member_suffix[from][left]
+                 + self.other_snap_top
+         };
+-        self.member_projection(members, t, from, other)
++        self.member_projection(members, t, from, other, false)
+             .map(|bounds| bounds.0)
+     }
+     fn product_base(&self) -> Option<f64> {
+@@ -1242,6 +1331,7 @@
+         })
+     }
+     fn prepare_assignment(&mut self, _members: &[usize], options: &[Vec<i32>]) {
++        self.paired_cache=None;
+         if self.core.is_some() {
+             for (slot, choices) in options.iter().enumerate() {
+                 let member = _members[slot];
+@@ -1355,18 +1445,22 @@
+         } else {
+             self.assignment_other_bonus(members, assigned, from)
+         };
+-        let upper = self.projection(members, assigned, from, t, other)?.0;
++        let mut upper = self.projection(members, assigned, from, t, other, false)?.0;
+         if upper <= limit {
+             return Some(upper);
+         }
++        if let Some(mean)=self.paired_mean(members,assigned,from,t) {
++            upper=upper.min(self.mean_bound(t.bonus,other,mean));
++            if upper<=limit {return Some(upper);}
++        }
+         Some(
+-            self.paired_projection(members, assigned, from, t, other)
++            self.paired_projection(members, assigned, from, t, other, false)
+                 .map_or(upper, |bounds| upper.min(bounds.0)),
+         )
+     }
+     fn leaf_bound(&mut self, team: &Team, t: Totals) -> Option<f64> {
+         let other = self.other_bonus(team);
+-        if let Some(bounds) = self.projection(&team.members, &team.snaps, 5, t, other) {
++        if let Some(bounds) = self.projection(&team.members, &team.snaps, 5, t, other, false) {
+             return Some(bounds.0);
+         }
+ 
+@@ -1409,9 +1503,10 @@
              let mean = self.value(bonus, self.skip_rank);
              let direct = self.direct(bonus, self.skip_rank);
              let other_mean = self.other(other, self.skip_rank);
@@ -496,7 +847,7 @@
              });
          };
          let scores = core.evaluate(team, power as i32)?;
-@@ -1453,7 +1474,7 @@
+@@ -1453,7 +1548,7 @@
          let other_mean = (other_sum / count).clamp(other_min, other_max);
          Ok(Exact {
              key: (mean + self.tie * other_mean).clamp(key_min, key_max),
@@ -505,7 +856,7 @@
          })
      }
  }
-@@ -1579,6 +1600,7 @@
+@@ -1579,6 +1674,7 @@
      }
  }
  impl Objective for ScoreTie {
@@ -513,80 +864,34 @@
      fn exchange_snap_equivalent(&mut self, member: usize, a: i32, b: i32) -> bool {
          self.mean.core.shape(member, a) == self.mean.core.shape(member, b)
      }
-@@ -1926,6 +1948,72 @@
-     }
- }
- 
-+// Moenotes single-reward ties compare power over the complete primary-reward group.
-+pub struct RewardPower {
-+    pub event: EventObjective,
-+    pub target: f64,
-+    pub excluded: Vec<Vec<usize>>,
-+}
-+impl RewardPower {
-+    fn upper(&self, reward:f64, power:f64)->f64 { if reward<self.target {-1.0} else {power} }
-+    fn eligible(&self, team:&Team)->bool {
-+        let mut members=team.members.clone();members.sort_unstable();
-+        !self.excluded.contains(&members)
-+    }
-+}
-+impl Objective for RewardPower {
-+    // A score-product relaxation cannot supply a power upper bound when skill strength varies.
-+    fn generic_assignment_product(&self)->bool {false}
-+    fn member_snapshot_prices(&self)->bool {self.event.member_snapshot_prices()}
-+    fn canonical_leader(&self)->bool {true}
-+    fn conditional_snap_dominance(&self)->bool {true}
-+    fn exchange_snap_equivalent(&mut self,m:usize,a:i32,b:i32)->bool {self.event.exchange_snap_equivalent(m,a,b)}
-+    fn needs_power_cap(&self)->bool {self.event.needs_power_cap()}
-+    fn prepare_dominance(&mut self,p:f64) {self.event.prepare_dominance(p)}
-+    fn numeric_member_dominance(&mut self,a:usize,b:usize,p:f64)->bool {
-+        self.excluded.is_empty() && self.event.numeric_member_dominance(a,b,p)
-+    }
-+    fn numeric_snap_dominance(&mut self,m:usize,a:i32,b:i32,p:f64)->bool {self.event.numeric_snap_dominance(m,a,b,p)}
-+    fn snap_dominance(&mut self,m:usize,s:i32)->Vec<f64> {self.event.snap_dominance(m,s)}
-+    fn skill(&mut self,m:usize,s:i32)->(f64,f64) {self.event.skill(m,s)}
-+    fn member_bonus(&self,m:usize)->f64 {self.event.member_bonus(m)}
-+    fn snap_bonus(&self,s:usize)->f64 {self.event.snap_bonus(s)}
-+    fn prepare_power(&mut self,p:Arc<Vec<f64>>,w:usize) {self.event.prepare_power(p,w)}
-+    fn prepare_assignment_power(&mut self,p:f64) {self.event.prepare_assignment_power(p)}
-+    fn prepare_members(&mut self,c:&[Vec<usize>]) {self.event.prepare_members(c)}
-+    fn prepare_assignment(&mut self,m:&[usize],o:&[Vec<i32>]) {self.event.prepare_assignment(m,o)}
-+    fn product_base(&self)->Option<f64> {self.event.product_base()}
-+    fn joint_targets(&mut self,_:f64)->Option<Vec<JointTarget>> {self.event.joint_targets(self.target)}
-+    fn bonus_floor(&mut self,_:f64)->Option<f64> {self.event.bonus_floor(self.target)}
-+    fn bound(&mut self,t:Totals)->f64 {let reward=self.event.bound(t);self.upper(reward,t.power)}
-+    fn member_bound_at(&mut self,m:&[usize],t:Totals,l:usize,f:usize,_:f64)->Option<f64> {
-+        let reward=self.event.member_bound_at(m,t,l,f,self.target)?;Some(self.upper(reward,t.power))
-+    }
-+    fn cheap_assignment_bound(&mut self,m:&[usize],t:Totals,a:&[i32],f:usize)->f64 {
-+        let reward=self.event.cheap_assignment_bound(m,t,a,f);self.upper(reward,t.power)
-+    }
-+    fn assignment_bound(&mut self,m:&[usize],t:Totals,a:&[i32],f:usize)->Option<f64> {
-+        let reward=self.event.assignment_bound(m,t,a,f)?;Some(self.upper(reward,t.power))
-+    }
-+    fn assignment_order_bound(&mut self,m:&[usize],t:Totals,a:&[i32],f:usize,_:f64)->Option<f64> {
-+        let reward=self.event.assignment_order_bound(m,t,a,f,self.target)?;Some(self.upper(reward,t.power))
-+    }
-+    fn leaf_bound(&mut self,team:&Team,t:Totals)->Option<f64> {
-+        if !self.eligible(team) {return Some(-1.0);}
-+        let reward=self.event.leaf_bound(team,t)?;Some(self.upper(reward,t.power))
-+    }
-+    fn interval(&mut self,team:&Team,t:Totals)->(f64,f64) {
-+        if !self.eligible(team) {return (-1.0,-1.0);}
-+        let (low,high)=self.event.interval(team,t);
-+        if low>self.target || high<self.target {(-1.0,-1.0)}
-+        else {(if low==self.target && high==self.target {t.power} else {-1.0},t.power)}
-+    }
-+    fn exact(&mut self,team:&Team,p:f64,slots:&[f64])->Result<Exact,String> {
-+        let mut result=self.event.exact(team,p,slots)?;
-+        result.key=if result.key==self.target && self.eligible(team) {p} else {-1.0};Ok(result)
-+    }
-+}
-+
- pub struct SkipTie {
-     pub event: EventObjective,
-     pub target: f64,
-@@ -2029,6 +2117,7 @@
+@@ -1674,7 +1770,7 @@
+             .sum::<f64>()
+             + self.member_suffix[from][left]
+             + self.other_snaps;
+-        if let Some((primary, other)) = self.event.member_projection(members, t, from, bonus) {
++        if let Some((primary, other)) = self.event.member_projection(members, t, from, bonus, true) {
+             if primary < self.target || self.other_target.is_some_and(|target| other < target) {
+                 return Some(-1.0);
+             }
+@@ -1809,7 +1905,7 @@
+                 .map(|&s| self.event.other_snap(s))
+                 .sum::<f64>()
+             + self.other_suffix[from].min(distinct);
+-        let (primary, other) = self.event.projection(members, assigned, from, t, bonus)?;
++        let (primary, other) = self.event.projection(members, assigned, from, t, bonus, true)?;
+         let upper =
+             if primary < self.target || self.other_target.is_some_and(|target| other < target) {
+                 -1.0
+@@ -1823,7 +1919,7 @@
+         }
+         if let Some((primary, other, mean)) = self
+             .event
+-            .paired_projection(members, assigned, from, t, bonus)
++            .paired_projection(members, assigned, from, t, bonus, true)
+         {
+             if primary < self.target || self.other_target.is_some_and(|target| other < target) {
+                 return Some(-1.0);
+@@ -2029,6 +2125,7 @@
      pub chart: Chart,
      pub route: Route,
      curve: Option<RewardCurve>,
@@ -594,7 +899,7 @@
  }
  impl ChallengePoints {
      pub fn new(mean: crate::objectives::LiveObjective, chart: Chart, route: Route) -> Self {
-@@ -2054,7 +2143,15 @@
+@@ -2054,7 +2151,15 @@
              chart,
              route,
              curve,
@@ -611,7 +916,7 @@
      }
      fn value(&self, score: f64) -> f64 {
          *self
-@@ -2099,16 +2196,16 @@
+@@ -2099,16 +2204,16 @@
          self.curve
              .as_ref()
              .map_or(f64::INFINITY, |curve| curve.upper(score))
@@ -631,7 +936,7 @@
          )
      }
      fn exact(&mut self, team: &Team, power: f64, slots: &[f64]) -> Result<Exact, String> {
-@@ -2118,10 +2215,345 @@
+@@ -2118,10 +2223,345 @@
              .into_iter()
              .map(|s| self.value(crate::master::number(s, 0.0)))
              .collect();
@@ -998,7 +1303,7 @@
      fn advance(&self, model: &mut Model<'_>, from: usize, to: usize) -> Result<(), String> {
          for k in from..to {
 +            #[cfg(target_arch="wasm32")]
-+            if (k-from)&31==0 && self.search_clock.is_some_and(|(deadline,now)|now()>=deadline) {
++            if (k-from)&31==0 && (self.search_clock.is_some_and(|(deadline,now)|now()>=deadline) || crate::clock::deadline_expired()) {
 +                return Err("search-deadline".into());
 +            }
              if self.generation != crate::cancellation_generation() {
@@ -1031,12 +1336,13 @@
      let jobs = vec![(0..event_orders.len()).collect::<Vec<_>>()];
 --- a/src/gekiso_objective.rs
 +++ b/src/gekiso_objective.rs
-@@ -1,3 +1,4 @@
+@@ -1,3 +1,5 @@
++//! Modified for fallible Moenotes LUCK context deadlines on 2026-10-26.
 +//! Updated for Moenotes exact reward bounds and preparation deadlines on 2026-10-26.
  //! Gekiso context caches and safe level/support bounds for exact search.
  use crate::{
      full::conditions::Performer,
-@@ -850,6 +851,8 @@
+@@ -850,6 +852,8 @@
      supported: bool,
  }
  pub struct Kernel<'a> {
@@ -1045,7 +1351,7 @@
      master: &'a Master,
      members: &'a [Member],
      snaps: &'a [Snap],
-@@ -1768,6 +1771,8 @@
+@@ -1768,6 +1772,8 @@
              pattern_order: VecDeque::new(),
              pattern_bytes: 0,
              numeric_hull: None,
@@ -1054,7 +1360,58 @@
              defer_scores: false,
              seed_preview: false,
              live_floor: false,
-@@ -3511,7 +3516,7 @@
+@@ -3212,6 +3218,9 @@
+         if let Some(value) = self.cache.get(&key) {
+             return Arc::clone(&value.weights);
+         }
++        // Infallible bound contexts finish atomically; search checks their job boundary.
++        #[cfg(target_arch="wasm32")]
++        let _deadline=crate::clock::deadline_scope(None);
+         let context = gekiso::context(
+             within.unwrap_or(self.master),
+             self.chart,
+@@ -3228,10 +3237,10 @@
+         deck: &[Performer],
+         within: Option<&Master>,
+         tag: i32,
+-    ) -> (Arc<Context>, Arc<Weights>) {
++    ) -> Result<(Arc<Context>, Arc<Weights>),String> {
+         let (deck, key) = self.deck_key(deck, tag);
+         if let Some(value) = self.cache.get(&key) {
+-            return (Arc::clone(&value.context), Arc::clone(&value.weights));
++            return Ok((Arc::clone(&value.context), Arc::clone(&value.weights)));
+         }
+         let context = Arc::new(
+             gekiso::context(
+@@ -3239,8 +3248,7 @@
+                 self.chart,
+                 &deck,
+                 &self.seeds,
+-            )
+-            .unwrap_or_else(|e| panic!("{e}")),
++            )?,
+         );
+         let weights = Arc::new(self.weights(&context));
+         let bytes = 128
+@@ -3252,7 +3260,7 @@
+                 .map(|r| r.len() * 8)
+                 .sum::<usize>();
+         if bytes > 16 * 1024 * 1024 {
+-            return (context, weights);
++            return Ok((context, weights));
+         }
+         // A lottery record shared by several contexts counts once, while any of them holds it.
+         let record = context.shared_record();
+@@ -3297,7 +3305,7 @@
+                 }
+             }
+         }
+-        (context, weights)
++        Ok((context, weights))
+     }
+     fn weights(&self, ctx: &Context) -> Weights {
+         note_weights(self.master, self.chart, ctx)
+@@ -3511,7 +3519,7 @@
      }
      /// Computes the support bounds a warm pass at `level` is about to read, several at a time where the target has
      /// threads, and keeps their weights in the cache that `weights_of` reads.
@@ -1063,7 +1420,7 @@
          if self.chart.luck {
              return;
          }
-@@ -3525,6 +3530,7 @@
+@@ -3525,6 +3533,7 @@
          let mut seen = HashSet::default();
          let mut jobs = Vec::new();
          for &(m, s) in pairs {
@@ -1071,7 +1428,7 @@
              let Some(p) = self.support(m, s) else {
                  continue;
              };
-@@ -3552,13 +3558,27 @@
+@@ -3552,13 +3561,27 @@
          if jobs.len() < 2 {
              return;
          }
@@ -1099,7 +1456,23 @@
          for ((_, key), weights) in jobs.into_iter().zip(found) {
              self.store_weights(key, Arc::new(weights));
          }
-@@ -4270,6 +4290,8 @@
+@@ -4222,12 +4245,14 @@
+         Ok(result)
+     }
+     fn unsettled_scores(&mut self, team: &Team, power: i32) -> Result<Arc<live::Scores>, String> {
++        #[cfg(target_arch="wasm32")]
++        let _deadline=crate::clock::deadline_scope(self.search_clock.map(|(deadline,_)|deadline));
+         let key = (team.members.clone(), team.snaps.clone(), power);
+         if let Some(scores) = self.unsettled.get(&key) {
+             return Ok(Arc::clone(scores));
+         }
+         let deck = self.deck_of(team);
+-        let ctx = self.context_of(&deck, None, 0).0;
++        let ctx = self.context_of(&deck, None, 0)?.0;
+         let slots: Vec<_> = team
+             .members
+             .iter()
+@@ -4270,6 +4295,8 @@
          let deck = self.original_deck(team);
          for (order, row) in rows.iter_mut().enumerate() {
              if row.is_none() {
@@ -1108,7 +1481,16 @@
                  *row = Some(gekiso::replay_order(
                      self.master,
                      self.chart,
-@@ -4368,6 +4390,8 @@
+@@ -4359,6 +4386,8 @@
+             .then_some(values)
+     }
+     fn search_exact(&mut self, team: &Team, power: i32, settle: bool) -> Result<Exact, String> {
++        #[cfg(target_arch="wasm32")]
++        let _deadline=crate::clock::deadline_scope(self.search_clock.map(|(deadline,_)|deadline));
+         if !self.chart.luck && self.criterion == Criterion::Max && self.seeds.is_empty() && settle {
+             if let Some(bounds) = self.max_order_bounds(team, power) {
+                 let deck = self.original_deck(team);
+@@ -4368,6 +4397,8 @@
                  let mut best = f64::NEG_INFINITY;
                  let mut count = 0;
                  for index in order {
@@ -1117,7 +1499,25 @@
                      if bounds[index] <= best {
                          break;
                      }
-@@ -4551,6 +4575,11 @@
+@@ -4400,7 +4431,7 @@
+         }
+         let upper = self.unsettled_scores(team, power)?;
+         let deck = self.deck_of(team);
+-        let ctx = self.context_of(&deck, None, 0).0;
++        let ctx = self.context_of(&deck, None, 0)?.0;
+         let slots: Vec<_> = team
+             .members
+             .iter()
+@@ -4530,6 +4561,8 @@
+         Some((power * coefficient).next_up() + (self.chart.notes.len() + 4) as f64)
+     }
+     pub fn exact(&mut self, team: &Team, power: i32, settle: bool) -> Result<Exact, String> {
++        #[cfg(target_arch="wasm32")]
++        let _deadline=crate::clock::deadline_scope(self.search_clock.map(|(deadline,_)|deadline));
+         if !self.chart.luck && self.seeds.is_empty() {
+             if let Some(scores) =
+                 self.partial_orders
+@@ -4551,6 +4584,11 @@
                      )
                  })
                  .collect();
@@ -1129,7 +1529,16 @@
              let scores = gekiso::replay_orders(self.master, self.chart, &deck, &self.seeds, power)?;
              return Ok(Exact {
                  key: self.criterion.key(&scores.scores),
-@@ -10044,7 +10073,7 @@
+@@ -4559,7 +4597,7 @@
+         }
+         let ctx = if self.seeds.is_empty() {
+             let deck = self.deck_of(team);
+-            self.context_of(&deck, None, 0).0
++            self.context_of(&deck, None, 0)?.0
+         } else {
+             let deck = team
+                 .members
+@@ -10044,7 +10082,7 @@
              })
              .collect();
          let level = adapter.level;
@@ -1138,7 +1547,7 @@
      }
      for m in 0..env.members.len() {
          if (env.now)() >= deadline {
-@@ -10222,6 +10251,8 @@
+@@ -10222,6 +10260,8 @@
      ))
  }
  struct ReplayObjective<'a> {
@@ -1147,7 +1556,7 @@
      master: &'a Master,
      members: &'a [Member],
      snaps: &'a [Snap],
-@@ -10234,6 +10265,9 @@
+@@ -10234,6 +10274,9 @@
      shapes: HashMap<Performer, u32>,
  }
  impl Objective for ReplayObjective<'_> {
@@ -1157,7 +1566,7 @@
      fn score_ties(&self) -> bool {
          self.criterion != Criterion::Mean
      }
-@@ -10337,6 +10371,9 @@
+@@ -10337,6 +10380,9 @@
                  )
              })
              .collect();
@@ -1167,7 +1576,7 @@
          let scores =
              gekiso::replay_orders(self.master, self.chart, &deck, self.seeds, power as i32)?;
          Ok(Exact {
-@@ -10749,6 +10786,8 @@
+@@ -10749,6 +10795,8 @@
              });
          }
          let mut objective = ReplayObjective {
@@ -1176,7 +1585,7 @@
              master: env.master,
              members: env.members,
              snaps: env.snaps,
-@@ -10809,6 +10848,8 @@
+@@ -10809,6 +10857,8 @@
      let started = (env.now)();
      let generation = env.generation;
      let mut kernel = Kernel::new(env.master, env.members, env.snaps, chart, seeds, criterion);
@@ -1185,6 +1594,40 @@
      if let Some(bounds) = shared_bounds {
          kernel.global_fixed_preparation = bounds.preparation.clone();
          kernel.global_fixed_luck = bounds.luck.clone();
+--- a/src/luck.rs
++++ b/src/luck.rs
+@@ -1,3 +1,4 @@
++//! Modified for interruptible Moenotes LUCK distributions on 2026-10-26.
+ //! Ordered vector dynamic programming for the merged website's Gekiso lottery.
+ //! Called only inside the compute backend, never from Flutter's UI isolate.
+ use rustc_hash::FxHashMap as HashMap;
+@@ -613,6 +614,8 @@
+     {
+         return Err("invalid gauge width".into());
+     }
++    #[cfg(target_arch="wasm32")]
++    if crate::clock::deadline_expired() {return Err("search-deadline".into());}
+     let generation = crate::cancellation_generation();
+     let mut e = Engine::new(input);
+     let mut out = Output {
+@@ -646,6 +649,8 @@
+         e.reset(input.initial);
+         let mut steady_at = None;
+         for k in first..=last {
++            #[cfg(target_arch="wasm32")]
++            if crate::clock::deadline_expired() {return Err("search-deadline".into());}
+             if generation != crate::cancellation_generation() {
+                 return Err("cancelled".into());
+             }
+@@ -772,6 +777,8 @@
+             }
+         }
+     }
++    #[cfg(target_arch="wasm32")]
++    if crate::clock::deadline_expired() {return Err("search-deadline".into());}
+     for row in e.rows.rows.drain(..) {
+         release(row, &mut e.pool);
+     }
 --- a/src/master.rs
 +++ b/src/master.rs
 @@ -1,3 +1,4 @@
@@ -1251,10 +1694,12 @@
  //! Exact top-K search over leaders, character-distinct member sets and snap
  //! assignments. Bounds prune only when the retained legal teams justify it.
  use crate::{
-@@ -40,6 +42,13 @@
+@@ -40,6 +42,15 @@
      pub product: f64,
  }
  pub trait Objective {
++    fn discrete_upper(&self,upper:f64)->f64 {upper}
++    fn power_ties(&self)->bool {false}
 +    fn accepts_exact(&self, _exact:&Exact)->bool {true}
 +    fn observe_frontier(&mut self, _hits: &[Hit], _k: usize) {}
 +    fn physical_teams(&self) -> bool { false }
@@ -1265,7 +1710,7 @@
      fn score_ties(&self) -> bool {
          false
      }
-@@ -552,6 +561,7 @@
+@@ -552,6 +563,7 @@
      hit_keys: Vec<String>,
      option_scratch: [Vec<i32>; 5],
      retained: HashMap<String, f64>,
@@ -1273,7 +1718,7 @@
      compact_at: usize,
      timed_out: bool,
      unexplored: f64,
-@@ -649,7 +659,7 @@
+@@ -649,7 +661,7 @@
      values[from..].iter().rev().fold(0.0, |sum, v| sum + v)
  }
  impl<'a, O: Objective + ?Sized> Runner<'a, O> {
@@ -1282,7 +1727,7 @@
          let started = (input.now)();
          let generation = crate::cancellation_generation();
          input.k = input.k.max(1);
-@@ -713,7 +723,9 @@
+@@ -713,7 +725,9 @@
              vec![0.0; n * width],
          );
          for i in 0..n {
@@ -1292,7 +1737,7 @@
                  let col = if j < 0 { s } else { j as usize };
                  if j >= 0 {
                      snap_power[i * width + col] = power::snap_points(
-@@ -769,6 +781,7 @@
+@@ -769,6 +783,7 @@
              })
              .collect();
          let mut profiles = HashMap::default();
@@ -1300,7 +1745,7 @@
          if input.objective.needs_power_cap() {
              let mut maximum = 0.0_f64;
              for leader in 0..n {
-@@ -884,10 +897,11 @@
+@@ -884,10 +899,11 @@
              .collect();
          let k = input.k;
          let snap_power = Arc::new(snap_power);
@@ -1313,7 +1758,7 @@
              input,
              started,
              last_notify: started,
-@@ -922,6 +936,7 @@
+@@ -922,6 +938,7 @@
              hit_keys: Vec::new(),
              option_scratch: std::array::from_fn(|_| Vec::new()),
              retained: HashMap::default(),
@@ -1321,7 +1766,7 @@
              compact_at: 4096,
              timed_out: false,
              unexplored: f64::NEG_INFINITY,
-@@ -933,7 +948,7 @@
+@@ -933,7 +950,7 @@
              stamp: 0,
              target_limit: f64::NAN,
              member_targets: None,
@@ -1330,7 +1775,29 @@
      }
      fn expired(&self) -> bool {
          self.generation != crate::cancellation_generation()
-@@ -1004,9 +1019,7 @@
+@@ -979,6 +996,7 @@
+         }
+     }
+     fn cannot_improve(&self, upper: f64) -> bool {
++        let upper=self.input.objective.discrete_upper(upper);
+         (self.input.objective.live_floor()
+             && !self.input.objective.score_ties()
+             && upper <= crate::search_floor())
+@@ -989,6 +1007,13 @@
+                     || !self.input.objective.score_ties()
+                         && upper == self.hits[self.input.k - 1].key))
+     }
++    fn cannot_improve_power(&self,key:f64,power:f64,set:Option<&str>)->bool {
++        let key=self.input.objective.discrete_upper(key);
++        if !self.input.objective.power_ties() {return false;}
++        let dominated=|hit:&Hit|key==hit.key && power<=hit.power;
++        self.hits.len()>=self.input.k && dominated(&self.hits[self.input.k-1])
++            || set.and_then(|set|self.hit_keys.iter().position(|key|key==set)).is_some_and(|i|dominated(&self.hits[i]))
++    }
+     fn compare_hit(&mut self, hit: &mut Hit, index: usize) -> Result<std::cmp::Ordering, String> {
+         let primary = hit.key.total_cmp(&self.hits[index].key);
+         if !primary.is_eq() || !self.input.objective.score_ties() {
+@@ -1004,9 +1029,7 @@
          self.input
              .objective
              .complete_score_tie(&mut self.hits[index])?;
@@ -1341,7 +1808,7 @@
      }
      fn insert_position(&mut self, hit: &mut Hit) -> Result<usize, String> {
          let mut i = self.hits.len();
-@@ -1022,6 +1035,14 @@
+@@ -1022,6 +1045,14 @@
              .collect();
          keys.sort_by(|a, b| a.encode_utf16().cmp(b.encode_utf16()));
          keys.join("|")
@@ -1356,7 +1823,7 @@
      }
      fn profile(&mut self, leader: usize) -> Arc<LeaderProfile> {
          self.profiles
-@@ -1034,7 +1055,8 @@
+@@ -1034,7 +1065,8 @@
              })
              .clone()
      }
@@ -1366,7 +1833,17 @@
          if !self.input.streaming {
              self.candidates.push(candidate);
              return Ok(());
-@@ -1096,6 +1118,7 @@
+@@ -1044,7 +1076,8 @@
+             self.unexplored = self.unexplored.max(candidate.high);
+             return Ok(());
+         }
+-        if self.cannot_improve(candidate.high) {
++        if self.cannot_improve(candidate.high)
++            || self.cannot_improve_power(candidate.high,candidate.power,Some(&candidate.set_key)) {
+             return Ok(());
+         }
+         let existing = self
+@@ -1096,6 +1129,7 @@
          if !was_evaluated {
              self.stats.exact += 1;
          }
@@ -1374,7 +1851,7 @@
          self.frontier.offer(&candidate.set_key, exact.key);
          let mut hit = Hit {
              team: candidate.team,
-@@ -1124,6 +1147,7 @@
+@@ -1124,6 +1158,7 @@
          if let Some(hit) = self.hits.first() {
              self.input.objective.observe_hit(hit);
          }
@@ -1382,7 +1859,7 @@
          if let Some(callback) = self.input.on_candidate.as_deref_mut() {
              callback(&self.hits);
          }
-@@ -1245,7 +1269,8 @@
+@@ -1245,7 +1280,8 @@
          }
          let exact = self.input.objective.exact(&seed, power, &powers)?;
          self.stats.exact += 1;
@@ -1392,7 +1869,7 @@
          self.frontier.offer(&set_key, exact.key);
          self.retain_seed(
              Candidate {
-@@ -1300,6 +1325,29 @@
+@@ -1300,6 +1336,29 @@
              members: team.members.clone(),
              snaps: assigned.iter().map(|&col| snapshots[col]).collect(),
          })
@@ -1422,7 +1899,7 @@
      }
      fn warm_seed(&mut self, owned_leaders: Option<&[usize]>) -> Result<(), String> {
          let Some(mut objective) = self.input.objective.seed_objective() else {
-@@ -1635,7 +1683,12 @@
+@@ -1635,7 +1694,12 @@
                              }
                              let exact = self.input.objective.exact(&next, totals.power, &powers)?;
                              self.stats.exact += 1;
@@ -1435,7 +1912,7 @@
                              if candidate > next_value {
                                  next_value = candidate;
                                  best = Some((next, totals, powers, exact));
-@@ -1650,7 +1703,7 @@
+@@ -1650,7 +1714,7 @@
                      };
                      team = next;
                      value = next_value;
@@ -1444,7 +1921,25 @@
                      self.frontier.offer(&set_key, exact.key);
                      self.retain_seed(
                          Candidate {
-@@ -2179,11 +2232,11 @@
+@@ -2119,7 +2183,8 @@
+             ),
+         };
+         let plain = self.input.objective.bound(totals);
+-        if plain < self.limit() || self.cannot_improve(plain) {
++        if plain < self.limit() || self.cannot_improve(plain)
++            || self.cannot_improve_power(plain,totals.power,None) {
+             return Ok(());
+         }
+         let limit = self.necessary_limit(self.limit());
+@@ -2137,6 +2202,7 @@
+         }
+         let bound = self.member_set_bound(chosen, totals, left, index);
+         if bound < self.limit()
++            || self.cannot_improve_power(bound,totals.power,None)
+             || self.cannot_improve(bound)
+             || self
+                 .input
+@@ -2179,11 +2245,11 @@
          self.member_visit(m, index + 1, power, weight, bonus, member_part)
      }
      fn assignment_limit(&self, a: &Assignment) -> f64 {
@@ -1458,7 +1953,48 @@
                  && (a.exact_low > upper
                      || !self.input.objective.score_ties() && a.exact_low == upper)
      }
-@@ -2470,8 +2523,10 @@
+@@ -2305,6 +2371,20 @@
+         true
+     }
+     fn remaining_bound(&mut self, a: &Assignment, from: usize, totals: Totals) -> f64 {
++        if self.input.objective.power_ties() && !self.input.objective.generic_assignment_product() && from>0 && a.power_order.len()==5 {
++            let power=self.matching.ordered_maximum(&a.power_order[from..],&a.used,self.width,|row,snap| {
++                self.snap_power[a.team[from+row]*self.width+if snap<0 {self.width-1} else {snap as usize}]
++            });
++            let skill=a.skill_order[from..].iter().zip(&a.team[from..]).fold(totals.skill,|sum,(order,&member)| {
++                let snap=order.iter().copied().find(|&snap|snap<0 || !a.used[snap as usize]).unwrap();
++                (sum+self.skill[member*self.width+if snap<0 {self.width-1} else {snap as usize}]).next_up()
++            });
++            let bonus=if self.any_snap_bonus {self.matching.bonus_upper(&self.bonus_order,&a.allowed[from..],&a.used,&self.snap_bonus)} else {0.0};
++            let t=Totals {power:totals.power+power,skill,skill_low:0.0,bonus:totals.bonus+bonus};
++            let upper=self.input.objective.assignment_order_bound(&a.team,t,&a.assigned,from,self.assignment_necessary_limit(a))
++                .unwrap_or_else(||self.assignment_bound(a,t,from));
++            return if self.cannot_improve_set(a,upper) || self.cannot_improve_power(upper,t.power,Some(&a.set_key)) {f64::NEG_INFINITY} else {upper};
++        }
+         let mut table = std::mem::take(&mut self.pools[from]);
+         self.tables(&mut table, a, from);
+         let power = self.matching.maximum(&table.power, table.columns, None);
+@@ -2328,6 +2408,11 @@
+             if power <= NONE / 2.0 || skill <= NONE / 2.0 {
+                 return f64::NEG_INFINITY;
+             }
++            if self.input.objective.power_ties() {
++                let bound=self.input.objective.bound(Totals {power:totals.power+power,
++                    skill:totals.skill+skill,bonus:totals.bonus+bonus,skill_low:0.0});
++                if self.cannot_improve_power(bound,totals.power+power,Some(&a.set_key)) {return f64::NEG_INFINITY;}
++            }
+             let order_limit = self.assignment_necessary_limit(a);
+             let objective_bound = self.input.objective.assignment_order_bound(
+                 &a.team,
+@@ -2343,6 +2428,7 @@
+             );
+             if objective_bound.is_some_and(|bound| {
+                 bound < self.assignment_limit(a) || self.cannot_improve_set(a, bound)
++                    || self.cannot_improve_power(bound,totals.power+power,Some(&a.set_key))
+             }) {
+                 return f64::NEG_INFINITY;
+             }
+@@ -2470,8 +2556,10 @@
          if high < self.assignment_limit(a) || self.cannot_improve_set(a, high) {
              return Ok(());
          }
@@ -1471,7 +2007,7 @@
          self.stats.candidates += 1;
          if self.candidates.len() > self.compact_at {
              self.compact();
-@@ -2885,7 +2940,9 @@
+@@ -2885,7 +2973,9 @@
                              .max_bonus
                              .is_none_or(|b| totals.bonus <= b)
                      {
@@ -1481,7 +2017,15 @@
                      }
                  }
              }
-@@ -3544,6 +3601,8 @@
+@@ -3190,6 +3280,7 @@
+             slot,
+         );
+         if optimistic < self.assignment_limit(a)
++            || self.cannot_improve_power(optimistic,power,Some(&a.set_key))
+             || self.cannot_improve_set(a, optimistic)
+             || (slot > 0
+                 && slot < 5
+@@ -3544,6 +3635,8 @@
              }
              if self.expired() {
                  self.timed_out = true;
@@ -1490,7 +2034,7 @@
              }
              self.stats.leaders += 1;
              if self.any_snap_bonus {
-@@ -3995,7 +4054,9 @@
+@@ -3995,7 +4088,9 @@
              stats: Stats::default(),
          });
      }

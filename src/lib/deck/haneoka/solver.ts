@@ -87,7 +87,11 @@ export class DeckSolver {
       status: box.errors.length ? "invalid" : "incomplete", missing: box.missing, errors: box.errors, result: null,
     });
     let last = -Infinity;
-    const deadline = converted.timeLimitMs === null ? Infinity : performance.timeOrigin + started + converted.timeLimitMs;
+    const music = converted.goal.kind === "gekiso"
+      ? table(this.data, "MasterLiveMusic").find(row => row.id === converted.goal.songs![0]!.songId)! : null;
+    const luck = music !== null && [music.gekisouMission1, music.gekisouMission2, music.gekisouMission3].includes(2);
+    const reserve = luck ? Math.min(40, converted.timeLimitMs ?? 0) : 0;
+    const deadline = converted.timeLimitMs === null ? Infinity : performance.timeOrigin + started + converted.timeLimitMs - reserve;
     const warm: EngineHit[] = [];
     const mergeWarm = (hits: EngineHit[]) => {
       if (!warm.length) return hits;
@@ -120,9 +124,7 @@ export class DeckSolver {
             return { ...team, members: order.map(slot => team.members[slot]!), snaps: order.map(slot => team.snaps[slot]!) };
           }));
       }
-      const music = converted.goal.kind === "gekiso"
-        ? table(this.data, "MasterLiveMusic").find(row => row.id === converted.goal.songs![0]!.songId)! : null;
-      if (converted.goal.kind === "gekiso" && [music!.gekisouMission1, music!.gekisouMission2, music!.gekisouMission3].includes(2)
+      if (converted.goal.kind === "gekiso" && luck
         && performance.timeOrigin + performance.now() < deadline) {
         const song = converted.charts[0]!.song;
         const proposals = engine!.invoke<EngineResponse>({ op: "run", handle: this.handle, charts: converted.charts,
@@ -130,10 +132,16 @@ export class DeckSolver {
             deadline: Math.min(deadline, performance.timeOrigin + performance.now() + 100) } });
         for (const team of proposals.overall.slice(0, 1)) {
           if (performance.timeOrigin + performance.now() >= deadline) break;
-          const preview = engine!.invoke<{ evaluations: { power: number; score: { mean: number; max: number; orders: number[] } }[] }>({
-            op: "evaluateAll", handle: this.handle, charts: converted.charts, request: { ...prepared,
-              team: { members: team.members, snaps: team.snaps, leader: team.members[0] }, songs: converted.goal.songs,
-              gekiso: { accuracy: converted.goal.accuracy, rank: 1, seeds: 0 }, event: null } }).evaluations[0]!;
+          let preview: { power: number; score: { mean: number; max: number; orders: number[] } };
+          try {
+            preview = engine!.invoke<{ evaluations: typeof preview[] }>({
+              op: "evaluateAll", handle: this.handle, charts: converted.charts, request: { ...prepared,
+                team: { members: team.members, snaps: team.snaps, leader: team.members[0] }, songs: converted.goal.songs,
+                gekiso: { accuracy: converted.goal.accuracy, rank: 1, seeds: 0 }, event: null } }).evaluations[0]!;
+          } catch (error) {
+            if (error instanceof Error && error.message === "search-deadline") break;
+            throw error;
+          }
           warm.push({ ...team, power: preview.power, score: preview.score,
             key: converted.goal.criterion === "max" ? preview.score.max : preview.score.mean });
           if (progress && warm.length && performance.now() - last >= intervalMs) {

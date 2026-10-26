@@ -213,12 +213,14 @@ nine terms, weights 1 through 1,000,000,000). Native comparison is lexicographic
 results and progress include `team.levels` with exact per-level and per-term payoffs. Top-K distinguishes
 leaders and member-to-Snapshot assignments. A time limit retains the available formations without proof.
 The page's automatic CP conversion uses its existing challenge-rate request, exact payoff/cost extraction,
-and subsequent combined request. This combined capability remains expected-only.
-Single ordinary Skip PT/items/CP and Challenge Skip PT/items also accept maximum aggregation; one deterministic
-settlement gives the same payoff as expected, with denominator 1. The existing page normalizes Skip to expected.
+and subsequent combined request. Played combined rewards remain expected-only. Ordinary and Challenge Skip
+combined rewards also accept maximum, as do single ordinary Skip PT/items/CP and Challenge Skip PT/items.
+One deterministic settlement gives the same payoff as expected, with denominator 1. The answer parser allows
+combined maximum only for Skip. Challenge routes cannot earn CP. The existing page normalizes Skip to expected.
 Played maximum rewards and other event scenes remain outside this adapter's advertised capability.
-Single PT/item payoff ties compare power over the complete primary tier; they do not implicitly rank the other
-reward or played score. Single Skip CP is constant by result grade and ranks equal-payoff teams by power.
+Single PT/item requests compare payoff then power in one complete-pool search; they do not implicitly rank
+the other reward or played score. Conservative coupled bounds are cached within each assignment, and ordered
+matching supplies remaining power and bonus upper bounds. Single Skip CP is constant by result grade and ranks equal-payoff teams by power.
 
 The adapter also accepts ordinary / challenge Skip `score` requests and power with one selected event's
 parameter bonuses. Skip score has one deterministic result and no skill-order statistics; expected and maximum
@@ -239,7 +241,10 @@ Gekisou requests enter native search directly. The replay uses the requested acc
 aggregation and leaves the full-search cache intact. Early candidates do not carry proof into the full request.
 Frame replay and order completion also check the absolute deadline, including periodic MISS replay. Interruption
 retains completed candidates with incomplete proof and unknown counters/bound. The same context can search again.
-Preparation and finalization remain cooperative, so the budget is not a hard wall-clock cutoff. See [the full-pool report](haneoka-performance.md) for measured overhead.
+LUCK distribution frames and bootstrap replay also observe the deadline. Fallible context construction returns
+deadline errors without turning them into runtime panics, and interrupted work is not cached as complete.
+The adapter reserves up to 40 ms for LUCK job boundaries and finalization. Preparation and finalization remain
+cooperative, so the budget is not a hard wall-clock cutoff. See [the full-pool report](haneoka-performance.md) for measured overhead.
 
 Skip reward grades also accept the source model's numeric and comma-separated named enum forms. A missing
 settlement row for the parsed grade is an invalid request, rather than a zero-reward result.

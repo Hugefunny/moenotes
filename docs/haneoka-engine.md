@@ -79,12 +79,17 @@ music duration. No chart approximation or independent scoring formula is introdu
   reward in `value.payoff.score`. `value.payoff.exact` contains the integer reward sum and observation count.
   CP ranking compares CP directly. The score tie used by the upstream CP objective is disabled for these requests.
   Single PT/item rewards resolve payoff ties by power, matching the published model; the donor's implicit other-reward
-  and score refinement is not applied. Search refines each complete primary tier over the original card pool.
+  and score refinement is not applied. One search compares reward first and power second over the original card pool. Remaining Snapshot matching
+  supplies power upper bounds; a score-product relaxation is never substituted for a power bound. Integer
+  settlement steps tighten reward upper bounds, and coupled score bounds reuse a fixed positive AM-GM scale
+  and assignment prefixes. Ordered matching keeps the best available columns without reducing the legal pool.
   Single rewards retain distinct member rosters; combined rewards retain physical formations.
-- Ordinary Skip PT/items/CP and Challenge Skip PT/items also accept `maximum`. Their one deterministic settlement
-  is identical under expected and maximum aggregation, with exact denominator 1 and no skill-order statistics.
-  Skip CP uses power to choose among its equal-payoff teams. Combined maximum and played maximum rewards remain unsupported.
-  The existing page still normalizes Skip aggregation to expected; this adds the request/Worker capability.
+- Ordinary Skip PT/items/CP, Challenge Skip PT/items, and combined ordinary / Challenge Skip rewards accept
+  `maximum`. One deterministic settlement is identical under expected and maximum aggregation, with exact
+  denominator 1 and no skill-order statistics. Challenge routes spend CP and cannot include CP earnings terms.
+  Skip CP uses power to choose among its equal-payoff teams. Played maximum rewards remain unsupported.
+  The answer parser accepts combined maximum only for Skip. The existing page still normalizes Skip aggregation
+  to expected; this adds the request/Worker capability.
 - Rewards use the page's `rewardProjection: true` and played/Skip clock. Projection excludes saved balances;
   the original model's half-open event window still applies. Int64 tick tokens are preserved before comparison,
   including the final 100 ns before an event ends. Dates follow the model's canonical no-offset JST interpretation.
@@ -107,15 +112,19 @@ music duration. No chart approximation or independent scoring formula is introdu
   replay returns the last completed candidates, incomplete proof and unknown bound/counters; it never reports
   an unfinished replay as zero evaluations. The chart context remains reusable for a subsequent search.
   The MISS replay objective now forwards Snapshot power preparation to its deterministic bound.
-  Preparation checks deadlines between member/Snapshot jobs and WASM support contexts. The budget remains
-  cooperative: initialization and finalization can exceed it. A zero budget returns no fabricated team.
+  WASM LUCK distribution frames and fixed-team bootstrap evaluation observe the same scoped deadline.
+  Deadline errors propagate through fallible context construction; interrupted work is not cached as complete.
+  Infallible bound contexts finish at their job boundary. LUCK requests reserve up to 40 ms of their budget for
+  these boundaries and finalization. Preparation also checks between member/Snapshot jobs and support contexts.
+  The budget remains cooperative: an indivisible job or finalization may extend wall time past the configured
+  value. A zero budget returns no fabricated team.
 - Unknown or conflicting account inputs remain missing/invalid. Relevant fields are checked before
   the engine's min/max growth policy can fill them.
 - The verified JP and international snapshots have empty memory tables. Nonempty active memory
   tables are explicitly unsupported until their saved-state mapping is implemented.
 
 Pending before production switching: other event scenes, played maximum rewards, Arena scene
-mapping, memory activation, cross-song UI and stopped-search continuation, full-range
+mapping, memory activation, cross-song UI and stopped-search continuation, broader account/song
 performance and phone/browser acceptance. Existing production capabilities remain available
 through the original provider during this work.
 

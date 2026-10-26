@@ -300,3 +300,94 @@ combined maximum remain unsupported. Skip payoff ties compare power, including c
 Further work includes item proof within short budgets, Mission/LUCK interruption latency, other played reward
 scenes/maximum rewards, Arena and active-memory source coverage, cross-song UI and stopped-search continuation.
 Peak memory, real-account import and browser/phone acceptance remain separate. Production still uses the original provider.
+
+
+## Reward bounds, LUCK recovery and Skip combined maximum - 2026-10-26
+
+This comparison checks correct results and material latency changes against the preserved runtime from
+`9995829ac47a7192cef0064a356aa26d0b3cf6c8`. A configured two-second budget is cooperative, rather than a hard
+wall-clock acceptance threshold. The same frozen JP/Intl complete card pools and declared legal maximum growth
+are used; these are specified scene requests, not an all-song or real-account browser run.
+
+- Patch: `2fc6950de0f6f4e1687ce661cc493750cb78c8ddbc9af73b4c8fbd270d5b783a`.
+- WASM: `a55704e95104dc4172c6ecebbee302a03f52351531d26e45cc904126cb074ebf` (6901698 bytes).
+- Adapter: `bc04da625268e103a4cb314a8d03552b871893cd9e061f1b889b27b3bb4e977d`.
+
+### Alternating old/new requests
+
+The 120 isolated calls cover 15 scenes, two servers, two repeats and both runtimes. Each repeat reverses the
+execution order. Dataset hashes, account hashes and requests match within every pair. All 60 current calls
+return three legal candidates, no error, and the same best primary value as the baseline. No build, type-check
+or test ran concurrently with these measurements.
+
+| Scene | Baseline wall, ms | Current wall, ms | Baseline / current proven |
+| --- | ---: | ---: | ---: |
+| power | 5-18 | 6-21 | 4/4 → 4/4 |
+| free-easy | 14-35 | 14-36 | 4/4 → 4/4 |
+| free-expert | 16-27 | 16-23 | 4/4 → 4/4 |
+| free-maximum | 24-43 | 26-43 | 4/4 → 4/4 |
+| battle | 2002-2006 | 2002-2003 | 0/4 → 0/4 |
+| mission | 2010-2058 | 1964-2047 | 0/4 → 0/4 |
+| free-pt | 141-207 | 74-136 | 4/4 → 4/4 |
+| free-items | 2005-2007 | 1409-1520 | 0/4 → 4/4 |
+| free-cp | 55-102 | 56-128 | 4/4 → 4/4 |
+| free-combined | 1761-2014 | 1770-2010 | 3/4 → 2/4 |
+| challenge-combined | 33-36 | 31-35 | 4/4 → 4/4 |
+| skip-combined | 10-12 | 10-14 | 4/4 → 4/4 |
+| skip-score | 9-10 | 8-10 | 4/4 → 4/4 |
+| challenge-skip-score | 10-13 | 10-11 | 4/4 → 4/4 |
+| power-event | 13-16 | 13-20 | 4/4 → 4/4 |
+
+Item proof now completes in the configured budget, with payoff 2184 and powers 1388380, 1204384 and 1203672.
+Single PT/item search compares payoff and power directly. Its coupled order bounds reuse conservative prefixes,
+and small ordered matching avoids rebuilding full remaining-Snapshot matrices. The full candidate pool remains.
+
+Free combined is close to the short deadline: the paired calls finish with proof in 3/4 baseline versus 2/4
+current calls, while every best payoff remains 2500. A fresh-process control alternates baseline/current/current/
+baseline with a ten-second budget. All 16 controls complete the same proof: baseline 1744-2042 ms,
+current 1732-2151 ms; pooled medians 1990 and 1980 ms.
+This control shows no material complete-proof slowdown; short-budget proof status still varies near the cutoff.
+
+Mission retains its previous best score 35959251.398098335 and incomplete proof. LUCK distributions now check
+deadlines inside frames; fixed-team bootstrap and MISS replay share that deadline. Context errors propagate,
+and an interrupted evaluation does not become a completed cached result. Infallible bound jobs finish at a job
+boundary, with up to 40 ms reserved for boundaries and finalization. Occasional wall-time overrun remains
+visible in the table; it is not reported as a hard cutoff guarantee.
+
+### Actual bundled Worker
+
+The Worker core loads the current descriptor, JS and WASM with its existing hash and size checks.
+
+| Request | Wall, ms | First progress, ms | Proven |
+| --- | ---: | ---: | --- |
+| mission | 2019 | 221 | false |
+| battle | 2003 | 733 | false |
+| free-expert | 31 | 19 | true |
+| free-items | 1602 | 46 | true |
+| free-combined | 2002 | 790 | false |
+| challenge-combined | 38 | 17 | true |
+| skip-combined | 14 | 9 | true |
+
+### Remaining-scene increment and validation
+
+Ordinary and Challenge Skip combined maximum now use the same deterministic settlement as expected aggregation.
+The adapter advertises the capability, and the answer parser accepts maximum combined results only for Skip.
+Eight complete-pool expected/maximum comparisons, four published-model fixed-formation comparisons and one
+actual Worker case pass. Every level retains denominator 1. Challenge CP earnings remain rejected; the page
+still normalizes Skip to expected. Played maximum rewards remain outside this increment.
+
+- 282 distinct adapter/native/Worker cases pass in batches. A full run initially had one failure from requiring
+  a recovery request to return a candidate within 250 ms. The recovery check now proves a fixed formation
+  without a timing assumption and compares it with independent frozen replay; all eight LUCK checks pass.
+  Real short-budget performance is covered by the separate complete-pool comparison above.
+- Frozen 1200-formation power witnesses and mixed-grade fractional reward oracles remain covered. Ordered power
+  and bonus bounds also pass 10500 generated matching cases against independent Hungarian matching, including
+  4568 feasible constrained power cases.
+- Existing repository regression: 896 passed and one existing Windows/GNU-time skip. Initial Go subprocess
+  failures were missing process PATH configuration; the same tests pass with the existing local Go toolchain.
+- No UI/CSS/i18n changes or production provider switch. Browser/phone, peak memory, broader account/song cases,
+  played maximum rewards, other event scenes, Arena/active memories, cross-song UI and continuation remain separate.
+
+Local receipts: `eighth-final-paired.json`, `eighth-combined-control.jsonl`, `eighth-final-entries.json`,
+`eighth-final-validation.json`, `eighth-recovery-final.log` and `eighth-ordered-proof.log`. New tests, data,
+generators and runtimes remain ignored local verification artifacts.

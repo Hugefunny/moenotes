@@ -119,7 +119,7 @@ export function parseDeckAnswer(json: string): DeckAnswer {
     if (r.aggregation !== undefined && r.aggregation !== "expected" && r.aggregation !== "maximum") throw new Error("Unknown result aggregation");
     const metric = record(r.metric) ? r.metric : {};
     const levels = metric.kind === "combined" ? planLevels(metric.levels) : null;
-    if (levels && r.aggregation === "maximum") throw new Error("Invalid reward plan result");
+    if (levels && r.aggregation === "maximum" && (!record(r.goal) || r.goal.kind !== "skip")) throw new Error("Invalid reward plan result");
     result = {
       ...(levels ? { levels } : {}),
       phase, elapsedMs: num(r.elapsedMs),
