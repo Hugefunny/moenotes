@@ -611,3 +611,89 @@ Closure validation for the same final normal-release artifacts:
 - Evidence: `eleventh-final-tests.log`, `eleventh-final-cp.json`, `eleventh-paired.json`,
   `eleventh-recheck.json`, `eleventh-cold-control.json`, `eleventh-entries.json`,
   `eleventh-performance-summary.json` and `eleventh-final-validation.json`. Tests and receipts remain local.
+
+## Complete page-scene migration, 2026-10-27
+
+Arena, active per-stat memories, Battle/Mission/Arena single maximum and expected combined rewards,
+all-song requests, song coverage/results and candidate-based continuation are implemented together.
+The original production provider remains selected. Release activation is separate.
+
+Final patch `f20fc2b5f7526e535bcb35e4b64ac5efb95ffc17048ded2ad474251661cd55f6`; normal-release WASM
+`e4711df9c09bafe846a730d9c53bb14d98ba0635ff584993ec35b05202882a35` (7214666 bytes); JS
+`9268222ae4f3847e3167afe44807b721781e5248a56a76003103ec519fbd4ac6` (57502 bytes). The final normal release takes 4m21s;
+the pinned base and generated-source/byte/hash guards pass.
+
+The first isolated acceptance pass alternates 120 calls against frozen `9164fd7`, across 15 existing targets,
+both complete JP/Intl card pools and two repeats. Every paired dataset/account/request hash matches.
+57 of 60 primary values match. Two Battle cutoff differences point in opposite directions
+(34079972.8333 versus 36087609.8); one JP maximum-item call retains 2137 versus 2184 at two seconds.
+All return three candidates. These calls use staged WASM `99b2b1d7f091c48a1f5852e0e49aadc06e3c549e592c1bc0b6253477bee44acd`.
+Both versions reach a 32.3125 MiB linear-memory high-water mark in that two-instance process.
+
+| Existing target | Baseline wall, ms | Staged current wall, ms | Baseline/current proven out of 4 |
+| --- | ---: | ---: | ---: |
+| power | 6-21 | 7-25 | 4/4 |
+| free-easy | 17-44 | 20-51 | 4/4 |
+| free-expert | 18-26 | 19-25 | 4/4 |
+| free-maximum | 27-39 | 26-47 | 4/4 |
+| battle | 2003-2007 | 2003-2004 | 0/0 |
+| mission | 1964-2009 | 1963-2111 | 0/0 |
+| free-pt | 102-172 | 106-180 | 4/4 |
+| free-items | 1825-2004 | 1878-2003 | 1/1 |
+| free-cp | 70-127 | 71-118 | 4/4 |
+| free-combined | 2003-2014 | 2003-2033 | 0/0 |
+| challenge-combined | 35-59 | 37-56 | 4/4 |
+| skip-combined | 13-18 | 14-17 | 4/4 |
+| free-pt-maximum | 71-116 | 78-107 | 4/4 |
+| free-items-maximum | 2002-2004 | 2002-2003 | 0/0 |
+| free-cp-maximum | 1034-1173 | 1075-1154 | 4/4 |
+
+The final source review restored the pre-existing numeric/comma/Unicode Skip-grade parser, which the
+temporary generator had replaced with the donor default. `finish-final-artifact-delta.json` verifies that
+only this restoration and modification notices distinguish the final native source from the staged one.
+The 168 staged timing calls are retained as staged evidence, rather than relabelled as final-binary calls.
+
+The final binary has a fresh isolated 16-call, three-second control for Battle and maximum items. All
+eight paired primary values match: Battle 36087609.8 and maximum items 2292. Battle takes 3002-3006 ms,
+with incomplete proof on both versions. Maximum items proves 4/4 baseline and 4/4 current runs:
+baseline 2125-2345 ms/current 2191-2360 ms. These controls and the short-budget evidence support
+the user's no-significant-regression boundary; they do not promise identical candidates at every cutoff.
+
+The staged new-scene pass runs 48 complete-pool calls: Battle/Mission/Arena PT/items/CP maximum and
+expected combined rewards, twice on each server. All return three candidates. Battle/Arena CP proves
+in 609-1035 ms; Mission single rewards finish in 62-1507 ms and remain sampled/unproven. Other searches
+use about their two-second budget; combined rewards retain the complete physical formation pool and
+can remain incomplete. New-scene native linear memory peaks at 30.75 MiB. An initial bulk harness stopped
+after 20 cases with transient process RSS508 MiB; the full rerun with garbage collection between datasets,
+outside timed calls, completes all 48 with maximum RSS312 MiB. This is process evidence, not browser or
+physical-phone memory. The initial interrupted receipt remains separate.
+
+The final hash-bound Worker core runs 44 cases with default K=5: all 24 new reward cases, active memory,
+all ordinary songs (Intl91/JP89), all selected-event challenge songs, declared Arena songs and continuation.
+All 44 return five candidates; continuation keeps or improves the prior best. Skip and challenge scopes
+complete coverage in these fixtures; expensive live scopes can stay partially covered at two seconds.
+Every requested song stays eligible. Worker-core measurements in Bun are separate from browser scheduling.
+
+Actual browser verification uses the page's temporary box import, the real bundled Worker and a declared
+71-member/74-Snapshot low-growth pool. Battle searches all91 EASY songs. Stop retains scored candidates;
+continue restarts the timer and improves from 3083012 to 4823678 and then 6269956 while reporting partial
+coverage. Final-binary Stop also retains candidates and coverage. Desktop1280 and responsive390 widths,
+light/dark themes and five core-locale labels are checked; no horizontal page overflow is observed.
+Screenshots are local verification artifacts. Browser storage is unavailable in this IAB session, so the
+box stays in memory. No real account or physical phone is used. An archived unmodified `9164fd7` page
+reproduces the recovering MUI SSR hydration warning; it is outside this algorithm increment.
+
+Final validation:368 distinct migration cases pass across13 local files:365 in the full batch and a final
+19-case boundary recheck that overlaps16 earlier cases. This includes49 Skip-grade cases and the frozen
+1200-formation payoff/power witnesses. The last three cases preserve diagnostics for malformed goals. The existing repository has896 passes,
+one existing Windows GNU-time skip and zero failures. Astro669files has zero errors/warnings and nine
+existing hints. Lint and SEO pass (44 search routes/22308 sitemap URLs). New tests, fixtures, runtimes,
+generators and receipts remain ignored. Evidence is bound by `finish-final-validation.json`,
+`finish-final-validation-tests.log`, `finish-worker.json`, `finish-control.json`, staged
+`finish-performance-old.json`/`finish-performance-new.json`, and the explicit native artifact delta.
+
+Frozen source Arena/memory tables are empty; active mappings use declared fixtures and frozen native or
+published-provider comparisons. LUCK retains four fixed roots, conservative support intervals and no
+whole-law proof. Combined maximum for played lives and provider-only threshold/capped/score-and-LIFE
+objectives are not advertised. Candidate continuation lasts for the current page visit and re-evaluates
+formations rather than trusting saved scores/proofs. No PR, merge, deployment or production switch.

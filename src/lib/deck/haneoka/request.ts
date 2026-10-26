@@ -3,7 +3,7 @@ import { chartSource, integer, table, type DeckData } from "./data";
 export interface RewardTermInput { kind: string; eventId?: number; resourceType?: number; resourceId?: number; weight: number }
 export interface RecommendationRequest {
   format: string;
-  goal: { kind: string; rank?: number; eventParameter?: boolean; musicId?: number; difficulty?: string; challengeMusicId?: number;
+  goal: { kind: string; rank?: number; arenaMusicId?: number; musicIds?: number[]; challengeMusicIds?: number[]; arenaMusicIds?: number[]; eventParameter?: boolean; musicId?: number; difficulty?: string; challengeMusicId?: number;
     play?: { kind?: string; greatFraction?: number; justFraction?: number; missEvery?: number };
     accuracy?: { greatFraction?: number; justFraction?: number } };
   metric?: { kind: string; eventId?: number; consumption?: number; resourceType?: number; resourceId?: number; secondaryPriority?: string; levels?: RewardTermInput[][] };
@@ -17,19 +17,20 @@ export interface RecommendationRequest {
   limits?: { timeLimitMs: number | null };
 }
 export const HANEOKA_COMMIT = "c91e6459a5ed43d55dc2b75e6a9d4f55b3edc62a";
-export const HANEOKA_PATCH_SHA = "b1d13bcdb58401296511ce7225b2e577c42de086bdf33a0448a56fbed7e67f28";
+export const HANEOKA_PATCH_SHA = "f20fc2b5f7526e535bcb35e4b64ac5efb95ffc17048ded2ad474251661cd55f6";
 export const CAPABILITIES = {
-  goals: ["power", "freeLive", "challengeLive", "battleLive", "missionLive", "skip"],
-  metrics: { freeLive: ["score", "eventPoints", "eventItems", "challengePoints"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score", "eventPoints", "eventItems", "challengePoints"], missionLive: ["score", "eventPoints", "eventItems", "challengePoints"], skip: ["score", "eventPoints", "eventItems", "challengePoints"] },
+  goals: ["power", "freeLive", "challengeLive", "battleLive", "missionLive", "arenaLive", "skip"],
+  metrics: { freeLive: ["score", "eventPoints", "eventItems", "challengePoints"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score", "eventPoints", "eventItems", "challengePoints"], missionLive: ["score", "eventPoints", "eventItems", "challengePoints"], arenaLive: ["score", "eventPoints", "eventItems", "challengePoints"], skip: ["score", "eventPoints", "eventItems", "challengePoints"] },
   aggregations: {
-    expected: { freeLive: ["score", "eventPoints", "eventItems", "challengePoints"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score", "eventPoints", "eventItems", "challengePoints"], missionLive: ["score", "eventPoints", "eventItems", "challengePoints"], skip: ["score", "eventPoints", "eventItems", "challengePoints"] },
-    maximum: { freeLive: ["score", "eventPoints", "eventItems", "challengePoints"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score"], missionLive: ["score"], skip: ["score", "eventPoints", "eventItems", "challengePoints", "combined"] },
+    expected: { freeLive: ["score", "eventPoints", "eventItems", "challengePoints"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score", "eventPoints", "eventItems", "challengePoints"], missionLive: ["score", "eventPoints", "eventItems", "challengePoints"], arenaLive: ["score", "eventPoints", "eventItems", "challengePoints"], skip: ["score", "eventPoints", "eventItems", "challengePoints"] },
+    maximum: { freeLive: ["score", "eventPoints", "eventItems", "challengePoints"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score", "eventPoints", "eventItems", "challengePoints"], missionLive: ["score", "eventPoints", "eventItems", "challengePoints"], arenaLive: ["score", "eventPoints", "eventItems", "challengePoints"], skip: ["score", "eventPoints", "eventItems", "challengePoints", "combined"] },
   },
-  combinedMetric: { goals: ["freeLive", "challengeLive", "skip"], kind: "combined", objective: "lexicographicWeightedExpectedSums", weights: "integer", maxLevels: 3, maxTerms: 9, maxWeight: 1_000_000_000 },
+  combinedMetric: { goals: ["freeLive", "challengeLive", "battleLive", "missionLive", "arenaLive", "skip"], kind: "combined", objective: "lexicographicWeightedExpectedSums", weights: "integer", maxLevels: 3, maxTerms: 9, maxWeight: 1_000_000_000 },
   eventItemRewards: { selection: "exactResultGrade", eventGroupField: "eventGroup", rowsPerGrade: 1, probabilityMarker: 10000 },
+  crossSong: true, resume: true,
   accuracy: { great: true, just: true }, patternPlay: true, luckMissions: true, luckGreatConversions: true,
 };
-export function adaptRequest(data: DeckData, request: RecommendationRequest) {
+function adaptSingleRequest(data: DeckData, request: RecommendationRequest) {
   if (request.format !== "ournotes-deck.recommendation-request/2" || !CAPABILITIES.goals.includes(request.goal?.kind)
     || ![undefined, "score", "eventPoints", "eventItems", "challengePoints", "combined"].includes(request.metric?.kind) || ![undefined, "expected", "maximum"].includes(request.aggregation))
     throw new Error("haneoka-unsupported-request");
@@ -38,12 +39,12 @@ export function adaptRequest(data: DeckData, request: RecommendationRequest) {
   const kind: string = request.goal.kind;
   const rewards = ["eventPoints", "eventItems", "challengePoints", "combined"].includes(request.metric?.kind ?? "");
   const skip = kind === "skip";
-  const gekiso = ["battleLive", "missionLive"].includes(kind);
-  if (rewards && (!["freeLive", "challengeLive", "skip", "battleLive", "missionLive"].includes(kind)
-    || gekiso && (request.aggregation === "maximum" || request.metric?.kind === "combined")
+  const gekiso = ["battleLive", "missionLive", "arenaLive"].includes(kind);
+  if (rewards && (!["freeLive", "challengeLive", "skip", "battleLive", "missionLive", "arenaLive"].includes(kind)
+    || gekiso && request.aggregation === "maximum" && request.metric?.kind === "combined"
     || request.aggregation === "maximum" && !skip && !["eventPoints", "eventItems", "challengePoints"].includes(request.metric!.kind)))
     throw new Error("haneoka-unsupported-reward-scene");
-  if (rewards && kind === "battleLive" && (!request.room || !Number.isInteger(request.room.players) || request.room.players < 1 || request.room.players > 5
+  if (rewards && ["battleLive", "arenaLive"].includes(kind) && (!request.room || !Number.isInteger(request.room.players) || request.room.players < 1 || request.room.players > 5
     || request.room.othersAverageScore !== null && (!Number.isInteger(request.room.othersAverageScore) || request.room.othersAverageScore < 0 || request.room.othersAverageScore > 2147483647)))
     throw new Error("haneoka-room");
   if (rewards && kind === "missionLive" && request.room !== undefined) throw new Error("haneoka-room");
@@ -54,12 +55,17 @@ export function adaptRequest(data: DeckData, request: RecommendationRequest) {
     throw new Error("haneoka-power-event");
   const difficulty = ["easy", "normal", "hard", "expert"].indexOf(request.goal.difficulty ?? "");
   let musicId: unknown = request.goal.musicId, challengeEventId: number | null = null;
+  const arena = kind === "arenaLive" ? table(data, "MasterArenaMusic").find(row => row.id === request.goal.arenaMusicId) : null;
+  if (kind === "arenaLive") {
+    if (!arena) throw new Error("haneoka-arena-song");
+    musicId = arena.liveMusicId;
+  }
   if (kind === "challengeLive" || skip && request.goal.challengeMusicId !== undefined) {
     const challenge = table(data, "MasterChallengeMusic").find(row => row.id === request.goal.challengeMusicId);
     if (!challenge) throw new Error("haneoka-challenge-song");
     musicId = challenge.liveMusicId; challengeEventId = integer(challenge.eventId, "eventId");
   }
-  const song = musicId == null ? null : { songId: integer(musicId, "musicId"), difficulty: Math.max(0, difficulty) };
+  const song = musicId == null ? null : { songId: arena ? -integer(arena.id, "arenaId") : integer(musicId, "musicId"), difficulty: Math.max(0, difficulty), ...(arena ? { baseSongId: integer(musicId, "musicId"), arenaMusicId: integer(arena.id, "arenaId") } : {}) };
   const charts: { song: unknown; source: unknown }[] = [];
   if (kind !== "power") {
     if (!song || difficulty < 0) throw new Error("haneoka-song");
@@ -97,6 +103,25 @@ export function adaptRequest(data: DeckData, request: RecommendationRequest) {
     },
     k: integer(request.k, "k"), timeLimitMs,
   };
+}
+
+export function adaptRequest(data: DeckData, request: RecommendationRequest) {
+  if (!request.goal || typeof request.goal !== "object") return adaptSingleRequest(data, request);
+  const fields = ["musicIds", "challengeMusicIds", "arenaMusicIds"] as const;
+  const supplied = fields.filter(field => request.goal[field] !== undefined);
+  if (!supplied.length) return adaptSingleRequest(data, request);
+  const field = supplied[0]!, ids = request.goal[field];
+  const wrongScope = field === "arenaMusicIds" ? request.goal.kind !== "arenaLive"
+    : field === "challengeMusicIds" ? !["challengeLive", "skip"].includes(request.goal.kind)
+    : ["challengeLive", "arenaLive"].includes(request.goal.kind) || request.goal.kind === "skip" && request.goal.challengeMusicId !== undefined;
+  if (supplied.length !== 1 || wrongScope || request.goal.kind === "power" || !Array.isArray(ids) || !ids.length
+    || ids.length > data.charts.length || new Set(ids).size !== ids.length || ids.some(id => !Number.isInteger(id) || id <= 0))
+    throw new Error("haneoka-cross-song");
+  const key = field === "musicIds" ? "musicId" : field === "challengeMusicIds" ? "challengeMusicId" : "arenaMusicId";
+  const singles = ids.map(id => adaptSingleRequest(data, { ...request, goal: { ...request.goal, [field]: undefined, [key]: id } }));
+  const first = singles[0]!;
+  const songs = singles.map(single => "songs" in single.goal ? single.goal.songs![0]! : single.goal.song!);
+  return { ...first, goal: { ...first.goal, songs }, charts: singles.flatMap(single => single.charts) };
 }
 
 function eventGoal(data: DeckData, request: RecommendationRequest, song: { songId: number; difficulty: number },

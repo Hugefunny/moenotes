@@ -1,3 +1,4 @@
+import { accountMemory } from "./memory";
 import type { RecommendationRequest } from "./request";
 import { integer, table, type DeckData, type Row } from "./data";
 export interface Issue { path: string; code: string; message: string }
@@ -40,7 +41,7 @@ export function adaptAccount(data: DeckData, account: AccountInput, request: Rec
   };
   const p = account.account._player;
   const power = request.goal.kind === "power" || request.goal.kind === "skip";
-  const gekiso = ["battleLive", "missionLive"].includes(request.goal.kind);
+  const gekiso = ["battleLive", "missionLive", "arenaLive"].includes(request.goal.kind);
   const excludeMembers = new Set((request.constraints?.excludeMembers ?? []).map(String));
   const excludeSnaps = new Set((request.constraints?.excludeSnaps ?? []).map(String));
   const memberMaster = new Map(rows("MasterMemberCard").map(row => [row.id, row]));
@@ -119,13 +120,11 @@ export function adaptAccount(data: DeckData, account: AccountInput, request: Rec
   if (account.coverage["_player._bandItems"] !== "complete") issue("_player._bandItems", "missing");
   const vipRank = known(account.declared?._vip?._rank, "declared._vip._rank");
   if (vipRank !== null && !rows("MasterVip").some(row => row.vipRank === vipRank)) issue("declared._vip._rank", "invalid_value");
-  // Memory is inactive in the verified JP/Intl snapshots. A future active table needs its own saved-state adapter.
-  if (["MasterMemoryMemberLevel", "MasterMemorySupportLevel", "MasterMemoryMusicBonus"].some(name => rows(name).length))
-    issue("_player._memory", "unsupported_memory");
+  const memory = accountMemory(data, account, missing, errors);
   if (members.length < 5) issue("_player._memberCards", "not_enough_members");
   return {
     members, snaps, player: { characterRanks, characterTotalRank: Object.values(characterRanks).reduce((a, b) => a + b, 0),
-      bandItems, vipRank, characterMemory: {}, musicMemory: {} },
+      bandItems, vipRank, characterMemory: {}, musicMemory: {}, memory },
     missing, errors,
     coversAllOwnedCards: account.coverage["_player._memberCards"] === "complete" && account.coverage["_player._supportCards"] === "complete",
   };

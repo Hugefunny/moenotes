@@ -23,6 +23,7 @@ export interface DeckRecommendJob {
   inputRevision: number;
   accountJson: string;
   requestJson: string;
+  seedJson?: string;
   progressIntervalMs: number;
   /** The Worker is ready and the run has been sent. */
   onReady?: (ready: DeckWorkerReadyInfo) => void;
@@ -109,7 +110,7 @@ export class DeckWorkerClient {
         }
         active.datasetId = ready.datasetId;
         const run: DeckWorkerRun = { type: "run", jobId: job.jobId, inputRevision: job.inputRevision, accountJson: job.accountJson,
-          requestJson: job.requestJson, progressIntervalMs: job.progressIntervalMs };
+          requestJson: job.requestJson, progressIntervalMs: job.progressIntervalMs, ...(job.seedJson === undefined ? {} : { seedJson: job.seedJson }) };
         try { slot.worker.postMessage(run); active.posted = true; }
         catch (error) { this.fail(slot, "protocol", describe(error)); return; }
         job.onReady?.({ datasetId: ready.datasetId, initMs: ready.initMs, capabilitiesJson: ready.capabilitiesJson, catalog: ready.catalog });

@@ -15,6 +15,7 @@ export interface DeckOrderStat { score: number; order: number[] }
 export interface DeckTeam {
   rank: number;
   rankCertified: boolean;
+  song?: { musicId: number; difficulty: string };
   leader: DeckPair;
   others: DeckPair[];
   power: number;
@@ -37,6 +38,7 @@ export interface DeckAnswer {
   errors: DeckIssue[];
   result: null | {
     phase: DeckPhase;
+    coverage?: { covered: number; total: number; proven: number };
     elapsedMs: number | null;
     optimality: DeckOptimality;
     teams: DeckTeam[];
@@ -97,6 +99,7 @@ function team(raw: unknown, index: number, inheritedRankProof: boolean, levels: 
   if (levels && !teamValue?.payoff) throw new Error("Missing reward plan payoff");
   return { rank: num(raw.rank) ?? index + 1, rankCertified: raw.rankCertified === undefined ? inheritedRankProof : raw.rankCertified === true, leader: pair(raw.leader), others: raw.others.map(pair), power: num(raw.power) ?? 0, value: teamValue, orders,
     ...(levels ? { levels: teamLevels(raw.levels, levels) } : {}),
+    ...(record(raw.song) && Number.isInteger(raw.song.musicId) && typeof raw.song.difficulty === "string" ? { song: { musicId: raw.song.musicId as number, difficulty: raw.song.difficulty } } : {}),
     bestOrder: record(raw.bestOrder) ? stat(raw.bestOrder) : null,
     layout: { members: layout.members.map(int), snaps: layout.snaps.map(item => item === null ? null : int(item)) } };
 }
@@ -123,6 +126,7 @@ export function parseDeckAnswer(json: string): DeckAnswer {
     result = {
       ...(levels ? { levels } : {}),
       phase, elapsedMs: num(r.elapsedMs),
+      ...(record(r.coverage) ? { coverage: { covered: int(r.coverage.covered), total: int(r.coverage.total), proven: int(r.coverage.proven) } } : {}),
       aggregation: r.aggregation === "maximum" ? "maximum" : "expected",
       goalKind: record(r.goal) && typeof r.goal.kind === "string" ? r.goal.kind : null,
       exitReason: typeof r.exitReason === "string" ? r.exitReason : null,

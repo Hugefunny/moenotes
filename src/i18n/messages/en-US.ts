@@ -580,6 +580,10 @@ export const enUS = {
     "othersAverage": "Other players' average score",
     "othersAverageSame": "Leave empty for the same as yours",
     "solver": {
+      "allSongs": "All songs",
+      "resumeSearch": "Continue search",
+      "songCoverage": "Songs: {n}/{total}",
+
       "haneokaAttribution": "Team-building algorithm from Haneoka",
       "eventItemsUnsupported": "This engine does not support event badges selected by exact result grade.",
       "eventItemRewardsUnsupported": "This scene’s event reward data is unsupported. Each grade must have exactly one reward row with probability marker 10000.",

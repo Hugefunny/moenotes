@@ -1,5 +1,7 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent } from "react";
 import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import { withMd3 } from "@/components/md3/Md3Provider";
 import type { AppLocale } from "@/config/locales";
 import type { GameServer } from "@/config/servers";
@@ -169,8 +171,16 @@ function DeckWorkspace(props: DeckWorkspaceProps) {
   const ownedSnaps = box?.cards.filter(card => card.kind === "snap") ?? [];
   // Keep the stored objective preference while using the selected scene's effective objective.
   const goal = goalInput.goal;
-  const effectiveInput: DeckGoalInput = { ...goalInput, aggregation: effectiveAggregation(goalInput) };
-  const gap = goalGap(effectiveInput, event);
+  const effectiveInput: DeckGoalInput = { ...goalInput, allSongs: !!goalInput.allSongs && solver.engine.status === "ready" && solver.engine.capabilities?.crossSong === true && goal !== "power", aggregation: effectiveAggregation(goalInput) };
+  const scopeCatalog = solver.engine.status === "ready" ? solver.engine.catalog : null;
+  const scopeKind = solverGoalKind(effectiveInput);
+  const eligibleSongs = scopeCatalog?.musics.filter(song => song.difficulties.includes(effectiveInput.difficulty)) ?? [];
+  const eligibleIds = new Set(eligibleSongs.map(song => song.id));
+  const songScope = effectiveInput.allSongs ? scopeKind === "arenaLive"
+    ? { field: "arenaMusicIds" as const, ids: scopeCatalog?.arenaMusics.filter(song => eligibleIds.has(song.musicId)).map(song => song.id) ?? [] }
+    : isChallengeInput(effectiveInput) ? { field: "challengeMusicIds" as const, ids: scopeCatalog?.challengeMusics.filter(song => song.eventId === event?.id && eligibleIds.has(song.musicId)).map(song => song.id) ?? [] }
+    : { field: "musicIds" as const, ids: eligibleSongs.map(song => song.id) } : undefined;
+  const gap = songScope && !songScope.ids.length ? "song" : goalGap(effectiveInput, event);
   const dataGap = solver.engine.status === "ready" ? deckDataGap(effectiveInput, event, solver.engine.catalog,
     props.deckArenas?.find(value => value.server === server)?.songs, capabilities) : null;
   const supported = capabilities ? computes(capabilities, effectiveInput) : !usesEventItemRewards(effectiveInput) && !rewardLayoutOf(effectiveInput) && effectiveInput.aggregation === "expected";
@@ -223,9 +233,9 @@ function DeckWorkspace(props: DeckWorkspaceProps) {
       setRateBasis(rate === null ? null : { song: songs.find(item => item.id === event?.challengeMusics.find(row => row.id === effectiveInput.challengeMusicId)?.musicId)?.title ?? String(effectiveInput.challengeMusicId),
         difficulty: effectiveInput.rateDifficulty, cost });
       solver.run(runKey, accountJson, { rate, request: answer => {
-        if (!answer) return recommendationRequest(effectiveInput, context);
+        if (!answer) return recommendationRequest(effectiveInput, context, { ...(songScope ? { songScope } : {}) });
         const worth = challengeWorth(answer, cost);
-        return worth ? recommendationRequest(effectiveInput, context, { worth }) : null;
+        return worth ? recommendationRequest(effectiveInput, context, { worth, ...(songScope ? { songScope } : {}) }) : null;
       } });
       requestAnimationFrame(() => teamPanel.current?.closest<HTMLElement>(".dc-team")?.scrollIntoView({ block: "start", behavior: "smooth" }));
     } catch (error) { setRunError(error instanceof Error ? error.message : String(error)); }
@@ -485,16 +495,17 @@ function DeckWorkspace(props: DeckWorkspaceProps) {
           <HaneokaExport locale={locale} box={box} disabled={busy || !box?.cards.length || linked && linkedSave.state.status !== "ready"} />
         </>}
         conditions={<>
+          {capabilities?.crossSong && goal !== "power" && <FormControlLabel control={<Checkbox checked={!!effectiveInput.allSongs} onChange={(_, checked) => updateGoal({ allSongs: checked })} />} label={tr("solver.allSongs")} />}
           {isEventPayoffGoal(goal) ? <label className="dc-field">{tr("venue")}<select aria-label={tr("venue")} value={goalInput.venue} onChange={change => updateGoal({ venue: change.target.value as DeckVenue })}>
             {goalVenues(goal).map(value => <option key={value} value={value} disabled={!!capabilities && !computes(capabilities, { goal, venue: value })}>{tr(`venues.${value}`)}</option>)}</select></label> : null}
-          {solverGoalKind(effectiveInput) === "arenaLive" ? <label className="dc-field">{tr("arenaSong")}<select value={goalInput.arenaMusicId ?? ""} onChange={change => updateGoal({ arenaMusicId: change.target.value ? Number(change.target.value) : null })}><option value="">{tr(arenas.length ? "chooseArena" : "noArena")}</option>{arenas.map(row => <option key={row.id} value={row.id}>{songs.find(song => song.id === row.musicId)?.title ?? row.musicId}</option>)}</select></label> : isChallengeInput(effectiveInput) ? <div className="dc-challenge-songs" role="group" aria-label={tr("challengeSong")}>
+          {solverGoalKind(effectiveInput) === "arenaLive" ? <label className="dc-field">{tr("arenaSong")}<select disabled={!!effectiveInput.allSongs} value={goalInput.arenaMusicId ?? ""} onChange={change => updateGoal({ arenaMusicId: change.target.value ? Number(change.target.value) : null })}><option value="">{tr(arenas.length ? "chooseArena" : "noArena")}</option>{arenas.map(row => <option key={row.id} value={row.id}>{songs.find(song => song.id === row.musicId)?.title ?? row.musicId}</option>)}</select></label> : isChallengeInput(effectiveInput) ? <div className="dc-challenge-songs" role="group" aria-label={tr("challengeSong")}>
             {(event?.challengeMusics ?? []).map(row => {
               const music = songs.find(item => item.id === row.musicId);
-              return <button type="button" key={row.id} className="dc-song-button md3-state" aria-pressed={goalInput.challengeMusicId === row.id} onClick={() => updateGoal({ challengeMusicId: row.id })}>
+              return <button type="button" key={row.id} className="dc-song-button md3-state" disabled={!!effectiveInput.allSongs} aria-pressed={goalInput.challengeMusicId === row.id} onClick={() => updateGoal({ challengeMusicId: row.id })}>
                 {music ? <img className="dc-song-cover" src={music.jacketUrl} alt="" /> : <span className="dc-song-cover" aria-hidden="true" />}
                 <span className="dc-song-summary"><strong>{music?.title ?? row.musicId}</strong></span></button>;
             })}</div>
-            : (goal !== "power" || goalInput.powerSong) && <button type="button" className="dc-song-button md3-state" onClick={() => setSongPicker(true)} aria-haspopup="dialog">
+            : (goal !== "power" || goalInput.powerSong) && <button type="button" className="dc-song-button md3-state" disabled={!!effectiveInput.allSongs} onClick={() => setSongPicker(true)} aria-haspopup="dialog">
               {selectedSong ? <img className="dc-song-cover" src={selectedSong.jacketUrl} alt="" /> : <svg className="dc-song-cover" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M12 23V9l15-3v14M12 9l15-3M12 23c0 2-2 4-4 4s-4-1-4-3 2-4 4-4 4 1 4 3Zm15-3c0 2-2 4-4 4s-4-1-4-3 2-4 4-4 4 1 4 3Z" /></svg>}
               <span className="dc-song-summary"><small>{tr("song")}</small><strong>{selectedSong?.title ?? composer("emptySong")}</strong></span>
               <svg className="dc-song-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
@@ -534,11 +545,12 @@ function DeckWorkspace(props: DeckWorkspaceProps) {
           {engineNotice()}
           {job.status === "running" ? <Button className="dc-run-button" variant="tonal" size="large" fullWidth onClick={solver.stop}>{tr("solver.stop")}</Button>
             : <Button className="dc-run-button" size="large" fullWidth disabled={busy || !ownedMembers.length || !canRun} onClick={runSolver}>{tr(job.status === "idle" ? "solver.start" : "solver.rerun")}</Button>}
+          {capabilities?.resume && job.status === "done" && job.answer.status === "ok" && job.answer.result && !job.answer.result.optimality.proven && !stale && <Button variant="text" fullWidth disabled={busy || !canRun} onClick={solver.resume}>{tr("solver.resumeSearch")}</Button>}
           {job.status !== "running" && (runBlocker || blocker) && <small className="dc-blocker">{runBlocker || blocker}</small>}
         </>}
         results={<div ref={teamPanel} className="dc-team-body">
           {job.status !== "idle" ? <DeckResult locale={locale} job={job} goal={goal} rateBasis={rateBasis} stale={stale} timeLimit={goalInput.timeLimit} box={box} catalog={catalog} linked={linked} busy={busy}
-            onStop={solver.stop} onRerun={runSolver} onEditCard={setEditingCardKey} onPlayer={() => setPlayerSettings(true)} onAnswerAll={(keys, name, value) => void answerAll(keys, name, value)} />
+            onStop={solver.stop} onRerun={runSolver} songNames={Object.fromEntries([...songs.map(song => [song.id, song.title] as const), ...arenas.map(arena => [-arena.id, songs.find(song => song.id === arena.musicId)?.title ?? String(arena.musicId)] as const)])} onEditCard={setEditingCardKey} onPlayer={() => setPlayerSettings(true)} onAnswerAll={(keys, name, value) => void answerAll(keys, name, value)} />
           : <div className="dc-empty-team"><div className="dc-empty-slots" aria-hidden="true">{Array.from({ length: 5 }, (_, index) => <span key={index} className={index === 2 ? "is-leader" : ""} />)}</div>
             <h3>{composer(ownedMembers.length ? "readyTitle" : "emptyTitle")}</h3><p>{composer(ownedMembers.length ? "readyDescription" : "emptyDescription")}</p></div>}
         </div>}

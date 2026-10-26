@@ -86,6 +86,18 @@ export function adaptData(data: DeckData, datasetId: string) {
     }),
     gekisou: { missionTypes: [row.gekisouMission1, row.gekisouMission2, row.gekisouMission3] },
   })));
+  const arenaIds = new Set<number>();
+  for (const arena of rows("MasterArenaMusic")) {
+    const id = integer(arena.id, "arenaId"), base = songs[String(arena.liveMusicId)];
+    if (id <= 0 || !base || arenaIds.has(id) || songs[String(-id)]) throw new Error("haneoka-arena-song");
+    arenaIds.add(id);
+    const missions = [arena.gekisouMission1, arena.gekisouMission2, arena.gekisouMission3].map((value, i) => {
+      const mission = integer(value, "arenaMission");
+      if (mission < 0 || mission > 4) throw new Error("haneoka-arena-mission");
+      return mission || (base.gekisou as { missionTypes: unknown[] }).missionTypes[i];
+    });
+    songs[String(-id)] = { ...base, id: -id, musicId: -id, gekisou: { missionTypes: missions } };
+  }
   const effects = rows("MasterEventEffect", ["eventId"]);
   const eventRows = Object.fromEntries(eventTables.map(name => [name, rows(name)]));
   const events = keyed(rows("MasterEvent").map(row => ({
@@ -96,6 +108,21 @@ export function adaptData(data: DeckData, datasetId: string) {
       return [name, eventRows[name]!.filter(reward => (name.includes("Reward") ? reward.eventGroup : reward.group) === group)];
     })),
   })));
+  const memoryFields: Record<string, string[]> = {
+    MasterMemoryMemberLevel: ["id", "point", "performance", "technic", "visual"],
+    MasterMemorySupportLevel: ["id", "point", "performance", "technic", "visual"],
+    MasterMemoryMusicBonus: ["id", "groupId", "scoreRank", "performance", "technic", "visual"],
+    MasterMemoryMusic: ["id", "groupId"], MasterMemoryMusicGroup: ["id", "skillTargetIds"],
+  };
+  for (const [name, fields] of Object.entries(memoryFields)) if (rows(name).length) {
+    const seen = new Set<number>();
+    for (const row of rows(name, fields)) {
+      const id = integer(row.id, name + ".id");
+      if (id <= 0 || seen.has(id)) throw new Error("haneoka-memory-id:" + name);
+      seen.add(id);
+      for (const field of fields.filter(field => field !== "skillTargetIds")) integer(row[field], name + "." + field);
+    }
+  }
   const itemEffects = rows("MasterBandItemSkillEffect", ["bandItemId", "level"]);
   return {
     schema: "haneoka-team-builder-data-v1", identity: { server: data.provenance.region === "jp" ? "jp" : "intl", releaseId: datasetId },

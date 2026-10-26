@@ -256,24 +256,22 @@ The existing page producer and Worker protocol carry these requests unchanged. T
 the largest settlement across 120 orders, then power, and returns the first canonical order achieving it.
 Progress and final output use one selected score/payoff with exact denominator 1, `orders: null`, and a
 `bestOrder` containing score, payoff and member order. Expected rewards keep their 120-order mean statistics.
-Played combined maximum and Free CP maximum remain outside the advertised capability. Skip keeps its
+Played combined maximum remains outside the advertised capability; Free CP maximum is supported as described below. Skip keeps its
 deterministic one-settlement path. The production provider remains unchanged.
 
 
 ### Battle and Mission event rewards
 
-The Haneoka development adapter accepts single expected PT, event items and CP for Battle/Mission.
-Battle carries the page's explicit `room` policy; Mission uses the solo result rule. Existing page-produced
+The Haneoka development adapter accepts single expected/maximum PT, event items and CP, plus expected combined rewards, for Battle/Mission/Arena.
+Battle/Arena carry the page's explicit `room` policy; Mission uses the solo result rule. Existing page-produced
 requests, account coverage, budgets and Worker lifecycle are retained. Non-LUCK payoff certificates cover
 all 120 skill orders. LUCK returns a four-root mean with an all-grade support interval, `exact: null`, no
-order statistics, incomplete proof and `exitReason: "sampled"`; the roots are recorded in `rewardSampling`.
+order statistics, incomplete proof and `exitReason: "sampled"`; maximum additionally names the order with the largest mean over roots; the roots are recorded in `rewardSampling`.
 This is the donor's finite-root route, not the published model's complete probability-law solver.
 
 The optional `combinedMetric.goals` capability lists scenes that support combined objectives. Omission
 preserves legacy providers' behavior; a malformed list disables only the combined capability. The page
-checks the main scene and an automatic challenge-rating scene against this scope. This prevents newly
-supported single metrics from enabling unported Battle/Mission combinations. Maximum event rewards for
-those two scenes remain unsupported. The production provider is unchanged.
+checks the main scene and an automatic challenge-rating scene against this scope. The Haneoka scope now includes all six supported live/Skip scenes. Played combined maximum remains unsupported. The production provider is unchanged.
 
 
 ### Free Live maximum CP
@@ -284,3 +282,25 @@ the first canonical order earning that maximum CP. Its played score and CP payof
 denominator 1; order summary statistics are null. Expected CP retains mean payoff and 120-order statistics.
 The final hash-bound bundled Worker is checked at the page's default five-team count. Expiry preserves
 the candidates and incomplete proof state. No Worker protocol fields or production provider are changed.
+
+
+### Cross-song scope and candidate continuation
+
+The optional capabilities `crossSong: true` and `resume: true` independently enable the corresponding page
+controls. Providers omitting them keep the existing single-song lifecycle. Protocol version remains
+`moenotes.deck-worker/1`; `run.seedJson?: string` is optional and is forwarded as the fifth argument to
+`recommend(accountJson, requestJson, progress, progressIntervalMs, seedJson)`. Existing JavaScript and
+wasm-bindgen providers ignore the extra argument.
+
+Haneoka cross-song goals carry one validated ID list (`musicIds`, `challengeMusicIds` or `arenaMusicIds`).
+The producer adds the scope without parsing and rounding existing Int64 clock tokens. Responses preserve
+`teams[].song: {musicId, difficulty}` and `result.coverage: {covered, total, proven}` through the answer parser.
+All supplied charts remain eligible even when time expires before complete coverage.
+
+Raw progress/final output includes `continuation.teams`, containing formations and song bindings. The page
+stores this raw text alongside the frozen account/request and CP rating, and supplies it when continuing
+the same inputs. Haneoka re-scores candidates; old values and proof flags cannot certify a new request.
+The Worker remains synchronous inside its dedicated thread; Stop terminates it and keeps the last page
+progress. A new Worker verifies the same data/runtime hashes before continuing. Rebuilding local runtime
+files during a visit requires reloading the preview descriptor; a stale descriptor correctly fails integrity.
+The production runtime provider and publication process remain unchanged.

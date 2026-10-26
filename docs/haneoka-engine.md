@@ -26,7 +26,7 @@ Generated WASM, bundled adapter, runtime descriptor, license and NOTICE live und
 `public/haneoka-team-engine/`. These outputs must be built together; the descriptor binds their sizes and hashes.
 
 This uses Moenotes' existing **development-only** engine override. The production provider and its
-model-commit checks are unchanged. This is an integration milestone, not a production migration.
+model-commit checks are unchanged. Activation is a separate release decision.
 
 ## Data and model identities
 
@@ -43,8 +43,8 @@ music duration. No chart approximation or independent scoring formula is introdu
 ## Current capability boundary
 
 - Power with optional parameter bonuses from one selected known event, with or without a normal song context.
-  Parameter bonuses do not select challenge-song typing. Free Live, Challenge Live, Battle Live and Mission Live
-  score searches; ordinary and Challenge Skip deterministic score searches (expected and maximum are identical).
+  Parameter bonuses do not select challenge-song typing. Free Live, Challenge Live, Battle Live, Mission Live
+  and Arena score searches; ordinary and Challenge Skip deterministic score searches (expected and maximum are identical).
 - Skip score uses the native deterministic formula as its objective and bound. Nonnegative finite score factors
   are required for the power bound to remain monotone; an unsupported factor produces a diagnostic request error.
   It reads growth/player bonuses without requiring unused live skills, and returns no random-order statistics.
@@ -53,15 +53,16 @@ music duration. No chart approximation or independent scoring formula is introdu
 - Free Live and Challenge Live single PT / event-item expected and maximum rewards; Free Live CP expected and maximum; ordinary Skip PT / CP /
   event items; Challenge Skip PT / event items. Ordinary consumption is 0 through 10; Challenge consumption is
   200/400/800/1600. Every positive cost must have exactly one matching source row.
-- Battle Live and Mission Live single PT / event-item / CP expected rewards use native Gekiso replay.
-  Battle requires explicit `room.players` (1 through 5) and `othersAverageScore` (null for the local score,
+- Battle Live, Mission Live and Arena single PT / event-item / CP expected and maximum rewards use native Gekiso replay.
+  Battle and Arena require explicit `room.players` (1 through 5) and `othersAverageScore` (null for the local score,
   or a nonnegative Int32 peer average). Checked Int32 room totals use the source multiplayer thresholds;
-  Mission uses ordinary solo result thresholds and rejects room/rank inputs. Both use ordinary boost costs.
+  Mission uses ordinary solo result thresholds and rejects room/rank inputs. All three use ordinary boost costs.
   Non-LUCK rewards settle all 120 skill orders before averaging and use payoff/power ordering.
   LUCK charts settle four fixed roots (0 through 3), each over 120 skill orders. Their payoff point is a
   finite-root mean, with no exact whole-law payoff certificate. The payoff interval spans the minimum and
   maximum settlement over all eligible result grades at that team's bonus; it is a conservative support
-  range, not a confidence interval. LUCK outputs keep proof false, omit order statistics/bestOrder, and
+  range, not a confidence interval. LUCK outputs keep proof false and omit order statistics. Expected outputs
+  omit bestOrder; maximum identifies the order with the highest mean over roots. They
   expose `rewardSampling` plus `exitReason: "sampled"`. Sampling follows the song, independently of venue.
   Completed candidates survive expiry; interrupted counters stay unknown. A request-local 256-entry exact
   cache avoids repeated completed replays. The existing fixed-context scorer handles eligible LUCK plays;
@@ -71,7 +72,7 @@ music duration. No chart approximation or independent scoring formula is introdu
   may finish CP proof directly. Otherwise the same complete pool is searched with those candidates as seeds.
 - Combined expected rewards use up to three lexicographic levels, nine total PT / event-item / CP terms,
   and positive integer weights through 1,000,000,000. The Haneoka capability scopes combinations to Free,
-  Challenge and Skip through `combinedMetric.goals`; Battle/Mission combinations remain disabled.
+  Challenge, Battle, Mission, Arena and Skip through `combinedMetric.goals`.
   All terms refer to the same event. The existing page's
   manual conversion and automatic two-stage CP worth requests use this capability. Challenge routes cannot earn CP.
 - Each combined level keeps an `i128` weighted sum of integer settlements. Only one level is projected to a
@@ -86,6 +87,8 @@ music duration. No chart approximation or independent scoring formula is introdu
   Only a completed proof whose retained K formations share the same exact primary sum can fix that prefix.
   The full remaining-level search then visits the original pool and rejects candidates outside that certificate.
   An incomplete prefix stage supplies seeds only; its candidates never become an assumed global bound.
+  Battle/Mission/Arena combined searches use conservative unbounded search bounds and retain all Snapshot
+  options; a full-pool request can remain incomplete within its budget.
 - Combined top-K retains physical formations: leader, members and member-to-Snapshot assignments. It preserves
   Snapshot options and disables roster-level lower bounds that would otherwise discard distinct formations.
   Progress and final answers expose each level and term's exact sum/count. Played rewards average 120 skill orders;
@@ -102,7 +105,7 @@ music duration. No chart approximation or independent scoring formula is introdu
   settlement steps tighten reward upper bounds, and coupled score bounds reuse a fixed positive AM-GM scale
   and assignment prefixes. Ordered matching keeps the best available columns without reducing the legal pool.
   Single rewards retain distinct member rosters; combined rewards retain physical formations.
-- Played single PT/items maximum searches compare the largest settlement over all 120 skill orders, then power.
+- Played non-LUCK single PT/items maximum searches compare the largest settlement over all 120 skill orders, then power.
   Equal-payoff orders use the first canonical formation permutation: nonleaders sorted by card ID, leader in slot 2.
   `value.score` is that order's native score, with exact denominator 1; `value.payoff` also has denominator 1.
   `orders` is null, and `bestOrder` contains its score, payoff and member order in both progress and final output.
@@ -153,12 +156,38 @@ music duration. No chart approximation or independent scoring formula is introdu
 - Unknown or conflicting account inputs remain missing/invalid. Relevant fields are checked before
   the engine's min/max growth policy can fill them.
 - The verified JP and international snapshots have empty memory tables. Nonempty active memory
-  tables are explicitly unsupported until their saved-state mapping is implemented.
+  tables use explicit saved member/support unlock flags and music-group ranks. Only unlocked owned cards
+  count, including owned cards excluded from a formation. Per-stat member/support level bonuses and targeted
+  music bonuses are added before band/music power multipliers. Source row order chooses the last reached
+  level/reward. Missing or partial state remains missing; invalid IDs, flags, duplicates and group membership
+  remain invalid. Declared active-table tests match the published provider; no live active-table claim is made.
 
-Pending before production switching: Battle/Mission combined and maximum rewards, Arena scene
-mapping, memory activation, cross-song UI and stopped-search continuation, broader account/song
-performance and phone/browser acceptance. Existing production capabilities remain available
-through the original provider during this work.
+## Arena, cross-song search and continuation
+
+Arena IDs map to internal virtual songs. Their base song owns the chart and power typing. Nonzero Arena
+mission slots override the base missions; zero slots retain the base value. Responses map the song identity
+back to the base music ID. The frozen source catalogues currently contain no Arena rows; declared rows test
+fallback, overrides and base typing against frozen native replay.
+
+`crossSong: true` enables the page's all-songs checkbox. The scope includes every catalogue song at the selected
+difficulty, every challenge song of the selected event, or every available Arena song. Requests carry exactly
+one of `musicIds`, `challengeMusicIds` or `arenaMusicIds`; incompatible, duplicate, empty and unknown scopes
+are diagnosed. All charts remain in the request. Native scheduling divides remaining time across remaining
+songs; result teams carry song identity and the status reports covered/total songs and proven count.
+Mixed 120/480-observation combined results compare exact rational level values before power ties.
+
+`resume: true` enables continuing an incomplete result with unchanged inputs. The Worker accepts optional
+`seedJson`; the adapter takes only validated candidate formations and song bindings from `continuation.teams`.
+Native search re-evaluates candidates, ignoring old scores and proof flags. Previous winning songs run first;
+other songs remain in scope. This is candidate-based continuation, not a serialized branch-and-bound stack.
+The page keeps candidates visible, restarts the run timer and preserves the resolved goal and CP conversion
+when continuing. Changing inputs makes the old result stale; server changes and retries discard continuation.
+Stopping before new progress keeps the prior candidates. Continuation lasts for the current page visit.
+
+The current page's scene families are covered. Production activation remains a separate release action.
+Played combined maximum and older provider-only threshold/capped/score-and-LIFE objectives are not advertised.
+LUCK retains the native finite-root model and cooperative deadlines. Live-account and physical-phone
+acceptance remain separate from declared-fixture and responsive browser verification.
 
 ## Performance evidence
 

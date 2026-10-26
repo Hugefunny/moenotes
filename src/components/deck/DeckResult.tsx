@@ -22,6 +22,7 @@ export interface DeckRateBasis { song: string; difficulty: string; cost: number 
 
 export interface DeckResultProps {
   locale: AppLocale;
+  songNames?: Readonly<Record<number, string>>;
   job: Exclude<DeckJobState, { status: "idle" }>;
   goal: DeckGoal;
   /** Set for a run whose challenge points were rated by a challenge live. */
@@ -91,6 +92,7 @@ export default function DeckResult(props: DeckResultProps) {
       {!rating && optimality && !optimality.proven && optimality.upperBound !== null && optimality.lowerBound !== null && <p className="dr-bounds">
         {tr("bounds", { best: formatValue(optimality.lowerBound / unit, metric, locale), limit: formatValue(optimality.upperBound / unit, metric, locale) })}
         {optimality.lowerBound > 0 && <span> · {tr("gapPercent", { n: percent(Math.max(0, optimality.upperBound - optimality.lowerBound) / optimality.lowerBound) })}</span>}</p>}
+      {result?.coverage && <small>{tr("songCoverage", { n: result.coverage.covered, total: result.coverage.total })}</small>}
       {result && !result.coversAllOwnedCards && <p className="dr-note">{tr("partialBox")}</p>}
     </div>
     {rating ? <p className="dr-muted">{t(locale, "deckWorkspace.rewardMix.ratingNote")}</p> : <>
@@ -183,7 +185,7 @@ function TeamCard(props: DeckResultProps & { team: DeckTeam; best: DeckTeam; met
     <details open={props.first}>
       <summary className="dr-team-head">
         <span className="dr-rank">{team.rankCertified ? `#${team.rank}` : tr("candidateRank", { n: team.rank })}</span>
-        <span className="dr-value"><small>{value.terms && value.mixed ? t(locale, `deckWorkspace.rewardMix.${props.deterministic ? "totalDeterministic" : "total"}`, { unit: t(locale, `deckWorkspace.rewardMix.rewards.${value.terms[0]!.kind}`) }) : tr(value.label)}</small>
+        <span className="dr-value">{team.song && (props.job.status === "running" ? props.job.progress : props.job.status === "done" ? props.job.answer : null)?.result?.coverage && <small>{props.songNames?.[team.song.musicId] ?? team.song.musicId} · {team.song.difficulty.toUpperCase()}</small>}<small>{value.terms && value.mixed ? t(locale, `deckWorkspace.rewardMix.${props.deterministic ? "totalDeterministic" : "total"}`, { unit: t(locale, `deckWorkspace.rewardMix.rewards.${value.terms[0]!.kind}`) }) : tr(value.label)}</small>
           <strong>{valueText}</strong></span>
         {behind !== null && behind > 0 && <span className="dr-behind" title={tr("behindFirst", { n: formatValue(behind, value.shown, locale) })}>−{formatValue(behind, value.shown, locale)}</span>}
         {metric !== "power" && <span className="dr-power"><small>{tr("power")}</small><span>{formatValue(team.power, "power", locale)}</span></span>}

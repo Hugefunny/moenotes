@@ -64,6 +64,7 @@ export function heldEvent(events: readonly DeckEvent[], now: number, parse: (dat
 export interface DeckGoalInput {
   goal: DeckGoal;
   aggregation: DeckAggregation;
+  allSongs?: boolean;
   /** Event payoff goals: how the other rewards of the same live take part in the ranking. */
   rewards: RewardPlan;
   musicId: number | null;
@@ -151,6 +152,8 @@ export interface DeckSolverCapabilities {
   aggregations?: Partial<Record<DeckAggregation, Readonly<Record<string, readonly string[]>>>>;
   accuracy: { great: boolean; just: boolean };
   patternPlay?: boolean;
+  crossSong?: boolean;
+  resume?: boolean;
   eventItemRewards?: { selection: "exactResultGrade"; eventGroupField: "eventGroup"; rowsPerGrade: 1; probabilityMarker: 10000 };
   /** Combined metrics: levels compared in turn, each the expected weighted sum of several metrics with integer weights. */
   combinedMetric?: { maxLevels: number; maxTerms: number; maxWeight: number; goals?: readonly string[] };
@@ -192,7 +195,7 @@ export function parseCapabilities(json: string | null): DeckSolverCapabilities |
     ? { maxLevels: combined.maxLevels as number, maxTerms: combined.maxTerms as number, maxWeight: combined.maxWeight as number,
       ...(combined.goals === undefined ? {} : { goals: strings(combined.goals) }) } : undefined;
   return { goals: strings(raw.goals), metrics, aggregations, ...(eventItemRewards ? { eventItemRewards } : {}), ...(combinedMetric ? { combinedMetric } : {}),
-    luckMissions: raw.luckMissions === true, luckGreatConversions: raw.luckGreatConversions === true, patternPlay: raw.patternPlay === true || !!raw.patternPlay && typeof raw.patternPlay === "object", accuracy: { great: accuracy.great === true, just: accuracy.just === true } };
+    crossSong: raw.crossSong === true, resume: raw.resume === true, luckMissions: raw.luckMissions === true, luckGreatConversions: raw.luckGreatConversions === true, patternPlay: raw.patternPlay === true || !!raw.patternPlay && typeof raw.patternPlay === "object", accuracy: { great: accuracy.great === true, just: accuracy.just === true } };
 }
 
 /** Whether the engine computes a goal input's goal kind and metric. */
@@ -241,6 +244,7 @@ export function goalGap(input: DeckGoalInput, event: DeckEvent | null): DeckGoal
   if (layout?.auto && !event?.challengeMusics.some(row => row.id === input.challengeMusicId)) return "rateSong";
   const kind = solverGoalKind(input);
   if (readsAccuracy(input) && input.playMode === "pattern" && (!Number.isSafeInteger(input.missEvery) || input.missEvery < 0)) return "play";
+  if (input.allSongs && kind !== "power") return null;
   if (kind === "arenaLive") return input.arenaMusicId === null ? "arenaSong" : null;
   if (isChallengeInput(input)) return input.challengeMusicId !== null && event?.challengeMusics.some(row => row.id === input.challengeMusicId) ? null : "challengeSong";
   if (kind === "power") return input.powerSong && input.musicId === null ? "song" : null;
@@ -285,7 +289,7 @@ export function challengeRateRequest(input: DeckGoalInput, context: { event: Dec
  * takes its `worth` from the answer to `challengeRateRequest`.
  */
 export function recommendationRequest(input: DeckGoalInput, context: { event: DeckEvent | null; now: number; constraints: DeckRunConstraints },
-  options: { worth?: ChallengeWorth | null; teams?: number } = {}): string {
+  options: { worth?: ChallengeWorth | null; teams?: number; songScope?: { field: "musicIds" | "challengeMusicIds" | "arenaMusicIds"; ids: readonly number[] } } = {}): string {
   if (input.goal === "challengePoints" && ["challengeLive", "challengeSkip"].includes(input.venue)) throw new Error("Challenge Live spends challenge points; choose an ordinary venue to earn them");
   const gap = goalGap(input, context.event);
   if (gap) throw new Error(`The goal still needs: ${gap}`);
@@ -302,6 +306,10 @@ export function recommendationRequest(input: DeckGoalInput, context: { event: De
     case "challengeLive": goal = `{"kind":"challengeLive","challengeMusicId":${input.challengeMusicId},"difficulty":${JSON.stringify(input.difficulty)},${play}}`; break;
     case "skip": goal = isChallengeInput(input) ? `{"kind":"skip","challengeMusicId":${input.challengeMusicId},"difficulty":${JSON.stringify(input.difficulty)}}` : `{"kind":"skip",${song}}`; break;
     default: goal = `{"kind":"power"${input.powerSong ? `,"musicId":${input.musicId}` : ""},"eventParameter":${input.eventParameter && !!event}}`;
+  }
+  if (options.songScope) {
+    if (!options.songScope.ids.length) throw new Error("The song scope is empty");
+    goal = goal.replace("{", `{${JSON.stringify(options.songScope.field)}:${JSON.stringify(options.songScope.ids)},`);
   }
   const parts = [`"format":${JSON.stringify(REQUEST_FORMAT)}`, `"goal":${goal}`];
   if (effectiveAggregation(input) === "maximum") parts.push('"aggregation":"maximum"');

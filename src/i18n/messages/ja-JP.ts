@@ -569,6 +569,10 @@ export const jaJP = {
     "othersAverage": "ルームの他プレイヤーの平均スコア",
     "othersAverageSame": "空欄なら自分と同じスコア",
     "solver": {
+      "allSongs": "すべての楽曲",
+      "resumeSearch": "検索を続ける",
+      "songCoverage": "楽曲：{n}/{total}",
+
       "haneokaAttribution": "編成アルゴリズム提供：Haneoka",
       "eventItemsUnsupported": "このエンジンは、確定した結果ランクに基づくイベントバッジ計算に未対応です。",
       "eventItemRewardsUnsupported": "このモードのイベント報酬データには未対応です。各ランクの報酬行はちょうど1件で、確率マーカーが 10000 である必要があります。",

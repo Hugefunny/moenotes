@@ -321,7 +321,7 @@
              return self.plan(input, started, now);
          }
 -        let songs = if kind == "power" || kind == "potential" {
-+        let songs = if kind == "power" || kind == "potential" || kind == "skip-score" {
++        let songs = if kind == "power" || kind == "potential" || kind == "skip-score" && request["goal"]["songs"].is_null() {
              vec![request["goal"]["song"].clone()]
          } else {
              master::rows(&request["goal"]["songs"])
@@ -334,7 +334,15 @@
              return Err(format!("unsupported-goal:{kind}"));
          }
          let deadline = request["deadline"].as_f64().unwrap_or_else(|| {
-@@ -2500,13 +2607,15 @@
+@@ -2492,6 +2599,7 @@
+             crate::progress::chart(self.charts.get(&key), kind == "gekiso");
+             let mut single = request.clone();
+             single["goal"]["songs"] = json!([song]);
++            if kind=="skip-score" {single["goal"]["song"]=song.clone();}
+             let current = now();
+             let song_deadline = (current
+                 + (deadline - current).max(0.0) / (songs.len() - index) as f64)
+@@ -2500,13 +2608,15 @@
                  single["deadline"] = json!(song_deadline);
              }
              let mut response = match kind {
@@ -352,7 +360,7 @@
                      }
                  }
                  "gekiso" => self.search_gekiso(
-@@ -3765,6 +3874,15 @@
+@@ -3765,6 +3875,21 @@
  }
  
  fn compare_hits(a: &Value, b: &Value) -> std::cmp::Ordering {
@@ -363,12 +371,18 @@
 +            .then_with(||a["snaps"].to_string().cmp(&b["snaps"].to_string()));
 +    }
 +    if a["lexVector"].is_array() && b["lexVector"].is_array() {
-+        return crate::event::compare_reward_keys(&b["lexVector"],&a["lexVector"]);
++        let da=master::number(&a["event"]["orders"],1.0).max(1.0) as i128;
++        let db=master::number(&b["event"]["orders"],1.0).max(1.0) as i128;
++        for (a,b) in master::rows(&a["lexVector"]).iter().zip(master::rows(&b["lexVector"])) {
++            let a=a.as_str().unwrap().parse::<i128>().unwrap();let b=b.as_str().unwrap().parse::<i128>().unwrap();
++            let order=(b*da).cmp(&(a*db));if order!=std::cmp::Ordering::Equal {return order;}
++        }
++        return master::number(&b["power"],0.0).total_cmp(&master::number(&a["power"],0.0));
 +    }
      master::number(&b["key"], 0.0)
          .total_cmp(&master::number(&a["key"], 0.0))
          .then_with(|| {
-@@ -3786,6 +3904,8 @@
+@@ -3786,6 +3911,8 @@
  impl Engine {
      pub fn evaluate_all(&mut self, input: &Value) -> Result<Value, String> {
          let request = &input["request"];
@@ -377,7 +391,7 @@
          let mut out = Vec::new();
          for song in master::rows(&request["songs"]) {
              self.load_source(input, song)?;
-@@ -3963,3 +4083,72 @@
+@@ -3963,3 +4090,77 @@
          }
      }
  }
@@ -386,7 +400,7 @@
 +    fn search_moenotes_rewards(&self,request:&Value,started:f64,now:&dyn Fn()->f64)->Result<Value,String> {
 +        use crate::{event::{Route,RouteKind},full::play::Accuracy,rewards::MoenotesRewards,search};
 +        let goal=&request["goal"];let gk=&goal["gekiso"];
-+        if goal["criterion"]!="mean" || goal["route"]!="live" || !["battleLive","missionLive"].contains(&gk["scene"].as_str().unwrap_or("")) {return Err("moenotes-reward-scene".into());}
++        if !["mean","max"].contains(&goal["criterion"].as_str().unwrap_or("")) || goal["route"]!="live" || !["battleLive","missionLive","arenaLive"].contains(&gk["scene"].as_str().unwrap_or("")) {return Err("moenotes-reward-scene".into());}
 +        let cards=search_box(&self.master,request)?;crate::progress::keys(&cards.members,&cards.snaps);
 +        let player=power::player_state(&self.master,&request["player"]);
 +        let song=master::rows(&goal["songs"]).first().copied().ok_or("no Gekiso song")?;
@@ -402,14 +416,16 @@
 +        let deadline=request["deadline"].as_f64().unwrap_or_else(||request["timeLimitMs"].as_f64().map_or(f64::INFINITY,|ms|started+ms));
 +        #[cfg(target_arch="wasm32")]
 +        let _scope=crate::clock::deadline_scope(Some(deadline));
-+        let kind=match goal["measure"].as_str(){Some("points")=>0,Some("items")=>1,Some("challenge-points")=>2,_=>return Err("moenotes-reward-measure".into())};
-+        let battle=gk["scene"]=="battleLive";
-+        let mut objective=MoenotesRewards::new(&self.master,&cards.members,&cards.snaps,chart,compiled,route,kind,battle,&goal["room"],deadline,now)?;
++        let kind=match goal["measure"].as_str(){Some("points")=>0,Some("items")=>1,Some("challenge-points")=>2,Some("combined")=>3,_=>return Err("moenotes-reward-measure".into())};
++        let battle=gk["scene"]!="missionLive";
++        let mut objective=MoenotesRewards::new(&self.master,&cards.members,&cards.snaps,chart,compiled,route,kind,battle,&goal["room"],deadline,now)?.with_goal(goal)?;
 +        let sampled=objective.sampled;let ceiling=objective.ceiling();
 +        let k=master::int(&request["k"]).max(1) as usize;let generation=crate::cancellation_generation();
 +        let mut power_request=request.clone();power_request["goal"]=json!({"kind":"power","song":song});
 +        power_request["deadline"]=json!(deadline.min(now()+50.0));
-+        let power=crate::progress::with_callback(None,||self.search_power(&power_request,started,now))?;
++        let seeded=!seed_teams(request,song,&cards.members,&cards.snaps).is_empty();
++        let power=if seeded {json!({"overall":[],"results":[{"proven":false,"stats":null}]})}
++            else {crate::progress::with_callback(None,||self.search_power(&power_request,started,now))?};
 +        let power_proven=power["results"][0]["proven"]==true;
 +        let mut completed=Vec::new();let mut interrupted=false;
 +        for hit in master::rows(&power["overall"]) {
@@ -444,7 +460,10 @@
 +            let d=&hit.detail;let settlement=&d["settlement"];let mut value=hit_json(hit,song,&cards.members,&cards.snaps,Some(chart),battle);
 +            value["score"]["ranks"]=settlement["ranks"].clone();
 +            value["event"]=json!({"mean":settlement["mean"],"rewardSum":settlement["rewardSum"],"orders":settlement["observations"],"sampled":sampled,"lower":d["payoffLower"],"upper":d["payoffUpper"]});
-+            value["rewardPowerTie"]=json!(true);value
++            value["rewardPowerTie"]=json!(kind<3);
++            if !d["selectedOrder"].is_null(){value["event"]["selectedOrder"]=d["selectedOrder"].clone();}
++            if kind==3 {value["levels"]=d["levels"].clone();value["lexVector"]=d["lexVector"].clone();}
++            value
 +        }).collect();
 +        let proven=output.proven && !sampled;
 +        Ok(json!({"overall":hits,"results":[{"song":song,"hits":hits,"proven":proven,"sampled":sampled,"bound":if sampled{Some(ceiling)}else{output.bound},"powerPreparation":{"proven":power_proven,"witnesses":power_witnesses,"cpCertificate":cp_certificate,"stats":power["results"][0]["stats"]},"stats":if interrupted{Value::Null}else{json!(output.stats)}}],"elapsedMs":now()-started}))
@@ -1913,11 +1932,37 @@
 --- a/src/master.rs
 +++ b/src/master.rs
 @@ -1,3 +1,4 @@
-+//! Modified for Moenotes result-grade enum parsing on 2026-10-26.
++//! Modified for Moenotes result-grade parsing and active memories on 2026-10-27.
  //! Release-bound, typed tables compiled from the public team-builder document.
  use crate::num::f;
  use serde_json::{Map, Value};
-@@ -874,16 +875,14 @@
+@@ -372,6 +373,7 @@
+ }
+ #[derive(Clone)]
+ struct MasterData {
++    pub memory: Value,
+     pub server: String,
+     pub release_id: String,
+     pub params: Params,
+@@ -411,6 +413,8 @@
+ }
+ #[derive(Clone)]
+ pub struct Master {
++    pub memory_active: bool,
++    pub memory: Arc<Value>,
+     pub server: String,
+     pub release_id: String,
+     pub params: Arc<Params>,
+@@ -452,6 +456,8 @@
+ impl From<MasterData> for Master {
+     fn from(data: MasterData) -> Self {
+         Self {
++            memory_active: data.memory["active"]==true,
++            memory: Arc::new(data.memory),
+             server: data.server,
+             release_id: data.release_id,
+             params: Arc::new(data.params),
+@@ -874,16 +880,14 @@
          .find(|r| r["id"] == "live_skip_result_score_rank")
          .map(|r| text(&r["value"]))
          .unwrap_or_else(|| "C".into());
@@ -1942,6 +1987,14 @@
      };
      let challenge = if !data["crossServer"]["challengeMusics"].is_null() {
          &data["crossServer"]["challengeMusics"]
+@@ -891,6 +895,7 @@
+         &data["challengeMusicTable"]["rows"]
+     };
+     Ok(Master::from(MasterData {
++        memory: serde_json::json!({"active":(["memoryMemberLevels","memorySupportLevels","memoryMusicBonuses"].iter().any(|key|!rows(&runtime[*key]["rows"]).is_empty())),"memberLevels":runtime["memoryMemberLevels"]["rows"],"supportLevels":runtime["memorySupportLevels"]["rows"],"groups":runtime["memoryMusicGroups"]["rows"],"bonuses":runtime["memoryMusicBonuses"]["rows"]}),
+         server: text(&identity["server"]),
+         release_id: text(&identity["releaseId"]),
+         params: Params {
 --- a/src/progress.rs
 +++ b/src/progress.rs
 @@ -1,3 +1,5 @@
@@ -1950,17 +2003,18 @@
  //! Synchronous compute-thread notifications; the host forwards them to its UI.
  use crate::{
      chart::Chart,
-@@ -126,6 +128,9 @@
+@@ -126,6 +128,10 @@
          let cp = master::number(&d["cpSum"], 0.0) / count;
          value["event"] = json!({"mean":master::number(&d["mean"],0.0)/denominator,"bonusPercent":master::number(&detail["bonus"],0.0)/100.0,"challengePoints":cp,"perPlayMin":d["directMin"],"perPlayMax":d["directMax"],"rewardSum":d["rewardSum"],"comparisonSum":d["comparisonSum"],"orders":d["observations"],"directMean":master::number(&d["rewardSum"],0.0)/count,"otherMean":d["otherMean"],"convertedMean":cp*numerator/denominator});
          value["gekiso"] = json!({"just":detail["just"],"luckSamples":detail["luckSamples"],"sampled":detail["sampled"],"rank":1});
 +        if !detail["payoffLower"].is_null() {
 +            value["event"]["lower"]=detail["payoffLower"].clone();value["event"]["upper"]=detail["payoffUpper"].clone();value["event"]["sampled"]=detail["sampled"].clone();
++            if !detail["selectedOrder"].is_null() {value["event"]["selectedOrder"]=detail["selectedOrder"].clone();}
 +        }
      } else if !detail["bonus"].is_null() {
          let cp = master::number(&detail["challengePoints"], 0.0);
          let mean = master::number(&detail["mean"], 0.0) / denominator;
-@@ -141,14 +146,19 @@
+@@ -141,14 +147,19 @@
              .reduce(f64::max)
              .unwrap_or(mean);
          value["event"] = json!({"mean":if plan{master::number(&detail["directMean"],mean)}else{mean},"bonusPercent":master::number(&detail["bonus"],0.0)/100.0,"challengePoints":cp,"perPlayMin":master::number(&detail["directMin"],low),"perPlayMax":master::number(&detail["directMax"],high),"directMean":detail["directMean"],"otherMean":detail["otherMean"]});
@@ -1984,7 +2038,7 @@
      }
 --- a/src/rewards.rs
 +++ b/src/rewards.rs
-@@ -10968,3 +10968,154 @@
+@@ -10968,3 +10968,205 @@
              .collect(),
      )
  }
@@ -2004,6 +2058,10 @@
 +    member_bonus: Vec<f64>,
 +    snap_bonus: Vec<f64>,
 +    max_bonus: f64,
++    other_member:Vec<f64>,
++    other_snap:Vec<f64>,
++    levels:Vec<Vec<crate::event::RewardTerm>>,
++    maximum:bool,
 +    ceiling_rank: i32,
 +    monotone: bool,
 +    pub sampled: bool,
@@ -2020,30 +2078,46 @@
 +        let others = if battle && !room["othersAverageScore"].is_null() {
 +            Some(room["othersAverageScore"].as_i64().filter(|v|(0..=i32::MAX as i64).contains(v)).ok_or("moenotes-room")? as i32)
 +        } else { None };
-+        if !(1..=5).contains(&players) || kind > 2 { return Err("moenotes-reward-scene".into()); }
-+        let member_bonus = members.iter().map(|m| if kind==2 {0.0} else {crate::power::member_event_percent(&route.effects,m,kind as i32) as f64}).collect::<Vec<_>>();
-+        let snap_bonus = snaps.iter().map(|s| if kind==2 {0.0} else {crate::power::snap_event_percent(&route.effects,s,kind as i32) as f64}).collect::<Vec<_>>();
++        if !(1..=5).contains(&players) || kind > 3 { return Err("moenotes-reward-scene".into()); }
++        let member_bonus = members.iter().map(|m| if kind==2 {0.0} else {crate::power::member_event_percent(&route.effects,m,if kind==3 {0}else{kind as i32}) as f64}).collect::<Vec<_>>();
++        let snap_bonus = snaps.iter().map(|s| if kind==2 {0.0} else {crate::power::snap_event_percent(&route.effects,s,if kind==3 {0}else{kind as i32}) as f64}).collect::<Vec<_>>();
 +        let mut top = snap_bonus.clone();top.sort_by(|a,b|b.total_cmp(a));
 +        let max_bonus = crate::event::top_character_bonus(members,&member_bonus)+top.iter().take(5).map(|v|v.max(0.0)).sum::<f64>();
 +        let mut ranks=chart.ranks.clone();ranks.sort_by_key(|r|r.required);
 +        let mut out=Self{master,members,snaps,sampled:gk.luck,chart:gk,route,ranks,kind,battle,players,others,
-+            member_bonus,snap_bonus,max_bonus,ceiling_rank:2,monotone:true,deadline,now,exact_cache:HashMap::default()};
++            member_bonus,snap_bonus,max_bonus,other_member:Vec::new(),other_snap:Vec::new(),levels:Vec::new(),maximum:false,ceiling_rank:2,monotone:true,deadline,now,exact_cache:HashMap::default()};
 +        let eligible=out.ranks.iter().map(|r|r.rank).collect::<BTreeSet<_>>();
 +        if eligible.is_empty(){return Err("moenotes-reward-ranks".into());}
 +        let mut high=f64::NEG_INFINITY;
-+        for &rank in &eligible {
++        for &rank in eligible.iter().filter(|_|kind<3) {
 +            let value=out.reward(0.0,rank)?;
 +            if value>high {high=value;out.ceiling_rank=rank;}
 +        }
 +        let bonus=max_bonus+10000.0;
 +        let rate=crate::num::i32(if kind==1 {out.route.reward_rate} else {out.route.rate}) as i128;
-+        out.monotone=kind==2 || out.member_bonus.iter().chain(&out.snap_bonus).all(|&v|v>=0.0)
++        out.monotone=kind<3 && (kind==2 || out.member_bonus.iter().chain(&out.snap_bonus).all(|&v|v>=0.0)
 +            && bonus<=i32::MAX as f64 && rate>=0 && eligible.iter().all(|&rank| {
 +                let base=if kind==0 {*out.route.points.get(&rank).unwrap() as i128}
 +                    else {out.route.rewards.iter().filter(|r|r.score_rank==rank && r.resource_id==out.route.item_id).map(|r|r.count as i128).sum()};
 +                base>=0 && base*rate*bonus as i128<=i32::MAX as i128
-+            });
++            }));
 +        Ok(out)
++    }
++    pub fn with_goal(mut self, goal:&serde_json::Value)->Result<Self,String> {
++        self.maximum=goal["criterion"]=="max";
++        if self.kind==3 {
++            self.levels=serde_json::from_value(goal["levels"].clone()).map_err(|_|"moenotes-combined-levels")?;
++            if self.maximum || self.levels.is_empty() || self.levels.len()>3 || self.levels.iter().flatten().any(|t|t.kind>2 || t.weight<1 || t.weight>1_000_000_000) {return Err("moenotes-combined-levels".into());}
++            self.other_member=self.members.iter().map(|m|crate::power::member_event_percent(&self.route.effects,m,1) as f64).collect();
++            self.other_snap=self.snaps.iter().map(|s|crate::power::snap_event_percent(&self.route.effects,s,1) as f64).collect();
++        }else {self.other_member=vec![0.0;self.members.len()];self.other_snap=vec![0.0;self.snaps.len()];}
++        Ok(self)
++    }
++    fn value_at(&self, kind:usize, bonus:f64, rank:i32)->Result<f64,String> {
++        match kind {0 if self.route.points.contains_key(&rank)=>Ok(self.route.points(bonus,rank)),
++            1 if self.route.rewards.iter().any(|r|r.score_rank==rank && r.resource_id==self.route.item_id)=>Ok(self.route.items(bonus,rank)),
++            2=>self.route.challenge_points.get(&rank).map(|&v|crate::num::imul(v,crate::num::i32(self.route.rate)) as f64).ok_or_else(||"moenotes-reward-rank".into()),
++            _=>Err("moenotes-reward-rank".into())}
 +    }
 +    fn reward(&self, bonus:f64, rank:i32)->Result<f64,String> {
 +        match self.kind {
@@ -2075,7 +2149,9 @@
 +}
 +impl Objective for MoenotesRewards<'_> {
 +    fn generic_assignment_product(&self)->bool {false}
-+    fn power_ties(&self)->bool {true}
++    fn power_ties(&self)->bool {self.kind<3}
++    fn physical_teams(&self)->bool {self.kind==3}
++    fn compare_ties(&self,a:&crate::search::Hit,b:&crate::search::Hit)->std::cmp::Ordering {if self.kind==3 {crate::event::compare_reward_keys(&a.detail["lexVector"],&b.detail["lexVector"]).then(a.power.total_cmp(&b.power))} else {a.power.total_cmp(&b.power)}}
 +    fn score_ties(&self)->bool {true}
 +    fn tie_rank(&self,hit:&crate::search::Hit)->[f64;2] {[hit.power,0.0]}
 +    fn canonical_leader(&self)->bool {true}
@@ -2111,32 +2187,61 @@
 +        let positions:[usize;5]=std::array::from_fn(|slot|canonical.iter().position(|&s|s==slot).unwrap());
 +        let mapping:[usize;120]=std::array::from_fn(|i|{let order=live::orders()[i].map(|s|positions[s]);live::orders().iter().position(|o|*o==order).unwrap()});
 +        let bonus=team.members.iter().map(|&m|self.member_bonus[m]).sum::<f64>()+team.snaps.iter().filter(|&&s|s>=0).map(|&s|self.snap_bonus[s as usize]).sum::<f64>();
-+        let runs=if self.sampled {4}else{1};let count=runs*120;
-+        let mut scores=vec![0.0;120];let(mut sum,mut low,mut high)=(0.0,f64::INFINITY,f64::NEG_INFINITY);let mut ranks=BTreeMap::<i32,usize>::new();
++        let other=team.members.iter().map(|&m|self.other_member[m]).sum::<f64>()+team.snaps.iter().filter(|&&s|s>=0).map(|&s|self.other_snap[s as usize]).sum::<f64>();
++        let runs=if self.sampled {4}else{1};
++        let mut scores=vec![0.0;120];let mut values=vec![[0i128;3];120];let mut ranks=BTreeMap::<i32,usize>::new();
 +        for seed in 0..runs {
 +            if (self.now)()>=self.deadline {return Err("search-deadline".into());}
 +            let replay=if self.chart.luck && !gekiso::uses_full_replay(self.master,&self.chart,&[seed]) {
 +                let context=gekiso::context_fixed(self.master,&self.chart,&deck,&[seed])?;
 +                gekiso::score_orders(self.master,&self.chart,&context,power as i32,&slots,true)?
 +            } else {
-+            #[cfg(target_arch="wasm32")]
-+            let replay=gekiso::replay_orders_until(self.master,&self.chart,&deck,&[seed],power as i32,self.deadline,self.now)?;
-+            #[cfg(not(target_arch="wasm32"))]
-+            let replay=gekiso::replay_orders(self.master,&self.chart,&deck,&[seed],power as i32)?;
++                #[cfg(target_arch="wasm32")]
++                let replay=gekiso::replay_orders_until(self.master,&self.chart,&deck,&[seed],power as i32,self.deadline,self.now)?;
++                #[cfg(not(target_arch="wasm32"))]
++                let replay=gekiso::replay_orders(self.master,&self.chart,&deck,&[seed],power as i32)?;
 +                replay.scores
 +            };
 +            for i in 0..120 {
 +                let score=replay.scores[mapping[i]];scores[i]+=score/runs as f64;
-+                let rank=self.rank(score)?;let reward=self.reward(bonus,rank)?;sum+=reward;low=low.min(reward);high=high.max(reward);*ranks.entry(rank).or_default()+=1;
++                let rank=self.rank(score)?;*ranks.entry(rank).or_default()+=1;
++                if self.kind==3 {for kind in 0..3 {if self.levels.iter().flatten().any(|t|t.kind==kind) {
++                    values[i][kind]+=self.value_at(kind,if kind==1 {other}else{bonus},rank)? as i128;
++                }}} else {values[i][0]+=self.reward(bonus,rank)? as i128;}
 +            }
 +        }
-+        let mut possible_low=f64::INFINITY;let mut possible_high=f64::NEG_INFINITY;
-+        for row in &self.ranks {let value=self.reward(bonus,row.rank)?;possible_low=possible_low.min(value);possible_high=possible_high.max(value);}
-+        let exact=Exact{key:sum/count as f64,detail:json!({"scores":live::summarize(power as i32,scores),"bonus":bonus,"sampled":self.sampled,"luckSamples":runs,
-+            "payoffLower":possible_low,"payoffUpper":possible_high,"settlement":{"rewardSum":sum,"comparisonSum":sum,"observations":count,"mean":sum/count as f64,"directMin":low,"directMax":high,"otherMean":0,"cpSum":if self.kind==2 {sum}else{0.0},"ranks":ranks}})};
++        let sum_level=|terms:&[crate::event::RewardTerm],v:&[i128;3]|terms.iter().map(|t|v[t.kind]*t.weight).sum::<i128>();
++        let primary=|v:&[i128;3]|if self.kind==3 {sum_level(&self.levels[0],v)} else {v[0]};
++        let mut other_slots=[1,2,3,4];other_slots.sort_by_key(|&slot|self.members[team.members[slot]].card.id);
++        let layout=[other_slots[0],other_slots[1],0,other_slots[2],other_slots[3]];
++        let slot_positions:[usize;5]=std::array::from_fn(|slot|layout.iter().position(|&s|s==slot).unwrap());
++        let mut selected=0;
++        if self.maximum {for i in 1..120 {
++            let key=|index:usize|live::orders()[index].map(|s|slot_positions[s]);
++            if primary(&values[i])>primary(&values[selected]) || primary(&values[i])==primary(&values[selected]) && key(i)<key(selected) {selected=i;}
++        }}
++        let count=if self.maximum {runs}else{runs*120};
++        let sums: [i128;3]=if self.maximum {values[selected]}else{std::array::from_fn(|kind|values.iter().map(|v|v[kind]).sum())};
++        let bounds:Vec<_>=self.ranks.iter().map(|r|{
++            if self.kind==3 {
++                let mut v=[0i128;3];for kind in 0..3 {if self.levels.iter().flatten().any(|t|t.kind==kind) {v[kind]=self.value_at(kind,if kind==1 {other}else{bonus},r.rank)? as i128;}}Ok(v)
++            }else {Ok([self.reward(bonus,r.rank)? as i128,0,0])}
++        }).collect::<Result<_,String>>()?;
++        let range=|f:&dyn Fn(&[i128;3])->i128|{let low=bounds.iter().map(f).min().unwrap();let high=bounds.iter().map(f).max().unwrap();json!({"lower":if self.kind==3 {(low as f64).next_down()}else{low as f64},"upper":if self.kind==3 {(high as f64).next_up()}else{high as f64}})};
++        let support=range(&primary);let sum=primary(&sums);let mean=sum as f64/count as f64;
++        let mut detail=json!({"scores":live::summarize(power as i32,scores),"bonus":bonus,"sampled":self.sampled,"luckSamples":runs,
++            "payoffLower":support["lower"],"payoffUpper":support["upper"],"settlement":{"rewardSum":if self.kind==3 {json!(sum.to_string())}else{json!(sum as f64)},"comparisonSum":sum.to_string(),"observations":count,"mean":mean,"directMin":values.iter().map(|v|primary(v) as f64/runs as f64).reduce(f64::min),"directMax":values.iter().map(|v|primary(v) as f64/runs as f64).reduce(f64::max),"otherMean":0,"cpSum":if self.kind==2 {sum as f64}else{0.0},"ranks":ranks}});
++        if self.maximum {detail["selectedOrder"]=json!(selected);}
++        if self.kind==3 {
++            detail["lexVector"]=json!(self.levels.iter().map(|l|sum_level(l,&sums).to_string()).collect::<Vec<_>>());
++            detail["levels"]=json!(self.levels.iter().map(|l|{
++                let support=range(&|v|sum_level(l,v));
++                json!({"sum":sum_level(l,&sums).to_string(),"terms":l.iter().map(|t|sums[t.kind].to_string()).collect::<Vec<_>>(),"lower":support["lower"],"upper":support["upper"],"termBounds":l.iter().map(|t|range(&|v|v[t.kind])).collect::<Vec<_>>()})
++            }).collect::<Vec<_>>());
++        }
 +        if self.exact_cache.len()>=256 {self.exact_cache.clear();}
-+        self.exact_cache.insert(cache_key,(exact.key,exact.detail.clone()));
-+        Ok(exact)
++        self.exact_cache.insert(cache_key,(mean,detail.clone()));
++        Ok(Exact{key:mean,detail})
 +    }
 +}
 --- a/src/search.rs
@@ -2498,3 +2603,67 @@
      runner.generation = generation;
      runner.run()
  }
+--- a/src/power.rs
++++ b/src/power.rs
+@@ -1,3 +1,4 @@
++//! Modified for Moenotes active-memory power bonuses on 2026-10-27.
+ //! Card growth, slot bonuses, leader conditions and exact deck power.
+ use crate::{
+     master::*,
+@@ -8,6 +9,8 @@
+ #[derive(Clone, Deserialize)]
+ #[serde(rename_all = "camelCase")]
+ pub struct Player {
++    #[serde(default)]
++    pub memory: serde_json::Value,
+     #[serde(default)]
+     pub character_ranks: BTreeMap<i32, i32>,
+     #[serde(default)]
+@@ -691,7 +694,8 @@
+             .and_then(|m| player.music_memory.get(&m.memory_key).copied())
+             .unwrap_or(0);
+     let flat = (cr + total + memory) as i64 * 10000;
+-    let common = base.map(|v| v + flat);
++    let memory = if master.memory_active {memory_bonus(master,player,member)}else{[0;3]};
++    let common = std::array::from_fn(|i|base[i]+flat+memory[i]*10000);
+     let mut fixed = points(&common)
+         + points(&pct_floor(
+             &common,
+@@ -848,6 +852,7 @@
+ impl Default for Player {
+     fn default() -> Self {
+         Self {
++            memory: serde_json::Value::Null,
+             character_ranks: BTreeMap::new(),
+             total_rank: 0,
+             band_items: BTreeMap::new(),
+@@ -883,6 +888,7 @@
+         int(&input["characterTotalRank"])
+     };
+     Player {
++        memory: input["memory"].clone(),
+         character_ranks: ranks,
+         total_rank: total,
+         band_items: non_zero(&input["bandItems"]),
+@@ -922,3 +928,21 @@
+         memory_key: song_id,
+     })
+ }
++
++fn memory_bonus(master: &Master, player: &Player, member: &Member) -> Stat3 {
++    let mut bonus = [0i64;3];
++    let mut add = |row: &serde_json::Value| {
++        for (i,key) in ["performance","technic","visual"].iter().enumerate() { bonus[i] += int(&row[key]) as i64; }
++    };
++    for (key,owned) in [("memberLevels",&player.memory["members"]),("supportLevels",&player.memory["supports"])] {
++        let count = rows(owned).len() as i32;
++        if let Some(row) = rows(&master.memory[key]).into_iter().filter(|r|int(&r["point"])<=count).last() { add(row); }
++    }
++    for group in rows(&master.memory["groups"]) {
++        let Some(state) = rows(&player.memory["musicGroups"]).into_iter().find(|r|r["id"]==group["id"]) else {continue};
++        let ranks = rows(&state["ranks"]);
++        if ranks.is_empty() || !matches_targets(master, member, &ids(&group["skillTargetIds"])) {continue;}
++        if let Some(row) = rows(&master.memory["bonuses"]).into_iter().filter(|r|r["groupId"]==group["id"] && ranks.iter().all(|rank|int(rank)>=int(&r["scoreRank"]))).last() {add(row);}
++    }
++    bonus
++}
