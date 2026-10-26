@@ -85,7 +85,7 @@ function Sidebar({ locale, pathname, activePath }: SidebarProps) {
         style={{ left: "calc(max(0px, (100vw - var(--mn-layout-max-width, 120rem)) / 2) + 0.75rem)" }}
       >
         <div className="flex h-full flex-col">
-          <DrawerNav locale={locale} pathname={pathname} activePath={activePath} groups={groups} collapsed={collapsed} onToggle={toggleGroup} />
+          <DrawerNav locale={locale} pathname={pathname} activePath={activePath} groups={groups} collapsed={collapsed} onToggle={toggleGroup} animate={ready} />
           <SidebarAccount locale={locale} pathname={pathname} />
         </div>
       </aside>
@@ -106,14 +106,14 @@ function Sidebar({ locale, pathname, activePath }: SidebarProps) {
             <Icon name="close" />
           </IconButton>
         </div>
-        <DrawerNav locale={locale} pathname={pathname} activePath={activePath} groups={groups} collapsed={collapsed} onToggle={toggleGroup} onNavigate={closeMobile} />
+        <DrawerNav locale={locale} pathname={pathname} activePath={activePath} groups={groups} collapsed={collapsed} onToggle={toggleGroup} animate={ready} onNavigate={closeMobile} />
         <SidebarAccount locale={locale} pathname={pathname} />
       </Drawer>
     </>
   );
 }
 
-function DrawerNav({ locale, pathname, activePath, groups, collapsed, onToggle, onNavigate }: { locale: AppLocale; pathname: string; activePath?: string | undefined; groups: AppRoute[]; collapsed: NavGroupCollapsed; onToggle: (id: string) => void; onNavigate?: (() => void) | undefined }) {
+function DrawerNav({ locale, pathname, activePath, groups, collapsed, onToggle, animate, onNavigate }: { locale: AppLocale; pathname: string; activePath?: string | undefined; groups: AppRoute[]; collapsed: NavGroupCollapsed; onToggle: (id: string) => void; animate: boolean; onNavigate?: (() => void) | undefined }) {
   const scrollRef = useRef<HTMLElement>(null);
   const current = activePath || pathname;
 
@@ -150,6 +150,7 @@ function DrawerNav({ locale, pathname, activePath, groups, collapsed, onToggle, 
           current={current}
           collapsed={Boolean(collapsed[group.id])}
           onToggle={() => onToggle(group.id)}
+          animate={animate}
           onNavigate={onNavigate}
         />
       ))}
@@ -157,7 +158,7 @@ function DrawerNav({ locale, pathname, activePath, groups, collapsed, onToggle, 
   );
 }
 
-function NavGroup({ group, locale, current, collapsed, onToggle, onNavigate }: { group: AppRoute; locale: AppLocale; current: string; collapsed: boolean; onToggle: () => void; onNavigate?: (() => void) | undefined }) {
+function NavGroup({ group, locale, current, collapsed, onToggle, animate, onNavigate }: { group: AppRoute; locale: AppLocale; current: string; collapsed: boolean; onToggle: () => void; animate: boolean; onNavigate?: (() => void) | undefined }) {
   const children = getNavChildren(group);
   const headerActive = stripLocaleFromPathname(current) === normalizePathname(group.path);
   const listId = `nav-group-${group.id}`;
@@ -192,7 +193,10 @@ function NavGroup({ group, locale, current, collapsed, onToggle, onNavigate }: {
         )}
       </div>
       {children.length > 0 && (
-        <Collapse in={!collapsed} timeout="auto">
+        // The stored folds land in the first commit, before the drawer is revealed: a zero timeout keeps that first
+        // application instant instead of collapsing groups while the reader is already looking. `animate` turns on
+        // one frame later, so every user click still animates.
+        <Collapse in={!collapsed} timeout={animate ? "auto" : 0}>
           <div id={listId} className="pb-1">
             {children.map((item) => (
               <NavItem
