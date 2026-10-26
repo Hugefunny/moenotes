@@ -58,6 +58,8 @@ describe("material 3 shell", () => {
     for (const group of groups) {
       expect(html).toContain(`aria-controls="nav-group-${group.id}"`);
       expect(html).toContain(`id="nav-group-${group.id}"`);
+      // The pre-paint stylesheet points these chevrons down for the groups the reader folded.
+      expect(html).toContain(`data-nav-chevron="${group.id}"`);
     }
   });
 

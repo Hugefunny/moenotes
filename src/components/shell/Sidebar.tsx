@@ -13,7 +13,7 @@ import { t } from "@/i18n";
 import { localizePath, normalizePathname, stripLocaleFromPathname } from "@/i18n/routing";
 import { useOverlay } from "@/lib/overlay/use-overlay";
 import { getNavChildren, getNavigationGroupId, getNavigationGroups, isCurrentRoute } from "@/lib/route/registry";
-import { parseCollapsedGroups, resolveNavGroupEntry, toggleCollapsedGroup, type NavGroupCollapsed } from "@/lib/sidebar/nav-groups";
+import { NAV_GROUP_CHEVRON_ATTRIBUTE, NAV_GROUP_LIST_PREFIX, NAV_GROUPS_STYLE_ID, parseCollapsedGroups, resolveNavGroupEntry, toggleCollapsedGroup, type NavGroupCollapsed } from "@/lib/sidebar/nav-groups";
 import { useSidebarState } from "@/lib/sidebar/use-sidebar-state";
 import { safeGetLocalStorage, safeGetSessionStorage, safeRemoveSessionStorage, safeSetLocalStorage, safeSetSessionStorage } from "@/lib/storage/safe-storage";
 import type { AppRoute, RouteIcon } from "@/types/route";
@@ -57,10 +57,11 @@ function Sidebar({ locale, pathname, activePath }: SidebarProps) {
     setHydrated(true);
   }, [activeGroupId]);
 
-  // The head script hides the drawer while stored folds exist, so the server's expanded markup never flashes; reveal
-  // it only once the folds are on the DOM, then enable the open/close transitions.
+  // The head script has already hidden the stored folds in the server markup, so the first paint matches them. Once
+  // the folds are on the DOM (the Collapse below re-mounts from them), drop that stylesheet and enable the transitions.
   useEffect(() => {
     if (!hydrated) return;
+    document.getElementById(NAV_GROUPS_STYLE_ID)?.remove();
     document.documentElement.removeAttribute("data-nav-groups");
     const raf = requestAnimationFrame(() => setReady(true));
     return () => cancelAnimationFrame(raf);
@@ -85,7 +86,7 @@ function Sidebar({ locale, pathname, activePath }: SidebarProps) {
         style={{ left: "calc(max(0px, (100vw - var(--mn-layout-max-width, 120rem)) / 2) + 0.75rem)" }}
       >
         <div className="flex h-full flex-col">
-          <DrawerNav locale={locale} pathname={pathname} activePath={activePath} groups={groups} collapsed={collapsed} onToggle={toggleGroup} animate={ready} />
+          <DrawerNav locale={locale} pathname={pathname} activePath={activePath} groups={groups} collapsed={collapsed} onToggle={toggleGroup} animate={ready} initialized={hydrated} />
           <SidebarAccount locale={locale} pathname={pathname} />
         </div>
       </aside>
@@ -106,14 +107,14 @@ function Sidebar({ locale, pathname, activePath }: SidebarProps) {
             <Icon name="close" />
           </IconButton>
         </div>
-        <DrawerNav locale={locale} pathname={pathname} activePath={activePath} groups={groups} collapsed={collapsed} onToggle={toggleGroup} animate={ready} onNavigate={closeMobile} />
+        <DrawerNav locale={locale} pathname={pathname} activePath={activePath} groups={groups} collapsed={collapsed} onToggle={toggleGroup} animate={ready} initialized={hydrated} onNavigate={closeMobile} />
         <SidebarAccount locale={locale} pathname={pathname} />
       </Drawer>
     </>
   );
 }
 
-function DrawerNav({ locale, pathname, activePath, groups, collapsed, onToggle, animate, onNavigate }: { locale: AppLocale; pathname: string; activePath?: string | undefined; groups: AppRoute[]; collapsed: NavGroupCollapsed; onToggle: (id: string) => void; animate: boolean; onNavigate?: (() => void) | undefined }) {
+function DrawerNav({ locale, pathname, activePath, groups, collapsed, onToggle, animate, initialized, onNavigate }: { locale: AppLocale; pathname: string; activePath?: string | undefined; groups: AppRoute[]; collapsed: NavGroupCollapsed; onToggle: (id: string) => void; animate: boolean; initialized: boolean; onNavigate?: (() => void) | undefined }) {
   const scrollRef = useRef<HTMLElement>(null);
   const current = activePath || pathname;
 
@@ -138,7 +139,7 @@ function DrawerNav({ locale, pathname, activePath, groups, collapsed, onToggle, 
 
   const home = stripLocaleFromPathname(current) === "/";
   return (
-    <nav ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2" aria-label={t(locale, "shell.navigation")}>
+    <nav ref={scrollRef} data-sidebar-nav className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2" aria-label={t(locale, "shell.navigation")}>
       <NavItem href={localizePath("/", locale)} active={home} onNavigate={onNavigate} icon={<RouteGlyph icon="home" className="h-5 w-5" />}>
         {t(locale, "nav.home")}
       </NavItem>
@@ -151,6 +152,7 @@ function DrawerNav({ locale, pathname, activePath, groups, collapsed, onToggle, 
           collapsed={Boolean(collapsed[group.id])}
           onToggle={() => onToggle(group.id)}
           animate={animate}
+          initialized={initialized}
           onNavigate={onNavigate}
         />
       ))}
@@ -158,10 +160,10 @@ function DrawerNav({ locale, pathname, activePath, groups, collapsed, onToggle, 
   );
 }
 
-function NavGroup({ group, locale, current, collapsed, onToggle, animate, onNavigate }: { group: AppRoute; locale: AppLocale; current: string; collapsed: boolean; onToggle: () => void; animate: boolean; onNavigate?: (() => void) | undefined }) {
+function NavGroup({ group, locale, current, collapsed, onToggle, animate, initialized, onNavigate }: { group: AppRoute; locale: AppLocale; current: string; collapsed: boolean; onToggle: () => void; animate: boolean; initialized: boolean; onNavigate?: (() => void) | undefined }) {
   const children = getNavChildren(group);
   const headerActive = stripLocaleFromPathname(current) === normalizePathname(group.path);
-  const listId = `nav-group-${group.id}`;
+  const listId = `${NAV_GROUP_LIST_PREFIX}${group.id}`;
   // Paths nest (`/music` holds `/music/guess` and song details), so only the longest matching item is current.
   const activeItemId = children.filter((item) => isCurrentRoute(current, item.path))
     .sort((a, b) => b.path.length - a.path.length)[0]?.id;
@@ -187,16 +189,17 @@ function NavGroup({ group, locale, current, collapsed, onToggle, animate, onNavi
             aria-controls={listId}
             aria-label={t(locale, group.labelKey)}
             onClick={onToggle}
+            {...{ [NAV_GROUP_CHEVRON_ATTRIBUTE]: group.id }}
           >
             <Icon name="chevronDown" className={`h-5 w-5 transition-transform duration-200 ${collapsed ? "" : "rotate-180"}`} />
           </IconButton>
         )}
       </div>
       {children.length > 0 && (
-        // The stored folds land in the first commit, before the drawer is revealed: a zero timeout keeps that first
-        // application instant instead of collapsing groups while the reader is already looking. `animate` turns on
-        // one frame later, so every user click still animates.
-        <Collapse in={!collapsed} timeout={animate ? "auto" : 0}>
+        // The stored folds land in the first client commit; re-mounting the transition at that instant makes it start
+        // from `in` (already exited when folded) instead of animating the server's expanded markup while the drawer is
+        // being revealed. MUI updates a mounted transition's status from an effect, which raced the reveal and flashed.
+        <Collapse key={initialized ? "applied" : "server"} in={!collapsed} timeout={animate ? "auto" : 0}>
           <div id={listId} className="pb-1">
             {children.map((item) => (
               <NavItem

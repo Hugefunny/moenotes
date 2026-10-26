@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { storageKeys } from "../src/config/storage";
 import { accentCache, ACCENT_CACHE_VERSION } from "../src/lib/settings/accent";
-import { buildNavGroupBootstrapScript, buildThemeBootstrapScript } from "../src/lib/settings/apply-theme";
+import { buildNavGroupBootstrapScript, buildSidebarScrollBootstrapScript, buildThemeBootstrapScript } from "../src/lib/settings/apply-theme";
 import { contrastRatio, MD3_ROLES, roleToKebab } from "../src/lib/md3/roles";
 import { MD3_DEFAULT_SEED, md3Schemes } from "../src/lib/md3/scheme";
 import { buildMd3ColorsCss } from "../src/lib/md3/tokens-css";
@@ -93,36 +93,121 @@ describe("material 3 schemes from band colors", () => {
   });
 });
 
-describe("navigation drawer held back until stored folds are applied", () => {
-  function runBootstrap(stored: string | null) {
+describe("navigation group folds are applied before the first paint", () => {
+  interface FakeStyle {
+    id: string;
+    textContent: string;
+    parentNode: unknown;
+  }
+
+  function runBootstrap(stored: string | null, activeGroupId?: string, previousGroupId: string | null = null) {
     const dataset: Record<string, string> = {};
+    let style: FakeStyle | null = null;
     let timer: (() => void) | null = null;
-    runInNewContext(buildNavGroupBootstrapScript(), {
+    const head = {
+      appendChild(node: FakeStyle) {
+        node.parentNode = head;
+        style = node;
+      },
+      removeChild(node: FakeStyle) {
+        if (style === node) style = null;
+      },
+    };
+    const fakeDocument = {
+      documentElement: { dataset },
+      head,
+      createElement: (): FakeStyle => ({ id: "", textContent: "", parentNode: null }),
+      getElementById: (id: string) => (style && style.id === id ? style : null),
+    };
+    runInNewContext(buildNavGroupBootstrapScript(activeGroupId), {
       localStorage: { getItem: (key: string) => (key === storageKeys.navGroups ? stored : null) },
-      document: { documentElement: { dataset } },
+      sessionStorage: { getItem: (key: string) => (key === storageKeys.navActiveGroup ? previousGroupId : null) },
+      document: fakeDocument,
       setTimeout: (callback: () => void) => {
         timer = callback;
         return 1;
       },
     });
-    return { dataset, fireTimeout: () => timer?.() };
+    return { dataset, style: () => style, fireTimeout: () => timer?.() };
   }
 
-  test("a folded group hides the drawer, and the timeout reveals it if React never does", () => {
+  test("a folded group's body is hidden and its chevron points down before the first paint", () => {
     const drawer = runBootstrap(JSON.stringify({ database: true, musics: false }));
     expect(drawer.dataset.navGroups).toBe("pending");
+    expect(drawer.style()?.textContent).toContain("#nav-group-database{display:none!important}");
+    expect(drawer.style()?.textContent).toContain('[data-nav-chevron="database"] svg{rotate:0deg!important}');
+    expect(drawer.style()?.textContent).not.toContain("nav-group-musics");
+    // The fallback for a bundle that never hydrates shows the expanded markup again.
     drawer.fireTimeout();
+    expect(drawer.style()).toBeNull();
     expect(drawer.dataset.navGroups).toBeUndefined();
+  });
+
+  test("the group entered from outside stays open, so the first paint already matches the entry rule", () => {
+    const entering = runBootstrap(JSON.stringify({ database: true, tools: true }), "database", null);
+    expect(entering.style()?.textContent).not.toContain("nav-group-database");
+    expect(entering.style()?.textContent).toContain("nav-group-tools");
+
+    const sameGroup = runBootstrap(JSON.stringify({ database: true }), "database", "database");
+    expect(sameGroup.style()?.textContent).toContain("nav-group-database");
   });
 
   test("nothing folded leaves the server markup untouched", () => {
     for (const stored of [null, "", "not json", "[]", JSON.stringify({ database: false }), JSON.stringify({ tools: "true" })]) {
-      expect(runBootstrap(stored).dataset.navGroups).toBeUndefined();
+      const result = runBootstrap(stored, "database", null);
+      expect(result.style()).toBeNull();
+      expect(result.dataset.navGroups).toBeUndefined();
     }
+    // Entering the only folded group opens it, so there is nothing to hide.
+    const onlyEntering = runBootstrap(JSON.stringify({ database: true }), "database", null);
+    expect(onlyEntering.style()).toBeNull();
+    expect(onlyEntering.dataset.navGroups).toBeUndefined();
+  });
+
+  test("foreign ids and non-boolean values are ignored", () => {
+    const result = runBootstrap('{"bad id":true,"__proto__":true,"tools":"true"}');
+    expect(result.style()).toBeNull();
+    expect(result.dataset.navGroups).toBeUndefined();
+  });
+
+  test("the stored folds hide only their group bodies, never the drawer", () => {
+    const css = readFileSync(new URL("../src/styles/global.css", import.meta.url), "utf8");
+    expect(css).not.toContain('data-nav-groups="pending"] .mn-desktop-sidebar');
   });
 
   test("the script is valid JavaScript", () => {
     expect(() => new Function(buildNavGroupBootstrapScript())).not.toThrow();
     expect(buildNavGroupBootstrapScript()).toContain(JSON.stringify(storageKeys.navGroups));
+    expect(buildNavGroupBootstrapScript("database")).toContain('"database"');
+  });
+});
+
+describe("the drawer's scroll offset is restored before hydration", () => {
+  function runScrollBootstrap(saved: string | null, nav: { scrollTop: number } | null) {
+    runInNewContext(buildSidebarScrollBootstrapScript(), {
+      sessionStorage: { getItem: (key: string) => (key === storageKeys.sidebarScroll ? saved : null) },
+      document: { querySelector: () => nav },
+    });
+  }
+
+  test("a stored offset is applied to the drawer's list", () => {
+    const nav = { scrollTop: 0 };
+    runScrollBootstrap("300", nav);
+    expect(nav.scrollTop).toBe(300);
+  });
+
+  test("missing, unusable or non-positive offsets leave the list alone", () => {
+    for (const saved of [null, "", "not a number", "0", "-20"]) {
+      const nav = { scrollTop: 42 };
+      runScrollBootstrap(saved, nav);
+      expect(nav.scrollTop).toBe(42);
+    }
+    expect(() => runScrollBootstrap("300", null)).not.toThrow();
+  });
+
+  test("the script is valid JavaScript and targets the drawer's list", () => {
+    expect(() => new Function(buildSidebarScrollBootstrapScript())).not.toThrow();
+    expect(buildSidebarScrollBootstrapScript()).toContain(JSON.stringify(storageKeys.sidebarScroll));
+    expect(buildSidebarScrollBootstrapScript()).toContain("nav[data-sidebar-nav]");
   });
 });
