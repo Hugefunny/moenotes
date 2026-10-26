@@ -165,7 +165,8 @@ music duration. No chart approximation or independent scoring formula is introdu
 ## Arena, cross-song search and continuation
 
 Arena IDs map to internal virtual songs. Their base song owns the chart and power typing. Nonzero Arena
-mission slots override the base missions; zero slots retain the base value. Responses map the song identity
+mission slots override the base missions; zero slots retain the base value. LUCK preparation and deadline
+reservation use these effective missions for both single-song and all-song Arena requests. Responses map the song identity
 back to the base music ID. The frozen source catalogues currently contain no Arena rows; declared rows test
 fallback, overrides and base typing against frozen native replay.
 
@@ -178,6 +179,7 @@ Mixed 120/480-observation combined results compare exact rational level values b
 
 `resume: true` enables continuing an incomplete result with unchanged inputs. The Worker accepts optional
 `seedJson`; the adapter takes only validated candidate formations and song bindings from `continuation.teams`.
+The token retains at most K best candidates per song, dropping superseded progress candidates.
 Native search re-evaluates candidates, ignoring old scores and proof flags. Previous winning songs run first;
 other songs remain in scope. This is candidate-based continuation, not a serialized branch-and-bound stack.
 The page keeps candidates visible, restarts the run timer and preserves the resolved goal and CP conversion

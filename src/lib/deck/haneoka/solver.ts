@@ -104,11 +104,16 @@ export class DeckSolver {
       status: box.errors.length ? "invalid" : "incomplete", missing: box.missing, errors: box.errors, result: null,
     });
     let last = -Infinity;
-    const arena = request.goal.kind === "arenaLive" ? table(this.data, "MasterArenaMusic").find(row => row.id === request.goal.arenaMusicId) : null;
-    const ids = "songs" in converted.goal ? converted.goal.songs?.flatMap(song => song ? [song.songId] : []) : [];
-    const luck = (converted.goal.kind === "gekiso" || converted.goal.kind === "event" && "gekiso" in converted.goal) && table(this.data, "MasterLiveMusic").some(row =>
-      ids?.includes(Number(row.id)) && [row.gekisouMission1, row.gekisouMission2, row.gekisouMission3].includes(2))
-      || !!arena && [arena.gekisouMission1, arena.gekisouMission2, arena.gekisouMission3].includes(2);
+    const songs = "songs" in converted.goal ? converted.goal.songs ?? [] : [];
+    const gekiso = converted.goal.kind === "gekiso" || converted.goal.kind === "event" && "gekiso" in converted.goal;
+    const musics = new Map((gekiso ? table(this.data, "MasterLiveMusic") : []).map(row => [row.id, row]));
+    const arenas = new Map((request.goal.kind === "arenaLive" ? table(this.data, "MasterArenaMusic") : []).map(row => [row.id, row]));
+    const luck = gekiso && songs.some(song => {
+      if (!song) return false;
+      const arena = arenas.get("arenaMusicId" in song ? song.arenaMusicId : undefined);
+      const music = musics.get("baseSongId" in song ? song.baseSongId : song.songId);
+      return ["gekisouMission1", "gekisouMission2", "gekisouMission3"].some(field => (arena?.[field] || music?.[field]) === 2);
+    });
     const reserve = luck ? Math.min(40, converted.timeLimitMs ?? 0) : 0;
     const deadline = converted.timeLimitMs === null ? Infinity : performance.timeOrigin + started + converted.timeLimitMs - reserve;
     const warm: EngineHit[] = [];
@@ -124,6 +129,20 @@ export class DeckSolver {
       }
       return b.key - a.key || (retainRewards ? b.power - a.power : 0);
     };
+    const remember = (hits: EngineHit[]) => {
+      for (const hit of hits) {
+        const key = identity(hit), previous = candidates.get(key);
+        if (!previous || compare(hit, previous) < 0) candidates.set(key, hit);
+      }
+      const bySong = new Map<string, EngineHit[]>();
+      for (const hit of candidates.values()) {
+        const key = JSON.stringify(hit.song ?? null);
+        const group = bySong.get(key) ?? [];
+        group.push(hit); bySong.set(key, group);
+      }
+      candidates.clear();
+      for (const hits of bySong.values()) for (const hit of hits.sort(compare).slice(0, converted.k)) candidates.set(identity(hit), hit);
+    };
     const mergeWarm = (hits: EngineHit[]) => {
       if (!warm.length) return hits;
       const rosters = new Map<string, EngineHit>();
@@ -136,7 +155,8 @@ export class DeckSolver {
     engine!.onProgress = value => {
       const now = performance.now();
       const current = (value.hits ?? []) as EngineHit[];
-      for (const hit of current) { candidates.set(identity(hit), hit); if (hit.song) covered.add(JSON.stringify(hit.song)); }
+      remember(current);
+      for (const hit of current) if (hit.song) covered.add(JSON.stringify(hit.song));
       const hits = mergeWarm(current);
       if (retainRewards) warm.splice(0, warm.length, ...hits);
       if (!progress || now - last < intervalMs) return;
@@ -150,7 +170,7 @@ export class DeckSolver {
       if (seedJson) {
         let previous; try { previous = JSON.parse(seedJson); } catch { throw new Error("haneoka-continuation"); }
         const hits = previous?.continuation?.teams;
-        if (!Array.isArray(hits) || hits.length > this.data.charts.length * 10 || hits.some(hit =>
+        if (!Array.isArray(hits) || hits.length > Math.max(1, this.data.charts.length) * Math.max(10, converted.k) || hits.some(hit =>
           !hit || typeof hit !== "object" || !Array.isArray(hit.members) || hit.members.length !== 5 || !Array.isArray(hit.snaps) || hit.snaps.length !== 5
           || hit.members.some((key: unknown) => typeof key !== "string" || !/^m[1-9]\d*$/.test(key)) || hit.snaps.some((key: unknown) => key !== null && (typeof key !== "string" || !/^s[1-9]\d*$/.test(key))))) throw new Error("haneoka-continuation");
         prepared.seeds = hits.map(hit => ({ song: hit.song, members: hit.members, snaps: hit.snaps }));
@@ -194,7 +214,8 @@ export class DeckSolver {
           }
           warm.push({ ...team, power: preview.power, score: preview.score,
             key: converted.goal.criterion === "max" ? preview.score.max : preview.score.mean });
-          for (const hit of warm) { candidates.set(identity(hit), hit); if (hit.song) covered.add(JSON.stringify(hit.song)); }
+          remember(warm);
+          for (const hit of warm) if (hit.song) covered.add(JSON.stringify(hit.song));
           if (progress && warm.length && performance.now() - last >= intervalMs) {
             last = performance.now();
             progress(answer({ results: [], overall: mergeWarm([]), elapsedMs: performance.now() - started }, request, box.coversAllOwnedCards, false, covered.size, [...candidates.values()]));
@@ -205,7 +226,7 @@ export class DeckSolver {
       const response = engine!.invoke<EngineResponse>({ op: "run", handle: this.handle, charts: converted.charts,
         request: prepared }, true);
       response.overall = mergeWarm(response.overall);
-      for (const row of response.results) for (const hit of row.hits ?? []) candidates.set(identity(hit), hit);
+      for (const row of response.results) remember(row.hits ?? []);
       response.elapsedMs = performance.now() - started;
       return answer(response, request, box.coversAllOwnedCards, true, undefined, [...candidates.values()]);
     } catch (error) {

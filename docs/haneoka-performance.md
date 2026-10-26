@@ -697,3 +697,34 @@ published-provider comparisons. LUCK retains four fixed roots, conservative supp
 whole-law proof. Combined maximum for played lives and provider-only threshold/capped/score-and-LIFE
 objectives are not advertised. Candidate continuation lasts for the current page visit and re-evaluates
 formations rather than trusting saved scores/proofs. No PR, merge, deployment or production switch.
+
+
+## Pre-PR review, 2026-10-27
+
+The complete branch is reviewed against upstream main `afb1f3ac44ed4e40433075c1b45e0b9af37b29f8`;
+Git's merge-tree reports no conflicts. Two adapter boundaries are fixed before submitting the PR:
+Arena preparation now recognizes effective LUCK missions after base fallback or all-song selection, and
+continuation keeps at most K candidates per song rather than accumulating superseded progress candidates.
+A one-chart fixture now accepts its own continuation. Native search still visits the original card/Snapshot
+pool, re-evaluates all carried candidates and ignores caller proof flags. The native patch/WASM are unchanged.
+
+The full local migration batch passes371 cases/9035 assertions across14 files, including the three reproduced
+regressions. A final22-case boundary/Worker recheck passes after type narrowing. Existing repository tests
+pass896 cases with one existing Windows GNU-time skip. One initial unchanged Go packer test failed during
+Windows temporary-directory cleanup with EBUSY; its isolated23-case and full896-case reruns pass without
+changing tests. Final type check has669files, zero errors/warnings and nine existing hints. Lint and SEO pass.
+
+The final hash-bound Worker core passes44 calls, all with five candidates. A fresh isolated32-call alternating
+comparison against `254d0eb` uses identical JP/Intl full-pool inputs and the same native WASM. Fifteen of16
+paired primary values are equal; one cross-song Battle value improves. No tested primary value regresses.
+Free combined takes1629-1820ms before/1694-1812ms after, Mission1966-1978/1972-1997ms, and cross-song Battle
+1975-1985/1975-1985ms. Declared base-LUCK Arena takes2002-2125/1968-1988ms; first candidates move from55-64ms
+to115-129ms because the scored preparation path is now used. This is an absolute increase of about60ms,
+with the same final primary values and correct deadline reservation. In this all-song batch, per-instance
+WASM linear-memory high-water marks are102.1875MiB before and102.9375MiB after; these scopes differ from
+the earlier single-song32.3125MiB batch. Short-budget proof and coverage limits remain unchanged.
+
+Final JS SHA-256: `21f7f52e1e2d4991bdfddb0f2f44dbcb499562d0074f3e0235fbad3fefee5666` (58275 bytes).
+Local receipts: `pr-review-validation.json`, `pr-review-final-tests.log`, `pr-review-boundaries-final.log`,
+`pr-review-paired.json` and `pr-review-worker.json`. New tests/fixtures/binaries remain local and ignored.
+The production provider remains selected; this review does not merge or deploy the integration.

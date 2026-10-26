@@ -297,7 +297,8 @@ The producer adds the scope without parsing and rounding existing Int64 clock to
 `teams[].song: {musicId, difficulty}` and `result.coverage: {covered, total, proven}` through the answer parser.
 All supplied charts remain eligible even when time expires before complete coverage.
 
-Raw progress/final output includes `continuation.teams`, containing formations and song bindings. The page
+Raw progress/final output includes `continuation.teams`, containing up to K retained formations per song
+and their song bindings. Superseded progress candidates do not enlarge later tokens. The page
 stores this raw text alongside the frozen account/request and CP rating, and supplies it when continuing
 the same inputs. Haneoka re-scores candidates; old values and proof flags cannot certify a new request.
 The Worker remains synchronous inside its dedicated thread; Stop terminates it and keeps the last page
