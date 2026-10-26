@@ -17,13 +17,13 @@ export interface RecommendationRequest {
   limits?: { timeLimitMs: number | null };
 }
 export const HANEOKA_COMMIT = "c91e6459a5ed43d55dc2b75e6a9d4f55b3edc62a";
-export const HANEOKA_PATCH_SHA = "54776b2f36fd6c201e05358c231f1ba8ab75a585009372cac428a53d0fc6172a";
+export const HANEOKA_PATCH_SHA = "b1d13bcdb58401296511ce7225b2e577c42de086bdf33a0448a56fbed7e67f28";
 export const CAPABILITIES = {
   goals: ["power", "freeLive", "challengeLive", "battleLive", "missionLive", "skip"],
   metrics: { freeLive: ["score", "eventPoints", "eventItems", "challengePoints"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score", "eventPoints", "eventItems", "challengePoints"], missionLive: ["score", "eventPoints", "eventItems", "challengePoints"], skip: ["score", "eventPoints", "eventItems", "challengePoints"] },
   aggregations: {
     expected: { freeLive: ["score", "eventPoints", "eventItems", "challengePoints"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score", "eventPoints", "eventItems", "challengePoints"], missionLive: ["score", "eventPoints", "eventItems", "challengePoints"], skip: ["score", "eventPoints", "eventItems", "challengePoints"] },
-    maximum: { freeLive: ["score", "eventPoints", "eventItems"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score"], missionLive: ["score"], skip: ["score", "eventPoints", "eventItems", "challengePoints", "combined"] },
+    maximum: { freeLive: ["score", "eventPoints", "eventItems", "challengePoints"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score"], missionLive: ["score"], skip: ["score", "eventPoints", "eventItems", "challengePoints", "combined"] },
   },
   combinedMetric: { goals: ["freeLive", "challengeLive", "skip"], kind: "combined", objective: "lexicographicWeightedExpectedSums", weights: "integer", maxLevels: 3, maxTerms: 9, maxWeight: 1_000_000_000 },
   eventItemRewards: { selection: "exactResultGrade", eventGroupField: "eventGroup", rowsPerGrade: 1, probabilityMarker: 10000 },
@@ -41,7 +41,7 @@ export function adaptRequest(data: DeckData, request: RecommendationRequest) {
   const gekiso = ["battleLive", "missionLive"].includes(kind);
   if (rewards && (!["freeLive", "challengeLive", "skip", "battleLive", "missionLive"].includes(kind)
     || gekiso && (request.aggregation === "maximum" || request.metric?.kind === "combined")
-    || request.aggregation === "maximum" && !skip && !["eventPoints", "eventItems"].includes(request.metric!.kind)))
+    || request.aggregation === "maximum" && !skip && !["eventPoints", "eventItems", "challengePoints"].includes(request.metric!.kind)))
     throw new Error("haneoka-unsupported-reward-scene");
   if (rewards && kind === "battleLive" && (!request.room || !Number.isInteger(request.room.players) || request.room.players < 1 || request.room.players > 5
     || request.room.othersAverageScore !== null && (!Number.isInteger(request.room.othersAverageScore) || request.room.othersAverageScore < 0 || request.room.othersAverageScore > 2147483647)))

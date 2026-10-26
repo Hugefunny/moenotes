@@ -50,7 +50,7 @@ music duration. No chart approximation or independent scoring formula is introdu
   It reads growth/player bonuses without requiring unused live skills, and returns no random-order statistics.
   Challenge Skip score uses challenge-song typing; parameter bonuses apply only when that challenge event is
   selected in `eventIds`, matching the source model. Ordinary Skip score ignores event parameter context.
-- Free Live and Challenge Live single PT / event-item expected and maximum rewards; Free Live CP; ordinary Skip PT / CP /
+- Free Live and Challenge Live single PT / event-item expected and maximum rewards; Free Live CP expected and maximum; ordinary Skip PT / CP /
   event items; Challenge Skip PT / event items. Ordinary consumption is 0 through 10; Challenge consumption is
   200/400/800/1600. Every positive cost must have exactly one matching source row.
 - Battle Live and Mission Live single PT / event-item / CP expected rewards use native Gekiso replay.
@@ -109,10 +109,17 @@ music duration. No chart approximation or independent scoring formula is introdu
   Bounds use maximum order scores and whole-settlement steps; mean-only relaxations are excluded.
   Signed Int32 overflow, negative bonuses or decreasing grade rewards disable monotone bonus/grade bounds and
   numeric dominance while retaining all Snapshot options. The exact settlement still follows the source arithmetic.
+- Free Live maximum CP uses the native CP objective over all 120 skill orders, followed by power and the
+  canonical team key. The first canonical skill order among equal maximum payoffs supplies `bestOrder`.
+  Score and payoff refer to that same order, both exact denominators are 1, and `orders` is null.
+  The maximum score bound is used only when grade-to-CP settlements are nondecreasing. Declining grade
+  rewards retain all Snapshot options, disable unsafe score dominance and use a conservative payoff ceiling.
+  The existing page's CP/Free/maximum controls, request producer and Worker protocol need no new fields.
+  Expected CP keeps its existing mean objective and output.
 - Ordinary Skip PT/items/CP, Challenge Skip PT/items, and combined ordinary / Challenge Skip rewards accept
   `maximum`. One deterministic settlement is identical under expected and maximum aggregation, with exact
   denominator 1 and no skill-order statistics. Challenge routes spend CP and cannot include CP earnings terms.
-  Skip CP uses power to choose among its equal-payoff teams. Played combined maximum and Free CP maximum remain unsupported.
+  Skip CP uses power to choose among its equal-payoff teams. Played combined maximum remains unsupported.
   The answer parser accepts combined maximum only for Skip. The existing page still normalizes Skip aggregation
   to expected; this adds the request/Worker capability.
 - Rewards use the page's `rewardProjection: true` and played/Skip clock. Projection excludes saved balances;
@@ -148,7 +155,7 @@ music duration. No chart approximation or independent scoring formula is introdu
 - The verified JP and international snapshots have empty memory tables. Nonempty active memory
   tables are explicitly unsupported until their saved-state mapping is implemented.
 
-Pending before production switching: other event scenes, played maximum rewards, Arena scene
+Pending before production switching: Battle/Mission combined and maximum rewards, Arena scene
 mapping, memory activation, cross-song UI and stopped-search continuation, broader account/song
 performance and phone/browser acceptance. Existing production capabilities remain available
 through the original provider during this work.

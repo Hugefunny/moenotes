@@ -539,3 +539,75 @@ Closure checks for the final normal-release artifacts:
   These are real Worker protocol-core calls in Bun, not browser/phone scheduling or live-account acceptance.
 - `tenth-final-validation.json`, `tenth-final-rewards-tests.json`, `tenth-paired.json` and `tenth-entries.json`
   bind the evidence to the final artifacts. All added tests, generators and receipts remain ignored local files.
+
+
+## Eleventh milestone: Free Live maximum CP, 2026-10-26
+
+Free Live now supports single maximum CP through the existing page request and native CP objective.
+It selects one payoff-maximizing order rather than an average, preserves the declared play and complete
+card/Snapshot pool, then ranks equal payoffs by power. No proof-time target was tightened.
+
+Patch `b1d13bcdb58401296511ce7225b2e577c42de086bdf33a0448a56fbed7e67f28`; normal-release WASM `45a968acc5ce0e848b29e291918fb990f24a400cf184f9843d5d87bca9294d2c` (7175089 bytes);
+JS `909f2acfd561d43dec64412a6ab5299caf092155b3b5d5988f9bb5958c0b28e7`. The immutable source, patch and runtime byte/hash guards pass.
+
+The frozen complete JP/Intl pools and declared legal maximum-growth account fixtures are unchanged.
+The final 88 calls alternate old/current order and repeat twice per server without concurrent builds/tests.
+The new target compares with published `ournotes-deck` 0.0.12; ten existing targets compare with frozen
+`3fa1432`. Dataset, account and request hashes match within every pair; constructors are outside call timing.
+
+| Target | Baseline wall, ms | Current wall, ms | Baseline proven / 4 | Current proven / 4 |
+| --- | ---: | ---: | ---: | ---: |
+| free-cp-maximum | 2002-2003 | 995-1142 | 0 | 4 |
+| free-cp | 69-139 | 68-106 | 4 | 4 |
+| free-pt | 88-146 | 94-133 | 4 | 4 |
+| free-items | 1805-1876 | 1740-1884 | 4 | 4 |
+| free-combined | 2003-2013 | 1962-2015 | 0 | 1 |
+| challenge-combined | 38-43 | 39-42 | 4 | 4 |
+| skip-combined | 13-16 | 13-17 | 4 | 4 |
+| free-pt-maximum | 69-102 | 72-93 | 4 | 4 |
+| free-items-maximum | 2002-2004 | 2002-2005 | 0 | 0 |
+| battle | 2002-2003 | 2002-2004 | 0 | 0 |
+| mission | 1973-2055 | 1972-2054 | 0 | 0 |
+
+The initial old-target comparisons preserve best primary value in 39 of 40 pairs. One Intl Free maximum-item
+call retains 2184 rather than 2292 at two seconds; the other repeat retains 2292. One JP Free combined call
+finishes proof where its baseline times out, with the same primary value. Both cases and the lower result
+remain in the initial evidence. An isolated follow-up alternates four repeats per server for these two targets:
+15 of 16 follow-up pairs retain identical primary values. The same first Intl maximum-item call again retains
+2184, while subsequent three repeats and all JP calls retain 2292. This is a reproducible cold-entry difference
+at the two-second cutoff. A separate three-second control with 50 ms progress reporting gives both versions
+2292 with completed proof: baseline 2503/2654 ms, current 2660/2706 ms for Intl/JP. The page default is 30 seconds.
+The Free maximum-item and combined native code paths are unchanged by this increment. The cold-entry gap is
+kept as a measured limit under the relaxed acceptance target; no equal-candidate guarantee is made at two seconds.
+The four new
+comparisons return CP 50, versus published best-found CP 30 at the same two-second budget.
+This compares found candidates under their recorded models; the native proof is scoped to these input pools.
+The two-server bundled Worker checks use the real protocol core and final hashed JS/WASM, at the page default
+of five teams: maximum CP returns five candidates and CP 50 at about two seconds with incomplete proof;
+first candidates appear at about 60 ms. Three-team paired calls finish proof in about one second. Five-team
+expected CP remains proven. The five-team proof latency is retained as a measured limit, not a reason to
+restart optimization. These are Bun Worker-core measurements; browser/phone scheduling is not measured.
+
+Local targeted validation covers published fixed-roster parity in JP/Intl at costs 0/1/10, ordinary Great
+and MISS play, the actual page request producer, inactive windows, zero budgets and still-unsupported scenes.
+Six independent exhaustive checks cover 62 physical card/Snapshot assignments and all 120 orders each,
+including mixed grades, decreasing CP rewards and all-zero rewards. Frozen native score replay supplies
+the order scores; direct CP table/boost settlement supplies the per-order oracle and canonical order.
+
+The initial targeted run had 17 passes and 12 failures because the local fixtures sent an invalid play kind
+or a nonzero Just share for ordinary Free play. The fixtures now use the actual producer request shape;
+the corrected 31 cases pass. No production behavior was changed to accept malformed source requests.
+Final regression totals and receipts are recorded at closure. New tests, runtime snapshots and generators
+remain ignored local files. No PR, merge, deployment or production-provider switch is included.
+
+Closure validation for the same final normal-release artifacts:
+
+- 195 migration cases across six files pass with 7771 assertions, including the 31 new CP cases and previous
+  integration, combined, played-maximum, LUCK and Battle/Mission rewards coverage. No failures.
+- Existing repository suite: 896 passes, one existing Windows GNU-time skip and zero failures. Astro check:
+  668 files, zero errors, zero warnings and nine existing hints. Lint and SEO pass (44 routes, 22308 URLs).
+- Four final hash-verified Worker-core cases return five legal candidates, covering expected/maximum CP in
+  JP/Intl. The source and generated runtime guards pass; the base native checkout stays unchanged.
+- Evidence: `eleventh-final-tests.log`, `eleventh-final-cp.json`, `eleventh-paired.json`,
+  `eleventh-recheck.json`, `eleventh-cold-control.json`, `eleventh-entries.json`,
+  `eleventh-performance-summary.json` and `eleventh-final-validation.json`. Tests and receipts remain local.

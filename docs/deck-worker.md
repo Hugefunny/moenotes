@@ -274,3 +274,13 @@ preserves legacy providers' behavior; a malformed list disables only the combine
 checks the main scene and an automatic challenge-rating scene against this scope. This prevents newly
 supported single metrics from enabling unported Battle/Mission combinations. Maximum event rewards for
 those two scenes remain unsupported. The production provider is unchanged.
+
+
+### Free Live maximum CP
+
+The Haneoka adapter now advertises `challengePoints` under `aggregations.maximum.freeLive`.
+The existing page request selects maximum CP over all 120 skill orders, then power. `bestOrder` contains
+the first canonical order earning that maximum CP. Its played score and CP payoff both have exact
+denominator 1; order summary statistics are null. Expected CP retains mean payoff and 120-order statistics.
+The final hash-bound bundled Worker is checked at the page's default five-team count. Expiry preserves
+the candidates and incomplete proof state. No Worker protocol fields or production provider are changed.
