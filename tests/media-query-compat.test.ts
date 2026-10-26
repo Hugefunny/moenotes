@@ -120,8 +120,12 @@ describe("media-query compatibility before hydration", () => {
 
   test("every page installs the bridge inline before theme bootstrapping and island markup", () => {
     const layout = readFileSync("src/layouts/RootLayout.astro", "utf8");
-    const compat = layout.indexOf('<script is:inline set:html={mediaQueryCompatScript}>');
-    const theme = layout.indexOf('<script is:inline set:html={themeScript}>');
+    const tagIndex = (variable: string) => {
+      const match = new RegExp(`<script is:inline[^>]*set:html=\\{${variable}\\}>`).exec(layout);
+      return match?.index ?? -1;
+    };
+    const compat = tagIndex("mediaQueryCompatScript");
+    const theme = tagIndex("themeScript");
     const content = layout.indexOf("<slot />");
     expect(compat).toBeGreaterThan(layout.indexOf("<head>"));
     expect(compat).toBeLessThan(theme);

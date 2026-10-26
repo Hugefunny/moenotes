@@ -211,3 +211,22 @@ describe("the drawer's scroll offset is restored before hydration", () => {
     expect(buildSidebarScrollBootstrapScript()).toContain("nav[data-sidebar-nav]");
   });
 });
+
+describe("critical inline scripts opt out of Rocket Loader", () => {
+  // Rocket Loader rewrites and defers every inline script unless the tag opts out, which turns the pre-paint theme,
+  // fold and scroll setup into a visible flip after the server markup has already painted.
+  test("theme, navigation and drawer scroll scripts stay synchronous", () => {
+    const files: Array<[string, string[]]> = [
+      ["../src/layouts/RootLayout.astro", ["mediaQueryCompatScript", "themeScript", "navGroupScript"]],
+      ["../src/components/shell/AppShell.astro", ["sidebarScrollScript"]],
+    ];
+    for (const [path, variables] of files) {
+      const lines = readFileSync(new URL(path, import.meta.url), "utf8").split("\n");
+      for (const variable of variables) {
+        const tag = lines.find((line) => line.includes(`set:html={${variable}}`));
+        expect(tag).toBeDefined();
+        expect(tag).toContain('data-cfasync="false"');
+      }
+    }
+  });
+});

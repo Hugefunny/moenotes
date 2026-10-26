@@ -49,12 +49,17 @@ const googleAnalyticsBootstrapScript = isGoogleAnalyticsEnabled
     <style is:inline>@layer theme, base, mui, components, utilities;</style>
     <Md3ThemeVars />
     <meta name="color-scheme" content="light dark" />
+    <!--
+      These three scripts must run before the first paint. `data-cfasync="false"` keeps Cloudflare Rocket Loader from
+      rewriting and deferring them: without it the theme, the folded groups and the drawer's scroll offset are applied
+      hundreds of milliseconds after the server markup has already painted.
+    -->
     <!-- Install the legacy WebView listener bridge before shared stores or MUI islands can load. -->
-    <script is:inline set:html={mediaQueryCompatScript}></script>
+    <script is:inline data-cfasync="false" set:html={mediaQueryCompatScript}></script>
     <!-- Resolve the theme before any external stylesheet can block this script. -->
-    <script is:inline set:html={themeScript}></script>
+    <script is:inline data-cfasync="false" set:html={themeScript}></script>
     <!-- Hide the stored folds in the server markup before the first paint (the drawer itself stays visible). -->
-    <script is:inline set:html={navGroupScript}></script>
+    <script is:inline data-cfasync="false" set:html={navGroupScript}></script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{meta.fullTitle}</title>
     <meta name="description" content={meta.description} />
