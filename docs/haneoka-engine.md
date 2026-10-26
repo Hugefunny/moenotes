@@ -53,8 +53,26 @@ music duration. No chart approximation or independent scoring formula is introdu
 - Free Live and Challenge Live single PT / event-item expected and maximum rewards; Free Live CP; ordinary Skip PT / CP /
   event items; Challenge Skip PT / event items. Ordinary consumption is 0 through 10; Challenge consumption is
   200/400/800/1600. Every positive cost must have exactly one matching source row.
+- Battle Live and Mission Live single PT / event-item / CP expected rewards use native Gekiso replay.
+  Battle requires explicit `room.players` (1 through 5) and `othersAverageScore` (null for the local score,
+  or a nonnegative Int32 peer average). Checked Int32 room totals use the source multiplayer thresholds;
+  Mission uses ordinary solo result thresholds and rejects room/rank inputs. Both use ordinary boost costs.
+  Non-LUCK rewards settle all 120 skill orders before averaging and use payoff/power ordering.
+  LUCK charts settle four fixed roots (0 through 3), each over 120 skill orders. Their payoff point is a
+  finite-root mean, with no exact whole-law payoff certificate. The payoff interval spans the minimum and
+  maximum settlement over all eligible result grades at that team's bonus; it is a conservative support
+  range, not a confidence interval. LUCK outputs keep proof false, omit order statistics/bestOrder, and
+  expose `rewardSampling` plus `exitReason: "sampled"`. Sampling follows the song, independently of venue.
+  Completed candidates survive expiry; interrupted counters stay unknown. A request-local 256-entry exact
+  cache avoids repeated completed replays. The existing fixed-context scorer handles eligible LUCK plays;
+  MISS/damage plays use full native replay. Every root has independent gameplay state.
+  A native power preparation of up to 50 ms proposes legal teams without emitting unscored reward progress.
+  Only a completed internal top-K power proof whose non-LUCK CP witnesses all reach the global CP ceiling
+  may finish CP proof directly. Otherwise the same complete pool is searched with those candidates as seeds.
 - Combined expected rewards use up to three lexicographic levels, nine total PT / event-item / CP terms,
-  and positive integer weights through 1,000,000,000. All terms refer to the same event. The existing page's
+  and positive integer weights through 1,000,000,000. The Haneoka capability scopes combinations to Free,
+  Challenge and Skip through `combinedMetric.goals`; Battle/Mission combinations remain disabled.
+  All terms refer to the same event. The existing page's
   manual conversion and automatic two-stage CP worth requests use this capability. Challenge routes cannot earn CP.
 - Each combined level keeps an `i128` weighted sum of integer settlements. Only one level is projected to a
   monotone floating search key; exact vectors decide projected ties and final ordering. Lexicographic levels are

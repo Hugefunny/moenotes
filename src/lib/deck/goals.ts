@@ -153,7 +153,7 @@ export interface DeckSolverCapabilities {
   patternPlay?: boolean;
   eventItemRewards?: { selection: "exactResultGrade"; eventGroupField: "eventGroup"; rowsPerGrade: 1; probabilityMarker: 10000 };
   /** Combined metrics: levels compared in turn, each the expected weighted sum of several metrics with integer weights. */
-  combinedMetric?: { maxLevels: number; maxTerms: number; maxWeight: number };
+  combinedMetric?: { maxLevels: number; maxTerms: number; maxWeight: number; goals?: readonly string[] };
   /** Gekisou lives with LUCK missions are computed. */
   luckMissions?: boolean;
   /** Plays with Great judgements are computed in LUCK lives, where a held judgement conversion changes the draws. */
@@ -188,7 +188,9 @@ export function parseCapabilities(json: string | null): DeckSolverCapabilities |
   const combinedMetric: DeckSolverCapabilities["combinedMetric"] = combined && typeof combined === "object"
     && combined.kind === "combined" && combined.objective === "lexicographicWeightedExpectedSums" && combined.weights === "integer"
     && Number.isSafeInteger(combined.maxLevels) && Number.isSafeInteger(combined.maxTerms) && Number.isSafeInteger(combined.maxWeight)
-    ? { maxLevels: combined.maxLevels as number, maxTerms: combined.maxTerms as number, maxWeight: combined.maxWeight as number } : undefined;
+    && (combined.goals === undefined || Array.isArray(combined.goals) && combined.goals.every(kind => typeof kind === "string"))
+    ? { maxLevels: combined.maxLevels as number, maxTerms: combined.maxTerms as number, maxWeight: combined.maxWeight as number,
+      ...(combined.goals === undefined ? {} : { goals: strings(combined.goals) }) } : undefined;
   return { goals: strings(raw.goals), metrics, aggregations, ...(eventItemRewards ? { eventItemRewards } : {}), ...(combinedMetric ? { combinedMetric } : {}),
     luckMissions: raw.luckMissions === true, luckGreatConversions: raw.luckGreatConversions === true, patternPlay: raw.patternPlay === true || !!raw.patternPlay && typeof raw.patternPlay === "object", accuracy: { great: accuracy.great === true, just: accuracy.just === true } };
 }
@@ -198,12 +200,12 @@ export function computes(capabilities: DeckSolverCapabilities, input: Pick<DeckG
   const layout = rewardLayoutOf(input);
   if (layout) {
     const combined = capabilities.combinedMetric;
-    if (!combined || effectiveAggregation(input) !== "expected") return false;
+    if (!combined || effectiveAggregation(input) !== "expected" || combined.goals && !combined.goals.includes(solverGoalKind(input))) return false;
     const kinds = [layout.base, ...layout.converted, ...layout.ties];
     if (1 + layout.ties.length > combined.maxLevels || kinds.length > combined.maxTerms || combined.maxWeight < MAX_TERM_WEIGHT
       || kinds.some(kind => !(capabilities.metrics[solverGoalKind(input)] ?? []).includes(kind))) return false;
     // The challenge live that rates challenge points earns the other rewards of the plan.
-    if (layout.auto && (!capabilities.goals.includes("challengeLive")
+    if (layout.auto && (!capabilities.goals.includes("challengeLive") || combined.goals && !combined.goals.includes("challengeLive")
       || kinds.some(kind => kind !== "challengePoints" && !(capabilities.metrics.challengeLive ?? []).includes(kind)))) return false;
   }
   if (usesEventItemRewards(input)) {

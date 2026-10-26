@@ -8,6 +8,7 @@ export interface RecommendationRequest {
     accuracy?: { greatFraction?: number; justFraction?: number } };
   metric?: { kind: string; eventId?: number; consumption?: number; resourceType?: number; resourceId?: number; secondaryPriority?: string; levels?: RewardTermInput[][] };
   eventContext?: { rewardProjection?: boolean; resultClock?: { kind?: string; liveStartJstTicks?: number | null; serverNowJstTicks?: number | string } };
+  room?: { players: number; othersAverageScore: number | null };
   aggregation?: "expected" | "maximum";
   eventIds?: number[];
   constraints?: { leader?: number | null; includeMembers?: (number | string)[]; excludeMembers?: (number | string)[];
@@ -16,15 +17,15 @@ export interface RecommendationRequest {
   limits?: { timeLimitMs: number | null };
 }
 export const HANEOKA_COMMIT = "c91e6459a5ed43d55dc2b75e6a9d4f55b3edc62a";
-export const HANEOKA_PATCH_SHA = "60260764a11f928f303b679e1af3d2b8b8c68c4da75f538785da81a1b180c5ee";
+export const HANEOKA_PATCH_SHA = "54776b2f36fd6c201e05358c231f1ba8ab75a585009372cac428a53d0fc6172a";
 export const CAPABILITIES = {
   goals: ["power", "freeLive", "challengeLive", "battleLive", "missionLive", "skip"],
-  metrics: { freeLive: ["score", "eventPoints", "eventItems", "challengePoints"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score"], missionLive: ["score"], skip: ["score", "eventPoints", "eventItems", "challengePoints"] },
+  metrics: { freeLive: ["score", "eventPoints", "eventItems", "challengePoints"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score", "eventPoints", "eventItems", "challengePoints"], missionLive: ["score", "eventPoints", "eventItems", "challengePoints"], skip: ["score", "eventPoints", "eventItems", "challengePoints"] },
   aggregations: {
-    expected: { freeLive: ["score", "eventPoints", "eventItems", "challengePoints"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score"], missionLive: ["score"], skip: ["score", "eventPoints", "eventItems", "challengePoints"] },
+    expected: { freeLive: ["score", "eventPoints", "eventItems", "challengePoints"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score", "eventPoints", "eventItems", "challengePoints"], missionLive: ["score", "eventPoints", "eventItems", "challengePoints"], skip: ["score", "eventPoints", "eventItems", "challengePoints"] },
     maximum: { freeLive: ["score", "eventPoints", "eventItems"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score"], missionLive: ["score"], skip: ["score", "eventPoints", "eventItems", "challengePoints", "combined"] },
   },
-  combinedMetric: { kind: "combined", objective: "lexicographicWeightedExpectedSums", weights: "integer", maxLevels: 3, maxTerms: 9, maxWeight: 1_000_000_000 },
+  combinedMetric: { goals: ["freeLive", "challengeLive", "skip"], kind: "combined", objective: "lexicographicWeightedExpectedSums", weights: "integer", maxLevels: 3, maxTerms: 9, maxWeight: 1_000_000_000 },
   eventItemRewards: { selection: "exactResultGrade", eventGroupField: "eventGroup", rowsPerGrade: 1, probabilityMarker: 10000 },
   accuracy: { great: true, just: true }, patternPlay: true, luckMissions: true, luckGreatConversions: true,
 };
@@ -37,9 +38,16 @@ export function adaptRequest(data: DeckData, request: RecommendationRequest) {
   const kind: string = request.goal.kind;
   const rewards = ["eventPoints", "eventItems", "challengePoints", "combined"].includes(request.metric?.kind ?? "");
   const skip = kind === "skip";
-  if (rewards && (!["freeLive", "challengeLive", "skip"].includes(kind) || request.aggregation === "maximum" && !skip && !["eventPoints", "eventItems"].includes(request.metric!.kind)))
-    throw new Error("haneoka-unsupported-reward-scene");
   const gekiso = ["battleLive", "missionLive"].includes(kind);
+  if (rewards && (!["freeLive", "challengeLive", "skip", "battleLive", "missionLive"].includes(kind)
+    || gekiso && (request.aggregation === "maximum" || request.metric?.kind === "combined")
+    || request.aggregation === "maximum" && !skip && !["eventPoints", "eventItems"].includes(request.metric!.kind)))
+    throw new Error("haneoka-unsupported-reward-scene");
+  if (rewards && kind === "battleLive" && (!request.room || !Number.isInteger(request.room.players) || request.room.players < 1 || request.room.players > 5
+    || request.room.othersAverageScore !== null && (!Number.isInteger(request.room.othersAverageScore) || request.room.othersAverageScore < 0 || request.room.othersAverageScore > 2147483647)))
+    throw new Error("haneoka-room");
+  if (rewards && kind === "missionLive" && request.room !== undefined) throw new Error("haneoka-room");
+  if (rewards && kind === "missionLive" && request.goal.rank !== undefined) throw new Error("haneoka-unsupported-rank");
   if (gekiso && request.goal.rank !== undefined && request.goal.rank !== 1) throw new Error("haneoka-unsupported-rank");
   const parameterEvents = kind === "power" && request.goal.eventParameter ? request.eventIds ?? [] : [];
   if (parameterEvents.length > 1 || parameterEvents.some(id => !table(data, "MasterEvent").some(event => event.id === id)))
@@ -78,7 +86,8 @@ export function adaptRequest(data: DeckData, request: RecommendationRequest) {
   const key = (id: unknown, prefix: string) => prefix + integer(typeof id === "string" ? Number(id) : id, "constraint");
   const c = request.constraints ?? {};
   return {
-    goal: rewards ? eventGoal(data, request, song!, challengeEventId, "play" in scoreGoal ? scoreGoal.play : null) : scoreGoal, charts,
+    goal: rewards ? { ...eventGoal(data, request, song!, challengeEventId, "play" in scoreGoal ? scoreGoal.play : null),
+      ...(scoreGoal.kind === "gekiso" ? { gekiso: { scene: kind, accuracy: scoreGoal.accuracy }, room: request.room } : {}) } : scoreGoal, charts,
     constraints: {
       requiredMembers: (c.includeMembers ?? []).map((id: unknown) => key(id, "m")),
       excludedMembers: (c.excludeMembers ?? []).map((id: unknown) => key(id, "m")),

@@ -468,3 +468,74 @@ real protocol core in Bun; browser scheduling and phone/peak-memory acceptance a
   New tests, source generators, data and runtime snapshots stay ignored and are excluded from delivery.
 - The production provider is unchanged. Played combined maximum, Free CP maximum, Battle/Mission event rewards,
   Arena/active memories and cross-song UI/continuation remain outside this increment.
+
+
+## Tenth milestone: Battle/Mission single expected rewards, 2026-10-26
+
+This increment adds expected single PT, items and CP for both Gekiso venues. It uses the pinned Haneoka
+scoring model and donor finite-root LUCK replay. It does not replace the production provider. Acceptance
+follows the user's relaxed target: usable candidates without a significant interactive performance retreat;
+finishing every proof in two seconds is not required. Battle/Mission combinations and maximum rewards remain gated.
+
+Patch `54776b2f36fd6c201e05358c231f1ba8ab75a585009372cac428a53d0fc6172a`; WASM `a08fad095e7663cf098b7111cb4d27b1018f0aeb1c8302023cd56b1e726435b5` (7160478 bytes);
+JS `11bafaa566f5752342e7405d152d6e957284084bda07e8770a6bac637939b65f`. Normal release build, immutable source guards and byte/hash binding remain in use.
+
+The two frozen complete JP/Intl pools and declared legal maximum growth are unchanged. Every comparison binds
+identical dataset/account/request hashes, alternates version order and repeats twice per server. Calls run
+without concurrent compilation or tests. The six new targets compare with the published original; nine existing
+targets compare with frozen `ae4cd96`. Setup is outside the 2000 ms recommendation-call budget.
+
+| Scene | Baseline wall, ms | Current wall, ms | Baseline proven / 4 | Current proven / 4 | Current team count |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| battle-pt | 2002-2004 | 2002-2003 | 0 | 0 | 3 |
+| battle-items | 2006-2009 | 2002-2002 | 0 | 0 | 3 |
+| battle-cp | 1159-1279 | 2002-2002 | 4 | 0 | 3 |
+| mission-pt | 2021-2176 | 278-326 | 0 | 0 | 3 |
+| mission-items | 2038-2050 | 1039-1088 | 0 | 0 | 3 |
+| mission-cp | 2037-2041 | 62-72 | 0 | 0 | 3 |
+| battle | 2002-2003 | 2002-2003 | 0 | 0 | 3 |
+| mission | 1970-1997 | 1963-2072 | 0 | 0 | 3 |
+| free-pt | 81-156 | 76-150 | 4 | 4 | 3 |
+| free-items | 1365-1595 | 1470-1532 | 4 | 4 | 3 |
+| free-combined | 1734-1907 | 1702-1891 | 4 | 4 | 3 |
+| challenge-combined | 31-37 | 30-37 | 4 | 4 | 3 |
+| skip-combined | 11-17 | 10-12 | 4 | 4 | 3 |
+| free-pt-maximum | 63-75 | 60-81 | 4 | 4 | 3 |
+| free-items-maximum | 2003-2004 | 2002-2004 | 0 | 0 | 3 |
+
+All 36 existing-target comparisons preserve the primary best value. Full answers, candidate times, proof
+flags, input hashes and ranges remain in `tenth-paired.json`; `tenth-performance-summary.json` summarizes pairs.
+The initial rejected prototype comparison is retained separately in `tenth-initial-paired.json`.
+
+LUCK points and published-model points are not interchangeable exact expectations. The current value is a
+four-root mean; its interval encloses every eligible grade settlement, and its whole-law proof remains false.
+The original may certify a grade-constant exact expectation. No finite-root mean is relabelled as that certificate.
+The native kernel and source provider can also score the same non-LUCK formation differently. Independent frozen
+replay of the first Battle PT comparison gives the published winning team 831 under Haneoka, versus 1079.7 for
+the migrated winner. The published model reports 1184.0333 for its own team. This separates a model difference
+from search quality; it is not evidence that either scoring model matches the live client.
+
+An initial Battle CP run retained only two teams at two seconds, versus the source's three and earlier proof.
+Native power preparation now supplies early legal scored teams; a CP shortcut additionally requires an internal
+power proof and all witnesses at the global ceiling. A caller-provided proof flag cannot establish it. Remaining
+non-saturating cases keep full search and incomplete status; CP proof can still consume the budget. This
+limitation remains visible rather than restarting hard two-second proof tuning.
+
+Validation includes source fixed-roster rewards, checked-room policies, frozen prefix replay with a certified
+rounding margin, per-root grade settlement over 12 assignments, Great/Just and MISS, lottery/non-lottery songs
+in both venues, clocks/costs, overflow diagnostics, page request generation and capability-scene gating.
+Detailed final test and Worker receipts are appended at closure. New tests, source generators, accounts and
+runtime snapshots remain ignored local artifacts. Phone/browser scheduling and peak-memory acceptance are separate.
+
+Closure checks for the final normal-release artifacts:
+
+- Final targeted rewards/retention suite: 48 passes, zero failures and 376 assertions. The same native WASM
+  passed the 162-case integration/combined/maximum/LUCK/rewards batch before the final adapter retention fix;
+  the final 48-case run additionally tests both venues retaining completed progress when the final list is empty.
+- The existing repository suite has 896 passes, one existing Windows GNU-time skip and zero failures.
+  Final Astro check covers 668 files with zero errors, zero warnings and nine existing hints. Final lint passes;
+  search/SEO checks pass for 44 routes and 22308 sitemap URLs.
+- The final hash-verified bundled Worker core completes all 12 JP/Intl scene/metric cases with three candidates.
+  These are real Worker protocol-core calls in Bun, not browser/phone scheduling or live-account acceptance.
+- `tenth-final-validation.json`, `tenth-final-rewards-tests.json`, `tenth-paired.json` and `tenth-entries.json`
+  bind the evidence to the final artifacts. All added tests, generators and receipts remain ignored local files.

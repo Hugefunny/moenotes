@@ -17,11 +17,12 @@ function orders(): number[][] {
 }
 const ORDERS = orders();
 function id(key: string): number { return Number(key.slice(1)); }
-interface EngineHit { members: string[]; snaps: (string | null)[]; power: number; key: number; skipScore?: number; score?: { orders: number[]; mean?: number } | null; event?: { mean: number; rewardSum: number | string; orders: number; selectedOrder?: number }; levels?: { sum: string; terms: string[] }[] }
+interface EngineHit { members: string[]; snaps: (string | null)[]; power: number; key: number; skipScore?: number; score?: { orders: number[]; mean?: number } | null; event?: { mean: number; rewardSum: number | string; orders: number; selectedOrder?: number; sampled?: boolean; lower?: number; upper?: number }; levels?: { sum: string; terms: string[] }[] }
 interface EngineResponse { results: { proven: boolean; bound: number | null }[]; overall: EngineHit[]; elapsedMs: number | null }
 function answer(response: EngineResponse, request: RecommendationRequest, coversAllOwnedCards: boolean, final: boolean) {
   const rows = response.results ?? [];
-  const proven = final && rows.length > 0 && rows.every(row => row.proven === true);
+  const sampled = (response.overall ?? []).some(hit => hit.event?.sampled === true);
+  const proven = final && !sampled && rows.length > 0 && rows.every(row => row.proven === true);
   const teams = (response.overall ?? []).map((hit, index) => {
     const members: number[] = hit.members.map(id), snaps: (number | null)[] = hit.snaps.map((key: string | null) => key === null ? null : id(key));
     const scores: number[] = hit.score?.orders ?? [];
@@ -34,8 +35,13 @@ function answer(response: EngineResponse, request: RecommendationRequest, covers
     const settlement = hit.event;
     if (reward && (!settlement || !(typeof settlement.rewardSum === "number" ? Number.isSafeInteger(settlement.rewardSum) : combined && /^-?\d+$/.test(settlement.rewardSum)) || !Number.isSafeInteger(settlement.orders) || settlement.orders < 1))
       throw new Error("haneoka-reward-certificate");
+    const sampledReward = settlement?.sampled === true;
+    if (sampledReward && (!Number.isFinite(settlement!.lower) || !Number.isFinite(settlement!.upper)
+      || settlement!.lower! > Number(settlement!.rewardSum) / settlement!.orders || settlement!.upper! < Number(settlement!.rewardSum) / settlement!.orders))
+      throw new Error("haneoka-reward-interval");
     const payoff = (sum: number | string) => ({ score: Number(sum) / settlement!.orders,
-      exact: { numerator: String(sum), denominator: String(settlement!.orders) }, interval: null });
+      exact: sampledReward ? null : { numerator: String(sum), denominator: String(settlement!.orders) },
+      interval: sampledReward ? { lower: settlement!.lower!, upper: settlement!.upper! } : null });
     const maximumReward = reward && request.aggregation === "maximum" && request.goal.kind !== "skip";
     const selected = maximumReward ? settlement!.selectedOrder : undefined;
     if (maximumReward && (!Number.isInteger(selected) || selected! < 0 || selected! >= 120 || scores.length !== 120 || settlement!.orders !== 1))
@@ -45,9 +51,9 @@ function answer(response: EngineResponse, request: RecommendationRequest, covers
     return {
       rank: index + 1, rankCertified: proven, leader: pair(0), others: [1, 2, 3, 4].map(pair),
       power: hit.power, value: { score: request.goal.kind === "skip" ? hit.skipScore! : maximumReward ? bestOrder!.score : reward ? hit.score!.mean! : hit.key, exact: maximumReward ? { numerator: String(bestOrder!.score), denominator: "1" } : null, interval: null,
-        payoff: reward ? payoff(settlement!.rewardSum) : null }, orders: maximumReward ? null : values,
+        payoff: reward ? payoff(settlement!.rewardSum) : null }, orders: maximumReward || sampledReward ? null : values,
       ...(combined ? { levels: hit.levels!.map(level => ({ value: payoff(level.sum), terms: level.terms.map(payoff) })) } : {}),
-      bestOrder,
+      bestOrder: sampledReward ? null : bestOrder,
       layout: { members: [members[1], members[2], members[0], members[3], members[4]],
         snaps: [snaps[1], snaps[2], snaps[0], snaps[3], snaps[4]] },
     };
@@ -58,9 +64,10 @@ function answer(response: EngineResponse, request: RecommendationRequest, covers
     engine: { name: "Haneoka", commit: HANEOKA_COMMIT, patchSha256: HANEOKA_PATCH_SHA, source: "https://github.com/haneoka-gakuen/ournotes-team-builder" },
     result: { phase: proven ? "done" : "search", elapsedMs: response.elapsedMs ?? null, teams,
       account: { cards: { coversAllOwnedCards } },
-      optimality: { proven, lowerBound: teams[0]?.value.payoff?.score ?? teams[0]?.value.score ?? null, upperBound: bound, fraction: null },
+      optimality: { proven, lowerBound: teams[0]?.value.payoff?.interval?.lower ?? teams[0]?.value.payoff?.score ?? teams[0]?.value.score ?? null, upperBound: bound, fraction: null },
       goal: request.goal, metric: request.metric ?? { kind: "power" }, aggregation: request.aggregation ?? "expected",
-      exitReason: final && !proven ? "timeLimit" : proven ? "complete" : null },
+      ...(sampled ? { rewardSampling: { kind: "fixedRoots", rootSeeds: [0, 1, 2, 3] } } : {}),
+      exitReason: final && sampled ? "sampled" : final && !proven ? "timeLimit" : proven ? "complete" : null },
   });
 }
 /** The existing Moenotes Worker supplies its already verified dataset hash alongside the unchanged dataset bytes. */
@@ -98,20 +105,22 @@ export class DeckSolver {
     const reserve = luck ? Math.min(40, converted.timeLimitMs ?? 0) : 0;
     const deadline = converted.timeLimitMs === null ? Infinity : performance.timeOrigin + started + converted.timeLimitMs - reserve;
     const warm: EngineHit[] = [];
+    const retainRewards = converted.goal.kind === "event" && "gekiso" in converted.goal;
     const mergeWarm = (hits: EngineHit[]) => {
       if (!warm.length) return hits;
       const rosters = new Map<string, EngineHit>();
       for (const hit of [...warm, ...hits]) {
         const key = [...hit.members].sort().join("|");
-        if (!rosters.has(key) || hit.key > rosters.get(key)!.key) rosters.set(key, hit);
+        if (!rosters.has(key) || hit.key > rosters.get(key)!.key || retainRewards && hit.key === rosters.get(key)!.key && hit.power > rosters.get(key)!.power) rosters.set(key, hit);
       }
-      return [...rosters.values()].sort((a, b) => b.key - a.key).slice(0, converted.k);
+      return [...rosters.values()].sort((a, b) => b.key - a.key || (retainRewards ? b.power - a.power : 0)).slice(0, converted.k);
     };
     engine!.onProgress = value => {
       const now = performance.now();
+      const hits = mergeWarm((value.hits ?? []) as EngineHit[]);
+      if (retainRewards) warm.splice(0, warm.length, ...hits);
       if (!progress || now - last < intervalMs) return;
       last = now;
-      const hits = mergeWarm((value.hits ?? []) as EngineHit[]);
       progress(answer({ overall: hits, results: [], elapsedMs: performance.now() - started }, request, box.coversAllOwnedCards, false));
     };
     try {
@@ -162,7 +171,7 @@ export class DeckSolver {
       response.elapsedMs = performance.now() - started;
       return answer(response, request, box.coversAllOwnedCards, true);
     } catch (error) {
-      if (!(error instanceof Error) || !["combined-reward-levels", "combined-reward-range", "combined-item-lottery", "skip-score-nonmonotone"].includes(error.message)) throw error;
+      if (!(error instanceof Error) || !error.message.startsWith("moenotes-") && !["combined-reward-levels", "combined-reward-range", "combined-item-lottery", "skip-score-nonmonotone"].includes(error.message)) throw error;
       return JSON.stringify({ format: "ournotes-deck.account-recommendation/1", final: true, status: "invalid", missing: [],
         errors: [{ path: "request", code: "unsupported_request", message: error.message }], result: null });
     } finally { engine!.onProgress = null; }

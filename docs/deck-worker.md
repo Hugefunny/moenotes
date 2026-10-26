@@ -258,3 +258,19 @@ Progress and final output use one selected score/payoff with exact denominator 1
 `bestOrder` containing score, payoff and member order. Expected rewards keep their 120-order mean statistics.
 Played combined maximum and Free CP maximum remain outside the advertised capability. Skip keeps its
 deterministic one-settlement path. The production provider remains unchanged.
+
+
+### Battle and Mission event rewards
+
+The Haneoka development adapter accepts single expected PT, event items and CP for Battle/Mission.
+Battle carries the page's explicit `room` policy; Mission uses the solo result rule. Existing page-produced
+requests, account coverage, budgets and Worker lifecycle are retained. Non-LUCK payoff certificates cover
+all 120 skill orders. LUCK returns a four-root mean with an all-grade support interval, `exact: null`, no
+order statistics, incomplete proof and `exitReason: "sampled"`; the roots are recorded in `rewardSampling`.
+This is the donor's finite-root route, not the published model's complete probability-law solver.
+
+The optional `combinedMetric.goals` capability lists scenes that support combined objectives. Omission
+preserves legacy providers' behavior; a malformed list disables only the combined capability. The page
+checks the main scene and an automatic challenge-rating scene against this scope. This prevents newly
+supported single metrics from enabling unported Battle/Mission combinations. Maximum event rewards for
+those two scenes remain unsupported. The production provider is unchanged.
