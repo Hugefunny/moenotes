@@ -248,3 +248,13 @@ cooperative, so the budget is not a hard wall-clock cutoff. See [the full-pool r
 
 Skip reward grades also accept the source model's numeric and comma-separated named enum forms. A missing
 settlement row for the parsed grade is an invalid request, rather than a zero-reward result.
+
+### Played maximum rewards
+
+The Haneoka development adapter advertises single PT and event-item maximum for Free and Challenge Live.
+The existing page producer and Worker protocol carry these requests unchanged. The native engine compares
+the largest settlement across 120 orders, then power, and returns the first canonical order achieving it.
+Progress and final output use one selected score/payoff with exact denominator 1, `orders: null`, and a
+`bestOrder` containing score, payoff and member order. Expected rewards keep their 120-order mean statistics.
+Played combined maximum and Free CP maximum remain outside the advertised capability. Skip keeps its
+deterministic one-settlement path. The production provider remains unchanged.

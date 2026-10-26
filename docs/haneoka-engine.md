@@ -50,7 +50,7 @@ music duration. No chart approximation or independent scoring formula is introdu
   It reads growth/player bonuses without requiring unused live skills, and returns no random-order statistics.
   Challenge Skip score uses challenge-song typing; parameter bonuses apply only when that challenge event is
   selected in `eventIds`, matching the source model. Ordinary Skip score ignores event parameter context.
-- Free Live and Challenge Live single PT / event-item expected rewards; Free Live CP; ordinary Skip PT / CP /
+- Free Live and Challenge Live single PT / event-item expected and maximum rewards; Free Live CP; ordinary Skip PT / CP /
   event items; Challenge Skip PT / event items. Ordinary consumption is 0 through 10; Challenge consumption is
   200/400/800/1600. Every positive cost must have exactly one matching source row.
 - Combined expected rewards use up to three lexicographic levels, nine total PT / event-item / CP terms,
@@ -75,7 +75,7 @@ music duration. No chart approximation or independent scoring formula is introdu
 - Automatic CP conversion first computes the selected challenge reward, then passes its exact payoff/cost through
   the existing page request producer. Its worth remains the best found value if that first search is incomplete;
   downstream proof certifies the emitted weighted objective, not optimality of an unfinished challenge search.
-- Reward results retain mean played score or deterministic Skip score in `value.score`, and selected expected
+- Expected reward results retain mean played score or deterministic Skip score in `value.score`, and selected expected
   reward in `value.payoff.score`. `value.payoff.exact` contains the integer reward sum and observation count.
   CP ranking compares CP directly. The score tie used by the upstream CP objective is disabled for these requests.
   Single PT/item rewards resolve payoff ties by power, matching the published model; the donor's implicit other-reward
@@ -84,10 +84,17 @@ music duration. No chart approximation or independent scoring formula is introdu
   settlement steps tighten reward upper bounds, and coupled score bounds reuse a fixed positive AM-GM scale
   and assignment prefixes. Ordered matching keeps the best available columns without reducing the legal pool.
   Single rewards retain distinct member rosters; combined rewards retain physical formations.
+- Played single PT/items maximum searches compare the largest settlement over all 120 skill orders, then power.
+  Equal-payoff orders use the first canonical formation permutation: nonleaders sorted by card ID, leader in slot 2.
+  `value.score` is that order's native score, with exact denominator 1; `value.payoff` also has denominator 1.
+  `orders` is null, and `bestOrder` contains its score, payoff and member order in both progress and final output.
+  Bounds use maximum order scores and whole-settlement steps; mean-only relaxations are excluded.
+  Signed Int32 overflow, negative bonuses or decreasing grade rewards disable monotone bonus/grade bounds and
+  numeric dominance while retaining all Snapshot options. The exact settlement still follows the source arithmetic.
 - Ordinary Skip PT/items/CP, Challenge Skip PT/items, and combined ordinary / Challenge Skip rewards accept
   `maximum`. One deterministic settlement is identical under expected and maximum aggregation, with exact
   denominator 1 and no skill-order statistics. Challenge routes spend CP and cannot include CP earnings terms.
-  Skip CP uses power to choose among its equal-payoff teams. Played maximum rewards remain unsupported.
+  Skip CP uses power to choose among its equal-payoff teams. Played combined maximum and Free CP maximum remain unsupported.
   The answer parser accepts combined maximum only for Skip. The existing page still normalizes Skip aggregation
   to expected; this adds the request/Worker capability.
 - Rewards use the page's `rewardProjection: true` and played/Skip clock. Projection excludes saved balances;

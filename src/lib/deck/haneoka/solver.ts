@@ -17,7 +17,7 @@ function orders(): number[][] {
 }
 const ORDERS = orders();
 function id(key: string): number { return Number(key.slice(1)); }
-interface EngineHit { members: string[]; snaps: (string | null)[]; power: number; key: number; skipScore?: number; score?: { orders: number[]; mean?: number } | null; event?: { mean: number; rewardSum: number | string; orders: number }; levels?: { sum: string; terms: string[] }[] }
+interface EngineHit { members: string[]; snaps: (string | null)[]; power: number; key: number; skipScore?: number; score?: { orders: number[]; mean?: number } | null; event?: { mean: number; rewardSum: number | string; orders: number; selectedOrder?: number }; levels?: { sum: string; terms: string[] }[] }
 interface EngineResponse { results: { proven: boolean; bound: number | null }[]; overall: EngineHit[]; elapsedMs: number | null }
 function answer(response: EngineResponse, request: RecommendationRequest, coversAllOwnedCards: boolean, final: boolean) {
   const rows = response.results ?? [];
@@ -36,13 +36,18 @@ function answer(response: EngineResponse, request: RecommendationRequest, covers
       throw new Error("haneoka-reward-certificate");
     const payoff = (sum: number | string) => ({ score: Number(sum) / settlement!.orders,
       exact: { numerator: String(sum), denominator: String(settlement!.orders) }, interval: null });
+    const maximumReward = reward && request.aggregation === "maximum" && request.goal.kind !== "skip";
+    const selected = maximumReward ? settlement!.selectedOrder : undefined;
+    if (maximumReward && (!Number.isInteger(selected) || selected! < 0 || selected! >= 120 || scores.length !== 120 || settlement!.orders !== 1))
+      throw new Error("haneoka-reward-order-certificate");
+    const bestOrder = maximumReward ? { score: scores[selected!]!, payoff: Number(settlement!.rewardSum), order: ORDERS[selected!]!.map(slot => members[slot]) } : values?.max ?? null;
     const pair = (i: number) => ({ member: members[i], snap: snaps[i] });
     return {
       rank: index + 1, rankCertified: proven, leader: pair(0), others: [1, 2, 3, 4].map(pair),
-      power: hit.power, value: { score: request.goal.kind === "skip" ? hit.skipScore! : reward ? hit.score!.mean! : hit.key, exact: null, interval: null,
-        payoff: reward ? payoff(settlement!.rewardSum) : null }, orders: values,
+      power: hit.power, value: { score: request.goal.kind === "skip" ? hit.skipScore! : maximumReward ? bestOrder!.score : reward ? hit.score!.mean! : hit.key, exact: maximumReward ? { numerator: String(bestOrder!.score), denominator: "1" } : null, interval: null,
+        payoff: reward ? payoff(settlement!.rewardSum) : null }, orders: maximumReward ? null : values,
       ...(combined ? { levels: hit.levels!.map(level => ({ value: payoff(level.sum), terms: level.terms.map(payoff) })) } : {}),
-      bestOrder: values?.max ?? null,
+      bestOrder,
       layout: { members: [members[1], members[2], members[0], members[3], members[4]],
         snaps: [snaps[1], snaps[2], snaps[0], snaps[3], snaps[4]] },
     };

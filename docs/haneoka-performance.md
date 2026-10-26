@@ -391,3 +391,80 @@ still normalizes Skip to expected. Played maximum rewards remain outside this in
 Local receipts: `eighth-final-paired.json`, `eighth-combined-control.jsonl`, `eighth-final-entries.json`,
 `eighth-final-validation.json`, `eighth-recovery-final.log` and `eighth-ordered-proof.log`. New tests, data,
 generators and runtimes remain ignored local verification artifacts.
+
+
+## Ninth milestone: played maximum PT and event items, 2026-10-26
+
+Acceptance follows the user's relaxed target: correct native rewards and no significant performance regression.
+This increment adds Free / Challenge single PT and event-item maximum. It keeps the original provider and all
+existing expected-reward paths. No card-pool reduction or hard two-second proof requirement is introduced.
+
+Patch `60260764a11f928f303b679e1af3d2b8b8c68c4da75f538785da81a1b180c5ee`; WASM `ed4aec4b262ee46aaa078e70a69b16a7bd95a77256d42705061999bf020da32b` (6921825 bytes);
+JS `ecafdb20c2d07bf449414fea89cc49d382223e6963076ad8c494260cd2f34025`. The normal release build and runtime hashes are recorded in ignored local receipts.
+
+The same frozen JP/Intl complete card pools and declared maximum legal growth from the preceding milestone are used.
+Each pair binds identical dataset/account/request hashes. Search budget is 2000 ms; setup is outside call timing.
+Runs alternate version order, with two repeats per server and scene. Benchmark calls run without compilation or tests.
+The four new modes compare against the published Moenotes model; existing modes compare against frozen `4cf26c7`.
+
+| Scene | Baseline wall, ms | Current wall, ms | Baseline proven / runs | Current proven / runs |
+| --- | ---: | ---: | ---: | ---: |
+| free-pt-maximum | 2002-2004 | 58-144 | 0 / 4 | 4 / 4 |
+| free-items-maximum | 2002-2002 | 2002-2002 | 0 / 4 | 0 / 4 |
+| challenge-pt-maximum | 2002-2002 | 34-194 | 0 / 4 | 4 / 4 |
+| challenge-items-maximum | 2001-2002 | 52-198 | 0 / 4 | 4 / 4 |
+| free-pt | 75-151 | 77-99 | 4 / 4 | 4 / 4 |
+| free-items | 1403-1547 | 1471-1552 | 4 / 4 | 4 / 4 |
+| challenge-pt | 26-170 | 25-166 | 4 / 4 | 4 / 4 |
+| challenge-items | 52-196 | 55-207 | 4 / 4 | 4 / 4 |
+| free-cp | 63-82 | 57-76 | 4 / 4 | 4 / 4 |
+| free-combined | 1767-1856 | 1708-1897 | 4 / 4 | 4 / 4 |
+| challenge-combined | 31-42 | 32-39 | 4 / 4 | 4 / 4 |
+| skip-combined | 10-11 | 10-16 | 4 / 4 | 4 / 4 |
+| free-maximum | 22-29 | 25-30 | 4 / 4 | 4 / 4 |
+| battle | 2002-2003 | 2002-2002 | 0 / 4 | 0 / 4 |
+| mission | 1963-1989 | 1964-1999 | 0 / 4 | 0 / 4 |
+
+Primary best values match in 48 of 60 pairs; 12 improve and 0 worsen. Full answers, progress, input identities and timing are
+retained in `.haneoka/ninth-paired.json`; the summary is `.haneoka/ninth-performance-summary.json`.
+These receipts describe the declared frozen pools and local desktop runtime, rather than real accounts or phone timing.
+
+| New maximum scene | Server | Published best at 2 seconds | Haneoka best at 2 seconds |
+| --- | --- | ---: | ---: |
+| free-pt-maximum | intl | 1406 | 1590 |
+| free-pt-maximum | jp | 1406 | 1590 |
+| free-items-maximum | intl | 1831 | 2292 |
+| free-items-maximum | jp | 1831 | 2292 |
+| challenge-pt-maximum | intl | 19650 | 23750 |
+| challenge-pt-maximum | jp | 18750 | 23750 |
+| challenge-items-maximum | intl | 23512 | 23512 |
+| challenge-items-maximum | jp | 30400 | 30400 |
+
+Independent validation uses the published original for fixed-roster payoff/power/first-order semantics, and a frozen
+earlier Haneoka WASM to exhaust 62 physical assignments and all 120 skill orders per declared mixed-grade case.
+Per-grade settlements are supplied by separate frozen replays. Cases include decreasing reward grades and signed
+Int32 overflow, partial play, consumption costs, inactive windows, zero budgets, progress certificates and page-produced requests.
+The fixed-roster source comparison exposes existing native score differences: Free +613 points (about 0.0103%) and
+Challenge -276 (about 0.0052%), with identical reward, power and selected order. This increment preserves Haneoka
+scoring; it does not claim bitwise score parity with the published engine. The frozen native oracle verifies the new maximum.
+All 44 comparisons of existing scenes retain the same primary best value and proof outcome. No significant
+latency regression appears in this sample. All current calls return status `ok` and three teams. Free single-item
+maximum remains unproven after two seconds, retaining payoff 2292 against the published model's 1831; this is a
+best-found result, and the relaxed acceptance target does not require further proof tuning in this increment.
+
+The actual bundled Worker core loads hash-verified data/JS/WASM and returns three teams for all eight new-mode
+calls across both servers. Free maximum PT takes 123-140 ms; Challenge maximum PT 169-191 ms; Challenge maximum
+items 53-68 ms. These six calls finish proof. Both Free maximum-item calls retain payoff 2292 at about 2003 ms,
+with incomplete proof and progress candidates. Exact score/payoff denominators remain 1. This exercises the
+real protocol core in Bun; browser scheduling and phone/peak-memory acceptance are not measured here.
+
+- 315 distinct migration cases pass: the full run has 314 passes and one old assertion that played PT maximum
+  is unsupported. That local assertion now checks the advertised new criterion and rejects still-unsupported
+  Free CP maximum; its focused rerun passes. All other cases passed on the same final production-config WASM.
+- Existing repository tests: 896 pass, one existing Windows/GNU-time skip. Astro check: 668 files, zero errors,
+  zero warnings and nine existing hints. Lint and search/SEO checks pass (44 search routes, 22308 sitemap URLs).
+- Local evidence includes `ninth-maximum.json`, `ninth-migration-tests.log`, `ninth-contract-recheck.log`,
+  `ninth-paired.json`, `ninth-performance-summary.json`, `ninth-entries.json` and `ninth-final-validation.json`.
+  New tests, source generators, data and runtime snapshots stay ignored and are excluded from delivery.
+- The production provider is unchanged. Played combined maximum, Free CP maximum, Battle/Mission event rewards,
+  Arena/active memories and cross-song UI/continuation remain outside this increment.
