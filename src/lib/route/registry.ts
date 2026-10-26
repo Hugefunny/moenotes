@@ -94,6 +94,22 @@ export function isCurrentRoute(currentPathname: string, routePath: string): bool
   return current === target || current.startsWith(`${target}/`);
 }
 
+/**
+ * The navigation group a page belongs to, read from the route tree rather than the URL prefix: `/characters` is a
+ * database page even though it does not start with `/database`, and `/tools/chart-data` belongs to the music group
+ * rather than the tools group.
+ */
+export function getNavigationGroupId(pathname: string): string | undefined {
+  const groups = getNavigationGroups();
+  const groupId = (route: AppRoute | undefined): string | undefined =>
+    route && groups.some((group) => group.id === route.id) ? route.id : undefined;
+  const match = findRouteMatch(pathname);
+  const matched = groupId(match?.group) ?? groupId(match?.item);
+  if (matched) return matched;
+  // Unmatched paths (a 404 under a hub, the player shell) still name a group when their prefix does.
+  return groups.find((group) => isCurrentRoute(pathname, group.path))?.id;
+}
+
 export function buildDynamicPath(pattern: string, params: RouteParams): `/${string}` {
   const path = normalizePathname(pattern).split("/").map((segment) => {
     if (!segment.startsWith(":")) return segment;

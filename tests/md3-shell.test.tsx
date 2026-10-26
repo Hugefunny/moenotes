@@ -49,6 +49,18 @@ describe("material 3 shell", () => {
     expect(html).toContain('aria-label="Main navigation"');
   });
 
+  test("the server renders every group expanded so the drawer works without JavaScript", () => {
+    const html = renderToString(<Sidebar locale="en-US" pathname="/cards" />);
+    expect(html).toContain('data-ready="false"');
+    expect(html).not.toContain('aria-expanded="false"');
+    const groups = getNavigationGroups().filter((group) => getNavChildren(group).length > 0);
+    expect((html.match(/aria-expanded="true"/g) ?? []).length).toBe(groups.length);
+    for (const group of groups) {
+      expect(html).toContain(`aria-controls="nav-group-${group.id}"`);
+      expect(html).toContain(`id="nav-group-${group.id}"`);
+    }
+  });
+
   test("every navigation destination draws its own icon", () => {
     const glyph = (route: AppRoute) => renderToString(<RouteGlyph icon={route.nav && route.nav.icon ? route.nav.icon : "sparkles"} routeId={route.id} />);
     const seen = new Map<string, string>([[renderToString(<RouteGlyph icon="home" />), "home"]]);

@@ -157,6 +157,9 @@ html[data-theme="dark"] .mn-brand .mn-brand-starlight, .mn-brand.mn-brand-light 
 
 /* ── Desktop navigation drawer: slides with the M3 emphasized curve; fades only under reduced motion ── */
 .mn-desktop-sidebar { opacity: 1; transform: translateX(0); }
+/* Held back by the head script while stored group folds exist; React removes the attribute once they are on the DOM
+   (src/components/shell/Sidebar.tsx), so the expanded server markup never paints first. */
+:root[data-nav-groups="pending"] .mn-desktop-sidebar { visibility: hidden; pointer-events: none; }
 .mn-desktop-sidebar[data-ready="true"] {
   transition: opacity var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard), transform var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized-decelerate);
 }

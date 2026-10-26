@@ -135,3 +135,27 @@ export function buildThemeBootstrapScript(): string {
   } catch(e) {}
 })();`;
 }
+
+/**
+ * Runs in the head before anything paints. The server always renders the navigation drawer fully expanded (its links
+ * must work without JavaScript); when the reader folded groups, this holds the drawer back until React has applied
+ * those folds (`src/components/shell/Sidebar.tsx` removes the attribute then). The timeout is the fallback for a
+ * bundle that never hydrates: showing the expanded drawer beats hiding it forever.
+ */
+export function buildNavGroupBootstrapScript(): string {
+  return `
+(function(){
+  try {
+    var saved = JSON.parse(localStorage.getItem(${JSON.stringify(storageKeys.navGroups)}) || 'null');
+    if (!saved || typeof saved !== 'object' || Array.isArray(saved)) return;
+    for (var id in saved) {
+      if (saved[id] !== true) continue;
+      document.documentElement.dataset.navGroups = 'pending';
+      setTimeout(function(){
+        if (document.documentElement.dataset.navGroups === 'pending') delete document.documentElement.dataset.navGroups;
+      }, 4000);
+      break;
+    }
+  } catch(e) {}
+})();`;
+}

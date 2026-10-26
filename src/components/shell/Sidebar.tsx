@@ -8,16 +8,15 @@ import RouteGlyph from "@/components/shared/RouteGlyph";
 import { withMd3 } from "@/components/md3/Md3Provider";
 import SidebarAccount from "@/components/shell/SidebarAccount";
 import type { AppLocale } from "@/config/locales";
+import { storageKeys } from "@/config/storage";
 import { t } from "@/i18n";
 import { localizePath, normalizePathname, stripLocaleFromPathname } from "@/i18n/routing";
 import { useOverlay } from "@/lib/overlay/use-overlay";
-import { getNavChildren, getNavigationGroups, isCurrentRoute } from "@/lib/route/registry";
+import { getNavChildren, getNavigationGroupId, getNavigationGroups, isCurrentRoute } from "@/lib/route/registry";
+import { parseCollapsedGroups, resolveNavGroupEntry, toggleCollapsedGroup, type NavGroupCollapsed } from "@/lib/sidebar/nav-groups";
 import { useSidebarState } from "@/lib/sidebar/use-sidebar-state";
-import { safeGetLocalStorage, safeGetSessionStorage, safeSetLocalStorage, safeSetSessionStorage } from "@/lib/storage/safe-storage";
+import { safeGetLocalStorage, safeGetSessionStorage, safeRemoveSessionStorage, safeSetLocalStorage, safeSetSessionStorage } from "@/lib/storage/safe-storage";
 import type { AppRoute, RouteIcon } from "@/types/route";
-
-const groupStorageKey = "moenotes:nav-groups";
-const scrollStorageKey = "moenotes:sidebar-scroll";
 
 interface SidebarProps {
   locale: AppLocale;
@@ -30,17 +29,50 @@ interface SidebarProps {
  * content (the top app bar's navigation button folds it away); below `md` it is a modal drawer of thick glass over a
  * scrim. Groups expand in place, the current page carries the seed's tint on the glass, and the account sits at the
  * foot.
+ *
+ * Folds have one source of truth: the reader's stored state. Entering a group from outside opens it once (see
+ * `resolveNavGroupEntry`); the chevron always folds and unfolds afterwards.
  */
 function Sidebar({ locale, pathname, activePath }: SidebarProps) {
   const [desktopOpen] = useSidebarState();
   const [ready, setReady] = useState(false);
   const { isOpen: mobileOpen, close: closeMobile } = useOverlay("mobile-sidebar");
   const groups = useMemo(() => getNavigationGroups(), []);
+  const current = activePath || pathname;
+  const activeGroupId = useMemo(() => getNavigationGroupId(current), [current]);
+  const [collapsed, setCollapsed] = useState<NavGroupCollapsed>({});
+  const [hydrated, setHydrated] = useState(false);
 
+  // The drawer and the mobile drawer share this state; a group opens only when its page is entered from outside it.
   useEffect(() => {
+    const entry = resolveNavGroupEntry(
+      parseCollapsedGroups(safeGetLocalStorage(storageKeys.navGroups)),
+      activeGroupId,
+      safeGetSessionStorage(storageKeys.navActiveGroup),
+    );
+    setCollapsed(entry.collapsed);
+    if (entry.persist) safeSetLocalStorage(storageKeys.navGroups, JSON.stringify(entry.collapsed));
+    if (entry.nextPreviousGroupId) safeSetSessionStorage(storageKeys.navActiveGroup, entry.nextPreviousGroupId);
+    else safeRemoveSessionStorage(storageKeys.navActiveGroup);
+    setHydrated(true);
+  }, [activeGroupId]);
+
+  // The head script hides the drawer while stored folds exist, so the server's expanded markup never flashes; reveal
+  // it only once the folds are on the DOM, then enable the open/close transitions.
+  useEffect(() => {
+    if (!hydrated) return;
+    document.documentElement.removeAttribute("data-nav-groups");
     const raf = requestAnimationFrame(() => setReady(true));
     return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [hydrated]);
+
+  const toggleGroup = (id: string) => {
+    setCollapsed((state) => {
+      const next = toggleCollapsedGroup(state, id);
+      safeSetLocalStorage(storageKeys.navGroups, JSON.stringify(next));
+      return next;
+    });
+  };
 
   return (
     <>
@@ -53,7 +85,7 @@ function Sidebar({ locale, pathname, activePath }: SidebarProps) {
         style={{ left: "calc(max(0px, (100vw - var(--mn-layout-max-width, 120rem)) / 2) + 0.75rem)" }}
       >
         <div className="flex h-full flex-col">
-          <DrawerNav locale={locale} pathname={pathname} activePath={activePath} groups={groups} />
+          <DrawerNav locale={locale} pathname={pathname} activePath={activePath} groups={groups} collapsed={collapsed} onToggle={toggleGroup} />
           <SidebarAccount locale={locale} pathname={pathname} />
         </div>
       </aside>
@@ -74,54 +106,35 @@ function Sidebar({ locale, pathname, activePath }: SidebarProps) {
             <Icon name="close" />
           </IconButton>
         </div>
-        <DrawerNav locale={locale} pathname={pathname} activePath={activePath} groups={groups} onNavigate={closeMobile} />
+        <DrawerNav locale={locale} pathname={pathname} activePath={activePath} groups={groups} collapsed={collapsed} onToggle={toggleGroup} onNavigate={closeMobile} />
         <SidebarAccount locale={locale} pathname={pathname} />
       </Drawer>
     </>
   );
 }
 
-function DrawerNav({ locale, pathname, activePath, groups, onNavigate }: { locale: AppLocale; pathname: string; activePath?: string | undefined; groups: AppRoute[]; onNavigate?: () => void }) {
+function DrawerNav({ locale, pathname, activePath, groups, collapsed, onToggle, onNavigate }: { locale: AppLocale; pathname: string; activePath?: string | undefined; groups: AppRoute[]; collapsed: NavGroupCollapsed; onToggle: (id: string) => void; onNavigate?: (() => void) | undefined }) {
   const scrollRef = useRef<HTMLElement>(null);
   const current = activePath || pathname;
-  const activeGroupIds = useMemo(() => groups.filter((group) => isCurrentRoute(current, group.path)).map((group) => group.id), [groups, current]);
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
   // Keep the drawer's scroll position across page loads.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const saved = Number.parseInt(safeGetSessionStorage(scrollStorageKey) ?? "", 10);
+    const saved = Number.parseInt(safeGetSessionStorage(storageKeys.sidebarScroll) ?? "", 10);
     if (Number.isFinite(saved)) requestAnimationFrame(() => { if (scrollRef.current) scrollRef.current.scrollTop = saved; });
     let ticking = false;
     const onScroll = () => {
       if (ticking) return;
       ticking = true;
       requestAnimationFrame(() => {
-        if (scrollRef.current) safeSetSessionStorage(scrollStorageKey, String(scrollRef.current.scrollTop));
+        if (scrollRef.current) safeSetSessionStorage(storageKeys.sidebarScroll, String(scrollRef.current.scrollTop));
         ticking = false;
       });
     };
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => el.removeEventListener("scroll", onScroll);
   }, []);
-
-  useEffect(() => {
-    try {
-      const saved: unknown = JSON.parse(safeGetLocalStorage(groupStorageKey) ?? "null");
-      if (saved && typeof saved === "object") setCollapsed(saved as Record<string, boolean>);
-    } catch {
-      setCollapsed({});
-    }
-  }, []);
-
-  const toggleGroup = (id: string) => {
-    setCollapsed((state) => {
-      const next = { ...state, [id]: !state[id] };
-      safeSetLocalStorage(groupStorageKey, JSON.stringify(next));
-      return next;
-    });
-  };
 
   const home = stripLocaleFromPathname(current) === "/";
   return (
@@ -135,8 +148,8 @@ function DrawerNav({ locale, pathname, activePath, groups, onNavigate }: { local
           group={group}
           locale={locale}
           current={current}
-          collapsed={Boolean(collapsed[group.id]) && !activeGroupIds.includes(group.id)}
-          onToggle={() => toggleGroup(group.id)}
+          collapsed={Boolean(collapsed[group.id])}
+          onToggle={() => onToggle(group.id)}
           onNavigate={onNavigate}
         />
       ))}

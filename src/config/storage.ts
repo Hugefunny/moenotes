@@ -1,6 +1,12 @@
 export const storageKeys = {
   settings: "moenotes:settings",
   sidebarOpen: "moenotes:sidebar-open",
+  /** Which navigation groups the reader folded, as JSON `Record<groupId, boolean>` in local storage. */
+  navGroups: "moenotes:nav-groups",
+  /** The group the previous page belonged to, so entering a group from outside opens it once (session-scoped). */
+  navActiveGroup: "moenotes:nav-active-group",
+  /** The desktop drawer's scroll offset, restored across page loads (session-scoped). */
+  sidebarScroll: "moenotes:sidebar-scroll",
   filterDrawerOpen: "moenotes:filter-drawer-open",
   browserNoticeDismissed: "moenotes:browser-notice-dismissed",
   scrollPrefix: "moenotes:scroll:",
