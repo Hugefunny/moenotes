@@ -222,12 +222,22 @@ describe("song meta rows", () => {
 
   test("one row per chart, filtered by difficulty, band and attribute", () => {
     const index = buildMetricsIndex({ songs: [{ id: 1, gekisouMissions: [2, 2, 2], charts: [{ difficulty: "expert", scoreId: 13, level: 25, notes: { judged: 321 } }] }] });
-    const rows = songMetaRows(songs, index, { difficulties: ["expert"], bands: [], types: [] });
+    const rows = songMetaRows(songs, index, { difficulties: ["expert"], bands: [], types: [], missions: [] });
     expect(rows.map((row) => row.song.id)).toEqual([3, 1, 2, 4]);
     expect(rows[1]!.notes).toBe(321);
     expect(rows[1]!.missions).toEqual([2, 2, 2]);
     expect(rows[0]!.metrics).toBeNull();
-    expect(songMetaRows(songs, index, { difficulties: [], bands: [0], types: [] }).map((row) => row.chart.scoreId)).toEqual([40, 43]);
-    expect(songMetaRows(songs, index, { difficulties: [], bands: [], types: [2] })).toHaveLength(2);
+    expect(songMetaRows(songs, index, { difficulties: [], bands: [0], types: [], missions: [] }).map((row) => row.chart.scoreId)).toEqual([40, 43]);
+    expect(songMetaRows(songs, index, { difficulties: [], bands: [], types: [2], missions: [] })).toHaveLength(2);
+  });
+
+  test("a Gekisou mission filter keeps charts holding any picked mission", () => {
+    const index = buildMetricsIndex({ songs: [{ id: 1, gekisouMissions: [2, 2, 2], charts: [{ difficulty: "expert", scoreId: 13, level: 25 }] }] });
+    const withMissions = [{ ...songs[0]!, gekisouMissions: [1, 3, 1] } as MusicViewModel, ...songs.slice(1)];
+    const ids = (missions: (1 | 2 | 3)[]) => songMetaRows(withMissions, index, { difficulties: ["expert"], bands: [], types: [], missions }).map((row) => row.song.id);
+    expect(ids([3])).toEqual([3]);
+    expect(ids([2])).toEqual([1]);
+    expect(ids([2, 3])).toEqual([3, 1]);
+    expect(ids([])).toEqual([3, 1, 2, 4]);
   });
 });
