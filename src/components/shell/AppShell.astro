@@ -16,6 +16,7 @@ import type { AppLocale } from "@/config/locales";
 import { localizePath } from "@/i18n/routing";
 import { buildHeaderCrumbs } from "@/lib/route/header-crumbs";
 import { getBuildThemeBands } from "@/lib/masterdata/build-settings";
+import { buildSidebarScrollBootstrapScript } from "@/lib/settings/apply-theme";
 import type { BreadcrumbDetail } from "@/types/route";
 
 interface Props {
@@ -27,6 +28,8 @@ interface Props {
 const { locale, pathname, breadcrumbDetail } = Astro.props;
 const crumbs = buildHeaderCrumbs(pathname, locale, breadcrumbDetail);
 const activePath = breadcrumbDetail?.ancestors?.at(-1)?.path;
+// Restore the drawer's scroll offset before the first paint; hydration repeats it harmlessly.
+const sidebarScrollScript = buildSidebarScrollBootstrapScript();
 // Band colors for the settings' theme color choice (memoized per locale, so every page shares one lookup).
 const themeBands = await getBuildThemeBands(locale);
 ---
@@ -35,6 +38,7 @@ const themeBands = await getBuildThemeBands(locale);
 <BackgroundPattern />
 <TopAppBar client:load locale={locale} homeHref={localizePath("/", locale)} crumbs={crumbs} />
 <Sidebar client:load locale={locale} pathname={pathname} activePath={activePath} />
+<script is:inline set:html={sidebarScrollScript}></script>
 <FilterDrawerHost client:load locale={locale} pathname={pathname} />
 <main id="content" class="mn-shell-offset mx-auto min-h-screen max-w-[var(--mn-layout-max-width,120rem)] px-4 pb-16 pt-[calc(var(--md-app-bar-height,64px)+1rem)] transition-[padding] duration-300 ease-[var(--md-sys-motion-easing-emphasized)] md:pl-[calc(var(--mn-sidebar-offset,17rem)+var(--mn-filter-offset,0rem)+1.5rem)] md:pr-6 md:pt-[calc(var(--md-app-bar-height,64px)+1.5rem)]">
   <slot />

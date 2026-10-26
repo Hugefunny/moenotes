@@ -7,6 +7,13 @@
 
 export type NavGroupCollapsed = Record<string, boolean>;
 
+/** The id of the pre-paint stylesheet the head script injects (src/lib/settings/apply-theme.ts). */
+export const NAV_GROUPS_STYLE_ID = "mn-nav-groups";
+/** The id prefix of a group's body; `aria-controls` and the pre-paint stylesheet both point at it. */
+export const NAV_GROUP_LIST_PREFIX = "nav-group-";
+/** The chevron's per-group hook, so the pre-paint stylesheet can point it the right way. */
+export const NAV_GROUP_CHEVRON_ATTRIBUTE = "data-nav-chevron";
+
 export interface NavGroupEntry {
   /** The folds to render after this page load. */
   collapsed: NavGroupCollapsed;

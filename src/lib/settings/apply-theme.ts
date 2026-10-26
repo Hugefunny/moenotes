@@ -3,6 +3,7 @@ import { storageKeys } from "@/config/storage";
 import { HOME_LAYOUT_STORAGE_KEY, HOME_LAYOUT_STYLE_ID, HOME_MODULES } from "@/lib/home/layout";
 import { colorDeclarations, MD3_ROLES, roleChannelVariable, roleCssVariable, type Md3Colors } from "@/lib/md3/roles";
 import { ACCENT_CACHE_VERSION, accentCache, type AccentCache } from "@/lib/settings/accent";
+import { NAV_GROUP_CHEVRON_ATTRIBUTE, NAV_GROUP_LIST_PREFIX, NAV_GROUPS_STYLE_ID } from "@/lib/sidebar/nav-groups";
 import type { AppSettings, ColorScheme } from "@/types/settings";
 
 export function resolveColorScheme(colorScheme: ColorScheme): "light" | "dark" {
@@ -138,24 +139,57 @@ export function buildThemeBootstrapScript(): string {
 
 /**
  * Runs in the head before anything paints. The server always renders the navigation drawer fully expanded (its links
- * must work without JavaScript); when the reader folded groups, this holds the drawer back until React has applied
- * those folds (`src/components/shell/Sidebar.tsx` removes the attribute then). The timeout is the fallback for a
- * bundle that never hydrates: showing the expanded drawer beats hiding it forever.
+ * must work without JavaScript); when the reader folded groups, this injects a stylesheet that hides exactly those
+ * group bodies and points their chevrons the right way, so the very first paint already matches the stored folds.
+ * A group entered from outside is left expanded, matching `resolveNavGroupEntry` in src/lib/sidebar/nav-groups.ts.
+ *
+ * React removes the stylesheet once its own collapsed state is on the DOM (`src/components/shell/Sidebar.tsx`). The
+ * timeout is the fallback for a bundle that never hydrates: showing everything expanded beats leaving groups hidden.
  */
-export function buildNavGroupBootstrapScript(): string {
+export function buildNavGroupBootstrapScript(activeGroupId?: string): string {
   return `
 (function(){
   try {
     var saved = JSON.parse(localStorage.getItem(${JSON.stringify(storageKeys.navGroups)}) || 'null');
     if (!saved || typeof saved !== 'object' || Array.isArray(saved)) return;
+    var active = ${JSON.stringify(activeGroupId ?? "")};
+    var previous = null;
+    try { previous = sessionStorage.getItem(${JSON.stringify(storageKeys.navActiveGroup)}); } catch(e) {}
+    // The active group opens once when its page is entered from outside the group, so do not hide it here either.
+    var entering = !!active && previous !== active;
+    var css = '';
     for (var id in saved) {
-      if (saved[id] !== true) continue;
-      document.documentElement.dataset.navGroups = 'pending';
-      setTimeout(function(){
-        if (document.documentElement.dataset.navGroups === 'pending') delete document.documentElement.dataset.navGroups;
-      }, 4000);
-      break;
+      if (saved[id] !== true || id === '__proto__' || !/^[A-Za-z0-9_-]+$/.test(id) || (entering && id === active)) continue;
+      css += '#' + ${JSON.stringify(NAV_GROUP_LIST_PREFIX)} + id + '{display:none!important}';
+      css += '[' + ${JSON.stringify(NAV_GROUP_CHEVRON_ATTRIBUTE)} + '="' + id + '"] svg{rotate:0deg!important}';
     }
+    if (!css) return;
+    document.documentElement.dataset.navGroups = 'pending';
+    var style = document.createElement('style');
+    style.id = ${JSON.stringify(NAV_GROUPS_STYLE_ID)};
+    style.textContent = css;
+    document.head.appendChild(style);
+    setTimeout(function(){
+      var injected = document.getElementById(${JSON.stringify(NAV_GROUPS_STYLE_ID)});
+      if (injected && injected.parentNode) injected.parentNode.removeChild(injected);
+      if (document.documentElement.dataset.navGroups === 'pending') delete document.documentElement.dataset.navGroups;
+    }, 4000);
+  } catch(e) {}
+})();`;
+}
+
+/**
+ * Runs right after the server-rendered drawer, before the first paint. The drawer's scroll offset lives in session
+ * storage (src/components/shell/Sidebar.tsx); restoring it here keeps the list where the reader left it instead of
+ * starting at the top and jumping down once React hydrates.
+ */
+export function buildSidebarScrollBootstrapScript(): string {
+  return `
+(function(){
+  try {
+    var nav = document.querySelector('.mn-desktop-sidebar nav[data-sidebar-nav]');
+    var saved = parseInt(sessionStorage.getItem(${JSON.stringify(storageKeys.sidebarScroll)}) || '', 10);
+    if (nav && isFinite(saved) && saved > 0) nav.scrollTop = saved;
   } catch(e) {}
 })();`;
 }
