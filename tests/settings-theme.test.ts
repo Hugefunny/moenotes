@@ -1,7 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
+import { runInNewContext } from "node:vm";
+import { storageKeys } from "../src/config/storage";
 import { accentCache, ACCENT_CACHE_VERSION } from "../src/lib/settings/accent";
-import { buildThemeBootstrapScript } from "../src/lib/settings/apply-theme";
+import { buildNavGroupBootstrapScript, buildThemeBootstrapScript } from "../src/lib/settings/apply-theme";
 import { contrastRatio, MD3_ROLES, roleToKebab } from "../src/lib/md3/roles";
 import { MD3_DEFAULT_SEED, md3Schemes } from "../src/lib/md3/scheme";
 import { buildMd3ColorsCss } from "../src/lib/md3/tokens-css";
@@ -88,5 +90,39 @@ describe("material 3 schemes from band colors", () => {
     const committed = readFileSync(new URL("../src/styles/md3/colors.css", import.meta.url), "utf8").replace(/\r\n/g, "\n");
     expect(committed).toBe(buildMd3ColorsCss());
     for (const role of MD3_ROLES) expect(committed).toContain(`--md-sys-color-${roleToKebab(role)}:`);
+  });
+});
+
+describe("navigation drawer held back until stored folds are applied", () => {
+  function runBootstrap(stored: string | null) {
+    const dataset: Record<string, string> = {};
+    let timer: (() => void) | null = null;
+    runInNewContext(buildNavGroupBootstrapScript(), {
+      localStorage: { getItem: (key: string) => (key === storageKeys.navGroups ? stored : null) },
+      document: { documentElement: { dataset } },
+      setTimeout: (callback: () => void) => {
+        timer = callback;
+        return 1;
+      },
+    });
+    return { dataset, fireTimeout: () => timer?.() };
+  }
+
+  test("a folded group hides the drawer, and the timeout reveals it if React never does", () => {
+    const drawer = runBootstrap(JSON.stringify({ database: true, musics: false }));
+    expect(drawer.dataset.navGroups).toBe("pending");
+    drawer.fireTimeout();
+    expect(drawer.dataset.navGroups).toBeUndefined();
+  });
+
+  test("nothing folded leaves the server markup untouched", () => {
+    for (const stored of [null, "", "not json", "[]", JSON.stringify({ database: false }), JSON.stringify({ tools: "true" })]) {
+      expect(runBootstrap(stored).dataset.navGroups).toBeUndefined();
+    }
+  });
+
+  test("the script is valid JavaScript", () => {
+    expect(() => new Function(buildNavGroupBootstrapScript())).not.toThrow();
+    expect(buildNavGroupBootstrapScript()).toContain(JSON.stringify(storageKeys.navGroups));
   });
 });
