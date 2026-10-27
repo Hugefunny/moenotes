@@ -1,6 +1,6 @@
 import type { MusicViewModel, SongDifficultyModel } from "./data";
 import { MUSIC_OTHER_BAND } from "./filter";
-import { lookupMetrics, type ChartMetrics, type ChartMetricsIndex } from "./metrics";
+import { lookupMetrics, type ChartMetrics, type ChartMetricsIndex, type GekisouMission } from "./metrics";
 import type { MusicDifficulty } from "./difficulty";
 
 /** The song meta table's modes: Free Live figures, or those plus the Gekisou measures. */
@@ -25,6 +25,8 @@ export interface SongMetaFilters {
   bands: readonly number[];
   /** Attributes; empty: every one. */
   types: readonly number[];
+  /** Gekisou missions a chart must hold at least one of; empty: every chart. */
+  missions: readonly GekisouMission[];
 }
 
 /** One row per chart of the songs that pass the filters, in song order then difficulty order. */
@@ -37,12 +39,14 @@ export function songMetaRows(songs: readonly MusicViewModel[], metrics: ChartMet
     for (const chart of song.difficulties) {
       if (filters.difficulties.length && !filters.difficulties.includes(chart.difficulty)) continue;
       const figures = lookupMetrics(metrics, song.id, chart.difficulty, chart.scoreId);
+      const missions = song.gekisouMissions?.length ? song.gekisouMissions : figures?.missions ?? [];
+      if (filters.missions.length && !missions.some((mission) => filters.missions.includes(mission as GekisouMission))) continue;
       rows.push({
         song,
         chart,
         metrics: figures,
         notes: figures?.notes ?? chart.notesCount,
-        missions: song.gekisouMissions?.length ? song.gekisouMissions : figures?.missions ?? [],
+        missions,
       });
     }
   }

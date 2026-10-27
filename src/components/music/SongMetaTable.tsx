@@ -11,7 +11,7 @@ import type { MusicViewModel } from "@/lib/music/data";
 import { DIFFICULTY_CHIP_CLASSES, DIFFICULTY_SHORT_LABELS, MUSIC_DIFFICULTIES, type MusicDifficulty } from "@/lib/music/difficulty";
 import { MUSIC_OTHER_BAND, MUSIC_TYPES, hasOtherBandMusic, musicBandOptions } from "@/lib/music/filter";
 import { songMetaRows, type SongMetaMode, type SongMetaRow } from "@/lib/music/song-meta";
-import { formatBpm, formatDuration, formatNumber, formatPercent, GEKISOU_MISSION_KEYS, isGekisouMission } from "@/lib/music/metrics";
+import { formatBpm, formatDuration, formatNumber, formatPercent, GEKISOU_MISSION_KEYS, GEKISOU_MISSIONS, isGekisouMission, type GekisouMission } from "@/lib/music/metrics";
 import { useSongTitle } from "@/lib/music/title-preference";
 import { songTrack } from "@/lib/music/tracks";
 import { useChartMetrics } from "@/lib/music/use-chart-metrics";
@@ -28,7 +28,7 @@ interface Props {
 const MODES: readonly SongMetaMode[] = ["normal", "gekisou"];
 const dash = "—";
 
-/** Every chart as a row (song facts built in, figures from music-data.json), with mode, difficulty, band and attribute filters. */
+/** Every chart as a row (song facts built in, figures from music-data.json), with mode, difficulty, Gekisou mission, band and attribute filters. */
 export default function SongMetaTable({ locale, servers, initialSongs }: Props) {
   const { server, pickServer, items: songs } = useServerList(locale, servers, initialSongs);
   const { index: metrics, status } = useChartMetrics();
@@ -38,11 +38,12 @@ export default function SongMetaTable({ locale, servers, initialSongs }: Props) 
   const [difficulties, setDifficulties] = useState<MusicDifficulty[]>(["expert"]);
   const [bands, setBands] = useState<number[]>([]);
   const [types, setTypes] = useState<number[]>([]);
+  const [missions, setMissions] = useState<GekisouMission[]>([]);
   const [sort, setSort] = useState<DataTableSort | null>({ key: "level", direction: "desc" });
 
   const bandOptions = useMemo(() => musicBandOptions(songs), [songs]);
   const hasOtherBand = useMemo(() => hasOtherBandMusic(songs), [songs]);
-  const rows = useMemo(() => songMetaRows(songs, metrics, { difficulties, bands, types }), [songs, metrics, difficulties, bands, types]);
+  const rows = useMemo(() => songMetaRows(songs, metrics, { difficulties, bands, types, missions }), [songs, metrics, difficulties, bands, types, missions]);
 
   const levelOf = (row: SongMetaRow) => row.chart.displayLevel;
   const columns: DataTableColumn<SongMetaRow>[] = [
@@ -138,6 +139,16 @@ export default function SongMetaTable({ locale, servers, initialSongs }: Props) 
               {MUSIC_DIFFICULTIES.map((difficulty) => (
                 <FilterButton key={difficulty} active={difficulties.includes(difficulty)} onClick={() => setDifficulties((current) => toggleArrayItem(current, difficulty))}>
                   {t(locale, `music.difficultyLevels.${difficulty}`)}
+                </FilterButton>
+              ))}
+            </div>
+          </FilterSection>
+          <FilterSection title={t(locale, "music.gekisou.title")}>
+            <div className="flex flex-wrap gap-2">
+              <FilterButton active={missions.length === 0} onClick={() => setMissions([])}>ALL</FilterButton>
+              {GEKISOU_MISSIONS.map((mission) => (
+                <FilterButton key={mission} active={missions.includes(mission)} onClick={() => setMissions((current) => toggleArrayItem(current, mission))}>
+                  {t(locale, `music.gekisou.missions.${GEKISOU_MISSION_KEYS[mission]}`)}
                 </FilterButton>
               ))}
             </div>
