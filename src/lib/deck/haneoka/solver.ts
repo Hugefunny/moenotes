@@ -1,5 +1,5 @@
 import { parseRequest } from "./clock";
-import { adaptData, table, type DeckData } from "./data";
+import { adaptData, optionalTable, table, type DeckData } from "./data";
 import { adaptAccount, type AccountInput } from "./account";
 import { adaptRequest, CAPABILITIES, HANEOKA_COMMIT, HANEOKA_PATCH_SHA, type RecommendationRequest } from "./request";
 import { HaneokaWasm } from "./wasm";
@@ -107,7 +107,7 @@ export class DeckSolver {
     const songs = "songs" in converted.goal ? converted.goal.songs ?? [] : [];
     const gekiso = converted.goal.kind === "gekiso" || converted.goal.kind === "event" && "gekiso" in converted.goal;
     const musics = new Map((gekiso ? table(this.data, "MasterLiveMusic") : []).map(row => [row.id, row]));
-    const arenas = new Map((request.goal.kind === "arenaLive" ? table(this.data, "MasterArenaMusic") : []).map(row => [row.id, row]));
+    const arenas = new Map((request.goal.kind === "arenaLive" ? optionalTable(this.data, "MasterArenaMusic") : []).map(row => [row.id, row]));
     const luck = gekiso && songs.some(song => {
       if (!song) return false;
       const arena = arenas.get("arenaMusicId" in song ? song.arenaMusicId : undefined);

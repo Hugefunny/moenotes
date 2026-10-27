@@ -1,5 +1,5 @@
 import { rewardActive } from "./clock";
-import { chartSource, integer, table, type DeckData } from "./data";
+import { chartSource, integer, optionalTable, table, type DeckData } from "./data";
 export interface RewardTermInput { kind: string; eventId?: number; resourceType?: number; resourceId?: number; weight: number }
 export interface RecommendationRequest {
   format: string;
@@ -55,7 +55,7 @@ function adaptSingleRequest(data: DeckData, request: RecommendationRequest) {
     throw new Error("haneoka-power-event");
   const difficulty = ["easy", "normal", "hard", "expert"].indexOf(request.goal.difficulty ?? "");
   let musicId: unknown = request.goal.musicId, challengeEventId: number | null = null;
-  const arena = kind === "arenaLive" ? table(data, "MasterArenaMusic").find(row => row.id === request.goal.arenaMusicId) : null;
+  const arena = kind === "arenaLive" ? optionalTable(data, "MasterArenaMusic").find(row => row.id === request.goal.arenaMusicId) : null;
   if (kind === "arenaLive") {
     if (!arena) throw new Error("haneoka-arena-song");
     musicId = arena.liveMusicId;

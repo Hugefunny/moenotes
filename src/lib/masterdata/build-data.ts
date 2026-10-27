@@ -471,7 +471,7 @@ export function gachaDetailsOn(server: GameServer, locale: AppLocale): Promise<G
       table<RawGachaBonusLot>("MasterGachaBonusLot.json", server),
       table<RawGachaStepUp>("MasterGachaStepUp.json", server),
       table<RawGachaGimmick>("MasterGachaGimmick.json", server),
-      table<RawGachaViewLabel>("MasterGachaViewLabel.json", server),
+      table<RawGachaViewLabel>("MasterGachaViewLabel.json", server).catch(() => ({ _allData: [] as RawGachaViewLabel[] })),
       rewardResolverOn(server, locale),
     ]);
     return normalizeGachas(gachas._allData, lots._allData, prizes._allData, views._allData, products._allData, cards, supportCards, items, textTable._allData, locale, {
@@ -780,7 +780,7 @@ export function getBuildDeckEvents(locale: AppLocale): Promise<{ server: GameSer
 /** Arena songs use their own scene IDs, never ordinary song IDs. */
 export function getBuildDeckArenas(): Promise<{ server: GameServer; songs: DeckArenaMusic[] }[]> {
   return memo("deck-arenas", async () => (await eachServer(async server => {
-    const rows = await table<{ id: number; liveMusicId: number }>("MasterArenaMusic.json", server);
+    const rows = await table<{ id: number; liveMusicId: number }>("MasterArenaMusic.json", server).catch(() => ({ _allData: [] as Array<{ id: number; liveMusicId: number }> }));
     return rows._allData.map(row => ({ id: row.id, musicId: row.liveMusicId }));
   })).map(([server, songs]) => ({ server, songs })));
 }

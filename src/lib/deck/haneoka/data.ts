@@ -22,6 +22,9 @@ export function table(data: DeckData, name: string, required: string[] = []): Ro
     return Object.fromEntries(t.columns.map((key, i) => [key.replace(/^_/, ""), row[i]]));
   });
 }
+export function optionalTable(data: DeckData, name: string, required: string[] = []): Row[] {
+  return data.master[name] === undefined ? [] : table(data, name, required);
+}
 export function integer(value: unknown, field: string): number {
   if (typeof value !== "number" || !Number.isInteger(value) || value < -2147483648 || value > 2147483647)
     throw new Error("haneoka-integer:" + field);
@@ -87,7 +90,7 @@ export function adaptData(data: DeckData, datasetId: string) {
     gekisou: { missionTypes: [row.gekisouMission1, row.gekisouMission2, row.gekisouMission3] },
   })));
   const arenaIds = new Set<number>();
-  for (const arena of rows("MasterArenaMusic")) {
+  for (const arena of optionalTable(data, "MasterArenaMusic")) {
     const id = integer(arena.id, "arenaId"), base = songs[String(arena.liveMusicId)];
     if (id <= 0 || !base || arenaIds.has(id) || songs[String(-id)]) throw new Error("haneoka-arena-song");
     arenaIds.add(id);
