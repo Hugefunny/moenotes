@@ -25,6 +25,7 @@ export interface DeckWorkerRun {
   accountJson: string;
   requestJson: string;
   progressIntervalMs: number;
+  seedJson?: string;
 }
 export type DeckWorkerCommand = DeckWorkerInit | DeckWorkerRun;
 

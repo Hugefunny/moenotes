@@ -71,6 +71,8 @@ bun run preview
 bun run lint
 ```
 
+Haneoka 引擎接入开发见 [接入说明](docs/haneoka-engine.md)，包含锁定版本、构建和本地预览方法。
+
 ## 提交与发版
 
 提交信息遵循 [Conventional Commits](https://www.conventionalcommits.org/zh-hans/)，并且用英文书写（标题与正文不能含中日韩文字或全角标点），例如 `feat(events): add exchange detail page`、`fix: stop dark mode flicker`。`bun install` 会启用仓库自带的 commit-msg 钩子，不合规的提交信息会被拒绝；CI 也会检查 Pull Request 标题、PR 内的提交和推送到 `main` 的提交。

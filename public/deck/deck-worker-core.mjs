@@ -102,6 +102,7 @@ function invalidRun(message) {
   if (typeof message.jobId !== 'string' || !message.jobId || !Number.isSafeInteger(message.inputRevision)) return 'Invalid job binding';
   if (typeof message.accountJson !== 'string' || typeof message.requestJson !== 'string') return 'Solver input must be JSON text';
   if (typeof message.progressIntervalMs !== 'number' || !Number.isFinite(message.progressIntervalMs) || message.progressIntervalMs < 0) return 'Invalid progressIntervalMs';
+  if (message.seedJson !== undefined && typeof message.seedJson !== 'string') return 'Invalid continuation';
   return null;
 }
 
@@ -178,7 +179,7 @@ export function createDeckWorkerCore({
       let DeckSolver, created;
       try { DeckSolver = await loadSolver({ glue, wasm }); }
       catch (error) { throw new Failure('init', 'Engine: ' + describe(error)); }
-      try { created = new DeckSolver(new Uint8Array(deckData)); }
+      try { created = new DeckSolver(new Uint8Array(deckData), { datasetId: message.deckDataSha256 }); }
       catch (error) { throw new Failure('init', 'DeckSolver: ' + describe(error)); }
       const datasetId = typeof created.datasetId === 'string' ? created.datasetId : '';
       if (datasetId !== message.deckDataSha256) {
@@ -215,7 +216,7 @@ export function createDeckWorkerCore({
         if (typeof progressJson !== 'string') return;
         try { post({ type: 'progress', jobId, inputRevision, resultJson: progressJson }); }
         catch { /* The page drops a Worker it can no longer reach. */ }
-      }, message.progressIntervalMs);
+      }, message.progressIntervalMs, message.seedJson);
     } catch (error) {
       crashed = true;
       post({ type: 'failed', ...binding, code: 'runtime', message: describe(error) });

@@ -84,7 +84,9 @@ against the message before using it. Then it:
    then checks the commit against `modelCommit` (unless `null`);
 2. imports the glue, a wasm-bindgen `--target web` ES module, from a `blob:` URL of its verified bytes, and calls its
    default export with `{ module_or_path: wasmBytes }`, so the WASM is never fetched again unverified;
-3. constructs `new DeckSolver(deckDataBytes)` with the deck data as a `Uint8Array`;
+3. constructs `new DeckSolver(deckDataBytes, { datasetId: deckDataSha256 })` with the verified data as a
+   `Uint8Array`; existing wasm-bindgen engines ignore the extra options argument. The
+   [Haneoka development adapter](haneoka-engine.md) binds its context to this verified hash;
 4. checks that `solver.datasetId`, the lowercase hex SHA-256 of the deck data bytes, equals `deckDataSha256`;
 5. reads `solver.capabilities()` as JSON text, when the solver has it, and returns the dataset catalogue in `ready`.
 
@@ -193,3 +195,113 @@ other files is refused, and a repeated identical `init` answers with the same `r
   as `stopped` with its last `progress` result (or `null`), which the page shows as the answer. A new `run` while one
   is running does the same, resolving the old job as `superseded`. Stopping a job that still waits for `ready` keeps
   the Worker for the next run.
+
+
+### Haneoka reward extension identity
+
+The development Haneoka runtime records the pinned upstream commit plus `model.patchSha256` and a downloadable
+`model.patch` file entry. `patches/haneoka-rewards.patch` adds exact reward sums, primary CP ranking, ordinary
+costs 6 through 9, ordinary / challenge Skip reward contexts, and exact combined reward vectors. Answers retain
+`engine.patchSha256` for this model identity. The source dataset identity and production provider commit checks remain the original ones.
+
+The adapter consumes the existing `jp` / `intl` account envelopes and the page's numeric Int64 clock tokens.
+Reward projection isolates saved balances but preserves the reference event window. The adapter retains tick
+precision during parsing; Skip progress includes deterministic Skip score and exact payoff just like final output.
+
+The adapter advertises `combinedMetric` for the existing page's weighted expected-sum requests (three levels,
+nine terms, weights 1 through 1,000,000,000). Native comparison is lexicographic with exact integer sums;
+results and progress include `team.levels` with exact per-level and per-term payoffs. Top-K distinguishes
+leaders and member-to-Snapshot assignments. A time limit retains the available formations without proof.
+The page's automatic CP conversion uses its existing challenge-rate request, exact payoff/cost extraction,
+and subsequent combined request. Played combined rewards remain expected-only. Ordinary and Challenge Skip
+combined rewards also accept maximum, as do single ordinary Skip PT/items/CP and Challenge Skip PT/items.
+One deterministic settlement gives the same payoff as expected, with denominator 1. The answer parser allows
+combined maximum only for Skip. Challenge routes cannot earn CP. The existing page normalizes Skip to expected.
+Played maximum rewards and other event scenes remain outside this adapter's advertised capability.
+Single PT/item requests compare payoff then power in one complete-pool search; they do not implicitly rank
+the other reward or played score. Conservative coupled bounds are cached within each assignment, and ordered
+matching supplies remaining power and bonus upper bounds. Single Skip CP is constant by result grade and ranks equal-payoff teams by power.
+
+The adapter also accepts ordinary / challenge Skip `score` requests and power with one selected event's
+parameter bonuses. Skip score has one deterministic result and no skill-order statistics; expected and maximum
+aggregation select the same value. Parameter bonuses do not change normal song typing. Native search compares
+Skip score directly, and progress retains the same score field as final output.
+
+### Haneoka preparation and early candidates
+
+The development adapter uses one absolute request deadline, including validation and proposal generation.
+Free combined rewards may use a native score search with a 100 ms budget to propose seeds; every seed is evaluated
+by the original full reward objective. Exact multi-level upper vectors prune only against `k` retained legal
+formations. A separate first-level stage may fix a prefix only after proving K physical formations share its
+exact optimum. Otherwise it supplies seeds to the original objective. The remaining-level search retains the
+complete pool and checks the fixed certificate on every accepted exact candidate.
+
+For LUCK Gekisou, one legal proposal is scored through native fixed-team replay before full preparation. Other
+Gekisou requests enter native search directly. The replay uses the requested accuracy and expected/maximum
+aggregation and leaves the full-search cache intact. Early candidates do not carry proof into the full request.
+Frame replay and order completion also check the absolute deadline, including periodic MISS replay. Interruption
+retains completed candidates with incomplete proof and unknown counters/bound. The same context can search again.
+LUCK distribution frames and bootstrap replay also observe the deadline. Fallible context construction returns
+deadline errors without turning them into runtime panics, and interrupted work is not cached as complete.
+The adapter reserves up to 40 ms for LUCK job boundaries and finalization. Preparation and finalization remain
+cooperative, so the budget is not a hard wall-clock cutoff. See [the full-pool report](haneoka-performance.md) for measured overhead.
+
+Skip reward grades also accept the source model's numeric and comma-separated named enum forms. A missing
+settlement row for the parsed grade is an invalid request, rather than a zero-reward result.
+
+### Played maximum rewards
+
+The Haneoka development adapter advertises single PT and event-item maximum for Free and Challenge Live.
+The existing page producer and Worker protocol carry these requests unchanged. The native engine compares
+the largest settlement across 120 orders, then power, and returns the first canonical order achieving it.
+Progress and final output use one selected score/payoff with exact denominator 1, `orders: null`, and a
+`bestOrder` containing score, payoff and member order. Expected rewards keep their 120-order mean statistics.
+Played combined maximum remains outside the advertised capability; Free CP maximum is supported as described below. Skip keeps its
+deterministic one-settlement path. The production provider remains unchanged.
+
+
+### Battle and Mission event rewards
+
+The Haneoka development adapter accepts single expected/maximum PT, event items and CP, plus expected combined rewards, for Battle/Mission/Arena.
+Battle/Arena carry the page's explicit `room` policy; Mission uses the solo result rule. Existing page-produced
+requests, account coverage, budgets and Worker lifecycle are retained. Non-LUCK payoff certificates cover
+all 120 skill orders. LUCK returns a four-root mean with an all-grade support interval, `exact: null`, no
+order statistics, incomplete proof and `exitReason: "sampled"`; maximum additionally names the order with the largest mean over roots; the roots are recorded in `rewardSampling`.
+This is the donor's finite-root route, not the published model's complete probability-law solver.
+
+The optional `combinedMetric.goals` capability lists scenes that support combined objectives. Omission
+preserves legacy providers' behavior; a malformed list disables only the combined capability. The page
+checks the main scene and an automatic challenge-rating scene against this scope. The Haneoka scope now includes all six supported live/Skip scenes. Played combined maximum remains unsupported. The production provider is unchanged.
+
+
+### Free Live maximum CP
+
+The Haneoka adapter now advertises `challengePoints` under `aggregations.maximum.freeLive`.
+The existing page request selects maximum CP over all 120 skill orders, then power. `bestOrder` contains
+the first canonical order earning that maximum CP. Its played score and CP payoff both have exact
+denominator 1; order summary statistics are null. Expected CP retains mean payoff and 120-order statistics.
+The final hash-bound bundled Worker is checked at the page's default five-team count. Expiry preserves
+the candidates and incomplete proof state. No Worker protocol fields or production provider are changed.
+
+
+### Cross-song scope and candidate continuation
+
+The optional capabilities `crossSong: true` and `resume: true` independently enable the corresponding page
+controls. Providers omitting them keep the existing single-song lifecycle. Protocol version remains
+`moenotes.deck-worker/1`; `run.seedJson?: string` is optional and is forwarded as the fifth argument to
+`recommend(accountJson, requestJson, progress, progressIntervalMs, seedJson)`. Existing JavaScript and
+wasm-bindgen providers ignore the extra argument.
+
+Haneoka cross-song goals carry one validated ID list (`musicIds`, `challengeMusicIds` or `arenaMusicIds`).
+The producer adds the scope without parsing and rounding existing Int64 clock tokens. Responses preserve
+`teams[].song: {musicId, difficulty}` and `result.coverage: {covered, total, proven}` through the answer parser.
+All supplied charts remain eligible even when time expires before complete coverage.
+
+Raw progress/final output includes `continuation.teams`, containing up to K retained formations per song
+and their song bindings. Superseded progress candidates do not enlarge later tokens. The page
+stores this raw text alongside the frozen account/request and CP rating, and supplies it when continuing
+the same inputs. Haneoka re-scores candidates; old values and proof flags cannot certify a new request.
+The Worker remains synchronous inside its dedicated thread; Stop terminates it and keeps the last page
+progress. A new Worker verifies the same data/runtime hashes before continuing. Rebuilding local runtime
+files during a visit requires reloading the preview descriptor; a stale descriptor correctly fails integrity.
+The production runtime provider and publication process remain unchanged.

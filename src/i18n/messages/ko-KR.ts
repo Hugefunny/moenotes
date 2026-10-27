@@ -570,6 +570,11 @@ export const koKR = {
     "othersAverage": "방의 다른 플레이어 평균 점수",
     "othersAverageSame": "비워 두면 내 점수와 같음",
     "solver": {
+      "allSongs": "모든 곡",
+      "resumeSearch": "검색 계속",
+      "songCoverage": "곡: {n}/{total}",
+
+      "haneokaAttribution": "팀 편성 알고리즘 제공: Haneoka",
       "eventItemsUnsupported": "현재 엔진은 정확한 결과 등급에 따른 이벤트 배지 계산을 지원하지 않습니다.",
       "eventItemRewardsUnsupported": "이 모드의 이벤트 보상 데이터는 지원되지 않습니다. 등급마다 보상 행이 정확히 하나이며 확률 표식이 10000이어야 합니다.",
       "maximumLabel": {"score": "최적 순서의 평균 점수", "challengePoints": "최적 순서의 평균 획득 CP", "eventPoints": "최적 순서의 평균 PT", "eventItems": "최적 순서의 평균 배지"},

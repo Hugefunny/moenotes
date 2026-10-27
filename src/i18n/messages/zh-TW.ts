@@ -571,6 +571,11 @@ export const zhTW = {
     "othersAverage": "房間裡其他人的平均分",
     "othersAverageSame": "留空表示與你同分",
     "solver": {
+      "allSongs": "全部歌曲",
+      "resumeSearch": "繼續搜尋",
+      "songCoverage": "歌曲：{n}/{total}",
+
+      "haneokaAttribution": "組卡演算法來自 Haneoka",
       "eventItemsUnsupported": "目前引擎不支援依確切結算評級計算活動徽章。",
       "eventItemRewardsUnsupported": "目前場景的活動獎勵資料不受支援：每個評級必須恰好有一條獎勵，且機率標記為 10000。",
       "maximumLabel": {"score": "最佳順序平均分數", "challengePoints": "最佳順序平均新增 CP", "eventPoints": "最佳順序平均 PT", "eventItems": "最佳順序平均徽章"},

@@ -15,6 +15,7 @@ export interface DeckOrderStat { score: number; order: number[] }
 export interface DeckTeam {
   rank: number;
   rankCertified: boolean;
+  song?: { musicId: number; difficulty: string };
   leader: DeckPair;
   others: DeckPair[];
   power: number;
@@ -30,12 +31,14 @@ export interface DeckOptimality { proven: boolean; lowerBound: number | null; up
 export interface DeckIssue { path: string; code: string; message: string }
 export type DeckPhase = "preprocess" | "search" | "proof" | "done";
 export interface DeckAnswer {
+  engine?: { name: "Haneoka"; commit: string; patchSha256?: string };
   final: boolean;
   status: "ok" | "incomplete" | "invalid" | "failed";
   missing: DeckIssue[];
   errors: DeckIssue[];
   result: null | {
     phase: DeckPhase;
+    coverage?: { covered: number; total: number; proven: number };
     elapsedMs: number | null;
     optimality: DeckOptimality;
     teams: DeckTeam[];
@@ -96,6 +99,7 @@ function team(raw: unknown, index: number, inheritedRankProof: boolean, levels: 
   if (levels && !teamValue?.payoff) throw new Error("Missing reward plan payoff");
   return { rank: num(raw.rank) ?? index + 1, rankCertified: raw.rankCertified === undefined ? inheritedRankProof : raw.rankCertified === true, leader: pair(raw.leader), others: raw.others.map(pair), power: num(raw.power) ?? 0, value: teamValue, orders,
     ...(levels ? { levels: teamLevels(raw.levels, levels) } : {}),
+    ...(record(raw.song) && Number.isInteger(raw.song.musicId) && typeof raw.song.difficulty === "string" ? { song: { musicId: raw.song.musicId as number, difficulty: raw.song.difficulty } } : {}),
     bestOrder: record(raw.bestOrder) ? stat(raw.bestOrder) : null,
     layout: { members: layout.members.map(int), snaps: layout.snaps.map(item => item === null ? null : int(item)) } };
 }
@@ -118,10 +122,11 @@ export function parseDeckAnswer(json: string): DeckAnswer {
     if (r.aggregation !== undefined && r.aggregation !== "expected" && r.aggregation !== "maximum") throw new Error("Unknown result aggregation");
     const metric = record(r.metric) ? r.metric : {};
     const levels = metric.kind === "combined" ? planLevels(metric.levels) : null;
-    if (levels && r.aggregation === "maximum") throw new Error("Invalid reward plan result");
+    if (levels && r.aggregation === "maximum" && (!record(r.goal) || r.goal.kind !== "skip")) throw new Error("Invalid reward plan result");
     result = {
       ...(levels ? { levels } : {}),
       phase, elapsedMs: num(r.elapsedMs),
+      ...(record(r.coverage) ? { coverage: { covered: int(r.coverage.covered), total: int(r.coverage.total), proven: int(r.coverage.proven) } } : {}),
       aggregation: r.aggregation === "maximum" ? "maximum" : "expected",
       goalKind: record(r.goal) && typeof r.goal.kind === "string" ? r.goal.kind : null,
       exitReason: typeof r.exitReason === "string" ? r.exitReason : null,
@@ -133,7 +138,7 @@ export function parseDeckAnswer(json: string): DeckAnswer {
       coversAllOwnedCards: account.coversAllOwnedCards !== false,
     };
   }
-  return { final: raw.final === true, status, missing: issues(raw.missing), errors: issues(raw.errors), result };
+  return { ...(record(raw.engine) && raw.engine.name === "Haneoka" && typeof raw.engine.commit === "string" ? { engine: { name: "Haneoka" as const, commit: raw.engine.commit, ...(typeof raw.engine.patchSha256 === "string" && /^[a-f0-9]{64}$/.test(raw.engine.patchSha256) ? { patchSha256: raw.engine.patchSha256 } : {}) } } : {}), final: raw.final === true, status, missing: issues(raw.missing), errors: issues(raw.errors), result };
 }
 
 /**

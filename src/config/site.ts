@@ -34,6 +34,9 @@ export interface SiteConfig {
 }
 
 export const haneokaUrl = "https://haneoka.org";
+export const haneokaEngineRepository = "https://github.com/haneoka-gakuen/ournotes-team-builder";
+export const haneokaEngineDocument = (commit: string, file: "LICENSE" | "NOTICE") =>
+  new URL("blob/" + commit + "/" + file, haneokaEngineRepository + "/").href;
 
 export const siteConfig: SiteConfig = {
   name: "Moenotes",
