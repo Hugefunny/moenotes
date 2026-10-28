@@ -21,10 +21,14 @@ browser ── bdon.moe ── moenotes serve (server/, Go) ── static build
   `/api/auth/logout`, `/api/me`). `src/lib/account/client.ts` reads `/api/me`
   (`{"user": {"name", "username", "picture"} | null}`) once per page load. Signing in and out are full-page
   navigations: a link to the login URL with the current path and locale, and a form POST to the logout path.
-- **Header.** `src/components/shell/AccountButton.tsx` shows a sign-in button, or the user's avatar (the name's
-  initial when there is none or it fails to load) with a sign-out menu. Without the API (a static preview, `astro
-  dev` without starmoe-api, or the API is down) `/api/me` fails and the button stays hidden, so the site deploys
-  independently of the API.
+- **Header.** `src/components/shell/SidebarAccount.tsx` (the foot of the navigation drawer) shows the sign-in row,
+  or the user's avatar (the name's initial when there is none or it fails to load) with a sign-out menu. Both rows
+  are in the server markup, so the drawer's foot has its final height from the first paint. `/api/me` answers after
+  the first paint, so its answer is recorded (`moenotes:account-state`) and the pre-paint script
+  (`src/lib/account/bootstrap.ts`) picks the row and writes the cached name and initial into it: a signed-in reader
+  sees their own row immediately instead of a sign-in row that swaps a moment later. Without the API (a static
+  preview, `astro dev` without starmoe-api, or the API is down) `/api/me` fails and the row is dropped — from the
+  first frame of the next page — so the site deploys independently of the API.
 - **Security settings.** Password, email, two-step verification, linked accounts and signed-in devices belong to
   the passport, not to one site, so the account page only links to Logto's prebuilt Account Center
   (`passportAccountUrl` in `src/config/account.ts`). Password and email open in the same tab and come back to the

@@ -50,6 +50,7 @@ export const routeRegistry = [
         path: "/characters",
         labelKey: "nav.items.characters",
         component: "characters",
+        filterTitleKey: "characters.filterTitle",
         seo: {
           titleKey: "seo.characters.title",
           descriptionKey: "seo.characters.description",
@@ -83,6 +84,7 @@ export const routeRegistry = [
         path: "/cards",
         labelKey: "nav.items.cards",
         component: "cards",
+        filterTitleKey: "cards.filterTitle",
         seo: {
           titleKey: "seo.cards.title",
           descriptionKey: "seo.cards.description",
@@ -116,6 +118,7 @@ export const routeRegistry = [
         path: "/support-cards",
         labelKey: "nav.items.supportCards",
         component: "support-cards",
+        filterTitleKey: "supportCards.filterTitle",
         seo: {
           titleKey: "seo.supportCards.title",
           descriptionKey: "seo.supportCards.description",
@@ -149,6 +152,7 @@ export const routeRegistry = [
         path: "/stamps",
         labelKey: "nav.items.stamps",
         component: "stamps",
+        filterTitleKey: "stamps.filterTitle",
         seo: {
           titleKey: "seo.stamps.title",
           descriptionKey: "seo.stamps.description",
@@ -164,6 +168,7 @@ export const routeRegistry = [
         path: "/titles",
         labelKey: "nav.items.titles",
         component: "titles",
+        filterTitleKey: "titles.filterTitle",
         seo: {
           titleKey: "seo.titles.title",
           descriptionKey: "seo.titles.description",
@@ -179,6 +184,7 @@ export const routeRegistry = [
         path: "/backgrounds",
         labelKey: "nav.items.backgrounds",
         component: "backgrounds",
+        filterTitleKey: "backgrounds.filterTitle",
         seo: {
           titleKey: "seo.backgrounds.title",
           descriptionKey: "seo.backgrounds.description",
@@ -194,6 +200,7 @@ export const routeRegistry = [
         path: "/comics",
         labelKey: "nav.items.comics",
         component: "comics",
+        filterTitleKey: "comics.filterTitle",
         seo: {
           titleKey: "seo.comics.title",
           descriptionKey: "seo.comics.description",
@@ -209,6 +216,7 @@ export const routeRegistry = [
         path: "/items",
         labelKey: "nav.items.items",
         component: "items",
+        filterTitleKey: "items.filterTitle",
         seo: {
           titleKey: "seo.items.title",
           descriptionKey: "seo.items.description",
@@ -243,6 +251,7 @@ export const routeRegistry = [
         path: "/band-items",
         labelKey: "nav.items.bandItems",
         component: "band-items",
+        filterTitleKey: "bandItems.filterTitle",
         seo: {
           titleKey: "seo.bandItems.title",
           descriptionKey: "seo.bandItems.description",
@@ -308,6 +317,7 @@ export const routeRegistry = [
         path: "/music",
         labelKey: "nav.items.music",
         component: "music",
+        filterTitleKey: "music.filterTitle",
         seo: {
           titleKey: "seo.music.title",
           descriptionKey: "seo.music.description",
@@ -422,6 +432,7 @@ export const routeRegistry = [
         path: "/events/list",
         labelKey: "nav.items.eventList",
         component: "event-list",
+        filterTitleKey: "events.filterTitle",
         seo: {
           titleKey: "seo.eventList.title",
           descriptionKey: "seo.eventList.description",
@@ -455,6 +466,7 @@ export const routeRegistry = [
         path: "/rewards",
         labelKey: "nav.items.rewards",
         component: "rewards",
+        filterTitleKey: "rewards.filterTitle",
         seo: {
           titleKey: "seo.rewards.title",
           descriptionKey: "seo.rewards.description",
@@ -523,6 +535,7 @@ export const routeRegistry = [
         path: "/gacha",
         labelKey: "nav.items.gacha",
         component: "gacha",
+        filterTitleKey: "gacha.filterTitle",
         seo: {
           titleKey: "seo.gacha.title",
           descriptionKey: "seo.gacha.description",
@@ -621,6 +634,7 @@ export const routeRegistry = [
         path: "/shop",
         labelKey: "nav.items.shop",
         component: "shop",
+        filterTitleKey: "shop.filterTitle",
         seo: {
           titleKey: "seo.shop.title",
           descriptionKey: "seo.shop.description",
@@ -687,6 +701,7 @@ export const routeRegistry = [
         path: "/calendar",
         labelKey: "nav.items.calendar",
         component: "calendar",
+        filterTitleKey: "calendar.filterTitle",
         seo: {
           titleKey: "seo.calendar.title",
           descriptionKey: "seo.calendar.description",
@@ -718,6 +733,7 @@ export const routeRegistry = [
         path: "/story/main",
         labelKey: "nav.items.mainStory",
         component: "story-main",
+        filterTitleKey: "story.categories.main",
         seo: {
           titleKey: "seo.mainStory.title",
           descriptionKey: "seo.mainStory.description",
@@ -733,6 +749,7 @@ export const routeRegistry = [
         path: "/story/event",
         labelKey: "nav.items.eventStory",
         component: "story-event",
+        filterTitleKey: "story.categories.event",
         seo: {
           titleKey: "seo.eventStory.title",
           descriptionKey: "seo.eventStory.description",
@@ -748,6 +765,7 @@ export const routeRegistry = [
         path: "/story/friendship",
         labelKey: "nav.items.friendshipStory",
         component: "story-friendship",
+        filterTitleKey: "story.categories.friendship",
         seo: {
           titleKey: "seo.friendshipStory.title",
           descriptionKey: "seo.friendshipStory.description",
@@ -764,6 +782,7 @@ export const routeRegistry = [
         path: "/story/birthday",
         labelKey: "nav.items.birthdayStory",
         component: "story-birthday",
+        filterTitleKey: "story.categories.birthday",
         seo: {
           titleKey: "seo.birthdayStory.title",
           descriptionKey: "seo.birthdayStory.description",
@@ -779,6 +798,7 @@ export const routeRegistry = [
         path: "/story/other",
         labelKey: "nav.items.otherStory",
         component: "story-other",
+        filterTitleKey: "story.categories.other",
         seo: {
           titleKey: "seo.otherStory.title",
           descriptionKey: "seo.otherStory.description",
@@ -844,6 +864,7 @@ export const routeRegistry = [
         path: "/tools/live2d",
         labelKey: "nav.items.live2dViewer",
         component: "live2d-viewer",
+        filterTitleKey: "live2d.filterTitle",
         seo: {
           titleKey: "seo.live2dViewer.title",
           descriptionKey: "seo.live2dViewer.description",
@@ -874,6 +895,7 @@ export const routeRegistry = [
         path: "/tools/asset-viewer",
         labelKey: "nav.items.assetViewer",
         component: "asset-viewer",
+        filterTitleKey: "assetBrowser.filterTitle",
         seo: {
           titleKey: "seo.assetViewer.title",
           descriptionKey: "seo.assetViewer.description",
