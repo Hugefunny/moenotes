@@ -7,6 +7,8 @@ export const storageKeys = {
   navActiveGroup: "moenotes:nav-active-group",
   /** The desktop drawer's scroll offset, restored across page loads (session-scoped). */
   sidebarScroll: "moenotes:sidebar-scroll",
+  /** The last `/api/me` answer ("signed-in" / "signed-out" / "unavailable"), so the drawer's foot paints correctly. */
+  accountState: "moenotes:account-state",
   filterDrawerOpen: "moenotes:filter-drawer-open",
   browserNoticeDismissed: "moenotes:browser-notice-dismissed",
   scrollPrefix: "moenotes:scroll:",

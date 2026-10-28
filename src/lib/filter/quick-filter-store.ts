@@ -121,6 +121,9 @@ function syncDocumentFilterState() {
   const root = document.documentElement;
   // The docked filter sheet's width becomes --mn-filter-offset (src/styles/tokens.css).
   root.dataset.filterDrawer = isDockedOpen ? "open" : "closed";
+  // The filter button hides while the sheet is open, modal or docked; the head script sets the same before paint
+  // (src/lib/filter/bootstrap.ts), so the button is not shown only to disappear when an open sheet comes back.
+  root.dataset.filterOpen = open ? "true" : "false";
 }
 
 export function registerFilters(title: string, content: ReactNode) {

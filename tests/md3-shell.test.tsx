@@ -1,13 +1,15 @@
 import { describe, expect, test } from "bun:test";
 import { renderToString } from "react-dom/server";
 import Sidebar from "../src/components/shell/Sidebar";
+import FilterDrawerHost from "../src/components/shell/filter-drawer/FilterDrawerHost";
 import CommandPalette from "../src/components/shell/CommandPalette";
 import KeyboardShortcutsHelp from "../src/components/shell/KeyboardShortcutsHelp";
 import SettingsDrawer from "../src/components/shell/SettingsDrawer";
 import TopAppBar from "../src/components/shell/TopAppBar";
 import RouteGlyph from "../src/components/shared/RouteGlyph";
 import { buildHeaderCrumbs } from "../src/lib/route/header-crumbs";
-import { getNavChildren, getNavigationGroups } from "../src/lib/route/registry";
+import { getAllRoutes, getNavChildren, getNavigationGroups } from "../src/lib/route/registry";
+import { t } from "../src/i18n";
 import type { AppRoute } from "../src/types/route";
 
 describe("material 3 shell", () => {
@@ -70,6 +72,37 @@ describe("material 3 shell", () => {
       const markup = glyph(route);
       expect(`${route.id} shares its icon with ${seen.get(markup) ?? "nothing"}`).toBe(`${route.id} shares its icon with nothing`);
       seen.set(markup, route.id);
+    }
+  });
+
+  test("the drawer's foot carries both account rows in the server markup", () => {
+    const html = renderToString(<Sidebar locale="en-US" pathname="/cards" />);
+    // The footer's height is final from the first paint, and the pre-paint script picks the row
+    // (src/lib/account/bootstrap.ts): no jump when /api/me answers and no sign-in row for a signed-in reader.
+    expect(html).toContain("mn-sidebar-account");
+    expect(html).toContain('href="/api/auth/login?return=%2Fcards&amp;locale=en-US"');
+    expect(html).toContain("Sign in");
+    expect(html).toContain("mn-account-user");
+    expect(html).toContain("mn-account-initial");
+    expect(html).toContain("mn-account-name");
+  });
+
+  test("the filter button is in the server markup on pages that register a filter sheet", () => {
+    const cards = renderToString(<FilterDrawerHost locale="en-US" pathname="/cards" />);
+    expect(cards).toContain("mn-filter-fab");
+    expect(cards).toContain("Filter cards");
+    // Already in place in the server markup: the first client commit must not replay the zoom-in (Zoom appear=false).
+    expect(cards).toContain("transform:none");
+    // Pages without a filter sheet never show it, not even for a frame.
+    expect(renderToString(<FilterDrawerHost locale="en-US" pathname="/" />)).not.toContain("mn-filter-fab");
+    expect(renderToString(<FilterDrawerHost locale="en-US" pathname="/story/main" />)).toContain("Main story");
+  });
+
+  test("every route's filter title resolves in the core locales", () => {
+    const routes = getAllRoutes().filter((route) => route.filterTitleKey);
+    expect(routes.length).toBeGreaterThan(0);
+    for (const locale of ["zh-CN", "zh-TW", "ja-JP", "en-US", "ko-KR"] as const) {
+      for (const route of routes) expect(t(locale, route.filterTitleKey!)).not.toBe("");
     }
   });
 

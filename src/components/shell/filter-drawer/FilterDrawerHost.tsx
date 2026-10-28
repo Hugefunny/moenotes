@@ -1,6 +1,7 @@
 import { Component, type ReactNode, type ErrorInfo } from "react";
 import { withMd3 } from "@/components/md3/Md3Provider";
 import type { AppLocale } from "@/config/locales";
+import { findRouteMatch } from "@/lib/route/registry";
 import FilterDrawer from "./FilterDrawer";
 import FilterTabHandle from "./FilterTabHandle";
 
@@ -35,10 +36,13 @@ class FilterErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySta
 }
 
 function FilterDrawerHost({ locale, pathname }: FilterDrawerHostProps) {
+  // The route tells the shell whether this page has a filter sheet, so the button can be rendered before the
+  // page's island registers it (src/config/routes.ts, filterTitleKey).
+  const filterTitleKey = findRouteMatch(pathname)?.item.filterTitleKey;
   return (
     <FilterErrorBoundary>
       <FilterDrawer locale={locale} pathname={pathname} />
-      <FilterTabHandle locale={locale} />
+      <FilterTabHandle locale={locale} titleKey={filterTitleKey} />
     </FilterErrorBoundary>
   );
 }

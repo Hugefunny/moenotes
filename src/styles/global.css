@@ -169,6 +169,28 @@ html[data-theme="dark"] .mn-brand .mn-brand-starlight, .mn-brand.mn-brand-light 
   }
   .mn-desktop-sidebar[data-open] { transform: none; }
 }
+/* The drawer's account pane renders both rows; `data-account` on <html> picks one before the first paint
+   (src/lib/account/bootstrap.ts). Without an answer yet, the sign-in row is the default. */
+.mn-sidebar-account .mn-account-user { display: none; }
+html[data-account="signed-in"] .mn-sidebar-account .mn-account-signin { display: none; }
+html[data-account="signed-in"] .mn-sidebar-account .mn-account-user { display: block; }
+html[data-account="unavailable"] .mn-sidebar-account { display: none; }
+/* Until /api/me answers, the cached name and initial stand in for React's text; `data-account-resolved` retires them. */
+.mn-account-name::after { content: var(--mn-account-name, ""); }
+.mn-account-initial::after { content: var(--mn-account-initial, "?"); }
+[data-account-resolved] .mn-account-name::after { content: none; }
+
+/* The filter button (src/components/shell/filter-drawer/FilterTabHandle.tsx) sits at the content column's bottom-left,
+   at the docked drawer's edge from lg up. It is positioned here, not inline, so the server-rendered button starts at
+   its final place; an open sheet hides it from the first paint (src/lib/filter/bootstrap.ts). */
+.mn-filter-fab { left: 1rem; }
+@media (min-width: 1024px) {
+  .mn-filter-fab {
+    left: calc(max(0px, (100vw - var(--mn-layout-max-width, 120rem)) / 2) + max(var(--mn-sidebar-offset, 17rem), 0.75rem) + 1.5rem);
+  }
+}
+html[data-filter-open="true"] .mn-filter-fab { display: none; }
+
 /* The sidebar's logo card and Home link get their own GPU layers: on some Android phones (seen on Chrome 127)
    they went unpainted in the nav's shared layer, showing only while a press transformed them. */
 .mn-nav-layer { transform: translateZ(0); }

@@ -12,8 +12,10 @@ import {
   analyticsConfig,
 } from "@/config/analytics";
 import { localizePath } from "@/i18n/routing";
-import { getNavigationGroupId } from "@/lib/route/registry";
+import { getNavigationGroupId, findRouteMatch } from "@/lib/route/registry";
 import { buildNavGroupBootstrapScript, buildThemeBootstrapScript } from "@/lib/settings/apply-theme";
+import { buildAccountBootstrapScript } from "@/lib/account/bootstrap";
+import { buildFilterBootstrapScript } from "@/lib/filter/bootstrap";
 import { buildMediaQueryCompatScript } from "@/lib/browser/media-query-compat";
 import { absolutePageUrl, buildHreflang, buildPageMetadata, type PageMetadata } from "@/lib/seo/metadata";
 import { breadcrumbJsonLd, serializeJsonLd, websiteJsonLd } from "@/lib/seo/jsonld";
@@ -31,6 +33,8 @@ const meta = buildPageMetadata(pathname, locale, metaOverrides);
 const mediaQueryCompatScript = buildMediaQueryCompatScript();
 const themeScript = buildThemeBootstrapScript();
 const navGroupScript = buildNavGroupBootstrapScript(getNavigationGroupId(pathname));
+const accountScript = buildAccountBootstrapScript();
+const filterScript = buildFilterBootstrapScript(Boolean(findRouteMatch(pathname)?.item.filterTitleKey));
 const website = websiteJsonLd(locale);
 const breadcrumbs = breadcrumbJsonLd(pathname, locale, breadcrumbDetail);
 const xDefaultHref = absolutePageUrl(localizePath(pathname, DEFAULT_LOCALE));
@@ -60,6 +64,10 @@ const googleAnalyticsBootstrapScript = isGoogleAnalyticsEnabled
     <script is:inline data-cfasync="false" set:html={themeScript}></script>
     <!-- Hide the stored folds in the server markup before the first paint (the drawer itself stays visible). -->
     <script is:inline data-cfasync="false" set:html={navGroupScript}></script>
+    <!-- Drop the drawer's account row before the first paint when this deployment has no account API. -->
+    <script is:inline data-cfasync="false" set:html={accountScript}></script>
+    <!-- Apply a filter sheet left open, before the first paint: the content's width and the filter button. -->
+    {filterScript && <script is:inline data-cfasync="false" set:html={filterScript}></script>}
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{meta.fullTitle}</title>
     <meta name="description" content={meta.description} />

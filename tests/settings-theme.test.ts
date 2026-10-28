@@ -217,7 +217,7 @@ describe("critical inline scripts opt out of Rocket Loader", () => {
   // fold and scroll setup into a visible flip after the server markup has already painted.
   test("theme, navigation and drawer scroll scripts stay synchronous", () => {
     const files: Array<[string, string[]]> = [
-      ["../src/layouts/RootLayout.astro", ["mediaQueryCompatScript", "themeScript", "navGroupScript"]],
+      ["../src/layouts/RootLayout.astro", ["mediaQueryCompatScript", "themeScript", "navGroupScript", "accountScript", "filterScript"]],
       ["../src/components/shell/AppShell.astro", ["sidebarScrollScript"]],
     ];
     for (const [path, variables] of files) {

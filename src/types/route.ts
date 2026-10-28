@@ -47,6 +47,11 @@ export interface AppRoute {
   parentId?: string;
   /** Rendering slot used by the catch-all page. */
   component?: RouteComponent;
+  /**
+   * i18n key of the filter sheet's title on pages that register one (`useQuickFilter`). The shell renders the filter
+   * button in the server markup from it, so the button does not appear only after the page's island registers.
+   */
+  filterTitleKey?: string;
   /** Static params to generate for dynamic routes once real data exists. */
   staticParams?: readonly RouteStaticParamConfig[] | (() => readonly RouteStaticParamConfig[] | Promise<readonly RouteStaticParamConfig[]>);
   labelKey: string;
