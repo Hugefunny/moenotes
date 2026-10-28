@@ -17,7 +17,12 @@ function orders(): number[][] {
 }
 const ORDERS = orders();
 function id(key: string): number { return Number(key.slice(1)); }
-interface EngineHit { song?: { songId: number; difficulty: number; baseSongId?: number; arenaMusicId?: number }; lexVector?: string[]; members: string[]; snaps: (string | null)[]; power: number; key: number; skipScore?: number; score?: { orders: number[]; mean?: number } | null; event?: { mean: number; rewardSum: number | string; orders: number; selectedOrder?: number; sampled?: boolean; lower?: number; upper?: number }; levels?: { sum: string; terms: string[]; lower?: number; upper?: number; termBounds?: { lower: number; upper: number }[] }[] }
+interface EngineAggregateSong {
+  song: { songId: number; difficulty: number; baseSongId?: number };
+  power: number;
+  score: { mean: number; min: number; median: number; max: number };
+}
+interface EngineHit { song?: { songId: number; difficulty: number; baseSongId?: number; arenaMusicId?: number } | null; aggregate?: { kind: "mean"; songs: EngineAggregateSong[] }; lexVector?: string[]; members: string[]; snaps: (string | null)[]; power: number; key: number; skipScore?: number; score?: { orders: number[]; mean?: number } | null; event?: { mean: number; rewardSum: number | string; orders: number; selectedOrder?: number; sampled?: boolean; lower?: number; upper?: number }; levels?: { sum: string; terms: string[]; lower?: number; upper?: number; termBounds?: { lower: number; upper: number }[] }[] }
 interface EngineResponse { results: { proven: boolean; bound: number | null; sampled?: boolean; hits?: EngineHit[] }[]; overall: EngineHit[]; elapsedMs: number | null }
 function answer(response: EngineResponse, request: RecommendationRequest, coversAllOwnedCards: boolean, final: boolean, coverage?: number, seeds?: Pick<EngineHit, "members" | "snaps" | "song">[]) {
   const rows = response.results ?? [];
@@ -54,12 +59,28 @@ function answer(response: EngineResponse, request: RecommendationRequest, covers
         payoff: reward ? payoff(settlement!.rewardSum) : null }, orders: maximumReward || sampledReward ? null : values,
       ...(combined ? { levels: hit.levels!.map(level => ({ value: payoff(level.sum, level.lower, level.upper), terms: level.terms.map((sum, i) => payoff(sum, level.termBounds?.[i]?.lower, level.termBounds?.[i]?.upper)) })) } : {}),
       bestOrder: sampledReward && !maximumReward ? null : bestOrder,
-      ...(hit.song ? { song: { musicId: hit.song.baseSongId ?? hit.song.songId, difficulty: ["easy", "normal", "hard", "expert"][hit.song.difficulty] } } : {}),
+      ...(hit.song && typeof hit.song.songId === "number" ? { song: { musicId: hit.song.baseSongId ?? hit.song.songId, difficulty: ["easy", "normal", "hard", "expert"][hit.song.difficulty] } } : {}),
+      ...(hit.aggregate?.kind === "mean" && Array.isArray(hit.aggregate.songs) ? {
+        aggregate: {
+          kind: "mean" as const,
+          songs: hit.aggregate.songs.map(part => ({
+            song: { musicId: part.song.baseSongId ?? part.song.songId, difficulty: ["easy", "normal", "hard", "expert"][part.song.difficulty]! },
+            power: part.power,
+            mean: part.score.mean,
+            min: part.score.min,
+            median: part.score.median,
+            max: part.score.max,
+          })),
+        },
+      } : {}),
       layout: { members: [members[1], members[2], members[0], members[3], members[4]],
         snaps: [snaps[1], snaps[2], snaps[0], snaps[3], snaps[4]] },
     };
   });
   const bound = rows.length === 1 && Number.isFinite(rows[0]!.bound) ? rows[0]!.bound : null;
+  const scopedIds = request.goal.musicIds ?? request.goal.challengeMusicIds ?? request.goal.arenaMusicIds;
+  const multiArenaIndividual = Array.isArray(request.goal.songs) && request.goal.songs.length > 1 && request.goal.arena?.mode !== "shared";
+  const coverageTotal = scopedIds ? scopedIds.length : multiArenaIndividual ? request.goal.songs!.length : null;
   return JSON.stringify({
     format: "ournotes-deck.account-recommendation/1", status: "ok", final, missing: [], errors: [],
     ...(seeds ? { continuation: { teams: seeds.map(hit => ({ song: hit.song, members: hit.members, snaps: hit.snaps })) } } : {}),
@@ -67,8 +88,8 @@ function answer(response: EngineResponse, request: RecommendationRequest, covers
     result: { phase: proven ? "done" : "search", elapsedMs: response.elapsedMs ?? null, teams,
       account: { cards: { coversAllOwnedCards } },
       optimality: { proven, lowerBound: teams[0]?.value.payoff?.interval?.lower ?? teams[0]?.value.payoff?.score ?? teams[0]?.value.score ?? null, upperBound: bound, fraction: null },
-      ...([request.goal.musicIds, request.goal.challengeMusicIds, request.goal.arenaMusicIds].some(Array.isArray) ? {
-        coverage: { total: (request.goal.musicIds ?? request.goal.challengeMusicIds ?? request.goal.arenaMusicIds)!.length,
+      ...(coverageTotal !== null ? {
+        coverage: { total: coverageTotal,
           covered: coverage ?? rows.filter(row => row.hits?.length).length, proven: rows.filter(row => row.proven).length } } : {}),
       goal: request.goal, metric: request.metric ?? { kind: "power" }, aggregation: request.aggregation ?? "expected",
       ...(sampled ? { rewardSampling: { kind: "fixedRoots", rootSeeds: [0, 1, 2, 3] } } : {}),
@@ -108,18 +129,19 @@ export class DeckSolver {
     const gekiso = converted.goal.kind === "gekiso" || converted.goal.kind === "event" && "gekiso" in converted.goal;
     const musics = new Map((gekiso ? table(this.data, "MasterLiveMusic") : []).map(row => [row.id, row]));
     const arenas = new Map((request.goal.kind === "arenaLive" ? optionalTable(this.data, "MasterArenaMusic") : []).map(row => [row.id, row]));
+    const arenaMissions = request.goal.arena?.missions;
     const luck = gekiso && songs.some(song => {
       if (!song) return false;
       const arena = arenas.get("arenaMusicId" in song ? song.arenaMusicId : undefined);
       const music = musics.get("baseSongId" in song ? song.baseSongId : song.songId);
-      return ["gekisouMission1", "gekisouMission2", "gekisouMission3"].some(field => (arena?.[field] || music?.[field]) === 2);
+      return ["gekisouMission1", "gekisouMission2", "gekisouMission3"].some((field, idx) => (arenaMissions?.[idx] || arena?.[field] || music?.[field]) === 2);
     });
     const reserve = luck ? Math.min(40, converted.timeLimitMs ?? 0) : 0;
     const deadline = converted.timeLimitMs === null ? Infinity : performance.timeOrigin + started + converted.timeLimitMs - reserve;
     const warm: EngineHit[] = [];
     const candidates = new Map<string, EngineHit>();
     const covered = new Set<string>();
-    const retainRewards = converted.goal.kind === "event" && "gekiso" in converted.goal || !!(request.goal.musicIds ?? request.goal.challengeMusicIds ?? request.goal.arenaMusicIds);
+    const retainRewards = converted.goal.kind === "event" && "gekiso" in converted.goal || !!(request.goal.musicIds ?? request.goal.challengeMusicIds ?? request.goal.arenaMusicIds) || (Array.isArray(request.goal.songs) && request.goal.songs.length > 1 && request.goal.arena?.mode !== "shared");
     const combined = request.metric?.kind === "combined";
     const identity = (hit: EngineHit) => JSON.stringify([hit.song, combined ? hit.members : [...hit.members].sort(), ...(combined ? [hit.snaps] : [])]);
     const compare = (a: EngineHit, b: EngineHit) => {
@@ -194,11 +216,12 @@ export class DeckSolver {
             return { ...team, members: order.map(slot => team.members[slot]!), snaps: order.map(slot => team.snaps[slot]!) };
           }))];
       }
-      if (converted.goal.kind === "gekiso" && luck && !seedJson
+      if (converted.goal.kind === "gekiso" && luck && !seedJson && request.goal.arena?.mode !== "shared"
         && performance.timeOrigin + performance.now() < deadline) {
         const song = converted.charts[0]!.song;
+        const arena = "arena" in converted.goal ? converted.goal.arena : undefined;
         const proposals = engine!.invoke<EngineResponse>({ op: "run", handle: this.handle, charts: [converted.charts[0]!],
-          request: { ...prepared, goal: { kind: "power", song, challengeEventId: null },
+          request: { ...prepared, goal: { kind: "power", song, challengeEventId: null, ...(arena ? { arena } : {}) },
             deadline: Math.min(deadline, performance.timeOrigin + performance.now() + 100) } });
         for (const team of proposals.overall.slice(0, 1)) {
           if (performance.timeOrigin + performance.now() >= deadline) break;
@@ -207,7 +230,7 @@ export class DeckSolver {
             preview = engine!.invoke<{ evaluations: typeof preview[] }>({
               op: "evaluateAll", handle: this.handle, charts: [converted.charts[0]!], request: { ...prepared,
                 team: { members: team.members, snaps: team.snaps, leader: team.members[0] }, songs: [song],
-                gekiso: { accuracy: converted.goal.accuracy, rank: 1, seeds: 0 }, event: null } }).evaluations[0]!;
+                gekiso: { accuracy: converted.goal.accuracy, rank: converted.goal.rank, seeds: 0, ...(arena ? { arena } : {}) }, event: null } }).evaluations[0]!;
           } catch (error) {
             if (error instanceof Error && error.message === "search-deadline") break;
             throw error;

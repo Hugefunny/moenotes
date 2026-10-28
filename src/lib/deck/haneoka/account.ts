@@ -44,6 +44,8 @@ export function adaptAccount(data: DeckData, account: AccountInput, request: Rec
   const gekiso = ["battleLive", "missionLive", "arenaLive"].includes(request.goal.kind);
   const excludeMembers = new Set((request.constraints?.excludeMembers ?? []).map(String));
   const excludeSnaps = new Set((request.constraints?.excludeSnaps ?? []).map(String));
+  const arenaBandId = request.goal.kind === "arenaLive" && Number.isInteger(request.goal.arena?.bandId) ? request.goal.arena!.bandId! : null;
+  const characterBand = arenaBandId === null ? null : new Map(rows("MasterCharacter").map(row => [row.id, row.bandID]));
   const memberMaster = new Map(rows("MasterMemberCard").map(row => [row.id, row]));
   const snapMaster = new Map(rows("MasterSupportCard").map(row => [row.id, row]));
   const seen = new Set<string>();
@@ -57,6 +59,7 @@ export function adaptAccount(data: DeckData, account: AccountInput, request: Rec
     seen.add(identity);
     const master = (snap ? snapMaster : memberMaster).get(id);
     if (!master) { issue(path + "._masterId", "unknown_id"); return []; }
+    if (!snap && characterBand && characterBand.get(master.characterID) !== arenaBandId) return [];
     const growth = {
       key: identity, cardId: id,
       level: level(card._exp, master[snap ? "supportCardLevelGroup" : "memberCardLevelGroup"], snap ? "MasterSupportCardLevel" : "MasterMemberCardLevel", path + "._exp"),

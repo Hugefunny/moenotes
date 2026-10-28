@@ -63,14 +63,15 @@ The result is one of:
 
 An aborted signal rejects the call instead.
 
-### Development engine
+### Engine descriptor override
 
-For a locally built engine, `resolveDeckRuntime` accepts `engineOverride`: an engine descriptor, or the URL of one.
-Development builds (`astro dev`) also read the descriptor URL from `PUBLIC_DECK_RECOMMEND_ENGINE`; production builds
-ignore that variable. A descriptor has the shape of `recommendEngine`; its URLs are relative to the descriptor, and a
-file without `sha256` and `bytes` is downloaded once to compute them. The override replaces `recommendEngine` only:
-the deck data still comes from the published manifest, and the model commit checks are skipped (`modelCommit: null`).
-The served files need `Access-Control-Allow-Origin` for the page's origin.
+By default (`assetConfig.deck.recommendEngine = "/haneoka-team-engine/runtime.json"`), both development and production
+builds load the site's pinned [Haneoka team engine](haneoka-engine.md) descriptor. `resolveDeckRuntime` also accepts
+`engineOverride` (`null` to use the replay manifest's `recommendEngine`, or another descriptor/URL), and development
+builds (`astro dev`) read `PUBLIC_DECK_RECOMMEND_ENGINE`. A descriptor has the shape of `recommendEngine`; its URLs are
+relative to the descriptor, and a file without `sha256` and `bytes` is downloaded once to compute them. The override
+replaces `recommendEngine` only: the deck data still comes from the published manifest, and the model commit checks are
+skipped (`modelCommit: null`). The served files need `Access-Control-Allow-Origin` for the page's origin.
 
 ## Worker
 

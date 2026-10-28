@@ -1,4 +1,5 @@
 import type { MusicDifficulty } from "@/lib/music/difficulty";
+import type { DeckArenaRule } from "./arena";
 import { EVENT_REWARDS, MAX_TERM_WEIGHT, defaultRewardPlan, rewardLayout, rewardLevels, statedTerms,
   type ChallengeWorth, type EventReward, type RewardLayout, type RewardPlan, type RewardTerm } from "./reward-mix";
 
@@ -75,6 +76,12 @@ export interface DeckGoalInput {
   rateDifficulty: MusicDifficulty;
   venue: DeckVenue;
   arenaMusicId: number | null;
+  /** 1.1.0.100+ Gekiso Arena league/regulation rule; null when Auto schedule has no active season/regulation. */
+  arenaRule?: DeckArenaRule | null;
+  /** Multi-song pool for Gekiso Arena (`shared` or `individual` mode). */
+  arenaSongEntries?: readonly { musicId: number; difficulty: MusicDifficulty }[];
+  /** Gekisou range placement (1..5, default 1). */
+  gekisouRank?: number;
   playMode: "accuracy" | "pattern";
   missEvery: number;
   boosts: number;
@@ -123,8 +130,8 @@ export const isNetworkInput = (input: Pick<DeckGoalInput, "goal" | "venue">): bo
 /** Whether the goal input reads a play style (a played live; not power or a skip). */
 export const readsAccuracy = (input: Pick<DeckGoalInput, "goal" | "venue">): boolean => !["power", "skip"].includes(solverGoalKind(input));
 /** Retain the objective preference for supported non-Gekisou played lives. */
-export const effectiveAggregation = (input: Pick<DeckGoalInput, "goal" | "venue"> & Partial<Pick<DeckGoalInput, "aggregation">>): DeckAggregation =>
-  readsAccuracy(input) ? input.aggregation ?? "expected" : "expected";
+export const effectiveAggregation = (input: Pick<DeckGoalInput, "goal" | "venue"> & Partial<Pick<DeckGoalInput, "aggregation" | "arenaRule">>): DeckAggregation =>
+  readsAccuracy(input) && !(solverGoalKind(input) === "arenaLive" && input.arenaRule?.mode === "shared") ? input.aggregation ?? "expected" : "expected";
 
 type RewardInput = Pick<DeckGoalInput, "goal"> & Partial<Pick<DeckGoalInput, "venue" | "rewards">>;
 /** The rewards a goal input can count beside its own. A challenge live spends challenge points and earns none. */
@@ -161,6 +168,10 @@ export interface DeckSolverCapabilities {
   luckMissions?: boolean;
   /** Plays with Great judgements are computed in LUCK lives, where a held judgement conversion changes the draws. */
   luckGreatConversions?: boolean;
+  /** 1.1.0.100+ Gekiso Arena league/regulation rules and shared 5-song formation search. */
+  arenaRules?: boolean;
+  /** Gekisou range placements 1..5. */
+  gekisouRank?: boolean;
 }
 
 export function parseCapabilities(json: string | null): DeckSolverCapabilities | null {
@@ -195,11 +206,13 @@ export function parseCapabilities(json: string | null): DeckSolverCapabilities |
     ? { maxLevels: combined.maxLevels as number, maxTerms: combined.maxTerms as number, maxWeight: combined.maxWeight as number,
       ...(combined.goals === undefined ? {} : { goals: strings(combined.goals) }) } : undefined;
   return { goals: strings(raw.goals), metrics, aggregations, ...(eventItemRewards ? { eventItemRewards } : {}), ...(combinedMetric ? { combinedMetric } : {}),
-    crossSong: raw.crossSong === true, resume: raw.resume === true, luckMissions: raw.luckMissions === true, luckGreatConversions: raw.luckGreatConversions === true, patternPlay: raw.patternPlay === true || !!raw.patternPlay && typeof raw.patternPlay === "object", accuracy: { great: accuracy.great === true, just: accuracy.just === true } };
+    crossSong: raw.crossSong === true, resume: raw.resume === true, luckMissions: raw.luckMissions === true, luckGreatConversions: raw.luckGreatConversions === true,
+    arenaRules: raw.arenaRules === true, gekisouRank: raw.gekisouRank === true,
+    patternPlay: raw.patternPlay === true || !!raw.patternPlay && typeof raw.patternPlay === "object", accuracy: { great: accuracy.great === true, just: accuracy.just === true } };
 }
 
 /** Whether the engine computes a goal input's goal kind and metric. */
-export function computes(capabilities: DeckSolverCapabilities, input: Pick<DeckGoalInput, "goal" | "venue"> & Partial<Pick<DeckGoalInput, "playMode" | "greatPercent" | "justPercent" | "aggregation" | "rewards">>): boolean {
+export function computes(capabilities: DeckSolverCapabilities, input: Pick<DeckGoalInput, "goal" | "venue"> & Partial<Pick<DeckGoalInput, "playMode" | "greatPercent" | "justPercent" | "aggregation" | "rewards" | "arenaRule" | "gekisouRank">>): boolean {
   const layout = rewardLayoutOf(input);
   if (layout) {
     const combined = capabilities.combinedMetric;
@@ -218,6 +231,11 @@ export function computes(capabilities: DeckSolverCapabilities, input: Pick<DeckG
   }
   if (input.goal === "challengePoints" && ["challengeLive", "challengeSkip"].includes(input.venue)) return false;
   const kind = solverGoalKind(input), metric = solverMetricKind(input.goal);
+  if (kind === "arenaLive" && input.arenaRule !== undefined) {
+    if (!capabilities.arenaRules) return false;
+    if (input.arenaRule?.mode === "shared" && (isEventPayoffGoal(input.goal) || effectiveAggregation(input) !== "expected")) return false;
+  }
+  if (playsGekisou(input) && input.gekisouRank !== undefined && input.gekisouRank !== 1 && !capabilities.gekisouRank) return false;
   if (input.playMode === "pattern" && readsAccuracy(input) && !capabilities.patternPlay) return false;
   if (readsAccuracy(input) && input.playMode !== "pattern") {
     if ((input.greatPercent ?? 0) !== 0 && !capabilities.accuracy.great) return false;
@@ -235,7 +253,7 @@ export function computesGoal(capabilities: DeckSolverCapabilities, goal: DeckGoa
 }
 
 /** What the goal input still needs before it can run. */
-export type DeckGoalGap = "song" | "challengeSong" | "event" | "eventItem" | "arenaSong" | "play" | "rewardMix" | "rateSong" | null;
+export type DeckGoalGap = "song" | "challengeSong" | "event" | "eventItem" | "arenaSong" | "arenaSchedule" | "play" | "rewardMix" | "rateSong" | null;
 export function goalGap(input: DeckGoalInput, event: DeckEvent | null): DeckGoalGap {
   if (isEventGoal(input.goal) && !event) return "event";
   const layout = rewardLayoutOf(input);
@@ -244,6 +262,15 @@ export function goalGap(input: DeckGoalInput, event: DeckEvent | null): DeckGoal
   if (layout?.auto && !event?.challengeMusics.some(row => row.id === input.challengeMusicId)) return "rateSong";
   const kind = solverGoalKind(input);
   if (readsAccuracy(input) && input.playMode === "pattern" && (!Number.isSafeInteger(input.missEvery) || input.missEvery < 0)) return "play";
+  if (kind === "arenaLive" && input.arenaRule !== undefined) {
+    if (!input.arenaRule) return "arenaSchedule";
+    if (input.arenaRule.mode === "shared") {
+      if (isEventPayoffGoal(input.goal) || effectiveAggregation(input) !== "expected") return "arenaSchedule";
+      return (input.arenaSongEntries?.length ?? 0) > 0 || input.musicId !== null ? null : "arenaSong";
+    }
+    if (input.allSongs) return null;
+    return (input.arenaSongEntries?.length ?? 0) > 0 || input.musicId !== null ? null : "arenaSong";
+  }
   if (input.allSongs && kind !== "power") return null;
   if (kind === "arenaLive") return input.arenaMusicId === null ? "arenaSong" : null;
   if (isChallengeInput(input)) return input.challengeMusicId !== null && event?.challengeMusics.some(row => row.id === input.challengeMusicId) ? null : "challengeSong";
@@ -252,7 +279,13 @@ export function goalGap(input: DeckGoalInput, event: DeckEvent | null): DeckGoal
 }
 
 /** Card choices for this run only; excluded cards still count as owned. Member card and snap master IDs. */
-export interface DeckRunConstraints { includeMembers: readonly string[]; excludeMembers: readonly string[]; excludeSnaps: readonly string[] }
+export interface DeckRunConstraints {
+  includeMembers: readonly string[];
+  excludeMembers: readonly string[];
+  excludeSnaps: readonly string[];
+  leader?: string | null;
+  noSnaps?: boolean;
+}
 
 /** JST DateTime ticks (100 ns since 0001-01-01, wall clock in UTC+9) of an epoch time in ms. */
 export function jstTicks(epochMs: number): string {
@@ -298,10 +331,29 @@ export function recommendationRequest(input: DeckGoalInput, context: { event: De
   const accuracy = playsGekisou(input) ? `{"greatFraction":${great},"justFraction":${fraction(Math.min(input.justPercent, 100 - input.greatPercent))}}` : `{"greatFraction":${great}}`;
   const play = input.playMode === "pattern" ? `"play":{"kind":"pattern","greatFraction":${great},"justFraction":${playsGekisou(input) ? fraction(Math.min(input.justPercent, 100 - input.greatPercent)) : 0},"missEvery":${input.missEvery}}` : `"accuracy":${accuracy}`;
   const song = `"musicId":${input.musicId},"difficulty":${JSON.stringify(input.difficulty)}`;
+  const rank = Math.min(5, Math.max(1, Math.trunc(input.gekisouRank ?? 1)));
   let goal: string;
   switch (kind) {
-    case "battleLive": case "missionLive": goal = `{"kind":"${kind}",${song}${kind === "battleLive" ? ',"rank":1' : ""},${play}}`; break;
-    case "arenaLive": goal = `{"kind":"arenaLive","arenaMusicId":${input.arenaMusicId},"difficulty":${JSON.stringify(input.difficulty)},"rank":1,${play}}`; break;
+    case "battleLive": case "missionLive": goal = `{"kind":"${kind}",${song}${kind === "battleLive" ? `,"rank":${rank}` : ""},${play}}`; break;
+    case "arenaLive": {
+      if (input.arenaRule) {
+        const arenaJson = JSON.stringify({
+          bandId: input.arenaRule.bandId,
+          musicType: input.arenaRule.musicType,
+          missions: [input.arenaRule.missions[0], input.arenaRule.missions[1], input.arenaRule.missions[2]],
+          ...(input.arenaRule.mode ? { mode: input.arenaRule.mode } : {}),
+        });
+        const entries = input.arenaSongEntries && input.arenaSongEntries.length > 0 && !options.songScope
+          ? input.arenaSongEntries.map(entry => ({ musicId: entry.musicId, difficulty: entry.difficulty }))
+          : null;
+        goal = entries
+          ? `{"kind":"arenaLive","arena":${arenaJson},"songs":${JSON.stringify(entries)},"rank":${rank},${play}}`
+          : `{"kind":"arenaLive","arena":${arenaJson},${song},"rank":${rank},${play}}`;
+      } else {
+        goal = `{"kind":"arenaLive","arenaMusicId":${input.arenaMusicId},"difficulty":${JSON.stringify(input.difficulty)},"rank":${rank},${play}}`;
+      }
+      break;
+    }
     case "freeLive": goal = `{"kind":"freeLive",${song},${play}}`; break;
     case "challengeLive": goal = `{"kind":"challengeLive","challengeMusicId":${input.challengeMusicId},"difficulty":${JSON.stringify(input.difficulty)},${play}}`; break;
     case "skip": goal = isChallengeInput(input) ? `{"kind":"skip","challengeMusicId":${input.challengeMusicId},"difficulty":${JSON.stringify(input.difficulty)}}` : `{"kind":"skip",${song}}`; break;
@@ -324,9 +376,10 @@ export function recommendationRequest(input: DeckGoalInput, context: { event: De
     parts.push(`"metric":${metric}`, `"eventContext":{"resultClock":${clock},"rewardProjection":true}`);
     if (isNetworkInput(input)) parts.push(`"room":{"players":5,"othersAverageScore":${input.othersAverageScore === null ? "null" : Math.max(0, Math.trunc(input.othersAverageScore))}}`);
   } else if (kind !== "power") parts.push(`"metric":{"kind":"score"}`);
-  const { includeMembers, excludeMembers, excludeSnaps } = context.constraints;
+  const { includeMembers, excludeMembers, excludeSnaps, leader, noSnaps } = context.constraints;
+  const leaderJson = leader == null || leader === "" ? "null" : ids([leader])[0]!;
   parts.push(`"eventIds":[${event && usesEventData(input) ? event.id : ""}]`,
-    `"constraints":{"leader":null,"includeMembers":[${ids(includeMembers).join(",")}],"excludeMembers":[${ids(excludeMembers).join(",")}],"excludeSnaps":[${ids(excludeSnaps).join(",")}],"noSnaps":false}`,
+    `"constraints":{"leader":${leaderJson},"includeMembers":[${ids(includeMembers).join(",")}],"excludeMembers":[${ids(excludeMembers).join(",")}],"excludeSnaps":[${ids(excludeSnaps).join(",")}],"noSnaps":${noSnaps === true ? "true" : "false"}}`,
     `"k":${options.teams ?? RECOMMENDATION_COUNT}`, `"limits":{"timeLimitMs":${input.timeLimit === null ? "null" : input.timeLimit * 1000}}`);
   return `{${parts.join(",")}}`;
 }

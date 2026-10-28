@@ -1,10 +1,10 @@
 # Haneoka engine integration
 
-The Haneoka engine is pinned at `c91e6459a5ed43d55dc2b75e6a9d4f55b3edc62a`.
+The Haneoka engine is pinned at `8b6915c140b6239cff5f4bca78380b654ed722e6`.
 The existing Moenotes card pool, account envelopes, Worker lifecycle and result components are reused.
 The Rust engine, with the Moenotes reward patch, owns scoring and search; the adapter translates documents, goals and results.
 
-## Local runtime
+## Local and production runtime
 
 Install Bun, Git and Rust with the `wasm32-unknown-unknown` target, then run:
 
@@ -12,10 +12,12 @@ Install Bun, Git and Rust with the `wasm32-unknown-unknown` target, then run:
 bun install --frozen-lockfile
 rustup target add wasm32-unknown-unknown
 bun run build:haneoka-engine
-PUBLIC_DECK_RECOMMEND_ENGINE=/haneoka-team-engine/runtime.json bun run dev
+bun run dev
 ```
 
-In PowerShell, set `$env:PUBLIC_DECK_RECOMMEND_ENGINE='/haneoka-team-engine/runtime.json'` before `bun run dev`.
+`assetConfig.deck.recommendEngine` defaults to `/haneoka-team-engine/runtime.json` in both development and production builds.
+In development builds, `PUBLIC_DECK_RECOMMEND_ENGINE` can point at another descriptor URL or be set to `""` to use the
+published replay manifest's `recommendEngine` instead.
 
 The build keeps the pinned external checkout unchanged under ignored `.haneoka/engine`.
 `patches/haneoka-rewards.patch` is applied to an independent generated source directory, whose file hashes
@@ -23,10 +25,10 @@ are checked before reuse. Cargo output also lives under `.haneoka/`. A changed g
 The patch uses LF on every checkout. The adapter's `HANEOKA_PATCH_SHA` must match the patch bytes. The runtime descriptor and answers record both
 the upstream commit and patch SHA-256; the complete patch is copied beside the runtime as `moenotes.patch`.
 Generated WASM, bundled adapter, runtime descriptor, license and NOTICE live under ignored
-`public/haneoka-team-engine/`. These outputs must be built together; the descriptor binds their sizes and hashes.
-
-This uses Moenotes' existing **development-only** engine override. The production provider and its
-model-commit checks are unchanged. Activation is a separate release decision.
+`public/haneoka-team-engine/` by default, or `--out <dir>` during site release builds (`scripts/build-site-release.ts`
+writes directly to `.site-release/site/haneoka-team-engine` after `astro build` so `public/` and `sourceDigest` stay
+unchanged). Passing `--test` runs `cargo test --locked` against the patched crate before compiling the WASM module.
+These outputs must be built together; the descriptor binds their sizes and hashes.
 
 ## Data and model identities
 
@@ -164,14 +166,20 @@ music duration. No chart approximation or independent scoring formula is introdu
 
 ## Arena, cross-song search and continuation
 
-Arena IDs map to internal virtual songs. Their base song owns the chart and power typing. Nonzero Arena
-mission slots override the base missions; zero slots retain the base value. LUCK preparation and deadline
-reservation use these effective missions for both single-song and all-song Arena requests. Responses map the song identity
-back to the base music ID. The frozen source catalogues currently contain no Arena rows; declared rows test
-fallback, overrides and base typing against frozen native replay.
+Gekiso Arena supports both `1.1.0.100+` league regulations (`goal.arena: { bandId, musicType, missions, mode }`) and
+legacy `MasterArenaMusic` virtual-song rows (`goal.arenaMusicId`):
+- Under `1.1.0.100+` regulations (`MasterArenaSeason`, `MasterArenaLeague`, `MasterArenaLeagueRegulation`), the page
+  resolves active league rules from server MasterData or accepts custom band/attribute/mission rules. The engine scopes
+  candidate members and released songs to `bandId` (using `_bandId` and multi-band `_bandIds`), overrides `musicType`
+  (`0` chart default, `1..5` forced attribute, `99` attribute-free) and nonzero `missions` (`0` chart default,
+  `1` COMBO, `2` LUCK, `3` JUST), and supports both `shared` (one formation maximizing the mean expected score across
+  1 to 5 selected songs, returning per-song `aggregate` stats) and `individual` (best formation per song or across all
+  band songs) modes.
+- Legacy `MasterArenaMusic` IDs continue to map to internal virtual songs when `goal.arena` is omitted.
 
 `crossSong: true` enables the page's all-songs checkbox. The scope includes every catalogue song at the selected
-difficulty, every challenge song of the selected event, or every available Arena song. Requests carry exactly
+difficulty, every challenge song of the selected event, or every available Arena song (band-filtered `musicIds` under
+`1.1.0.100+` individual Arena rules, or `arenaMusicIds` for legacy rows). Requests carry exactly
 one of `musicIds`, `challengeMusicIds` or `arenaMusicIds`; incompatible, duplicate, empty and unknown scopes
 are diagnosed. All charts remain in the request. Native scheduling divides remaining time across remaining
 songs; result teams carry song identity and the status reports covered/total songs and proven count.
@@ -186,7 +194,8 @@ The page keeps candidates visible, restarts the run timer and preserves the reso
 when continuing. Changing inputs makes the old result stale; server changes and retries discard continuation.
 Stopping before new progress keeps the prior candidates. Continuation lasts for the current page visit.
 
-The current page's scene families are covered. Production activation remains a separate release action.
+The current page's scene families (including cumulative support-skill climbing score-ups and Gekiso Range placement
+`rank` `1..5`) are covered and active in production via `/haneoka-team-engine/runtime.json`.
 Played combined maximum and older provider-only threshold/capped/score-and-LIFE objectives are not advertised.
 LUCK retains the native finite-root model and cooperative deadlines. Live-account and physical-phone
 acceptance remain separate from declared-fixture and responsive browser verification.

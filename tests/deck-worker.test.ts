@@ -510,7 +510,7 @@ describe("deck Worker protocol and files", () => {
 
   test("the site serves the Worker shell and its core module from public/deck; the engine comes with the data", () => {
     expect(assetConfig.deck.workerUrl).toBe("/deck/deck-worker.js");
-    expect(assetConfig.deck.recommendEngine).toBeNull();
+    expect(assetConfig.deck.recommendEngine).toBe("/haneoka-team-engine/runtime.json");
     expect(readdirSync(runtimeDir).sort()).toEqual(["deck-worker-core.mjs", "deck-worker.js"]);
     expect(readFileSync(path.join(runtimeDir, "deck-worker.js"), "utf8")).toContain("import('./deck-worker-core.mjs')");
   });

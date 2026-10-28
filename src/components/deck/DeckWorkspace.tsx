@@ -19,6 +19,8 @@ import { answerDeckFields } from "@/lib/box/deck-answers";
 import { boxAccountJson, gameSaveAccountJson } from "@/lib/deck/account-envelope";
 import { CHALLENGE_POINT_COSTS, DEFAULT_DECK_GOAL, EVENT_GOALS, EVERYDAY_GOALS, MAX_BOOST, computes, computesGoal, defaultDeckGoalInput, goalGap, heldEvent,
   playsGekisou, readsAccuracy, effectiveAggregation, usesEventItemRewards, rewardLayoutOf, isChallengeInput, isNetworkInput, challengeRateRequest, recommendationRequest, solverGoalKind, goalVenues, isEventPayoffGoal, type ChallengePointCost, type DeckEvent, type DeckGoal, type DeckGoalInput, type DeckVenue, type DeckArenaMusic } from "@/lib/deck/goals";
+import { arenaPeriod, arenaSongMatchesBand, resolveArenaRule, type DeckArenaCatalog, type DeckArenaMode, type DeckArenaRuleSource } from "@/lib/deck/arena";
+import DeckArenaControls, { type DeckArenaSongEntry } from "./DeckArenaControls";
 import { displayUtcLabel, formatMasterDate, parseMasterDate } from "@/lib/schedule";
 import { useDisplayTimeZone } from "@/lib/schedule/use-display-time-zone";
 import { safeGetLocalStorage, safeRemoveLocalStorage, safeSetLocalStorage } from "@/lib/storage/safe-storage";
@@ -69,7 +71,7 @@ export interface DeckWorkspaceProps {
   saveTables?: readonly GameSaveTables[];
   /** Per server, the events that offer event goals. */
   deckEvents?: readonly { server: GameServer; events: readonly DeckEvent[] }[];
-  deckArenas?: readonly { server: GameServer; songs: readonly DeckArenaMusic[] }[];
+  deckArenas?: readonly { server: GameServer; songs: readonly DeckArenaMusic[]; catalog?: DeckArenaCatalog }[];
 }
 const GOAL_STORAGE_KEY = "moenotes.deck.goal";
 /** Set per server after the user unlinks the uploaded save: the Box then keeps its own facts until a save is linked again. */
@@ -87,8 +89,9 @@ function finishAttempt(attempt: AutoAttempt, done: boolean): void {
   attempt.running = false;
   if (done) attempt.tries = 2;
 }
-/** Public sources of the deck engine: the scoring model and the search over teams. */
+/** Public sources of the deck engine: Haneoka team builder and the scoring/search references. */
 const DECK_SOURCES = [
+  { key: "haneoka", url: "https://github.com/haneoka-gakuen/ournotes-team-builder" },
   { key: "model", url: "https://github.com/empty-sekai/ournotes-deck/tree/main/crates/ournotes-sim" },
   { key: "search", url: "https://github.com/empty-sekai/ournotes-deck/tree/main/crates/ournotes-search" },
 ] as const;
@@ -147,6 +150,16 @@ function DeckWorkspace(props: DeckWorkspaceProps) {
   const capabilities = solver.engine.status === "ready" ? solver.engine.capabilities : null;
   const [excluded, setExcluded] = useState<string[]>([]);
   const [required, setRequired] = useState<string[]>([]);
+  const [leaderKey, setLeaderKey] = useState<string | null>(null);
+  const [noSnaps, setNoSnaps] = useState(false);
+  const [userArenaSource, setUserArenaSource] = useState<DeckArenaRuleSource | null>(null);
+  const [arenaLeagueId, setArenaLeagueId] = useState<number>(1);
+  const [arenaCustomBandId, setArenaCustomBandId] = useState<number>(1);
+  const [arenaCustomMusicType, setArenaCustomMusicType] = useState<number>(0);
+  const [arenaCustomMissions, setArenaCustomMissions] = useState<[number, number, number]>([0, 0, 0]);
+  const [arenaMode, setArenaMode] = useState<DeckArenaMode>("shared");
+  const [arenaPool, setArenaPool] = useState<DeckArenaSongEntry[]>([]);
+  const [arenaPickerOpen, setArenaPickerOpen] = useState(false);
   const [setup, setSetup] = useState(false);
   const [management, setManagement] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -171,24 +184,90 @@ function DeckWorkspace(props: DeckWorkspaceProps) {
   const ownedSnaps = box?.cards.filter(card => card.kind === "snap") ?? [];
   // Keep the stored objective preference while using the selected scene's effective objective.
   const goal = goalInput.goal;
-  const effectiveInput: DeckGoalInput = { ...goalInput, allSongs: !!goalInput.allSongs && solver.engine.status === "ready" && solver.engine.capabilities?.crossSong === true && goal !== "power", aggregation: effectiveAggregation(goalInput) };
+  const serverArenaData = props.deckArenas?.find(row => row.server === server);
+  const arenas = serverArenaData?.songs ?? [];
+  const arenaCatalog = serverArenaData?.catalog ?? null;
+  const useModernArena = solverGoalKind(goalInput) === "arenaLive" && !!arenaCatalog && arenaCatalog.leagues.length > 0 && (!capabilities || capabilities.arenaRules === true);
+  const validLeagueId = arenaCatalog?.leagues.some(l => l.id === arenaLeagueId) ? arenaLeagueId : (arenaCatalog?.leagues[0]?.id ?? 1);
+  const autoArenaPeriod = useMemo(() => arenaPeriod(arenaCatalog, validLeagueId, now), [arenaCatalog, validLeagueId, now]);
+  const arenaRuleSource: DeckArenaRuleSource = userArenaSource ?? (autoArenaPeriod.season && autoArenaPeriod.regulation ? "auto" : "custom");
+  const effectiveArenaMode: DeckArenaMode = isEventPayoffGoal(goal) ? "individual" : arenaMode;
+  const resolvedArena = useMemo(() => useModernArena ? resolveArenaRule({
+    catalog: arenaCatalog,
+    ruleSource: arenaRuleSource,
+    leagueId: validLeagueId,
+    customBandId: arenaCustomBandId,
+    customMusicType: arenaCustomMusicType,
+    customMissions: arenaCustomMissions,
+    mode: effectiveArenaMode,
+    now,
+  }) : null, [useModernArena, arenaCatalog, arenaRuleSource, validLeagueId, arenaCustomBandId, arenaCustomMusicType, arenaCustomMissions, effectiveArenaMode, now]);
+  useEffect(() => {
+    const nextAt = resolvedArena?.period.nextAt;
+    if (!nextAt || nextAt <= now) return;
+    const delay = Math.min(2_147_483_647, Math.max(250, nextAt - Date.now() + 50));
+    const timer = setTimeout(() => setNow(Date.now()), delay);
+    return () => clearTimeout(timer);
+  }, [resolvedArena?.period.nextAt, now]);
+  const activeArenaBandId = resolvedArena?.rule?.bandId ?? null;
+  const bandNames = useMemo(() => {
+    const map = new Map<number, string>();
+    for (const card of members) if (card.bandId && card.bandName && !map.has(card.bandId)) map.set(card.bandId, card.bandName);
+    for (const song of songs) if (song.bandId && song.bandName && !map.has(song.bandId)) map.set(song.bandId, song.bandName);
+    return map;
+  }, [members, songs]);
+  const arenaEligibleSongs = useMemo(
+    () => (activeArenaBandId === null ? [] : songs.filter(song => arenaSongMatchesBand(song, activeArenaBandId, now))),
+    [songs, activeArenaBandId, now],
+  );
+  const filteredArenaPool = useMemo(() => {
+    if (!useModernArena) return [];
+    const allowed = new Set(arenaEligibleSongs.map(song => song.id));
+    const list = arenaPool.filter(entry => allowed.has(entry.musicId));
+    if (isEventPayoffGoal(goal)) return list.slice(0, 1);
+    return effectiveArenaMode === "shared" ? list.slice(0, 5) : list;
+  }, [useModernArena, arenaEligibleSongs, arenaPool, goal, effectiveArenaMode]);
+  const canAllSongs = !!capabilities?.crossSong && goal !== "power" && !(useModernArena && effectiveArenaMode === "shared");
+  const effectiveInput: DeckGoalInput = {
+    ...goalInput,
+    allSongs: !!goalInput.allSongs && solver.engine.status === "ready" && canAllSongs,
+    aggregation: useModernArena && effectiveArenaMode === "shared" ? "expected" : effectiveAggregation(goalInput),
+    ...(useModernArena ? {
+      arenaRule: resolvedArena?.rule ?? null,
+      arenaSongEntries: filteredArenaPool,
+      ...(filteredArenaPool.length === 1 ? { musicId: filteredArenaPool[0]!.musicId, difficulty: filteredArenaPool[0]!.difficulty } : {}),
+    } : {}),
+  };
   const scopeCatalog = solver.engine.status === "ready" ? solver.engine.catalog : null;
   const scopeKind = solverGoalKind(effectiveInput);
   const eligibleSongs = scopeCatalog?.musics.filter(song => song.difficulties.includes(effectiveInput.difficulty)) ?? [];
   const eligibleIds = new Set(eligibleSongs.map(song => song.id));
+  const arenaEligibleIdSet = new Set(arenaEligibleSongs.map(song => song.id));
   const songScope = effectiveInput.allSongs ? scopeKind === "arenaLive"
-    ? { field: "arenaMusicIds" as const, ids: scopeCatalog?.arenaMusics.filter(song => eligibleIds.has(song.musicId)).map(song => song.id) ?? [] }
+    ? (useModernArena
+      ? { field: "musicIds" as const, ids: eligibleSongs.filter(song => arenaEligibleIdSet.has(song.id)).map(song => song.id) }
+      : { field: "arenaMusicIds" as const, ids: scopeCatalog?.arenaMusics.filter(song => eligibleIds.has(song.musicId)).map(song => song.id) ?? [] })
     : isChallengeInput(effectiveInput) ? { field: "challengeMusicIds" as const, ids: scopeCatalog?.challengeMusics.filter(song => song.eventId === event?.id && eligibleIds.has(song.musicId)).map(song => song.id) ?? [] }
     : { field: "musicIds" as const, ids: eligibleSongs.map(song => song.id) } : undefined;
   const gap = songScope && !songScope.ids.length ? "song" : goalGap(effectiveInput, event);
   const dataGap = solver.engine.status === "ready" ? deckDataGap(effectiveInput, event, solver.engine.catalog,
-    props.deckArenas?.find(value => value.server === server)?.songs, capabilities) : null;
+    arenas, capabilities) : null;
   const supported = capabilities ? computes(capabilities, effectiveInput) : !usesEventItemRewards(effectiveInput) && !rewardLayoutOf(effectiveInput) && effectiveInput.aggregation === "expected";
-  const idsOf = (keys: readonly string[], kind: CardKind) => keys.flatMap(key => {
+  const memberBandById = useMemo(() => new Map(members.map(card => [String(card.id), card.bandId])), [members]);
+  const idsOf = (keys: readonly string[], kind: CardKind, filterArenaBand = false) => keys.flatMap(key => {
     const card = box?.cards.find(item => item.key === key && item.kind === kind);
-    return card?.identity.value ? [card.identity.value] : [];
+    if (!card?.identity.value) return [];
+    if (filterArenaBand && activeArenaBandId !== null && memberBandById.get(card.identity.value) !== activeArenaBandId) return [];
+    return [card.identity.value];
   });
-  const constraints = { includeMembers: idsOf(required, "member"), excludeMembers: idsOf(excluded, "member"), excludeSnaps: idsOf(excluded, "snap") };
+  const resolvedLeaderId = leaderKey ? idsOf([leaderKey], "member", useModernArena)[0] ?? null : null;
+  const constraints = {
+    leader: resolvedLeaderId,
+    includeMembers: idsOf(required, "member", useModernArena),
+    excludeMembers: idsOf(excluded, "member"),
+    excludeSnaps: idsOf(excluded, "snap"),
+    noSnaps,
+  };
   /** The kind the restriction list shows: one at a time, since members and Snaps rate on different rarity scales. */
   const shownConstraintKind: CardKind = ownedMembers.length && ownedSnaps.length ? constraintKind : ownedMembers.length ? "member" : "snap";
   const constraintEntries = useMemo<ConstraintEntry[]>(() => {
@@ -206,7 +285,7 @@ function DeckWorkspace(props: DeckWorkspaceProps) {
   }, [box, members, snaps, catalog, shownConstraintKind]);
   // The all / required / excluded tab narrows the list without changing the filter options it offers.
   const matchConstraintScope = useCallback((entry: ConstraintEntry) => constraintFilter === "all"
-    || (constraintFilter === "required" ? required : excluded).includes(entry.card.key), [constraintFilter, required, excluded]);
+    || (constraintFilter === "required" ? required.includes(entry.card.key) || leaderKey === entry.card.key : excluded.includes(entry.card.key)), [constraintFilter, required, leaderKey, excluded]);
   const constraintCards = useCardFilters(constraintEntries, locale, "deck-constraints", describeConstraint, { match: matchConstraintScope });
   const { setFilters: setConstraintCardFilters } = constraintCards;
   // Rarity scales and bands differ between members and Snaps: whenever the shown kind changes (picked, or the box lost
@@ -254,7 +333,8 @@ function DeckWorkspace(props: DeckWorkspaceProps) {
     window.addEventListener("popstate", back);
     return () => window.removeEventListener("popstate", back);
   }, [locale]);
-  useEffect(() => { setExcluded([]); setRequired([]); updateGoal({ musicId: null, challengeMusicId: null, arenaMusicId: null }); setRunError(""); setManagement(false); setSetup(false); setDeleting(false); setImporting(false);
+  useEffect(() => { setExcluded([]); setRequired([]); setLeaderKey(null); setNoSnaps(false); setUserArenaSource(null); setArenaLeagueId(1); setArenaCustomBandId(1); setArenaCustomMusicType(0); setArenaCustomMissions([0, 0, 0]); setArenaPool([]); setArenaPickerOpen(false);
+    updateGoal({ musicId: null, challengeMusicId: null, arenaMusicId: null }); setRunError(""); setManagement(false); setSetup(false); setDeleting(false); setImporting(false);
     setConstraintsOpen(false); setEditingCardKey(null); setPlayerSettings(false); setGuideOpen(false); setBackupError(false); setSongPicker(false); setConstraintFilter("all");
     setConstraintKind("member"); setConstraintCardFilters(EMPTY_CARD_FILTERS); setPendingScreenshots([]); setDraggingScreenshots(false); setSavePicker(false); }, [server]);
   function openScreenshotImport() { if (linked) return; setManagement(false); setGuideOpen(false); setImporting(true); }
@@ -404,10 +484,11 @@ function DeckWorkspace(props: DeckWorkspaceProps) {
   /** Uploads exist but the Box reads none on its own: the user unlinked, or several players uploaded. */
   const pickPrompt = !stored?.save && !!saveList.saves?.length && (ownFacts === true || new Set(saveList.saves.map(save => save.accountId)).size > 1);
   const saveNotice = saveBanner ?? <GameSaveHint locale={locale} server={server} list={saveList} returnTo={returnTo} onPick={pickPrompt ? openSavePicker : undefined} />;
-  const arenas = props.deckArenas?.find(row => row.server === server)?.songs ?? [];
   const selectedSong = songs.find(item => item.id === (isChallengeInput(effectiveInput)
     ? event?.challengeMusics.find(row => row.id === goalInput.challengeMusicId)?.musicId
-    : solverGoalKind(effectiveInput) === "arenaLive" ? arenas.find(row => row.id === goalInput.arenaMusicId)?.musicId : goalInput.musicId));
+    : solverGoalKind(effectiveInput) === "arenaLive"
+      ? (useModernArena ? filteredArenaPool[0]?.musicId : arenas.find(row => row.id === goalInput.arenaMusicId)?.musicId)
+      : goalInput.musicId));
   const challengeSongs = (event?.challengeMusics ?? []).map(row => {
     const music = songs.find(item => item.id === row.musicId);
     return { id: row.id, title: music?.title ?? String(row.musicId), jacketUrl: music?.jacketUrl ?? null, difficulties: music?.difficulties.map(entry => entry.difficulty) ?? [] };
@@ -495,10 +576,45 @@ function DeckWorkspace(props: DeckWorkspaceProps) {
           <HaneokaExport locale={locale} box={box} disabled={busy || !box?.cards.length || linked && linkedSave.state.status !== "ready"} />
         </>}
         conditions={<>
-          {capabilities?.crossSong && goal !== "power" && <FormControlLabel control={<Checkbox checked={!!effectiveInput.allSongs} onChange={(_, checked) => updateGoal({ allSongs: checked })} />} label={tr("solver.allSongs")} />}
+          {canAllSongs && <FormControlLabel control={<Checkbox checked={!!effectiveInput.allSongs} onChange={(_, checked) => updateGoal({ allSongs: checked })} />} label={tr("solver.allSongs")} />}
           {isEventPayoffGoal(goal) ? <label className="dc-field">{tr("venue")}<select aria-label={tr("venue")} value={goalInput.venue} onChange={change => updateGoal({ venue: change.target.value as DeckVenue })}>
             {goalVenues(goal).map(value => <option key={value} value={value} disabled={!!capabilities && !computes(capabilities, { goal, venue: value })}>{tr(`venues.${value}`)}</option>)}</select></label> : null}
-          {solverGoalKind(effectiveInput) === "arenaLive" ? <label className="dc-field">{tr("arenaSong")}<select disabled={!!effectiveInput.allSongs} value={goalInput.arenaMusicId ?? ""} onChange={change => updateGoal({ arenaMusicId: change.target.value ? Number(change.target.value) : null })}><option value="">{tr(arenas.length ? "chooseArena" : "noArena")}</option>{arenas.map(row => <option key={row.id} value={row.id}>{songs.find(song => song.id === row.musicId)?.title ?? row.musicId}</option>)}</select></label> : isChallengeInput(effectiveInput) ? <div className="dc-challenge-songs" role="group" aria-label={tr("challengeSong")}>
+          {solverGoalKind(effectiveInput) === "arenaLive" ? (
+            useModernArena && arenaCatalog && resolvedArena ? <DeckArenaControls
+              locale={locale}
+              catalog={arenaCatalog}
+              period={resolvedArena.period}
+              rule={resolvedArena.rule}
+              ruleSource={arenaRuleSource}
+              leagueId={validLeagueId}
+              customBandId={arenaCustomBandId}
+              customMusicType={arenaCustomMusicType}
+              customMissions={arenaCustomMissions}
+              mode={effectiveArenaMode}
+              canChooseMode={!isEventPayoffGoal(goal)}
+              allSongs={!!effectiveInput.allSongs}
+              entries={filteredArenaPool}
+              eligibleSongs={arenaEligibleSongs}
+              bandNames={bandNames}
+              formatEnd={formatEnd}
+              onRuleSourceChange={setUserArenaSource}
+              onLeagueChange={setArenaLeagueId}
+              onCustomBandChange={setArenaCustomBandId}
+              onCustomMusicTypeChange={setArenaCustomMusicType}
+              onCustomMissionChange={(index, mission) => setArenaCustomMissions(prev => {
+                const next: [number, number, number] = [prev[0], prev[1], prev[2]];
+                next[index] = mission;
+                return next;
+              })}
+              onModeChange={nextMode => {
+                setArenaMode(nextMode);
+                if (nextMode === "shared") updateGoal({ allSongs: false, aggregation: "expected" });
+              }}
+              onEntriesChange={setArenaPool}
+              onOpenSongPicker={() => setArenaPickerOpen(true)}
+            />
+            : <label className="dc-field">{tr("arenaSong")}<select disabled={!!effectiveInput.allSongs} value={goalInput.arenaMusicId ?? ""} onChange={change => updateGoal({ arenaMusicId: change.target.value ? Number(change.target.value) : null })}><option value="">{tr(arenas.length ? "chooseArena" : "noArena")}</option>{arenas.map(row => <option key={row.id} value={row.id}>{songs.find(song => song.id === row.musicId)?.title ?? row.musicId}</option>)}</select></label>
+          ) : isChallengeInput(effectiveInput) ? <div className="dc-challenge-songs" role="group" aria-label={tr("challengeSong")}>
             {(event?.challengeMusics ?? []).map(row => {
               const music = songs.find(item => item.id === row.musicId);
               return <button type="button" key={row.id} className="dc-song-button md3-state" disabled={!!effectiveInput.allSongs} aria-pressed={goalInput.challengeMusicId === row.id} onClick={() => updateGoal({ challengeMusicId: row.id })}>
@@ -510,9 +626,9 @@ function DeckWorkspace(props: DeckWorkspaceProps) {
               <span className="dc-song-summary"><small>{tr("song")}</small><strong>{selectedSong?.title ?? composer("emptySong")}</strong></span>
               <svg className="dc-song-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
             </button>}
-          {goal !== "power" && <div className="dc-field-pair">
-            <label className="dc-field">{tr("difficulty")}<select aria-label={tr("difficulty")} value={goalInput.difficulty} onChange={change => updateGoal({ difficulty: change.target.value as MusicDifficulty })}>
-              {MUSIC_DIFFICULTIES.filter(value => !selectedSong || selectedSong.difficulties.some(entry => entry.difficulty === value)).map(value => <option key={value} value={value}>{value.toUpperCase()}</option>)}</select></label>
+          {goal !== "power" && (!(useModernArena && !effectiveInput.allSongs) || isEventPayoffGoal(goal)) && <div className="dc-field-pair">
+            {!(useModernArena && !effectiveInput.allSongs) && <label className="dc-field">{tr("difficulty")}<select aria-label={tr("difficulty")} value={goalInput.difficulty} onChange={change => updateGoal({ difficulty: change.target.value as MusicDifficulty })}>
+              {MUSIC_DIFFICULTIES.filter(value => !selectedSong || selectedSong.difficulties.some(entry => entry.difficulty === value)).map(value => <option key={value} value={value}>{value.toUpperCase()}</option>)}</select></label>}
             {isEventPayoffGoal(goal) && <label className="dc-field">{tr("consumption")}{isChallengeInput(effectiveInput)
               ? <select aria-label={tr("consumption")} value={goalInput.challengePoints} onChange={change => updateGoal({ challengePoints: Number(change.target.value) as ChallengePointCost })}>
                 {CHALLENGE_POINT_COSTS.map(value => <option key={value} value={value}>{tr("challengePoints", { n: value })}</option>)}</select>
@@ -521,13 +637,19 @@ function DeckWorkspace(props: DeckWorkspaceProps) {
           </div>}
           <DeckRewardMix locale={locale} input={effectiveInput} capabilities={capabilities} challengeSongs={challengeSongs}
             onChange={patch => { updateGoal(patch); if (patch.goal) safeSetLocalStorage(GOAL_STORAGE_KEY, patch.goal); }} />
-          <DeckObjective locale={locale} input={effectiveInput} capabilities={capabilities} onChange={aggregation => updateGoal({ aggregation })} />
+          {!(useModernArena && effectiveArenaMode === "shared") && <DeckObjective locale={locale} input={effectiveInput} capabilities={capabilities} onChange={aggregation => updateGoal({ aggregation })} />}
           <DeckGoalConditions locale={locale} input={effectiveInput} capabilities={capabilities} onChange={updateGoal} />
           {goal === "power" && <div className="dc-checks">
             <label><input type="checkbox" className="md3-checkbox" checked={goalInput.powerSong} onChange={change => updateGoal({ powerSong: change.target.checked })} />{tr("powerSong")}</label>
             {event && <label><input type="checkbox" className="md3-checkbox" checked={goalInput.eventParameter} onChange={change => updateGoal({ eventParameter: change.target.checked })} />{tr("powerEvent")}</label>}
           </div>}
-          {isNetworkInput(effectiveInput) && <p className="dw-muted">{tr("rankFixed")}</p>}
+          {isNetworkInput(effectiveInput) && (!capabilities || capabilities.gekisouRank ? (
+            <label className="dc-field">{tr("gekisouRankLabel")}
+              <select aria-label={tr("gekisouRankLabel")} value={goalInput.gekisouRank ?? 1} onChange={change => updateGoal({ gekisouRank: Number(change.target.value) })}>
+                {[1, 2, 3, 4, 5].map(place => <option key={place} value={place}>{tr("gekisouRankOption", { n: place })}</option>)}
+              </select>
+            </label>
+          ) : <p className="dw-muted">{tr("rankFixed")}</p>)}
           {readsAccuracy(effectiveInput) && <details className="dc-play-style"><summary>{composer("advanced")}</summary>
             <label>{tr("greatRate", { n: effectiveInput.greatPercent })}<input className="md3-range" style={{ "--md3-range-progress": `${effectiveInput.greatPercent / (playsGekisou(effectiveInput) ? 100 - effectiveInput.justPercent || 1 : 100) * 100}%` } as CSSProperties} aria-label={tr("greatRate", { n: effectiveInput.greatPercent })} type="range" min={0} max={playsGekisou(effectiveInput) ? 100 - effectiveInput.justPercent : 100}
               value={effectiveInput.greatPercent} onChange={change => updateGoal({ greatPercent: Number(change.target.value) })} /></label>
@@ -538,7 +660,7 @@ function DeckWorkspace(props: DeckWorkspaceProps) {
             {isEventPayoffGoal(goal) && isNetworkInput(effectiveInput) && <label>{tr("othersAverage")}<input type="number" min={0} inputMode="numeric" placeholder={tr("othersAverageSame")}
               value={goalInput.othersAverageScore ?? ""} onChange={change => updateGoal({ othersAverageScore: change.target.value === "" ? null : Number(change.target.value) })} /></label>}
           </details>}
-          <div className="dc-condition-actions"><Button variant="outlined" size="small" disabled={!box || busy} onClick={openConstraints}>{composer("searchConstraints")}{required.length + excluded.length > 0 && <span className="dc-count">{required.length + excluded.length}</span>}</Button>
+          <div className="dc-condition-actions"><Button variant="outlined" size="small" disabled={!box || busy} onClick={openConstraints}>{composer("searchConstraints")}{required.length + excluded.length + (leaderKey ? 1 : 0) + (noSnaps ? 1 : 0) > 0 && <span className="dc-count">{required.length + excluded.length + (leaderKey ? 1 : 0) + (noSnaps ? 1 : 0)}</span>}</Button>
             <Button variant="outlined" size="small" disabled={!box || busy} onClick={() => setPlayerSettings(true)}>{composer("playerBonuses")}</Button></div>
         </>}
         run={<>
@@ -561,6 +683,17 @@ function DeckWorkspace(props: DeckWorkspaceProps) {
     <MusicSelectDialog key={`songs:${server}`} locale={locale} songs={songs} open={songPicker} onClose={() => setSongPicker(false)}
       current={selectedSong ? { musicId: selectedSong.id, difficulty: goalInput.difficulty } : null} sortPage="deck-song"
       onSelect={selection => updateGoal({ musicId: selection.song.id, difficulty: selection.difficulty })} />
+    <MusicSelectDialog key={`arena-songs:${server}:${activeArenaBandId ?? 0}`} locale={locale} songs={arenaEligibleSongs} open={arenaPickerOpen} onClose={() => setArenaPickerOpen(false)}
+      current={filteredArenaPool[0] ?? null} sortPage="deck-arena-song"
+      onSelect={selection => {
+        setArenaPool(prev => {
+          const entry: DeckArenaSongEntry = { musicId: selection.song.id, difficulty: selection.difficulty };
+          if (isEventPayoffGoal(goal)) return [entry];
+          if (prev.some(item => item.musicId === entry.musicId && item.difficulty === entry.difficulty)) return prev;
+          const max = effectiveArenaMode === "shared" ? 5 : 20;
+          return [...prev, entry].slice(0, max);
+        });
+      }} />
     <Modal historyNavigation={false} isOpen={playerSettings && box !== null} onClose={() => setPlayerSettings(false)} title={tr("playerTitle")} closeLabel={tr("close")} size="xl">
       {stored && <PlayerStateManager key={`${server}:${stored.id}`} locale={locale} box={stored} view={linked ? box ?? undefined : undefined} catalogue={playerCatalogue} busy={busy} commit={storage.commit} embedded />}
     </Modal>
@@ -569,11 +702,14 @@ function DeckWorkspace(props: DeckWorkspaceProps) {
     <GameSavePicker locale={locale} server={server} isOpen={savePicker} onClose={() => setSavePicker(false)} list={saveList} busy={busy} onLink={pickGameSave} returnTo={returnTo} onScreenshot={openScreenshotImport} />
     <Modal historyNavigation={false} isOpen={constraintsOpen} onClose={() => setConstraintsOpen(false)} title={composer("constraintsTitle")} closeLabel={tr("close")} size="lg"><div className="dw-dialog dc-options">
         <p className="dw-muted">{composer("constraintDescription")}</p>
+        <div className="dc-checks">
+          <label><input type="checkbox" className="md3-checkbox" checked={noSnaps} onChange={event => setNoSnaps(event.target.checked)} />{composer("noSnaps")}</label>
+        </div>
         {ownedMembers.length > 0 && ownedSnaps.length > 0 && <div className="dc-option-tabs" role="group" aria-label={composer("constraintKind")}>{(["member", "snap"] as const).map(kind => <button type="button" key={kind} aria-pressed={shownConstraintKind === kind} onClick={() => setConstraintKind(kind)}>{tr(kind)}</button>)}</div>}
         <div className="dc-option-tabs" role="group" aria-label={composer("constraintsTitle")}>{(["all", "required", "excluded"] as const).map(value => <button type="button" key={value} aria-pressed={constraintFilter === value} onClick={() => setConstraintFilter(value)}>{composer(value === "all" ? "constraintAll" : value === "required" ? "constraintRequired" : "constraintExcluded")}</button>)}</div>
         <CardFilters locale={locale} kind={shownConstraintKind === "member" ? "member" : "support"} controller={constraintCards} variant="card" searchPlaceholder={tr("searchCards")} />
         <div className="dc-constraint-list">{constraintCards.sorted.map(({ card }) => <div key={card.key} className="dc-constraint-card"><BoxArtwork card={card} catalog={catalog} locale={locale} square /><div className="dc-constraint-info"><strong>{cardTitle(card, catalog)}</strong><small>{cardSubtitle(card, catalog)}</small></div>
-            <div className="dc-constraint-actions">{card.kind === "member" && <label><input type="checkbox" className="md3-checkbox" checked={required.includes(card.key)} disabled={excluded.includes(card.key) || required.filter(key => box?.cards.find(other => other.key === key)?.kind === card.kind).length >= 5 && !required.includes(card.key)} onChange={() => toggle(required, card.key, setRequired)} />{tr("required")}</label>}<label><input type="checkbox" className="md3-checkbox" checked={excluded.includes(card.key)} disabled={required.includes(card.key)} onChange={() => toggle(excluded, card.key, setExcluded)} />{tr("excluded")}</label></div></div>)}</div>
+            <div className="dc-constraint-actions">{card.kind === "member" && <label><input type="checkbox" className="md3-checkbox" checked={leaderKey === card.key} disabled={excluded.includes(card.key)} onChange={() => setLeaderKey(prev => prev === card.key ? null : card.key)} />{composer("leaderShort")}</label>}{card.kind === "member" && <label><input type="checkbox" className="md3-checkbox" checked={required.includes(card.key)} disabled={excluded.includes(card.key) || required.filter(key => box?.cards.find(other => other.key === key)?.kind === card.kind).length >= 5 && !required.includes(card.key)} onChange={() => toggle(required, card.key, setRequired)} />{tr("required")}</label>}<label><input type="checkbox" className="md3-checkbox" checked={excluded.includes(card.key)} disabled={required.includes(card.key) || leaderKey === card.key} onChange={() => toggle(excluded, card.key, setExcluded)} />{tr("excluded")}</label></div></div>)}</div>
         {!constraintCards.sorted.length && <p className="dw-muted">{tr("emptyCards")}</p>}
       <Button variant="tonal" onClick={() => setConstraintsOpen(false)}>{tr("done")}</Button></div></Modal>
     <Modal historyNavigation={false} isOpen={deleting} onClose={() => setDeleting(false)} title={tr("deleteBox")} closeLabel={tr("close")}><div className="dw-dialog"><p>{tr("deleteNote")}</p><button className="dw-danger" disabled={busy} onClick={async () => { if (await storage.remove()) setDeleting(false); }}>{tr("confirmDelete")}</button></div></Modal>

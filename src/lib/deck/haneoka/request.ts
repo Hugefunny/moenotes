@@ -4,6 +4,8 @@ export interface RewardTermInput { kind: string; eventId?: number; resourceType?
 export interface RecommendationRequest {
   format: string;
   goal: { kind: string; rank?: number; arenaMusicId?: number; musicIds?: number[]; challengeMusicIds?: number[]; arenaMusicIds?: number[]; eventParameter?: boolean; musicId?: number; difficulty?: string; challengeMusicId?: number;
+    arena?: { bandId?: number; musicType?: number; missions?: number[]; mode?: string };
+    songs?: { musicId?: number; difficulty?: string }[];
     play?: { kind?: string; greatFraction?: number; justFraction?: number; missEvery?: number };
     accuracy?: { greatFraction?: number; justFraction?: number } };
   metric?: { kind: string; eventId?: number; consumption?: number; resourceType?: number; resourceId?: number; secondaryPriority?: string; levels?: RewardTermInput[][] };
@@ -16,8 +18,8 @@ export interface RecommendationRequest {
   k: number;
   limits?: { timeLimitMs: number | null };
 }
-export const HANEOKA_COMMIT = "c91e6459a5ed43d55dc2b75e6a9d4f55b3edc62a";
-export const HANEOKA_PATCH_SHA = "f20fc2b5f7526e535bcb35e4b64ac5efb95ffc17048ded2ad474251661cd55f6";
+export const HANEOKA_COMMIT = "8b6915c140b6239cff5f4bca78380b654ed722e6";
+export const HANEOKA_PATCH_SHA = "3478e6717e462fbd49b3d3667384a540bb0533eb690be5a57a0620371007f31a";
 export const CAPABILITIES = {
   goals: ["power", "freeLive", "challengeLive", "battleLive", "missionLive", "arenaLive", "skip"],
   metrics: { freeLive: ["score", "eventPoints", "eventItems", "challengePoints"], challengeLive: ["score", "eventPoints", "eventItems"], battleLive: ["score", "eventPoints", "eventItems", "challengePoints"], missionLive: ["score", "eventPoints", "eventItems", "challengePoints"], arenaLive: ["score", "eventPoints", "eventItems", "challengePoints"], skip: ["score", "eventPoints", "eventItems", "challengePoints"] },
@@ -27,7 +29,7 @@ export const CAPABILITIES = {
   },
   combinedMetric: { goals: ["freeLive", "challengeLive", "battleLive", "missionLive", "arenaLive", "skip"], kind: "combined", objective: "lexicographicWeightedExpectedSums", weights: "integer", maxLevels: 3, maxTerms: 9, maxWeight: 1_000_000_000 },
   eventItemRewards: { selection: "exactResultGrade", eventGroupField: "eventGroup", rowsPerGrade: 1, probabilityMarker: 10000 },
-  crossSong: true, resume: true,
+  crossSong: true, resume: true, arenaRules: true, gekisouRank: true,
   accuracy: { great: true, just: true }, patternPlay: true, luckMissions: true, luckGreatConversions: true,
 };
 function adaptSingleRequest(data: DeckData, request: RecommendationRequest) {
@@ -49,14 +51,27 @@ function adaptSingleRequest(data: DeckData, request: RecommendationRequest) {
     throw new Error("haneoka-room");
   if (rewards && kind === "missionLive" && request.room !== undefined) throw new Error("haneoka-room");
   if (rewards && kind === "missionLive" && request.goal.rank !== undefined) throw new Error("haneoka-unsupported-rank");
-  if (gekiso && request.goal.rank !== undefined && request.goal.rank !== 1) throw new Error("haneoka-unsupported-rank");
+  if (gekiso && request.goal.rank !== undefined && (!Number.isInteger(request.goal.rank) || request.goal.rank < 1 || request.goal.rank > 5)) throw new Error("haneoka-unsupported-rank");
+  const rank = gekiso ? (request.goal.rank ?? 1) : 1;
   const parameterEvents = kind === "power" && request.goal.eventParameter ? request.eventIds ?? [] : [];
   if (parameterEvents.length > 1 || parameterEvents.some(id => !table(data, "MasterEvent").some(event => event.id === id)))
     throw new Error("haneoka-power-event");
+  const arenaRule = kind === "arenaLive" && request.goal.arena !== undefined ? (() => {
+    const raw = request.goal.arena;
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("haneoka-arena-rule");
+    const bandId = raw.bandId, musicType = raw.musicType, missions = raw.missions, mode = raw.mode;
+    if (!Number.isInteger(bandId) || bandId! < 1 || bandId! > 5) throw new Error("haneoka-arena-band");
+    if (!Number.isInteger(musicType) || !((musicType! >= 0 && musicType! <= 5) || musicType === 99)) throw new Error("haneoka-arena-type");
+    if (!Array.isArray(missions) || missions.length !== 3 || missions.some(m => !Number.isInteger(m) || m < 0 || m > 3))
+      throw new Error("haneoka-arena-missions");
+    if (mode !== undefined && mode !== "shared" && mode !== "individual") throw new Error("haneoka-arena-mode");
+    if (mode === "shared" && (rewards || request.aggregation === "maximum")) throw new Error("haneoka-arena-shared");
+    return { bandId: bandId!, musicType: musicType!, missions: [missions[0]!, missions[1]!, missions[2]!], ...(mode ? { mode } : {}) };
+  })() : null;
   const difficulty = ["easy", "normal", "hard", "expert"].indexOf(request.goal.difficulty ?? "");
   let musicId: unknown = request.goal.musicId, challengeEventId: number | null = null;
-  const arena = kind === "arenaLive" ? optionalTable(data, "MasterArenaMusic").find(row => row.id === request.goal.arenaMusicId) : null;
-  if (kind === "arenaLive") {
+  const arena = kind === "arenaLive" && !arenaRule ? optionalTable(data, "MasterArenaMusic").find(row => row.id === request.goal.arenaMusicId) : null;
+  if (kind === "arenaLive" && !arenaRule) {
     if (!arena) throw new Error("haneoka-arena-song");
     musicId = arena.liveMusicId;
   }
@@ -65,14 +80,42 @@ function adaptSingleRequest(data: DeckData, request: RecommendationRequest) {
     if (!challenge) throw new Error("haneoka-challenge-song");
     musicId = challenge.liveMusicId; challengeEventId = integer(challenge.eventId, "eventId");
   }
-  const song = musicId == null ? null : { songId: arena ? -integer(arena.id, "arenaId") : integer(musicId, "musicId"), difficulty: Math.max(0, difficulty), ...(arena ? { baseSongId: integer(musicId, "musicId"), arenaMusicId: integer(arena.id, "arenaId") } : {}) };
-  const charts: { song: unknown; source: unknown }[] = [];
-  if (kind !== "power") {
-    if (!song || difficulty < 0) throw new Error("haneoka-song");
-    const music = table(data, "MasterLiveMusic").find(row => row.id === musicId);
-    if (!music) throw new Error("haneoka-song");
-    const scoreId = integer(music[["easyID", "normalID", "hardID", "expertID"][difficulty]!], "scoreId");
-    charts.push({ song, source: chartSource(data, scoreId) });
+  const charts: { song: { songId: number; difficulty: number; baseSongId?: number; arenaMusicId?: number }; source: unknown }[] = [];
+  let songs: { songId: number; difficulty: number; baseSongId?: number; arenaMusicId?: number }[] = [];
+  let song: { songId: number; difficulty: number; baseSongId?: number; arenaMusicId?: number } | null = null;
+  if (arenaRule && Array.isArray(request.goal.songs)) {
+    if (!request.goal.songs.length || request.goal.songs.length > data.charts.length || rewards && request.goal.songs.length > 1)
+      throw new Error("haneoka-arena-songs");
+    const seen = new Set<string>();
+    for (const item of request.goal.songs) {
+      const diff = ["easy", "normal", "hard", "expert"].indexOf(item?.difficulty ?? "");
+      if (!item || item.musicId == null || diff < 0) throw new Error("haneoka-song");
+      const id = integer(item.musicId, "musicId");
+      const pairKey = `${id}:${diff}`;
+      if (seen.has(pairKey)) throw new Error("haneoka-arena-songs");
+      seen.add(pairKey);
+      const music = table(data, "MasterLiveMusic").find(row => row.id === id);
+      if (!music) throw new Error("haneoka-song");
+      if (Array.isArray(music.bandIDs) && music.bandIDs.length > 0 && !music.bandIDs.includes(arenaRule.bandId))
+        throw new Error("haneoka-arena-song-band");
+      const scoreId = integer(music[["easyID", "normalID", "hardID", "expertID"][diff]!], "scoreId");
+      const entry = { songId: id, difficulty: diff };
+      songs.push(entry);
+      charts.push({ song: entry, source: chartSource(data, scoreId) });
+    }
+    song = songs[0]!;
+  } else {
+    song = musicId == null ? null : { songId: arena ? -integer(arena.id, "arenaId") : integer(musicId, "musicId"), difficulty: Math.max(0, difficulty), ...(arena ? { baseSongId: integer(musicId, "musicId"), arenaMusicId: integer(arena.id, "arenaId") } : {}) };
+    if (kind !== "power") {
+      if (!song || difficulty < 0) throw new Error("haneoka-song");
+      const music = table(data, "MasterLiveMusic").find(row => row.id === musicId);
+      if (!music) throw new Error("haneoka-song");
+      if (arenaRule && Array.isArray(music.bandIDs) && music.bandIDs.length > 0 && !music.bandIDs.includes(arenaRule.bandId))
+        throw new Error("haneoka-arena-song-band");
+      const scoreId = integer(music[["easyID", "normalID", "hardID", "expertID"][difficulty]!], "scoreId");
+      charts.push({ song, source: chartSource(data, scoreId) });
+      songs = [song];
+    }
   }
   const play: { greatFraction?: number; justFraction?: number; missEvery?: number } = request.goal.play ?? request.goal.accuracy ?? {};
   const great = play.greatFraction ?? 0;
@@ -83,17 +126,18 @@ function adaptSingleRequest(data: DeckData, request: RecommendationRequest) {
   const scoreGoal = kind === "power" || skip && !rewards ? { kind: skip ? "skip-score" as const : "power" as const, song, challengeEventId,
     ...(parameterEvents.length ? { parameterEventId: parameterEvents[0] }
       : skip && challengeEventId !== null && request.eventIds?.includes(challengeEventId) ? { parameterEventId: challengeEventId } : {}) }
-    : gekiso ? { kind: "gekiso" as const, songs: [song], criterion, rank: 1, seeds: 0, accuracy: {
+    : gekiso ? { kind: "gekiso" as const, songs, criterion, rank, seeds: 0, ...(arenaRule ? { arena: arenaRule } : {}), accuracy: {
       great, just: great === 1 ? 0 : just / (1 - great), missEvery: play.missEvery ?? 0,
     } }
-      : { kind: "score" as const, songs: [song], criterion, challengeEventId, play: {
+      : { kind: "score" as const, songs, criterion, challengeEventId, play: {
         kind: "custom", great, good: 0, bad: 0, miss: 0, missEvery: play.missEvery ?? 0,
       } };
   const key = (id: unknown, prefix: string) => prefix + integer(typeof id === "string" ? Number(id) : id, "constraint");
   const c = request.constraints ?? {};
   return {
     goal: rewards ? { ...eventGoal(data, request, song!, challengeEventId, "play" in scoreGoal ? scoreGoal.play : null),
-      ...(scoreGoal.kind === "gekiso" ? { gekiso: { scene: kind, accuracy: scoreGoal.accuracy }, room: request.room } : {}) } : scoreGoal, charts,
+      ...(arenaRule ? { arena: arenaRule } : {}),
+      ...(scoreGoal.kind === "gekiso" ? { gekiso: { scene: kind, rank, accuracy: scoreGoal.accuracy }, room: request.room } : {}) } : scoreGoal, charts,
     constraints: {
       requiredMembers: (c.includeMembers ?? []).map((id: unknown) => key(id, "m")),
       excludedMembers: (c.excludeMembers ?? []).map((id: unknown) => key(id, "m")),
@@ -111,14 +155,16 @@ export function adaptRequest(data: DeckData, request: RecommendationRequest) {
   const supplied = fields.filter(field => request.goal[field] !== undefined);
   if (!supplied.length) return adaptSingleRequest(data, request);
   const field = supplied[0]!, ids = request.goal[field];
-  const wrongScope = field === "arenaMusicIds" ? request.goal.kind !== "arenaLive"
+  const arenaWithRule = request.goal.kind === "arenaLive" && request.goal.arena !== undefined && request.goal.arena?.mode !== "shared";
+  const wrongScope = field === "arenaMusicIds" ? request.goal.kind !== "arenaLive" || request.goal.arena !== undefined
     : field === "challengeMusicIds" ? !["challengeLive", "skip"].includes(request.goal.kind)
-    : ["challengeLive", "arenaLive"].includes(request.goal.kind) || request.goal.kind === "skip" && request.goal.challengeMusicId !== undefined;
+    : request.goal.kind === "challengeLive" || (request.goal.kind === "arenaLive" && !arenaWithRule) || request.goal.kind === "skip" && request.goal.challengeMusicId !== undefined;
   if (supplied.length !== 1 || wrongScope || request.goal.kind === "power" || !Array.isArray(ids) || !ids.length
     || ids.length > data.charts.length || new Set(ids).size !== ids.length || ids.some(id => !Number.isInteger(id) || id <= 0))
     throw new Error("haneoka-cross-song");
   const key = field === "musicIds" ? "musicId" : field === "challengeMusicIds" ? "challengeMusicId" : "arenaMusicId";
-  const singles = ids.map(id => adaptSingleRequest(data, { ...request, goal: { ...request.goal, [field]: undefined, [key]: id } }));
+  const { songs: _songs, musicIds: _musicIds, challengeMusicIds: _challengeIds, arenaMusicIds: _arenaIds, ...goalRest } = request.goal;
+  const singles = ids.map(id => adaptSingleRequest(data, { ...request, goal: { ...goalRest, [key]: id } }));
   const first = singles[0]!;
   const songs = singles.map(single => "songs" in single.goal ? single.goal.songs![0]! : single.goal.song!);
   return { ...first, goal: { ...first.goal, songs }, charts: singles.flatMap(single => single.charts) };

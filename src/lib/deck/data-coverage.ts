@@ -29,6 +29,23 @@ export function deckDataGap(input: DeckGoalInput, event: DeckEvent | null, catal
     const available = catalog.challengeMusics.find(row => row.id === selected.id);
     if (!available || available.eventId !== event!.id || available.musicId !== selected.musicId) return "song";
     musicId = selected.musicId;
+  } else if (kind === "arenaLive" && input.arenaRule !== undefined) {
+    if (!input.arenaRule) return null;
+    const entries = input.arenaSongEntries && input.arenaSongEntries.length > 0
+      ? input.arenaSongEntries
+      : input.musicId !== null ? [{ musicId: input.musicId, difficulty: input.difficulty }] : [];
+    const ruleMissions = input.arenaRule.missions;
+    for (const entry of entries) {
+      const music = catalog.musics.find(row => row.id === entry.musicId);
+      if (!music || !music.difficulties.includes(entry.difficulty)) return "song";
+      const hasOverrideLuck = ruleMissions.includes(2);
+      const allOverriddenNonLuck = ruleMissions.every(m => m === 1 || m === 3);
+      if (!hasOverrideLuck && !allOverriddenNonLuck && music.hasLuck === null) return "missions";
+      const effectiveLuck = hasOverrideLuck ? true : allOverriddenNonLuck ? false : music.hasLuck === true;
+      if (effectiveLuck && !capabilities?.luckMissions) return "luck";
+      if (effectiveLuck && input.greatPercent > 0 && !capabilities?.luckGreatConversions) return "luckGreat";
+    }
+    return null;
   } else if (kind === "arenaLive") {
     if (input.arenaMusicId === null) return null;
     const selected = arenas.find(row => row.id === input.arenaMusicId);
