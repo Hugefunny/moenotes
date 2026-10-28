@@ -81,14 +81,18 @@ export function adaptData(data: DeckData, datasetId: string) {
     return [kind, keyed(parents.map(row => ({ ...row, categories: row.skillCategories ?? [], effects: grouped.get(row.id) ?? [] })))];
   }
   const scoreRows = keyed(rows("MasterLiveMusicScore", ["id", "musicScoreLevel", "fullComboCount"]));
-  const songs = keyed(rows("MasterLiveMusic", ["id", "musicType", "bestMusicTagIDs", "liveScoreRankGroup"]).map(row => ({
-    ...row, musicId: row.id, bestMusicTagIds: row.bestMusicTagIDs,
-    difficulty: ["easyID", "normalID", "hardID", "expertID"].flatMap((key, difficulty) => {
-      const score = scoreRows[String(row[key])];
-      return score ? [{ difficulty, scoreId: score.id, playLevel: score.musicScoreLevel, noteCount: score.fullComboCount }] : [];
-    }),
-    gekisou: { missionTypes: [row.gekisouMission1, row.gekisouMission2, row.gekisouMission3] },
-  })));
+  const songs = keyed(rows("MasterLiveMusic", ["id", "musicType", "bestMusicTagIDs", "liveScoreRankGroup"]).map(row => {
+    const rawBandIds = Array.isArray(row.bandIDs) ? row.bandIDs : Array.isArray(row.bandIds) ? row.bandIds : null;
+    return {
+      ...row, musicId: row.id, bestMusicTagIds: row.bestMusicTagIDs,
+      ...(rawBandIds ? { bandIds: rawBandIds } : {}),
+      difficulty: ["easyID", "normalID", "hardID", "expertID"].flatMap((key, difficulty) => {
+        const score = scoreRows[String(row[key])];
+        return score ? [{ difficulty, scoreId: score.id, playLevel: score.musicScoreLevel, noteCount: score.fullComboCount }] : [];
+      }),
+      gekisou: { missionTypes: [row.gekisouMission1, row.gekisouMission2, row.gekisouMission3] },
+    };
+  }));
   const arenaIds = new Set<number>();
   for (const arena of optionalTable(data, "MasterArenaMusic")) {
     const id = integer(arena.id, "arenaId"), base = songs[String(arena.liveMusicId)];

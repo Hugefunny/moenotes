@@ -292,3 +292,31 @@
 @media (max-width: 700px) {
   body:has(.dc-composer) [data-scroll-to-top] { display: none; }
 }
+
+/* ── Gekiso Arena (1.1.0.100+) ── */
+.dc-arena { display: grid; gap: 12px; min-width: 0; }
+.dc-arena-custom { display: grid; gap: 10px; min-width: 0; }
+.dc-arena-missions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; min-width: 0; }
+.dc-arena-summary { display: grid; gap: 4px; padding: 10px 12px; border-radius: var(--md-sys-shape-corner-small); background: var(--md-sys-color-surface-container); color: var(--md-sys-color-on-surface-variant); font-size: var(--md-sys-typescale-body-small-size); line-height: var(--md-sys-typescale-body-small-line-height); }
+.dc-arena-summary.is-inactive { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; background: var(--md-sys-color-surface-container-high); }
+.dc-arena-summary-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 8px; }
+.dc-arena-summary-head strong { color: var(--md-sys-color-on-surface); font-size: var(--md-sys-typescale-label-large-size); font-weight: 500; }
+.dc-arena-pool { display: grid; gap: 8px; min-width: 0; }
+.dc-arena-pool-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 8px; color: var(--md-sys-color-on-surface-variant); font-size: var(--md-sys-typescale-label-medium-size); font-weight: 500; }
+.dc-arena-pool-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
+.dc-arena-songs { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.dc-arena-song { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto auto; align-items: center; gap: 8px; padding: 6px 8px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: var(--md-sys-shape-corner-medium); background: var(--md-sys-color-surface); }
+.dc-composer select.dc-arena-diff { width: auto; min-height: 32px; padding: 0 8px; font-size: var(--md-sys-typescale-label-medium-size); }
+.dc-composer .dc-arena-remove { display: inline-grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: var(--md-sys-shape-corner-full); background: transparent; color: var(--md-sys-color-on-surface-variant); font-size: 18px; line-height: 1; cursor: pointer; }
+.dc-composer .dc-arena-remove:hover { background: rgb(var(--md-sys-color-on-surface-rgb) / 0.08); color: var(--md-sys-color-on-surface); }
+
+.dr-aggregate-list { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.dr-aggregate-row { display: flex; align-items: center; justify-content: space-between; gap: 8px 12px; padding: 8px 10px; border-radius: var(--md-sys-shape-corner-small); background: var(--md-sys-color-surface); }
+.dr-aggregate-song, .dr-aggregate-score { display: grid; gap: 2px; min-width: 0; }
+.dr-aggregate-song strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--md-sys-typescale-body-medium-size); font-weight: 500; }
+.dr-aggregate-score { text-align: right; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.dr-aggregate-score strong { font-size: var(--md-sys-typescale-body-medium-size); font-weight: 500; }
+.dr-aggregate-row small { color: var(--md-sys-color-on-surface-variant); font-size: var(--md-sys-typescale-body-small-size); }
+@container deck-composer (max-width: 440px) {
+  .dc-arena-missions { grid-template-columns: minmax(0, 1fr); }
+}

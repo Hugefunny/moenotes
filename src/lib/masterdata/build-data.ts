@@ -46,6 +46,7 @@ import {
 } from "@/lib/cards/growth";
 import type { DeckCardLookup } from "@/lib/game-api/music-ranking";
 import type { DeckEvent, DeckArenaMusic } from "@/lib/deck/goals";
+import type { DeckArenaCatalog } from "@/lib/deck/arena";
 import { buildSupportCardGrowth, type RawSupportCardRank, type SupportCardGrowth } from "@/lib/support-cards/growth";
 import { getRoutePathById } from "@/lib/route/registry";
 import {
@@ -777,12 +778,30 @@ export function getBuildDeckEvents(locale: AppLocale): Promise<{ server: GameSer
   })).map(([server, events]) => ({ server, events })));
 }
 
-/** Arena songs use their own scene IDs, never ordinary song IDs. */
-export function getBuildDeckArenas(): Promise<{ server: GameServer; songs: DeckArenaMusic[] }[]> {
+/** Arena songs and 1.1.0.100+ Gekiso Arena league/regulation schedules per server. */
+export function getBuildDeckArenas(): Promise<{ server: GameServer; songs: DeckArenaMusic[]; catalog?: DeckArenaCatalog }[]> {
   return memo("deck-arenas", async () => (await eachServer(async server => {
-    const rows = await table<{ id: number; liveMusicId: number }>("MasterArenaMusic.json", server).catch(() => ({ _allData: [] as Array<{ id: number; liveMusicId: number }> }));
-    return rows._allData.map(row => ({ id: row.id, musicId: row.liveMusicId }));
-  })).map(([server, songs]) => ({ server, songs })));
+    const [rows, seasons, leagues, regulations] = await Promise.all([
+      table<{ id: number; liveMusicId: number }>("MasterArenaMusic.json", server).catch(() => ({ _allData: [] as Array<{ id: number; liveMusicId: number }> })),
+      table<{ id: number; startAt: string; endAt: string }>("MasterArenaSeason.json", server).catch(() => null),
+      table<{ id: number; bandId: number; startAt: string }>("MasterArenaLeague.json", server).catch(() => null),
+      table<{ id: number; leagueId: number; liveMusicType: number; gekisouMission1: number; gekisouMission2: number; gekisouMission3: number; startAt: string; endAt: string }>("MasterArenaLeagueRegulation.json", server).catch(() => null),
+    ]);
+    const songs = rows._allData.map(row => ({ id: row.id, musicId: row.liveMusicId }));
+    const catalog: DeckArenaCatalog | undefined = seasons && leagues && regulations ? {
+      seasons: seasons._allData.map(row => ({ id: Number(row.id), startAt: String(row.startAt ?? ""), endAt: String(row.endAt ?? "") })),
+      leagues: leagues._allData.map(row => ({ id: Number(row.id), bandId: Number(row.bandId), startAt: String(row.startAt ?? "") })),
+      regulations: regulations._allData.map(row => ({
+        id: Number(row.id),
+        leagueId: Number(row.leagueId),
+        musicType: Number(row.liveMusicType),
+        missions: [Number(row.gekisouMission1), Number(row.gekisouMission2), Number(row.gekisouMission3)],
+        startAt: String(row.startAt ?? ""),
+        endAt: String(row.endAt ?? ""),
+      })),
+    } : undefined;
+    return { songs, ...(catalog ? { catalog } : {}) };
+  })).map(([server, data]) => ({ server, ...data })));
 }
 
 export function getBuildEventDetail(locale: AppLocale, eventId: number): Promise<ServerFacetedValue<EventDetailViewModel> | null> {

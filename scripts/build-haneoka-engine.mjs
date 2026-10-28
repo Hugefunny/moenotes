@@ -6,9 +6,29 @@ import { fileURLToPath } from "node:url";
 import { HANEOKA_COMMIT as commit, HANEOKA_PATCH_SHA as patchSha256 } from "../src/lib/deck/haneoka/request.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const args = process.argv.slice(2);
+let customOut = null;
+let runTests = false;
+for (let i = 0; i < args.length; i++) {
+  if (args[i] === "--out") {
+    if (!args[i + 1]) throw new Error("--out requires a directory path");
+    customOut = path.resolve(root, args[++i]);
+  } else if (args[i] === "--test") {
+    runTests = true;
+  } else {
+    throw new Error(`Unknown build-haneoka-engine option: ${args[i]}`);
+  }
+}
 const source = path.join(root, ".haneoka/engine");
-const output = path.join(root, "public/haneoka-team-engine");
-const run = (command, args, cwd = root) => execFileSync(command, args, { cwd, stdio: "inherit" });
+const output = customOut ?? path.join(root, "public/haneoka-team-engine");
+const run = (command, args, cwd = root) => {
+  try {
+    execFileSync(command, args, { cwd, encoding: "utf8" });
+  } catch (error) {
+    const details = [error?.stdout, error?.stderr].filter(Boolean).join("\n").trim();
+    throw new Error(`Command failed: ${command} ${args.join(" ")}${details ? "\n" + details : ""}`);
+  }
+};
 if (!existsSync(path.join(source, ".git"))) {
   mkdirSync(path.dirname(source), { recursive: true });
   run("git", ["clone", "https://github.com/haneoka-gakuen/ournotes-team-builder.git", source]);
@@ -41,11 +61,23 @@ if (existsSync(prepared)) {
   run("git", ["apply", "--directory=" + patchedRelative, patch]);
   writeFileSync(prepared, JSON.stringify(Object.fromEntries(files.map(name => [name, digest(path.join(patched, name))]))));
 }
+const targetDir = path.join(root, ".haneoka/target");
+try {
+  const installed = execFileSync("rustup", ["target", "list", "--installed"], { encoding: "utf8" }).split(/\r?\n/);
+  if (!installed.includes("wasm32-unknown-unknown")) {
+    run("rustup", ["target", "add", "wasm32-unknown-unknown"]);
+  }
+} catch {
+  // Non-rustup toolchain; cargo build below verifies wasm32-unknown-unknown availability.
+}
+if (runTests) {
+  run("cargo", ["test", "--locked", "--manifest-path", path.join(patched, "Cargo.toml"), "--target-dir", targetDir]);
+}
 run("cargo", ["build", "--locked", "--release", "--lib", "--target", "wasm32-unknown-unknown",
-  "--manifest-path", path.join(patched, "Cargo.toml"), "--target-dir", path.join(root, ".haneoka/target")]);
+  "--manifest-path", path.join(patched, "Cargo.toml"), "--target-dir", targetDir]);
 mkdirSync(output, { recursive: true });
-run(process.execPath, ["build", "src/lib/deck/haneoka/solver.ts", "--target=browser", "--outfile=public/haneoka-team-engine/solver.mjs"]);
-copyFileSync(path.join(root, ".haneoka/target/wasm32-unknown-unknown/release/haneoka_team_engine.wasm"), path.join(output, "team-engine.wasm"));
+run(process.execPath, ["build", "src/lib/deck/haneoka/solver.ts", "--target=browser", "--outfile=" + path.join(output, "solver.mjs")]);
+copyFileSync(path.join(targetDir, "wasm32-unknown-unknown/release/haneoka_team_engine.wasm"), path.join(output, "team-engine.wasm"));
 for (const name of ["LICENSE", "NOTICE"]) copyFileSync(path.join(source, name), path.join(output, name));
 copyFileSync(patch, path.join(output, "moenotes.patch"));
 const file = (name) => {
@@ -56,4 +88,4 @@ writeFileSync(path.join(output, "runtime.json"), JSON.stringify({
   model: { name: "Haneoka", source: "https://github.com/haneoka-gakuen/ournotes-team-builder", commit, patchSha256, patch: file("moenotes.patch") },
   js: file("solver.mjs"), wasm: file("team-engine.wasm"),
 }, null, 2) + "\n");
-console.log("Built pinned Haneoka runtime: /haneoka-team-engine/runtime.json");
+console.log(`Built pinned Haneoka runtime: ${path.join(output, "runtime.json")}`);

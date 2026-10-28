@@ -220,6 +220,11 @@ async function build(input: BuildInput): Promise<void> {
   const cli = join(dirname(createRequire(import.meta.url).resolve("astro/package.json")), "bin", "astro.mjs");
   await measuredCommand([process.execPath, "--bun", cli, "build", "--root", process.cwd(), "--outDir", site], join(OUTPUT, "build-metrics.txt"));
   await access(join(site, "index.html"));
+  const haneokaOut = join(site, "haneoka-team-engine");
+  await command([process.execPath, join(process.cwd(), "scripts/build-haneoka-engine.mjs"), "--out", haneokaOut]);
+  await access(join(haneokaOut, "runtime.json"));
+  await access(join(haneokaOut, "team-engine.wasm"));
+  await access(join(haneokaOut, "solver.mjs"));
   await currentData();
   const packed = JSON.parse(await command([PACKER, "pack", site, PARTS_DIR], true)) as PackResult;
   const manifest: SiteManifest = {

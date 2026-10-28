@@ -198,6 +198,7 @@ function TeamCard(props: DeckResultProps & { team: DeckTeam; best: DeckTeam; met
         {props.levels && props.levels.length > 1 && team.levels && <RewardTies locale={locale} levels={props.levels.slice(1)} values={team.levels.slice(1).map(level => level.value)} />}
         <div className="dr-formation"><div className="dc-stage"><NativeFormationGroup locale={locale} slots={formationSlots(team, box, catalog)} label={tr("formation")} /></div></div>
         <Slots locale={locale} team={team} box={box} catalog={catalog} />
+        {team.aggregate && <AggregateSongs {...props} team={team} />}
         <SkillOrders {...props} />
       </div>
     </details>
@@ -246,6 +247,30 @@ function Slots({ locale, team, box, catalog }: { locale: AppLocale; team: DeckTe
       </li>;
     })}</ol>
     <p className="dr-note">{tr("freeSeating")}</p>
+  </section>;
+}
+
+/** Per-song score breakdown of a shared Gekiso Arena formation across the selected song pool. */
+function AggregateSongs(props: DeckResultProps & { team: DeckTeam }) {
+  const { locale, team, songNames } = props;
+  if (!team.aggregate || !team.aggregate.songs.length) return null;
+  const tr = (key: string, values?: Record<string, string | number>) => t(locale, `deckWorkspace.solver.${key}`, values);
+  return <section className="dr-orders dr-aggregate" aria-label={tr("arenaPoolTitle")}>
+    <div className="dr-orders-head"><h4>{tr("arenaPoolTitle")}</h4><span>{tr("arenaPoolCount", { n: team.aggregate.songs.length })}</span></div>
+    <ul className="dr-aggregate-list">
+      {team.aggregate.songs.map((entry, idx) => (
+        <li key={`${entry.song.musicId}:${entry.song.difficulty}:${idx}`} className="dr-aggregate-row">
+          <span className="dr-aggregate-song">
+            <strong>{songNames?.[entry.song.musicId] ?? entry.song.musicId}</strong>
+            <small>{entry.song.difficulty.toUpperCase()} · {tr("power")} {formatValue(entry.power, "power", locale)}</small>
+          </span>
+          <span className="dr-aggregate-score">
+            <strong>{formatValue(entry.mean, "score", locale)}</strong>
+            <small>{formatValue(entry.min, "score", locale)} – {formatValue(entry.max, "score", locale)}</small>
+          </span>
+        </li>
+      ))}
+    </ul>
   </section>;
 }
 

@@ -44,15 +44,17 @@ export const assetConfig = {
    */
   musicDataSiteJp: (import.meta.env.PUBLIC_MUSIC_DATA_SITE_JP || "https://storage.bdon.moe/moenotes/jp/music-data").replace(/\/+$/, ""),
   /**
-   * The deck solver runtime (docs/deck-worker.md). The Worker and its core module are this site's own files
-   * (`public/deck/`); the deck data and the recommendation engine come from the music data sites.
-   * `recommendEngine`: in development builds, `PUBLIC_DECK_RECOMMEND_ENGINE`, the URL of an engine descriptor that
-   * replaces the published `recommendEngine` entry; otherwise `null`.
+   * The deck solver runtime (docs/deck-worker.md, docs/haneoka-engine.md). The Worker and its core module are this
+   * site's own files (`public/deck/`), the deck data comes from the music data sites, and the pinned Haneoka WASM
+   * engine and adapter are served from `/haneoka-team-engine/runtime.json` (built by `scripts/build-haneoka-engine.mjs`
+   * locally and during `scripts/build-site-release.ts` in production). In development builds,
+   * `PUBLIC_DECK_RECOMMEND_ENGINE` can point at another descriptor URL or `""` to fall back to the manifest's engine.
    */
   deck: {
     workerUrl: "/deck/deck-worker.js",
-    recommendEngine: import.meta.env.DEV && import.meta.env.PUBLIC_DECK_RECOMMEND_ENGINE
-      ? String(import.meta.env.PUBLIC_DECK_RECOMMEND_ENGINE) : null,
+    recommendEngine: import.meta.env.DEV && import.meta.env.PUBLIC_DECK_RECOMMEND_ENGINE !== undefined
+      ? (String(import.meta.env.PUBLIC_DECK_RECOMMEND_ENGINE) || null)
+      : "/haneoka-team-engine/runtime.json",
   },
   /** Published prefab sources; TW/KR/EN reuse the international client UI. */
   gameUiLibraries: nativeUi.libraries,

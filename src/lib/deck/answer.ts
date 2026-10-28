@@ -12,10 +12,20 @@ export interface DeckValue extends DeckPayoffValue { payoff: DeckPayoffValue | n
 /** A team's value on one level: the expected weighted sum, and each term's own expectation in the order of the level's terms. */
 export interface DeckTeamLevel { value: number; terms: number[] }
 export interface DeckOrderStat { score: number; order: number[] }
+export interface DeckTeamSongScore {
+  song: { musicId: number; difficulty: string };
+  power: number;
+  mean: number;
+  min: number;
+  median: number;
+  max: number;
+}
 export interface DeckTeam {
   rank: number;
   rankCertified: boolean;
   song?: { musicId: number; difficulty: string };
+  /** Shared Gekiso Arena: per-song breakdown across the selected song pool. */
+  aggregate?: { kind: "mean"; songs: DeckTeamSongScore[] };
   leader: DeckPair;
   others: DeckPair[];
   power: number;
@@ -31,7 +41,7 @@ export interface DeckOptimality { proven: boolean; lowerBound: number | null; up
 export interface DeckIssue { path: string; code: string; message: string }
 export type DeckPhase = "preprocess" | "search" | "proof" | "done";
 export interface DeckAnswer {
-  engine?: { name: "Haneoka"; commit: string; patchSha256?: string };
+  engine?: { name: "Haneoka"; commit: string; patchSha256?: string; source?: string };
   final: boolean;
   status: "ok" | "incomplete" | "invalid" | "failed";
   missing: DeckIssue[];
@@ -97,9 +107,30 @@ function team(raw: unknown, index: number, inheritedRankProof: boolean, levels: 
   const orders = record(raw.orders) ? { count: int(raw.orders.count), min: stat(raw.orders.min), median: stat(raw.orders.median), max: stat(raw.orders.max) } : null;
   const teamValue = value(raw.value);
   if (levels && !teamValue?.payoff) throw new Error("Missing reward plan payoff");
-  return { rank: num(raw.rank) ?? index + 1, rankCertified: raw.rankCertified === undefined ? inheritedRankProof : raw.rankCertified === true, leader: pair(raw.leader), others: raw.others.map(pair), power: num(raw.power) ?? 0, value: teamValue, orders,
+  const aggregate = record(raw.aggregate) && raw.aggregate.kind === "mean" && Array.isArray(raw.aggregate.songs)
+    ? {
+        kind: "mean" as const,
+        songs: raw.aggregate.songs
+          .filter(record)
+          .filter(part => record(part.song) && Number.isInteger(part.song.musicId) && typeof part.song.difficulty === "string" && num(part.mean) !== null)
+          .map(part => {
+            const s = part.song as Record<string, unknown>;
+            const mean = part.mean as number;
+            return {
+              song: { musicId: s.musicId as number, difficulty: s.difficulty as string },
+              power: num(part.power) ?? 0,
+              mean,
+              min: num(part.min) ?? mean,
+              median: num(part.median) ?? mean,
+              max: num(part.max) ?? mean,
+            };
+          }),
+      }
+    : undefined;
+  return { rank: num(raw.rank) ?? index + 1, rankCertified: raw.rankCertified === undefined ? inheritedRankProof : raw.rankCertified === true, leader: pair(raw.leader), others: [0, 1, 2, 3].length ? raw.others.map(pair) : [], power: num(raw.power) ?? 0, value: teamValue, orders,
     ...(levels ? { levels: teamLevels(raw.levels, levels) } : {}),
     ...(record(raw.song) && Number.isInteger(raw.song.musicId) && typeof raw.song.difficulty === "string" ? { song: { musicId: raw.song.musicId as number, difficulty: raw.song.difficulty } } : {}),
+    ...(aggregate && aggregate.songs.length > 0 ? { aggregate } : {}),
     bestOrder: record(raw.bestOrder) ? stat(raw.bestOrder) : null,
     layout: { members: layout.members.map(int), snaps: layout.snaps.map(item => item === null ? null : int(item)) } };
 }
@@ -138,7 +169,7 @@ export function parseDeckAnswer(json: string): DeckAnswer {
       coversAllOwnedCards: account.coversAllOwnedCards !== false,
     };
   }
-  return { ...(record(raw.engine) && raw.engine.name === "Haneoka" && typeof raw.engine.commit === "string" ? { engine: { name: "Haneoka" as const, commit: raw.engine.commit, ...(typeof raw.engine.patchSha256 === "string" && /^[a-f0-9]{64}$/.test(raw.engine.patchSha256) ? { patchSha256: raw.engine.patchSha256 } : {}) } } : {}), final: raw.final === true, status, missing: issues(raw.missing), errors: issues(raw.errors), result };
+  return { ...(record(raw.engine) && raw.engine.name === "Haneoka" && typeof raw.engine.commit === "string" ? { engine: { name: "Haneoka" as const, commit: raw.engine.commit, ...(typeof raw.engine.patchSha256 === "string" && /^[a-f0-9]{64}$/.test(raw.engine.patchSha256) ? { patchSha256: raw.engine.patchSha256 } : {}), ...(typeof raw.engine.source === "string" && raw.engine.source ? { source: raw.engine.source } : {}) } } : {}), final: raw.final === true, status, missing: issues(raw.missing), errors: issues(raw.errors), result };
 }
 
 /**
